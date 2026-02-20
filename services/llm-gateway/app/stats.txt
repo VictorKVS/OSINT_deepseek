@@ -1,0 +1,1 @@
+{"judge":{"total_judgments":1,"decisions":{"ALLOW":1,"DENY":0,"QUARANTINE":0,"SIMULATE":0}},"sphinx":{"total_analyzed":1,"avg_risk":0.0},"enigma":{"total_evaluations":1,"law_applications":{"LAW_004":1}}}

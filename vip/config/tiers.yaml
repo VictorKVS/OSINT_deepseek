@@ -1,0 +1,67 @@
+﻿# Конфигурация уровней доступа VIP-модуля
+# tiers.yaml
+
+tiers:
+  basic:
+    name: "Базовый"
+    price: 50
+    features:
+      - vpn_rotation
+      - temp_email
+      - basic_proxies
+      - daily_reports
+    limits:
+      concurrent_sessions: 3
+      data_storage_gb: 10
+      requests_per_day: 1000
+    support: "email only"
+    
+  professional:
+    name: "Профессиональный"
+    price: 200
+    features:
+      - sock_puppets
+      - virtual_numbers
+      - vm_isolation
+      - evidence_chain
+      - telegram_integration
+      - weekly_updates
+    limits:
+      concurrent_sessions: 10
+      data_storage_gb: 50
+      requests_per_day: 5000
+    support: "priority email"
+    
+  vip:
+    name: "VIP"
+    price: 500
+    features:
+      - professional_sockpuppet_service
+      - dedicated_phone_numbers
+      - isolated_environments
+      - 24_7_support
+      - screen_recording
+      - dark_web_access
+      - custom_agents
+    limits:
+      concurrent_sessions: 50
+      data_storage_gb: 200
+      requests_per_day: 50000
+    support: "24/7 dedicated"
+    
+  enterprise:
+    name: "Enterprise"
+    price: 5000
+    features:
+      - dedicated_infrastructure
+      - team_collaboration
+      - custom_integrations
+      - legal_hold
+      - expert_support
+      - on_premise_deployment
+      - training_sessions
+    limits:
+      concurrent_sessions: "unlimited"
+      data_storage_gb: 1000
+      requests_per_day: "unlimited"
+    support: "dedicated team"

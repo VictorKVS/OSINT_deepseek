@@ -1,0 +1,246 @@
+profile:
+  id: HIGH_TECH_INTELLIGENCE
+  version: 0.1
+  status: draft
+  mission: >
+    Detect technologies, methods, products, research results, failures and market moves
+    that can materially improve or threaten FATHER, its product factories or expert knowledge bases.
+
+priorities:
+  - id: AI_MODELS
+    weight: 1.0
+    topics:
+      - frontier models
+      - open-weight models
+      - reasoning models
+      - multimodal models
+      - small/local models
+      - model efficiency
+      - inference optimization
+      - long context
+      - tool use
+  - id: AGENTIC_SYSTEMS
+    weight: 1.0
+    topics:
+      - agent orchestration
+      - multi-agent systems
+      - planning
+      - memory
+      - tool protocols
+      - computer use
+      - autonomous coding
+      - spec-driven development
+      - agent evaluation
+  - id: KNOWLEDGE_SYSTEMS
+    weight: 0.95
+    topics:
+      - knowledge graphs
+      - ontologies
+      - RAG
+      - vector search
+      - provenance
+      - organizational memory
+      - evidence systems
+      - semantic retrieval
+  - id: SOFTWARE_ENGINEERING
+    weight: 0.95
+    topics:
+      - AI coding agents
+      - test generation
+      - test-before-code
+      - architecture automation
+      - DevSecOps
+      - CI/CD
+      - software supply chain
+      - observability
+  - id: COMPUTE_HARDWARE
+    weight: 0.9
+    topics:
+      - GPU
+      - NPU
+      - TPU
+      - AI accelerators
+      - memory bandwidth
+      - edge AI
+      - photonic computing
+      - neuromorphic computing
+      - data center efficiency
+  - id: QUANTUM
+    weight: 0.75
+    topics:
+      - quantum computing
+      - error correction
+      - quantum algorithms
+      - quantum networking
+      - post-quantum implications
+  - id: ROBOTICS_AUTOMATION
+    weight: 0.85
+    topics:
+      - industrial robotics
+      - humanoid robotics
+      - autonomous systems
+      - digital manufacturing
+      - autonomous labs
+      - embodied AI
+  - id: DIGITAL_TWINS_ENGINEERING
+    weight: 0.9
+    topics:
+      - digital twin
+      - PLM
+      - BIM
+      - simulation
+      - generative engineering
+      - CAD/CAE automation
+      - systems engineering
+  - id: SECURITY
+    weight: 1.0
+    topics:
+      - AI security
+      - software security
+      - supply chain security
+      - cloud security
+      - identity
+      - cryptography
+      - post-quantum cryptography
+      - major incidents
+  - id: DATA_INFRASTRUCTURE
+    weight: 0.9
+    topics:
+      - databases
+      - distributed systems
+      - streaming
+      - storage
+      - vector databases
+      - graph databases
+      - data lakehouse
+      - event systems
+  - id: ENERGY_INFRASTRUCTURE
+    weight: 0.7
+    topics:
+      - energy storage
+      - grid technology
+      - advanced nuclear
+      - fusion
+      - renewables
+      - data center power
+      - cooling
+  - id: BIOTECH_MATERIALS
+    weight: 0.6
+    topics:
+      - synthetic biology
+      - bioinformatics
+      - autonomous discovery
+      - advanced materials
+      - nanotechnology
+  - id: SPACE
+    weight: 0.55
+    topics:
+      - launch systems
+      - satellite infrastructure
+      - space computing
+      - in-space manufacturing
+
+signal_types:
+  - BREAKTHROUGH
+  - NEW_PRODUCT
+  - NEW_OPEN_SOURCE
+  - NEW_STANDARD
+  - NEW_RESEARCH
+  - BENCHMARK
+  - PRICE_CHANGE
+  - PERFORMANCE_CHANGE
+  - SECURITY_INCIDENT
+  - FAILURE_CASE
+  - ACQUISITION_OR_PARTNERSHIP
+  - PLATFORM_STRATEGY
+  - REGULATORY_CHANGE
+  - TALENT_SIGNAL
+  - TECHNOLOGY_HORIZON_UNLOCK
+
+source_classes:
+  primary:
+    priority: 1.0
+    examples:
+      - official documentation
+      - source repositories
+      - research paper originals
+      - standards bodies
+      - regulator publications
+      - company engineering/research announcements
+  independent_technical:
+    priority: 0.9
+    examples:
+      - reproducible benchmark
+      - independent engineering analysis
+      - conference proceedings
+  specialist_media:
+    priority: 0.65
+  community_signal:
+    priority: 0.45
+    note: discovery lead; corroboration normally required for material claims
+  telegram_signal:
+    priority: 0.4
+    note: watch source; trace significant claims to primary evidence when possible
+
+routing:
+  AI_MODELS:
+    - AI_LLM_KB
+    - AGENT_ENGINEERING_KB
+    - ARCHITECTURE_KB
+    - COST_KB
+  AGENTIC_SYSTEMS:
+    - AGENT_ENGINEERING_KB
+    - ARCHITECTURE_KB
+    - TESTING_KB
+  KNOWLEDGE_SYSTEMS:
+    - KNOWLEDGE_ENGINEERING_KB
+    - ARCHITECTURE_KB
+  SOFTWARE_ENGINEERING:
+    - DEVELOPER_KB
+    - DEVSECOPS_KB
+    - TESTING_KB
+  COMPUTE_HARDWARE:
+    - INFRASTRUCTURE_KB
+    - FINOPS_KB
+    - TECHNOLOGY_HORIZONS
+  SECURITY:
+    - SECURITY_KB
+    - FAILURE_KB
+    - SURVIVAL_RULES_CANDIDATES
+  DIGITAL_TWINS_ENGINEERING:
+    - ARCHITECTURE_KB
+    - PRODUCT_FACTORY_KB
+    - TECHNOLOGY_HORIZONS
+  DATA_INFRASTRUCTURE:
+    - ARCHITECTURE_KB
+    - DEVELOPER_KB
+    - INFRASTRUCTURE_KB
+  ENERGY_INFRASTRUCTURE:
+    - TECHNOLOGY_HORIZONS
+    - INFRASTRUCTURE_KB
+  QUANTUM:
+    - TECHNOLOGY_HORIZONS
+    - SECURITY_KB
+  ROBOTICS_AUTOMATION:
+    - TECHNOLOGY_HORIZONS
+    - PRODUCT_FACTORY_KB
+  BIOTECH_MATERIALS:
+    - TECHNOLOGY_HORIZONS
+  SPACE:
+    - TECHNOLOGY_HORIZONS
+
+escalation:
+  immediate_review_when:
+    - impacts current FATHER architecture materially
+    - indicates critical vulnerability or active supply-chain risk
+    - changes cost or performance assumptions materially
+    - provides strong evidence that a current architecture decision is obsolete
+    - unlocks a watched technology horizon
+    - contradicts an ACTIVE Survival Rule or major knowledge object
+
+output_policy:
+  default_status: DISCOVERED
+  autonomous_verified_promotion: false
+  preserve_raw_provenance: true
+  require_socrates_for_material_claims: true
+  require_independent_corroboration_when_reasonable: true

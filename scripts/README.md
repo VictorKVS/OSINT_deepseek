@@ -1,6 +1,6 @@
 # Scripts
 
-This directory contains both the approved DEV runners and historical pre-FATHER experiments. They must not be treated as one architecture.
+This directory now contains only the canonical executable DEV adapters for the current FATHER OSINT product.
 
 ## Current DEV path
 
@@ -17,19 +17,7 @@ recorded DEV result
 - `run_dev_osint.py` — **KEEP**; direct simplified OSINT fixture run.
 - `run_dev_pipeline.py` — **KEEP / CANONICAL DEV RUNNER**; bounded `OSINT → Analyst → Socrates` scenario.
 
-## Legacy / archive candidates
-
-The following scripts predate the current requirements-first FATHER package:
-
-- `deepseek_safe.py` — local Ollama/resource experiment;
-- `hello_agent.py` — early agent prototype;
-- `monitor.py` — workstation hardware monitoring;
-- `rtx3060_agent.py` — RTX 3060/model experiment;
-- `smart_agent.py` — local Ollama chat agent with resource-based model switching.
-
-Status: **ARCHIVE / DELETE CANDIDATES — NOT PART OF CURRENT DEV CONTRACT**.
-
-Their useful ideas are documented in `docs/06_verification/06_LEGACY_RUNTIME_AUDIT.md`; code must not be copied into `father_osint` without a new approved requirement, architecture decision and acceptance test.
+The earlier Ollama/GPU/workstation scripts were removed during Stage 06 M2 after their useful engineering lessons had been captured in `docs/06_verification/06_LEGACY_RUNTIME_AUDIT.md` and clean-checkout CI proved they were not required by the current product.
 
 ## Rule
 

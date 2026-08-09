@@ -30,7 +30,8 @@ class FakeCollector:
 
 
 class OSINTAgentMVPTests(unittest.TestCase):
-    def test_collects_materials_and_skips_obvious_duplicates(self):
+    def test_collects_distinct_source_observations_even_when_payload_matches(self):
+        """AC-02: equal payload may share raw storage, but source observations must survive."""
         with tempfile.TemporaryDirectory() as tmp:
             store = MaterialStore(tmp)
             agent = OSINTAgent(store, [FakeCollector()])
@@ -39,12 +40,22 @@ class OSINTAgentMVPTests(unittest.TestCase):
             package = agent.run(task)
 
             self.assertEqual(package.task_id, task.task_id)
-            self.assertEqual(len(package.materials), 2)
-            self.assertEqual(package.duplicates_skipped, 1)
+            self.assertEqual(len(package.materials), 3)
+            self.assertEqual(
+                {material.source_locator for material in package.materials},
+                {
+                    "https://example.test/a",
+                    "https://example.test/b",
+                    "https://example.test/c",
+                },
+            )
             self.assertEqual(package.stop_reason, "collectors_exhausted")
             self.assertTrue((store.root / "tasks.jsonl").exists())
             self.assertTrue((store.root / "materials.jsonl").exists())
             self.assertTrue((store.root / "packages.jsonl").exists())
+
+            # Two distinct payloads exist even though three source observations exist.
+            self.assertEqual(len(list(store.raw_dir.glob("*.txt"))), 2)
 
     def test_missing_collector_is_explicit(self):
         with tempfile.TemporaryDirectory() as tmp:

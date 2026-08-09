@@ -60,7 +60,7 @@ run_dev_osint.py PASS
 run_dev_pipeline.py PASS
 ```
 
-Historical Ollama/GPU/workstation code, the old `core/` package and the unapproved Teleproto/Node Telegram transport PoC were removed only after their useful engineering lessons were documented and clean CI proved that the current FATHER OSINT path did not depend on them.
+Historical Ollama/GPU/workstation code, the old `core/` package, the unapproved Teleproto/Node Telegram transport PoC and the unrelated experimental policy/"llm-gateway" prototype were removed only after their useful engineering lessons were documented and clean CI proved that the current FATHER OSINT path did not depend on them.
 
 ## Development journal
 
@@ -68,7 +68,7 @@ The living project history, WHY decisions, completed work, unresolved risks and 
 
 **[Development Journal](docs/DEVELOPMENT_JOURNAL.md)**
 
-Material gate changes and cleanup decisions also receive dedicated Stage 06 reports under `docs/06_verification/`.
+Material gate changes and cleanup decisions also receive dedicated Stage 06 reports under `docs/06_verification/` and journal entries under `docs/journal/`.
 
 ## Documentation packs
 
@@ -85,6 +85,7 @@ Material gate changes and cleanup decisions also receive dedicated Stage 06 repo
 | [Dependency Split](docs/06_verification/10_DEPENDENCY_SPLIT.md) | Current vs DEV vs legacy dependency decision |
 | [Legacy Cleanup Report](docs/06_verification/11_LEGACY_CLEANUP_REPORT.md) | evidence-based removal of old runtime/core code |
 | [Telegram Experiment Audit](docs/06_verification/12_TELEGRAM_EXPERIMENT_AUDIT.md) | why the unapproved concrete transport PoC was removed |
+| [LLM Gateway Disposition](docs/06_verification/13_LLM_GATEWAY_DISPOSITION.md) | why the unrelated policy-control experiment was removed from the active tree |
 | [Traceability Matrix](docs/TRACEABILITY_MATRIX.md) | requirement → architecture → test → code |
 | [Donor KB: Telegram](docs/DONOR_KB_TELEGRAM_INTELLIGENCE_V0_1.md) | Research notes for future transport selection |
 
@@ -98,7 +99,6 @@ Material gate changes and cleanup decisions also receive dedicated Stage 06 repo
 | `data/` | DEV fixtures and runtime data references |
 | `config/` | Draft mission/profile/policy inputs |
 | `docs/` | Requirements, architecture, tests, decisions, verification and journal |
-| `services/` | Experimental/frozen subprojects; not implicit current dependencies |
 
 ## Current disposition
 
@@ -110,7 +110,6 @@ tests/                        CURRENT VERIFICATION
 config/                       DRAFT PROFILE/POLICY INPUTS
 data/dev/                     TEST FIXTURES ONLY
 father_osint/transports/      FUTURE BOUNDARY / NO APPROVED IMPLEMENTATION
-services/llm-gateway/         FROZEN EXPERIMENTAL SUBPROJECT
 ```
 
 ## Dependencies
@@ -121,7 +120,7 @@ services/llm-gateway/         FROZEN EXPERIMENTAL SUBPROJECT
 
 ## DEV vs PROD
 
-The current project works in **DEV / SIMPLIFIED** mode. Fixtures and public/simple sources are preferred until the contract is proven. Real MTProto sessions, Tor gateways, proxy rotation, schedulers, secrets infrastructure and battle monitoring are deferred to separate PROD gates.
+The current project works in **DEV / SIMPLIFIED** mode. Fixtures and public/simple sources are preferred until the contract is proven. Real MTProto sessions, Tor gateways, proxy rotation, schedulers, secrets infrastructure, LLM provider routing and battle monitoring are deferred to separate requirements and PROD gates.
 
 ## Change policy
 

@@ -30,6 +30,14 @@ class MaterialStore:
         return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
     @staticmethod
+    def hash_file(path: str | Path) -> str:
+        digest = hashlib.sha256()
+        with Path(path).open("rb") as fh:
+            for chunk in iter(lambda: fh.read(1024 * 1024), b""):
+                digest.update(chunk)
+        return digest.hexdigest()
+
+    @staticmethod
     def _append_jsonl(path: Path, payload: dict) -> None:
         with path.open("a", encoding="utf-8") as fh:
             fh.write(json.dumps(payload, ensure_ascii=False) + "\n")
@@ -38,22 +46,32 @@ class MaterialStore:
         self._append_jsonl(self.tasks_file, task.to_dict())
 
     def save_material(self, material: Material) -> bool:
-        """Persist one source observation.
+        """Persist one source observation and report raw-payload reuse.
 
-        Equal payload hashes do not make two source observations identical.
-        Raw payload bytes may be reused, while each Material record remains in
-        materials.jsonl for provenance. Exact observation-level deduplication is
-        intentionally not defined in DEV v1.
+        Returns True only when an equal raw-text payload already existed in the
+        content-addressed raw store and its bytes were reused. The Material
+        observation itself is still appended and is never skipped for that reason.
+
+        File-only observations are hashed from the original file bytes. DEV v1
+        preserves the original path rather than silently copying/normalizing files.
         """
+        payload_reused = False
+
         if material.raw_text is not None:
-            material.content_hash = material.content_hash or self.hash_text(material.raw_text)
+            material.content_hash = self.hash_text(material.raw_text)
             raw_path = self.raw_dir / f"{material.content_hash}.txt"
-            if not raw_path.exists():
+            payload_reused = raw_path.exists()
+            if not payload_reused:
                 raw_path.write_text(material.raw_text, encoding="utf-8")
             material.local_path = str(raw_path)
+        elif material.local_path is not None:
+            source_path = Path(material.local_path)
+            if not source_path.is_file():
+                raise FileNotFoundError(f"Material local_path not found: {source_path}")
+            material.content_hash = self.hash_file(source_path)
 
         self._append_jsonl(self.materials_file, material.to_dict())
-        return True
+        return payload_reused
 
     def save_package(self, package: MaterialPackage) -> None:
         self._append_jsonl(self.packages_file, package.to_dict())

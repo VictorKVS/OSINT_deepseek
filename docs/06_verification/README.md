@@ -1,16 +1,13 @@
 # Stage 06 — Verification and Repository Rationalization
 
-**Status:** ACTIVE / STATIC AUDIT BEFORE FULL LOCAL RUN
+**Status:** ✅ COMPLETE  
+**Outcome:** **DEV v1 BASELINE FROZEN**
 
-This stage verifies that the repository structure matches the approved contracts before a full local checkout/runtime campaign.
+Stage 06 verified that the repository, contracts, tests, runtime dependencies and documentation describe the same small DEV product before any new functional growth.
 
-No new product functionality is introduced here.
+No new production capability was the goal of this stage.
 
-## Purpose
-
-Before spending time on runtime debugging, decide which existing files are part of the approved FATHER OSINT DEV path and which are legacy, overlapping, experimental or deferred.
-
-## Chain
+## Completed chain
 
 ```text
 Approved ТЗ
@@ -21,32 +18,85 @@ Acceptance Test Design
   ↓
 Focused defect/fix evidence
   ↓
-STATIC REPOSITORY AUDIT   ← CURRENT
+Static repository audit
   ↓
-KEEP / CHANGE / DELETE / DEFER plan
+Clean-checkout verification
   ↓
-Full local checkout
+Dependency + legacy cleanup
   ↓
-pytest + script/runtime runs
+Full project audit
   ↓
-TEST_REPORT_003
+Semantic remediation
   ↓
-cleanup / regression
+Documentation consistency
+  ↓
+Final clean CI
+  ↓
+DEV v1 BASELINE FREEZE
 ```
 
-## Rule
+## Final verified baseline
 
-A file is not kept because it already exists. It is kept only when it has:
+```text
+Python 3.12
+father_osint import       PASS
+21 tests collected        PASS
+21 tests executed         PASS
+run_dev_osint.py          PASS
+run_dev_pipeline.py       PASS
+```
 
-1. an approved requirement or explicit DEV-harness purpose;
-2. a clear owner/responsibility;
-3. a defined input/output boundary;
-4. a verification obligation.
+The current DEV core is stdlib-only; verification uses `pytest` from `requirements-dev.txt`.
 
-Deletion is also not performed during static review if runtime dependency is still uncertain. Such files are marked `DELETE CANDIDATE` until full-checkout verification.
+## Material results
 
-## Documents
+Stage 06 established and verified these semantics:
 
-- [01_STATIC_REPOSITORY_AUDIT.md](01_STATIC_REPOSITORY_AUDIT.md) — file/group disposition and WHY.
-- Future: `02_FULL_RUN_PLAN.md` — exact local checkout/run procedure after static audit closes.
-- Future: `TEST_REPORT_003.md` — full-repository execution evidence.
+- independent source observations survive equal payload content;
+- identical raw payloads may reuse SHA-256-addressed storage without collapsing provenance;
+- follow-up research cycles review cumulative evidence;
+- file-only Material is hashed from original file bytes;
+- missing local files fail explicitly;
+- collector failures are isolated and visible;
+- the review loop is hard bounded;
+- Telegram collection remains transport-neutral;
+- no live transport, Knowledge Gate or production infrastructure is required to prove DEV v1.
+
+## Repository rationalization
+
+The active tree no longer contains the old duplicate pipeline, legacy `core/`, workstation/Ollama/GPU/PowerShell runtime, VIP prototype, experimental policy/"llm-gateway" implementation or Teleproto/Node bridge. Their useful lessons remain in Git history and audit records.
+
+## Evidence pack
+
+1. `01_STATIC_REPOSITORY_AUDIT.md` — initial file/group disposition.
+2. `02_FULL_RUN_PLAN.md` — clean execution plan.
+3. `03_TEST_REPORT_003.md` — earlier focused verification evidence.
+4. `04_DEPENDENCY_AUDIT.md` — pipeline/dependency analysis.
+5. `05_LEGACY_CORE_AUDIT.md` — legacy core lessons.
+6. `06_LEGACY_RUNTIME_AUDIT.md` — historical runtime analysis.
+7. `07_LLM_GATEWAY_AUDIT.md` — experimental policy subsystem analysis.
+8. `08_CONFIG_DATA_AUDIT.md` — configuration/data boundaries.
+9. `09_COMPONENT_TRACEABILITY_MAP.md` — current component ownership and verification map.
+10. `10_DEPENDENCY_SPLIT.md` — current runtime vs DEV dependency decision.
+11. `11_LEGACY_CLEANUP_REPORT.md` — evidence-based cleanup record.
+12. `12_TELEGRAM_EXPERIMENT_AUDIT.md` — Teleproto/Node experiment disposition.
+13. `13_LLM_GATEWAY_DISPOSITION.md` — experimental gateway removal decision.
+14. `14_FULL_PROJECT_AUDIT_2026-08-09.md` — full-project audit findings.
+15. `15_SEMANTIC_REMEDIATION_PLAN.md` — cumulative evidence, payload reuse and file hashing remediation contract.
+
+## Freeze rule
+
+DEV v1 freeze means:
+
+- current behavior is the reference baseline;
+- future changes must identify which approved requirement they satisfy;
+- no feature is added merely because a library or prototype exists;
+- every new capability re-enters the lifecycle at requirements/business analysis, not at code.
+
+Freeze does **not** mean production readiness. Live Telegram, Tor/dark-web access, local transcription, generic Artifact ingestion, Knowledge Gate, expert Analyst/Socrates and production observability remain future separately approved requirements.
+
+## Next gate
+
+**M5 — choose the next approved business requirement.**
+
+See `../DEVELOPMENT_JOURNAL.md` for the current roadmap and `16_DEV_V1_BASELINE_FREEZE.md` for the formal closure record.

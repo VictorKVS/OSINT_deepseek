@@ -1,0 +1,20 @@
+[
+  {
+    "source_locator": "https://github.com/tdlib/td",
+    "title": "TDLib repository",
+    "raw_text": "Telegram Database Library: cross-platform library for building Telegram clients.",
+    "published_at": "2026-08-08T00:00:00+00:00",
+    "author": "tdlib",
+    "tags": ["github", "telegram", "tdlib", "mtproto"],
+    "metadata": {"kind": "repository"}
+  },
+  {
+    "source_locator": "https://github.com/example/inference-runtime",
+    "title": "Inference runtime repository",
+    "raw_text": "Experimental inference runtime focused on reduced memory use.",
+    "published_at": "2026-08-08T00:00:00+00:00",
+    "author": "example",
+    "tags": ["github", "ai", "runtime", "inference"],
+    "metadata": {"kind": "repository"}
+  }
+]

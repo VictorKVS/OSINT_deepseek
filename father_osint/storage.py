@@ -9,10 +9,11 @@ from .models import Material, MaterialPackage, ResearchTask
 
 
 class MaterialStore:
-    """Simple append-only store for the MVP.
+    """Simple append-only DEV store.
 
-    Metadata is stored as JSONL. Raw text payloads are persisted as UTF-8 files
-    addressed by SHA-256 so obvious duplicates can be skipped cheaply.
+    Material records represent source observations and are always preserved.
+    Raw text payloads are stored separately as SHA-256-addressed UTF-8 blobs, so
+    identical payload bytes may be reused without collapsing provenance.
     """
 
     def __init__(self, root: str | Path = "data/osint") -> None:
@@ -23,28 +24,10 @@ class MaterialStore:
         self.packages_file = self.root / "packages.jsonl"
         self.raw_dir.mkdir(parents=True, exist_ok=True)
         self.root.mkdir(parents=True, exist_ok=True)
-        self._known_hashes = self._load_known_hashes()
 
     @staticmethod
     def hash_text(text: str) -> str:
         return hashlib.sha256(text.encode("utf-8")).hexdigest()
-
-    def _load_known_hashes(self) -> set[str]:
-        hashes: set[str] = set()
-        if not self.materials_file.exists():
-            return hashes
-        with self.materials_file.open("r", encoding="utf-8") as fh:
-            for line in fh:
-                line = line.strip()
-                if not line:
-                    continue
-                try:
-                    value = json.loads(line).get("content_hash")
-                except json.JSONDecodeError:
-                    continue
-                if value:
-                    hashes.add(value)
-        return hashes
 
     @staticmethod
     def _append_jsonl(path: Path, payload: dict) -> None:
@@ -55,22 +38,21 @@ class MaterialStore:
         self._append_jsonl(self.tasks_file, task.to_dict())
 
     def save_material(self, material: Material) -> bool:
-        """Persist a material. Return False when an obvious duplicate is skipped."""
+        """Persist one source observation.
+
+        Equal payload hashes do not make two source observations identical.
+        Raw payload bytes may be reused, while each Material record remains in
+        materials.jsonl for provenance. Exact observation-level deduplication is
+        intentionally not defined in DEV v1.
+        """
         if material.raw_text is not None:
             material.content_hash = material.content_hash or self.hash_text(material.raw_text)
-            if material.content_hash in self._known_hashes:
-                return False
             raw_path = self.raw_dir / f"{material.content_hash}.txt"
             if not raw_path.exists():
                 raw_path.write_text(material.raw_text, encoding="utf-8")
             material.local_path = str(raw_path)
 
-        if material.content_hash and material.content_hash in self._known_hashes:
-            return False
-
         self._append_jsonl(self.materials_file, material.to_dict())
-        if material.content_hash:
-            self._known_hashes.add(material.content_hash)
         return True
 
     def save_package(self, package: MaterialPackage) -> None:

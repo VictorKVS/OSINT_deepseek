@@ -2,15 +2,13 @@
 
 > **Status:** PROJECT / DEV / **STAGE 06 — VERIFICATION AND REPOSITORY RATIONALIZATION**
 >
-> **Engineering rule:** **NO CODE BEFORE CONTRACT.** Requirements are checked first, then business/process architecture is reviewed, then acceptance tests are designed, then implementation may continue.
+> **Engineering rule:** **NO CODE BEFORE CONTRACT.** Requirements are reviewed first, then business/process architecture, acceptance tests, implementation plan, code, verification and experience capture.
 
 This repository is being evolved from the original `OSINT_deepseek` prototype into the first practical worker of the FATHER ecosystem: an OSINT supplier for the Knowledge Factory.
 
 ## Mission
 
 The OSINT worker does **not** decide what is true and does **not** publish knowledge by itself. It receives a research task, finds and preserves materials, records provenance and returns a material package to Analyst.
-
-The surrounding DEV chain is:
 
 ```mermaid
 flowchart LR
@@ -38,9 +36,31 @@ flowchart TD
     V --> E[9. Experience -> KB]
 ```
 
-**Current project gate:** **Stage 06 is ACTIVE. Feature growth remains paused while the current repository boundary, dependencies, legacy assets and complete DEV execution path are verified.**
+**Current gate:** Stage 06 is active. Feature growth remains paused while the current DEV baseline, dependencies and repository boundaries are verified and cleaned with evidence.
 
-The project already completed the first full requirement→architecture→test→minimal-fix cycle for storage/provenance semantics. Current work is proving the repository as a coherent product and removing obsolete paths only after dependency evidence.
+## Verified DEV baseline
+
+The current clean-checkout CI path proves:
+
+```text
+checkout
+  ↓
+Python 3.12
+  ↓
+DEV dependency install
+  ↓
+import father_osint
+  ↓
+pytest collect
+  ↓
+17 tests PASS
+  ↓
+run_dev_osint.py PASS
+  ↓
+run_dev_pipeline.py PASS
+```
+
+Historical Ollama/GPU/workstation code and the old `core/` package were removed only after their useful engineering lessons were documented and clean CI proved that the current FATHER OSINT path did not depend on them.
 
 ## Development journal
 
@@ -48,46 +68,38 @@ The living project history, WHY decisions, completed work, unresolved risks and 
 
 **[Development Journal](docs/DEVELOPMENT_JOURNAL.md)**
 
-The journal must be updated whenever a gate is passed, a material architecture/contract decision changes, a major defect is resolved, a component is removed, or the roadmap changes.
+Material gate changes and cleanup decisions also receive dedicated Stage 06 reports under `docs/06_verification/`.
 
 ## Documentation packs
 
 | Pack | Purpose |
 |---|---|
-| [Development Journal](docs/DEVELOPMENT_JOURNAL.md) | **Living history + current status + WHY decisions + roadmap** |
-| [Project Governance](docs/PROJECT_GOVERNANCE.md) | Mandatory engineering chain, gates, statuses and change rules |
+| [Development Journal](docs/DEVELOPMENT_JOURNAL.md) | Living history, status, WHY decisions and roadmap |
+| [Project Governance](docs/PROJECT_GOVERNANCE.md) | Mandatory engineering chain and gates |
 | [OSINT Agent ТЗ v1](docs/OSINT_AGENT_TZ_V1.md) | What the OSINT worker must and must not do |
-| [Stage 03 — Architecture Review Pack](docs/03_architecture/README.md) | business analysis, diagrams, architecture views, review gate, WHY decisions |
-| [Business Analysis](docs/03_architecture/01_BUSINESS_ANALYSIS.md) | Actors, SIPOC, value stream, boundaries, business rules and risks |
-| [Architecture Views](docs/03_architecture/02_ARCHITECTURE_VIEWS.md) | Context, components, sequence, data flow, failures and DEV/PROD boundaries |
-| [Formal Architecture Review](docs/03_architecture/03_ARCHITECTURE_REVIEW.md) | Review checklist, defects, risks and PASS/REWORK gate |
-| [Decision Register](docs/03_architecture/04_DECISION_REGISTER.md) | Architecture decisions with WHY, evidence and revisit conditions |
-| [Stage 04 — Testing](docs/04_testing/README.md) | acceptance test design and execution rules |
-| [Stage 05 — Implementation](docs/05_implementation/01_STORAGE_SEMANTICS_PLAN.md) | reviewed minimal implementation plan for the first corrected defect |
-| [Stage 06 — Verification](docs/06_verification/README.md) | **Current stage:** static audit, component traceability, dependency/legacy rationalization and full-run planning |
-| [Component Traceability Map](docs/06_verification/09_COMPONENT_TRACEABILITY_MAP.md) | current `father_osint/` component → contract → test → status map |
-| [Test Plan v1](docs/TEST_PLAN_V1.md) | project-level verification strategy |
-| [Traceability Matrix](docs/TRACEABILITY_MATRIX.md) | Requirement -> architecture -> test -> code mapping |
-| [Repository Audit](docs/REPOSITORY_AUDIT_2026-08-09.md) | earlier inventory snapshot; current Stage 06 docs govern disposition |
+| [Stage 03 — Architecture Review](docs/03_architecture/README.md) | Business analysis, diagrams, architecture and decisions |
+| [Stage 04 — Testing](docs/04_testing/README.md) | Acceptance test design and execution rules |
+| [Stage 05 — Implementation](docs/05_implementation/01_STORAGE_SEMANTICS_PLAN.md) | Reviewed minimal implementation plan |
+| [Stage 06 — Verification](docs/06_verification/README.md) | Current verification and rationalization stage |
+| [Component Traceability Map](docs/06_verification/09_COMPONENT_TRACEABILITY_MAP.md) | component → contract → test → status |
+| [Dependency Split](docs/06_verification/10_DEPENDENCY_SPLIT.md) | Current vs DEV vs legacy dependency decision |
+| [Traceability Matrix](docs/TRACEABILITY_MATRIX.md) | requirement → architecture → test → code |
 | [Donor KB: Telegram](docs/DONOR_KB_TELEGRAM_INTELLIGENCE_V0_1.md) | Research notes for future transport selection |
 
 ## Directory map
 
-| Directory | Role | README |
-|---|---|---|
-| `docs/` | Requirements, architecture, test, implementation, verification and journal | [docs/README.md](docs/README.md) |
-| `father_osint/` | Current FATHER OSINT DEV implementation | [father_osint/README.md](father_osint/README.md) |
-| `father_osint/collectors/` | Source acquisition boundary | [collectors/README.md](father_osint/collectors/README.md) |
-| `father_osint/transports/` | Experimental transport adapters, not approved for PROD | [transports/README.md](father_osint/transports/README.md) |
-| `tests/` | Current contract/architecture/DEV verification assets | [tests/README.md](tests/README.md) |
-| `data/` | DEV fixtures and runtime data references | [data/README.md](data/README.md) |
-| `config/` | Draft mission/profile/policy inputs | [config/README.md](config/README.md) |
-| `core/` | Legacy prototype core; audited, not current architecture | [core/README.md](core/README.md) |
-| `scripts/` | Canonical DEV runners plus audited legacy scripts | [scripts/README.md](scripts/README.md) |
-| `services/` | Experimental services/subprojects | [services/README.md](services/README.md) |
-| `telegram_bridge/` | Experimental/deferred Telegram transport bridge | [telegram_bridge/README.md](telegram_bridge/README.md) |
+| Directory | Role |
+|---|---|
+| `father_osint/` | Current FATHER OSINT DEV implementation |
+| `scripts/` | Canonical DEV execution adapters |
+| `tests/` | Current contract/architecture/DEV verification assets |
+| `data/` | DEV fixtures and runtime data references |
+| `config/` | Draft mission/profile/policy inputs |
+| `docs/` | Requirements, architecture, tests, decisions, verification and journal |
+| `services/` | Experimental/frozen subprojects; not implicit current dependencies |
+| `telegram_bridge/` | Experimental/deferred Telegram transport bridge |
 
-## Current disposition at a glance
+## Current disposition
 
 ```text
 father_osint/                 CURRENT DEV PRODUCT
@@ -96,15 +108,19 @@ scripts/run_dev_pipeline.py   KEEP / CANONICAL DEV RUNNER
 tests/                        CURRENT VERIFICATION
 config/                       DRAFT PROFILE/POLICY INPUTS
 data/dev/                     TEST FIXTURES ONLY
-core/                         LEGACY
-old runtime scripts           LEGACY
 services/llm-gateway/         FROZEN EXPERIMENTAL SUBPROJECT
 Teleproto/live Telegram       EXPERIMENTAL / DEFERRED
 ```
 
+## Dependencies
+
+- `requirements.txt` — current runtime dependencies; current core is stdlib-only.
+- `requirements-dev.txt` — verification/test dependencies.
+- `requirements-legacy.txt` — historical dependency record only; not required for the current DEV product.
+
 ## DEV vs PROD
 
-The current project works in **DEV / SIMPLIFIED** mode. Fixtures and public/simple sources are preferred until the contract is proven. Real MTProto sessions, Tor gateways, proxy rotation, schedulers, secrets infrastructure and battle monitoring are explicitly deferred to the PROD design gate.
+The current project works in **DEV / SIMPLIFIED** mode. Fixtures and public/simple sources are preferred until the contract is proven. Real MTProto sessions, Tor gateways, proxy rotation, schedulers, secrets infrastructure and battle monitoring are deferred to separate PROD gates.
 
 ## Change policy
 

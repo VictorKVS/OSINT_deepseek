@@ -1,7 +1,7 @@
 # Техническое задание: FATHER OSINT Agent v1
 
-**Status:** REQUIREMENTS REVIEWED / ARCHITECTURE FEEDBACK APPLIED  
-**Implementation status:** existing code remains PROTOTYPE / UNVERIFIED until Stage 03 and Stage 04 are completed.
+**Status:** REQUIREMENTS REVIEWED / STAGE 06 SEMANTIC REMEDIATION APPLIED  
+**Implementation status:** DEV baseline verified on clean CI; production integrations remain out of scope.
 
 ## 1. Purpose
 
@@ -32,15 +32,19 @@ Minimum `ResearchTask` contract:
 - requester identifier;
 - optional stop condition.
 
+`depth` and `stop_when_enough` are contract fields in DEV v1; their production operational semantics are intentionally deferred until a concrete requirement and tests exist.
+
 ## 4. Outputs
 
 Minimum `MaterialPackage`:
 - task identifier;
 - collected material observations;
-- payload duplicates detected/reused;
+- count of raw payloads reused from content-addressed storage (`payloads_reused`);
 - collection errors;
 - stop reason;
 - notes when required.
+
+`payloads_reused` never means that a source observation was discarded. Observation-level deduplication is not defined in DEV v1.
 
 Minimum material observation record:
 - source type;
@@ -50,12 +54,18 @@ Minimum material observation record:
 - publication time when known;
 - author/publisher when known;
 - collection time;
-- content hash when payload exists;
+- SHA-256 content hash when payload exists;
 - source-specific metadata.
 
 ### Provenance rule
 
-Two different source observations may contain byte-identical or text-identical content. The system may store the payload once by hash, but **must not erase the fact that the same content was observed at different source locators**. Payload deduplication and source-observation deduplication are different concerns.
+Two different source observations may contain byte-identical or text-identical content. The system may store the text payload once by hash, but **must not erase the fact that the same content was observed at different source locators**. Payload reuse and source-observation identity are different concerns.
+
+For file-only material, SHA-256 is calculated over the original local file bytes. A missing referenced local file must fail explicitly rather than be silently persisted as unverifiable evidence.
+
+### Cumulative research rule
+
+A bounded multi-cycle research run is cumulative. A follow-up task may narrow collection to a missing source type, but previously collected evidence remains available to Analyst and Socrates. Each cycle keeps its own collection package for audit while review uses a cumulative evidence package.
 
 ## 5. Required behavior
 
@@ -63,10 +73,12 @@ Two different source observations may contain byte-identical or text-identical c
 2. Select only collectors compatible with requested source types.
 3. Collect permitted material without analytical conclusions.
 4. Preserve source locator and original material/reference.
-5. Reuse storage for obvious identical payloads without destroying independent source provenance records.
-6. Isolate collector failure so one source does not necessarily destroy the whole package.
-7. Stop at a declared limit or after collectors are exhausted.
-8. Return explicit errors/gaps instead of silently inventing material.
+5. Reuse storage for obvious identical text payloads without destroying independent source provenance records.
+6. Hash file-only source artifacts from original bytes before downstream interpretation.
+7. Isolate collector failure so one source does not necessarily destroy the whole package.
+8. Stop at a declared limit or after collectors are exhausted.
+9. Return explicit errors/gaps instead of silently inventing material.
+10. Preserve cumulative evidence across bounded follow-up research cycles.
 
 ## 6. DEV scope
 
@@ -77,7 +89,7 @@ Allowed now:
 - local inspectable storage;
 - deterministic Analyst/Socrates stubs;
 - bounded 1-3 cycle research loops;
-- experimental transport code kept isolated and unapproved.
+- transport-neutral Telegram collector boundary.
 
 Deferred to PROD gate:
 - live Telegram account/session operation;
@@ -97,7 +109,8 @@ Deferred to PROD gate:
 - failures visible in result;
 - local storage suitable for inspection;
 - no unbounded agent loops;
-- source provenance must survive payload deduplication.
+- source provenance must survive payload reuse;
+- cumulative follow-up must not forget earlier evidence.
 
 ## 8. Acceptance criteria
 
@@ -110,8 +123,11 @@ AC-06: Analyst can consume MaterialPackage without source-specific knowledge.
 AC-07: Analyst may request follow-up research when expected source coverage is missing.  
 AC-08: DEV research loop has a hard maximum cycle count.  
 AC-09: Socrates review either passes analysis or returns a bounded research-more request.  
-AC-10: no Knowledge Gate/PROD connector is required to prove OSINT v1.
+AC-10: no Knowledge Gate/PROD connector is required to prove OSINT v1.  
+AC-11: evidence acquired in earlier cycles remains visible during later follow-up review; a staged Telegram→GitHub scenario can reach PASS without recollecting already satisfied source types.  
+AC-12: two distinct observations with equal text are both preserved, one raw blob may be reused, and `payloads_reused` reports that reuse without implying an observation was skipped.  
+AC-13: file-only Material receives SHA-256 of original bytes; a missing file reference produces an explicit failure.
 
-## 9. Definition of Done for this phase
+## 9. Definition of Done for DEV v1
 
-The phase is complete only when this ТЗ is reviewed, architecture is reconciled, tests are mapped to acceptance criteria, current tests are executed, failures are classified, and existing source files receive `KEEP / CHANGE / DELETE / DEFER` status.
+The DEV phase is complete only when this ТЗ, architecture, traceability, tests and current code agree; all acceptance tests pass on a clean checkout; canonical runners pass; no removed legacy component is presented as current architecture; and remaining deferred items are explicitly labelled rather than implied to exist.

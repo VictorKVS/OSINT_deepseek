@@ -1,26 +1,48 @@
 # Scripts
 
-This directory contains a mix of legacy diagnostics/runners and current DEV launch scripts.
+This directory contains both the approved DEV runners and historical pre-FATHER experiments. They must not be treated as one architecture.
 
 ## Current DEV path
 
-- `run_dev_osint.py` — direct simplified OSINT fixture run.
-- `run_dev_pipeline.py` — bounded DEV research pipeline runner.
+```text
+ResearchTask
+    ↓
+run_dev_osint.py / run_dev_pipeline.py
+    ↓
+father_osint components
+    ↓
+recorded DEV result
+```
 
-## Legacy/support scripts
+- `run_dev_osint.py` — **KEEP**; direct simplified OSINT fixture run.
+- `run_dev_pipeline.py` — **KEEP / CANONICAL DEV RUNNER**; bounded `OSINT → Analyst → Socrates` scenario.
 
-`deepseek_safe.py`, `hello_agent.py`, `monitor.py`, `rtx3060_agent.py` and other pre-FATHER scripts remain **LEGACY / PRESERVE** until reviewed.
+## Legacy / archive candidates
+
+The following scripts predate the current requirements-first FATHER package:
+
+- `deepseek_safe.py` — local Ollama/resource experiment;
+- `hello_agent.py` — early agent prototype;
+- `monitor.py` — workstation hardware monitoring;
+- `rtx3060_agent.py` — RTX 3060/model experiment;
+- `smart_agent.py` — local Ollama chat agent with resource-based model switching.
+
+Status: **ARCHIVE / DELETE CANDIDATES — NOT PART OF CURRENT DEV CONTRACT**.
+
+Their useful ideas are documented in `docs/06_verification/06_LEGACY_RUNTIME_AUDIT.md`; code must not be copied into `father_osint` without a new approved requirement, architecture decision and acceptance test.
 
 ## Rule
 
-A script is not an architecture boundary. It may orchestrate approved components for testing/operation, but new business logic should not be hidden in launch scripts.
+A script is an executable adapter, not a business-logic boundary.
 
 ```text
-approved test/use case
-    ↓
+approved requirement/use case
+        ↓
+approved component contract
+        ↓
 runner script
-    ↓
-existing component API
-    ↓
-recorded result
+        ↓
+execution result
 ```
+
+New domain decisions, evidence rules, analysis logic or persistence semantics must not be hidden inside launch scripts.

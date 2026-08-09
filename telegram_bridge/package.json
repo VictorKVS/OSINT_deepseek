@@ -1,0 +1,8 @@
+{
+  "name": "father-telegram-bridge",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "telegram": "^2.26.22"
+  }
+}

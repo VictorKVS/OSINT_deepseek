@@ -3,9 +3,8 @@
 **Purpose:** living engineering journal.  
 **Started:** 2026-08-09  
 **Current stage:** **Stage 07 — M5 Telegram Radar Requirements & Donor Verification**  
-**Previous stage:** **Stage 06 — Verification and Repository Rationalization / COMPLETE**  
-**Frozen baseline:** **DEV v1**  
-**Current milestone:** **M5 — Telegram Radar**  
+**Frozen baseline:** **DEV v1 / Stage 06 COMPLETE**  
+**Current milestone:** **M5 — Telegram transport PoC preparation**  
 **Rule:** update this journal whenever a gate, contract, architecture decision, material defect, component disposition or roadmap changes.
 
 ---
@@ -90,7 +89,7 @@ Responsibilities remain narrow:
 | `.github/workflows/dev-verification.yml` | **KEEP / ACTIVE** | clean-checkout verification |
 | `config/` | **DRAFT INPUTS** | mission/profile/policy ideas, not calibrated truth |
 | `data/dev/` | **TEST FIXTURES ONLY** | behavior evidence, never intelligence evidence |
-| `father_osint/transports/` | **M5 EXTENSION BOUNDARY** | live implementation still unapproved pending donor/ADR gate |
+| `father_osint/transports/` | **M5 EXTENSION BOUNDARY** | live implementation unapproved pending PoC/ADR |
 | removed legacy/runtime/VIP/gateway/Teleproto code | **GIT HISTORY / AUDIT ONLY** | not current architecture |
 
 ---
@@ -140,11 +139,7 @@ Planned future Artifact/ingestion layer must support original preservation, pre-
 Future FATHER must be capable of local transcription without third-party servers. External transcription services remain optional controlled fallbacks and require privacy review; sensitive/evidence material defaults to local processing.
 
 ### J-015 — M5 capability selection
-After DEV v1 freeze, the next capability was selected by dependency/value review rather than technology preference.
-
-**Decision:** M5 = **Telegram Radar**.
-
-**WHY:** it converts the verified OSINT worker from fixture-only proof into a useful live acquisition worker while reusing the existing `ResearchTask → TelegramCollector → Material → MaterialStore` boundary. Artifact ingestion is next because it generalizes non-text inputs; local transcription depends on that layer; Knowledge Gate should follow real evidence flow rather than being invented in isolation.
+After DEV v1 freeze, Telegram Radar was selected before Artifact/Ingestion, local transcription and Knowledge Gate because it converts the proven fixture-based OSINT contract into a useful live acquisition worker with the smallest architecture expansion.
 
 Approved planning order:
 
@@ -158,7 +153,24 @@ M7 Local transcription
 M8 Knowledge Gate
 ```
 
-No concrete Telegram transport is approved by this decision.
+### J-016 — Fresh Telegram transport donor shortlist
+Fresh official-source verification on 2026-08-10 replaced assumptions from the old donor matrix.
+
+Current PoC shortlist:
+
+```text
+TDLib   → POC-1 / primary
+GramJS  → POC-2 / explicit activity-risk comparison
+```
+
+Non-finalists:
+- **Telethon:** GitHub upstream archived 2026-02-21 and points to a new upstream; the new upstream still requires separate SOURCE_VERIFIED review before it can return to the shortlist.
+- **Pyrogram:** archived and explicitly no longer maintained/supported.
+- **Hydrogram:** not shortlisted because the verified release evidence found was too old for a 2026 production shortlist without deeper freshness/security proof.
+
+Important correction: the earlier donor notes claimed a 2026 GramJS release cadence including `3.0.0`. Fresh official GitHub verification did **not** reproduce that claim; the retrieved repository page lists GitHub release `v2.17.4` dated 2023-05-14. Therefore GramJS remains useful for a PoC because its MTProto/session/API model is simple, but carries a material maintenance/freshness question.
+
+Detailed evidence: `docs/07_next_requirement/03_TELEGRAM_TRANSPORT_DONOR_RESEARCH_2026-08-10.md`.
 
 ---
 
@@ -195,24 +207,27 @@ The baseline remains frozen while M5 extends it through a separately reviewed re
 
 ## 7. Current Stage 07 / M5 — Telegram Radar
 
-Decision record: `docs/07_next_requirement/01_M5_CAPABILITY_PRIORITY.md`.
+Planning records:
+- `docs/07_next_requirement/01_M5_CAPABILITY_PRIORITY.md`
+- `docs/07_next_requirement/02_TELEGRAM_RADAR_REQUIREMENTS_V0_1.md`
+- `docs/07_next_requirement/03_TELEGRAM_TRANSPORT_DONOR_RESEARCH_2026-08-10.md`
 
 M5 business requirement:
 
-> FATHER OSINT shall collect requested public Telegram channel material through a replaceable approved transport and return normal provenance-preserving `Material` records with bounded execution and explicit failures.
+> FATHER OSINT shall collect requested public Telegram channel material through a replaceable approved transport and return provenance-preserving `Material` records with bounded execution and explicit failures.
 
-Required pre-code gates:
+Current gate:
 
 ```text
-requirements
+requirements              PASS / draft approved direction
    ↓
-requirements review
+donor SOURCE_VERIFIED     PASS for shortlist
    ↓
-donor refresh / SOURCE_VERIFIED
+TDLib PoC + GramJS PoC    ← NEXT
    ↓
-PoC candidates
+identical benchmark
    ↓
-benchmark + security review
+security/operations review
    ↓
 ADR transport selection
    ↓
@@ -220,10 +235,23 @@ acceptance tests
    ↓
 implementation plan
    ↓
-code
+production-path code
 ```
 
-Current status: **REQUIREMENTS DESIGN / DONOR REFRESH NEXT.**
+No concrete Telegram transport is APPROVED yet.
+
+### PoC acceptance focus
+
+Both candidates must prove the same scenario:
+- secrets/session material outside repository;
+- tiny allow-listed public source set;
+- stable source/message identifiers;
+- restart/checkpoint behavior;
+- explicit FloodWait/429 behavior;
+- per-source isolation/timeouts;
+- session data never emitted in normal logs;
+- compatibility with existing `TelegramCollector` contract;
+- frozen 21-test DEV v1 regression stays green.
 
 ---
 
@@ -234,11 +262,17 @@ Current status: **REQUIREMENTS DESIGN / DONOR REFRESH NEXT.**
 3. **Knowledge Gate (M8)** — separate domain model, review semantics and tests.
 4. **Expert Analyst/Socrates** — evaluation corpus, quality metrics and explicit expert requirements.
 5. **Production observability/runtime supervision** — redesign from retained lessons, not legacy restoration.
-6. **Windows-specific verification** — desirable before claiming a cross-platform product baseline.
+6. **Windows-specific verification** — required before cross-platform production claims.
 
 ---
 
-## 9. Journal update template
+## 9. Current roadmap
+
+Current action: **execute two bounded Telegram transport PoCs, starting with TDLib, without modifying frozen DEV v1 contracts.**
+
+---
+
+## 10. Journal update template
 
 ```text
 Date

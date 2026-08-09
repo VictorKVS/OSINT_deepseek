@@ -1,5 +1,5 @@
 """Transport adapters used by source collectors."""
 
-from .gramjs import GramJSTransport
+from .teleproto import TeleprotoTransport
 
-__all__ = ["GramJSTransport"]
+__all__ = ["TeleprotoTransport"]

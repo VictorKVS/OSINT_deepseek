@@ -20,8 +20,8 @@ class OSINTAgent:
     """Read/collect worker for the FATHER Knowledge Factory.
 
     The agent intentionally does not analyze or promote knowledge. It coordinates
-    source collectors, stores provenance-rich materials, skips obvious duplicates,
-    and returns a package to Analyst.
+    source collectors, stores provenance-rich materials, preserves every collected
+    observation, and returns a package to Analyst.
     """
 
     def __init__(self, store: MaterialStore, collectors: Iterable[Collector] = ()) -> None:
@@ -57,10 +57,10 @@ class OSINTAgent:
                         self.store.save_package(package)
                         return package
 
-                    if self.store.save_material(material):
-                        package.materials.append(material)
-                    else:
-                        package.duplicates_skipped += 1
+                    payload_reused = self.store.save_material(material)
+                    package.materials.append(material)
+                    if payload_reused:
+                        package.payloads_reused += 1
             except Exception as exc:  # collector isolation is intentional at the orchestration boundary
                 package.collection_errors.append(f"{collector.name}: {type(exc).__name__}: {exc}")
 

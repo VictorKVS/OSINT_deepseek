@@ -2,9 +2,10 @@
 
 **Purpose:** living engineering journal.  
 **Started:** 2026-08-09  
-**Current stage:** **DEV v1 BASELINE FROZEN**  
+**Current stage:** **Stage 07 — M5 Telegram Radar Requirements & Donor Verification**  
 **Previous stage:** **Stage 06 — Verification and Repository Rationalization / COMPLETE**  
-**Current milestone:** **M5 — choose the next approved business requirement**  
+**Frozen baseline:** **DEV v1**  
+**Current milestone:** **M5 — Telegram Radar**  
 **Rule:** update this journal whenever a gate, contract, architecture decision, material defect, component disposition or roadmap changes.
 
 ---
@@ -82,14 +83,14 @@ Responsibilities remain narrow:
 
 | Area | Status | Meaning |
 |---|---|---|
-| `father_osint/` | **DEV v1 BASELINE** | canonical current product package |
+| `father_osint/` | **DEV v1 BASELINE** | canonical frozen product package |
 | `tests/` | **VERIFIED CONTRACT EVIDENCE** | 21-test clean-CI baseline |
 | `scripts/run_dev_osint.py` | **KEEP** | direct DEV OSINT runner |
 | `scripts/run_dev_pipeline.py` | **KEEP / CANONICAL** | bounded OSINT→Analyst→Socrates runner |
 | `.github/workflows/dev-verification.yml` | **KEEP / ACTIVE** | clean-checkout verification |
 | `config/` | **DRAFT INPUTS** | mission/profile/policy ideas, not calibrated truth |
 | `data/dev/` | **TEST FIXTURES ONLY** | behavior evidence, never intelligence evidence |
-| `father_osint/transports/` | **FUTURE BOUNDARY** | no live Telegram transport approved |
+| `father_osint/transports/` | **M5 EXTENSION BOUNDARY** | live implementation still unapproved pending donor/ADR gate |
 | removed legacy/runtime/VIP/gateway/Teleproto code | **GIT HISTORY / AUDIT ONLY** | not current architecture |
 
 ---
@@ -124,7 +125,7 @@ Uncalibrated numeric priorities in configuration cannot silently become trust/co
 Prepared fixture content proves program behavior only. It never becomes KB evidence automatically.
 
 ### J-010 — Cumulative research evidence
-Follow-up review cycles now analyze accumulated evidence from earlier cycles instead of forgetting prior source coverage.
+Follow-up review cycles analyze accumulated evidence from earlier cycles instead of forgetting prior source coverage.
 
 ### J-011 — Explicit payload reuse semantics
 The misleading `duplicates_skipped` concept was replaced by payload-reuse semantics: observations survive; raw storage may be reused.
@@ -133,16 +134,37 @@ The misleading `duplicates_skipped` concept was replaced by payload-reuse semant
 File-only `Material` receives SHA-256 from original file bytes; missing file references fail explicitly.
 
 ### J-013 — Future reusable ingestion
-Planned future Artifact/ingestion layer must support original preservation, pre-normalization hashing, real MIME/signature checks, audio/video/image/document routing and local-first processing. It is a roadmap item, not current DEV v1 code.
+Planned future Artifact/ingestion layer must support original preservation, pre-normalization hashing, real MIME/signature checks, audio/video/image/document routing and local-first processing. It is a roadmap item, not DEV v1 code.
 
 ### J-014 — Local-first transcription roadmap
 Future FATHER must be capable of local transcription without third-party servers. External transcription services remain optional controlled fallbacks and require privacy review; sensitive/evidence material defaults to local processing.
 
+### J-015 — M5 capability selection
+After DEV v1 freeze, the next capability was selected by dependency/value review rather than technology preference.
+
+**Decision:** M5 = **Telegram Radar**.
+
+**WHY:** it converts the verified OSINT worker from fixture-only proof into a useful live acquisition worker while reusing the existing `ResearchTask → TelegramCollector → Material → MaterialStore` boundary. Artifact ingestion is next because it generalizes non-text inputs; local transcription depends on that layer; Knowledge Gate should follow real evidence flow rather than being invented in isolation.
+
+Approved planning order:
+
+```text
+M5 Telegram Radar
+      ↓
+M6 Artifact / universal ingestion
+      ↓
+M7 Local transcription
+      ↓
+M8 Knowledge Gate
+```
+
+No concrete Telegram transport is approved by this decision.
+
 ---
 
-## 5. Stage 06 verification result
+## 5. DEV v1 verification result
 
-Clean GitHub-hosted Linux checkout currently proves:
+Clean GitHub-hosted Linux checkout proves:
 
 ```text
 checkout                  PASS
@@ -154,15 +176,7 @@ run_dev_osint.py          PASS
 run_dev_pipeline.py       PASS
 ```
 
-Semantic acceptance includes:
-- source provenance survives equal payloads;
-- raw payload reuse is explicit;
-- local files are hashed from original bytes;
-- missing files fail visibly;
-- evidence accumulates across bounded follow-up cycles;
-- loops remain hard bounded;
-- collector failure is isolated and visible;
-- Telegram collector remains transport-neutral.
+Semantic acceptance includes provenance preservation, payload reuse without dropping observations, file SHA-256, explicit missing-file failure, cumulative bounded follow-up research, collector failure isolation and a transport-neutral Telegram collector.
 
 Detailed evidence lives in `docs/06_verification/` and `docs/journal/`.
 
@@ -170,58 +184,61 @@ Detailed evidence lives in `docs/06_verification/` and `docs/journal/`.
 
 ## 6. Stage 06 closure
 
-### M1 — Clean repository verification
-**PASS.** Clean Linux checkout, tests and canonical runners verified.
+- **M1 Clean repository verification — PASS**
+- **M2 Dependency and legacy cleanup — PASS**
+- **M3 Documentation consistency — PASS**
+- **M4 DEV v1 baseline freeze — PASS**
 
-### M2 — Dependency and legacy cleanup
-**PASS.** Active runtime is stdlib-only; DEV verification uses pytest. Legacy and unrelated experimental implementations were removed from the active tree after audits and regression.
-
-### M3 — Documentation consistency
-**PASS.** Root README, documentation index, test README, traceability, component map and Stage 06 control documents were reconciled with the current repository.
-
-### M4 — DEV v1 baseline freeze
-**PASS.** Current contracts and verified implementation are frozen as the reference baseline. Freeze does not mean production readiness; it means future work must start from a new approved requirement instead of silently extending the baseline.
+The baseline remains frozen while M5 extends it through a separately reviewed requirement.
 
 ---
 
-## 7. Open future requirements — not current defects
+## 7. Current Stage 07 / M5 — Telegram Radar
 
-1. **Live Telegram transport** — donor review + benchmark + security review + ADR required.
-2. **Reusable Artifact/Ingestion layer** — file/media/document normalization and evidence preservation.
-3. **Local transcription engine** — offline/local-first acceptance scenario; external service registry as controlled fallback.
-4. **Knowledge Gate / KB publication** — separate domain model, review semantics and tests.
-5. **Expert Analyst/Socrates** — requires evaluation corpus, quality metrics and explicit expert requirements.
-6. **Production observability/runtime supervision** — redesign from retained lessons, not restoration of old legacy code.
-7. **Windows-specific verification** — desirable before claiming cross-platform DEV baseline.
+Decision record: `docs/07_next_requirement/01_M5_CAPABILITY_PRIORITY.md`.
+
+M5 business requirement:
+
+> FATHER OSINT shall collect requested public Telegram channel material through a replaceable approved transport and return normal provenance-preserving `Material` records with bounded execution and explicit failures.
+
+Required pre-code gates:
+
+```text
+requirements
+   ↓
+requirements review
+   ↓
+donor refresh / SOURCE_VERIFIED
+   ↓
+PoC candidates
+   ↓
+benchmark + security review
+   ↓
+ADR transport selection
+   ↓
+acceptance tests
+   ↓
+implementation plan
+   ↓
+code
+```
+
+Current status: **REQUIREMENTS DESIGN / DONOR REFRESH NEXT.**
 
 ---
 
-## 8. Current roadmap
+## 8. Open future requirements — not current defects
 
-**M5 — NEXT APPROVED BUSINESS REQUIREMENT.**
-
-The next step is deliberately not “add another technology”. We first choose one concrete capability and pass it through the full engineering chain.
-
-Candidate next requirements currently recorded:
-- live Telegram Radar transport;
-- generic Artifact/Ingestion layer;
-- local transcription;
-- Knowledge Gate foundation.
-
-Selection criteria:
-1. immediate value to the FATHER workflow;
-2. dependency on the frozen DEV v1 core;
-3. testability with bounded acceptance criteria;
-4. minimum unnecessary infrastructure;
-5. reusable value for later agents.
-
-Until one is approved, **DEV v1 remains frozen**.
+1. **Artifact/Ingestion layer (M6)** — file/media/document normalization and evidence preservation.
+2. **Local transcription (M7)** — offline/local-first acceptance; external service registry as controlled fallback.
+3. **Knowledge Gate (M8)** — separate domain model, review semantics and tests.
+4. **Expert Analyst/Socrates** — evaluation corpus, quality metrics and explicit expert requirements.
+5. **Production observability/runtime supervision** — redesign from retained lessons, not legacy restoration.
+6. **Windows-specific verification** — desirable before claiming a cross-platform product baseline.
 
 ---
 
 ## 9. Journal update template
-
-For every material change record:
 
 ```text
 Date

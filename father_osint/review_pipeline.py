@@ -13,6 +13,7 @@ class ReviewCycle:
     number: int
     task: ResearchTask
     package: MaterialPackage
+    evidence_package: MaterialPackage
     analysis: Analysis
     review: SocratesReview
 
@@ -26,9 +27,18 @@ class ReviewPipelineResult:
     def final_review(self) -> SocratesReview | None:
         return self.cycles[-1].review if self.cycles else None
 
+    @property
+    def final_evidence_package(self) -> MaterialPackage | None:
+        return self.cycles[-1].evidence_package if self.cycles else None
+
 
 class DevReviewPipeline:
-    """Bounded DEV loop: OSINT -> Analyst -> Socrates -> optional follow-up OSINT."""
+    """Bounded DEV loop with cumulative evidence across follow-up cycles.
+
+    Each cycle keeps its own collection package for audit. Analyst and Socrates
+    review a cumulative evidence package so material acquired in an earlier cycle
+    is not forgotten when a follow-up task targets only a missing source type.
+    """
 
     def __init__(
         self,
@@ -47,17 +57,36 @@ class DevReviewPipeline:
     def run(self, initial_task: ResearchTask) -> ReviewPipelineResult:
         result = ReviewPipelineResult()
         task = initial_task
+        cumulative_materials = []
+        cumulative_errors: list[str] = []
+        cumulative_payloads_reused = 0
 
         for cycle_number in range(1, self.max_cycles + 1):
             package = self.osint_agent.run(task)
-            analysis = self.analyst.analyze(task, package)
-            review = self.socrates.review(task, package, analysis)
+            cumulative_materials.extend(package.materials)
+            cumulative_errors.extend(package.collection_errors)
+            cumulative_payloads_reused += package.payloads_reused
+
+            evidence_package = MaterialPackage(
+                task_id=initial_task.task_id,
+                materials=list(cumulative_materials),
+                payloads_reused=cumulative_payloads_reused,
+                collection_errors=list(cumulative_errors),
+                notes="Cumulative DEV evidence across review cycles",
+                stop_reason=package.stop_reason,
+            )
+
+            # Coverage is assessed against the original research request, not only
+            # against the narrowed follow-up task.
+            analysis = self.analyst.analyze(initial_task, evidence_package)
+            review = self.socrates.review(initial_task, evidence_package, analysis)
 
             result.cycles.append(
                 ReviewCycle(
                     number=cycle_number,
                     task=task,
                     package=package,
+                    evidence_package=evidence_package,
                     analysis=analysis,
                     review=review,
                 )

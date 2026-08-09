@@ -9,40 +9,42 @@ OSINT_AGENT_TZ_V1
         ↓
 REQUIREMENTS REVIEW
         ↓
-03_architecture/  ← CURRENT STAGE
+03_architecture/
         ↓
 ARCHITECTURE REVIEW GATE
         ↓
-TEST_PLAN_V1 + TRACEABILITY_MATRIX
+04_testing/  ← CURRENT STAGE
+        ↓
+TEST EXECUTION + TEST REPORT
         ↓
 IMPLEMENTATION PLAN
         ↓
 IMPLEMENTATION
         ↓
-TEST EVIDENCE
+REGRESSION / ACCEPTANCE
         ↓
 KEEP / CHANGE / DELETE / DEFER
 ```
 
 ## Current project stage
 
-**Stage 03 — Architecture + Business Analysis / OPEN.**
+**Stage 04 — Test Design / ACTIVE.**
 
-The current work is to prove what enters each stage, what leaves it, who owns the transition, why the component exists, which failure modes must be visible and which technical decisions are intentionally deferred.
+Stage 03 produced a conditional pass to test design. Functional code remains frozen while acceptance criteria are converted into explicit test oracles, current tests are reviewed, missing tests are specified, and the first execution plan is prepared.
 
-Main pack: [03_architecture/README.md](03_architecture/README.md)
+Main pack: [04_testing/README.md](04_testing/README.md)
 
 ## Active documents
 
 - `PROJECT_GOVERNANCE.md` — engineering lifecycle and gates.
-- `OSINT_AGENT_TZ_V1.md` — current technical specification.
-- `ARCHITECTURE_DEV_V1.md` — earlier minimal DEV architecture; now input to formal Stage 3 review.
-- `03_architecture/01_BUSINESS_ANALYSIS.md` — actors, SIPOC, value stream, business boundaries and functional decomposition.
-- `03_architecture/02_ARCHITECTURE_VIEWS.md` — system context, process, data, failure and DEV/PROD views.
-- `03_architecture/03_ARCHITECTURE_REVIEW.md` — formal architecture gate, risks and unresolved decisions.
-- `03_architecture/04_DECISION_REGISTER.md` — WHY and architecture decision register.
-- `TEST_PLAN_V1.md` — required order of verification; execution follows Stage 3 PASS.
-- `TRACEABILITY_MATRIX.md` — requirements to code/tests mapping; must be updated as part of Stage 3 exit.
+- `OSINT_AGENT_TZ_V1.md` — current technical specification and acceptance criteria.
+- `03_architecture/` — business analysis, architecture views, architecture review and decision register.
+- `04_testing/01_ACCEPTANCE_TEST_SPEC.md` — observable AC-01…AC-10 contracts and architecture-contract tests.
+- `04_testing/02_EXISTING_TEST_REVIEW.md` — KEEP / CHANGE / MIGRATE decisions for current tests.
+- `04_testing/03_TEST_EXECUTION_PLAN.md` — exact first-run order and failure classification.
+- `04_testing/04_TEST_REPORT_TEMPLATE.md` — required evidence format for actual runs.
+- `TEST_PLAN_V1.md` — project-level verification strategy.
+- `TRACEABILITY_MATRIX.md` — requirement → architecture → test → code → evidence map.
 - `REPOSITORY_AUDIT_2026-08-09.md` — current file inventory/status.
 
 ## Research/history

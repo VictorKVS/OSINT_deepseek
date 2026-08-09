@@ -1,4 +1,9 @@
 from pathlib import Path
+import sys
+
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
 from father_osint.agent import OSINTAgent
 from father_osint.collectors.dev import FixtureCollector
@@ -7,7 +12,7 @@ from father_osint.storage import MaterialStore
 
 
 def main() -> None:
-    root = Path(__file__).resolve().parents[1]
+    root = ROOT
     store = MaterialStore(root / "data" / "osint_dev")
 
     agent = OSINTAgent(

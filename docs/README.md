@@ -4,7 +4,7 @@ This directory is the project control plane. Implementation follows the document
 
 ## Living project record
 
-Start with **[DEVELOPMENT_JOURNAL.md](DEVELOPMENT_JOURNAL.md)** for the current checkpoint, development history, WHY decisions, open risks and roadmap.
+Start with **[DEVELOPMENT_JOURNAL.md](DEVELOPMENT_JOURNAL.md)** for the current checkpoint, development history, WHY decisions, open future requirements and roadmap.
 
 ```text
 PROJECT_GOVERNANCE
@@ -25,18 +25,18 @@ ACCEPTANCE TESTS
         ↓
 REVIEWED MINIMAL CHANGE
         ↓
-06_verification/  ← CURRENT STAGE
+06_verification/
         ↓
-CLEAN CHECKOUT + CI + RUNNERS
+CLEAN CHECKOUT + AUDIT + REMEDIATION
         ↓
-AUDIT / REMEDIATION / REGRESSION
+DOCUMENTATION CONSISTENCY
         ↓
-DEV V1 BASELINE
+DEV v1 BASELINE FREEZE
 ```
 
-## Current stage
+## Current status
 
-**Stage 06 — Verification and Repository Rationalization / ACTIVE.**
+**DEV v1 BASELINE FROZEN. Stage 06 is complete.**
 
 Completed evidence includes:
 - storage/provenance correction;
@@ -45,13 +45,15 @@ Completed evidence includes:
 - runtime/dev dependency separation;
 - clean GitHub Actions checkout verification;
 - full project audit;
-- semantic remediation for cumulative follow-up evidence, explicit payload-reuse semantics and file-only SHA-256.
+- semantic remediation for cumulative follow-up evidence, explicit payload-reuse semantics and file-only SHA-256;
+- documentation consistency pass;
+- formal DEV v1 freeze.
 
 The current clean CI baseline collects **21 tests**, passes all 21, then executes both canonical DEV runners.
 
 ## Active documents
 
-- `DEVELOPMENT_JOURNAL.md` — living history, WHY decisions, checkpoint and roadmap.
+- `DEVELOPMENT_JOURNAL.md` — living history, WHY decisions, current freeze state and next-requirement roadmap.
 - `PROJECT_GOVERNANCE.md` — engineering lifecycle and gates.
 - `OSINT_AGENT_TZ_V1.md` — current requirements and AC-01…AC-13.
 - `03_architecture/` — business analysis, architecture views and review decisions.
@@ -64,14 +66,15 @@ The current clean CI baseline collects **21 tests**, passes all 21, then execute
 - `06_verification/13_LLM_GATEWAY_DISPOSITION.md` — why the unrelated policy-control experiment was removed.
 - `06_verification/14_FULL_PROJECT_AUDIT_2026-08-09.md` — full current-project audit.
 - `06_verification/15_SEMANTIC_REMEDIATION_PLAN.md` — approved remediation contract.
+- `06_verification/16_DEV_V1_BASELINE_FREEZE.md` — formal closure/freeze record.
 - `TRACEABILITY_MATRIX.md` — current requirement → architecture → test → implementation → evidence map.
 
 ## Current repository view
 
-- `father_osint/` — canonical current DEV package.
+- `father_osint/` — frozen DEV v1 package.
 - `father_osint/review_pipeline.py` — cumulative bounded OSINT→Analyst→Socrates orchestration.
 - `father_osint/transports/` — future transport boundary; no implementation is approved by existence.
-- `tests/` — executable contract evidence.
+- `tests/` — verified executable contract evidence.
 - `scripts/run_dev_osint.py`, `scripts/run_dev_pipeline.py` — canonical DEV entrypoints.
 - `requirements.txt` — current stdlib-only runtime declaration.
 - `requirements-dev.txt` — current pytest verification dependency.
@@ -79,6 +82,18 @@ The current clean CI baseline collects **21 tests**, passes all 21, then execute
 - `data/dev/` — fixtures only, never automatic intelligence evidence.
 
 Removed legacy/experimental implementations remain available in Git history and audit documents; they are not current architecture.
+
+## Next engineering gate
+
+**M5 — choose one next approved business requirement.**
+
+Recorded candidates:
+- live Telegram Radar transport;
+- generic Artifact/Ingestion layer;
+- local-first transcription;
+- Knowledge Gate foundation.
+
+The next cycle starts at business requirement and acceptance criteria, not at library selection or code.
 
 ## Research/history
 

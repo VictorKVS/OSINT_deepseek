@@ -2,13 +2,13 @@
 
 > **Status:** PROJECT / DEV / **STAGE 06 — VERIFICATION AND REPOSITORY RATIONALIZATION**
 >
-> **Engineering rule:** **NO CODE BEFORE CONTRACT.** Requirements are reviewed first, then business/process architecture, acceptance tests, implementation plan, code, verification and experience capture.
+> **Engineering rule:** **NO CODE BEFORE CONTRACT.** Requirements are reviewed first, then architecture, acceptance tests, implementation plan, code, verification and experience capture.
 
-This repository is being evolved from the original `OSINT_deepseek` prototype into the first practical worker of the FATHER ecosystem: an OSINT supplier for the Knowledge Factory.
+This repository is evolving from the original `OSINT_deepseek` prototype into the first practical worker of the FATHER ecosystem: an OSINT supplier for the Knowledge Factory.
 
 ## Mission
 
-The OSINT worker does **not** decide what is true and does **not** publish knowledge by itself. It receives a research task, finds and preserves materials, records provenance and returns a material package to Analyst.
+The OSINT worker does **not** decide what is true and does **not** publish knowledge by itself. It receives a research task, finds and preserves materials, records provenance and returns evidence to Analyst.
 
 ```mermaid
 flowchart LR
@@ -20,7 +20,7 @@ flowchart LR
     E -->|RESEARCH MORE| A
 ```
 
-## FATHER engineering lifecycle
+## Engineering lifecycle
 
 ```mermaid
 flowchart TD
@@ -36,11 +36,9 @@ flowchart TD
     V --> E[9. Experience -> KB]
 ```
 
-**Current gate:** Stage 06 is active. Feature growth remains paused while the current DEV baseline, dependencies and repository boundaries are verified and cleaned with evidence.
-
 ## Verified DEV baseline
 
-The current clean-checkout CI path proves:
+Current clean-checkout CI proves:
 
 ```text
 checkout
@@ -51,43 +49,45 @@ DEV dependency install
   ↓
 import father_osint
   ↓
-pytest collect
-  ↓
-17 tests PASS
+21 tests PASS
   ↓
 run_dev_osint.py PASS
   ↓
 run_dev_pipeline.py PASS
 ```
 
-Historical Ollama/GPU/workstation code, the old `core/` package, the unapproved Teleproto/Node Telegram transport PoC and the unrelated experimental policy/"llm-gateway" prototype were removed only after their useful engineering lessons were documented and clean CI proved that the current FATHER OSINT path did not depend on them.
+The current semantic baseline also proves:
+- equal payload does not collapse independent source observations;
+- raw text payloads may be reused by SHA-256 without dropping provenance;
+- file-only Material is hashed from original file bytes;
+- missing local files fail explicitly;
+- follow-up research accumulates evidence across cycles;
+- research loops remain hard bounded.
+
+Historical Ollama/GPU/workstation code, old `core/`, `vip/`, the unapproved Teleproto/Node bridge and the unrelated experimental policy/"llm-gateway" prototype were removed only after their useful engineering lessons were documented and clean CI proved the current product did not depend on them.
 
 ## Development journal
 
-The living project history, WHY decisions, completed work, unresolved risks and forward roadmap are tracked in:
+Living history, WHY decisions, completed work, risks and roadmap:
 
 **[Development Journal](docs/DEVELOPMENT_JOURNAL.md)**
 
-Material gate changes and cleanup decisions also receive dedicated Stage 06 reports under `docs/06_verification/` and journal entries under `docs/journal/`.
+Stage-specific evidence is under `docs/06_verification/`; material changes also receive entries under `docs/journal/`.
 
-## Documentation packs
+## Key documentation
 
 | Pack | Purpose |
 |---|---|
 | [Development Journal](docs/DEVELOPMENT_JOURNAL.md) | Living history, status, WHY decisions and roadmap |
 | [Project Governance](docs/PROJECT_GOVERNANCE.md) | Mandatory engineering chain and gates |
-| [OSINT Agent ТЗ v1](docs/OSINT_AGENT_TZ_V1.md) | What the OSINT worker must and must not do |
-| [Stage 03 — Architecture Review](docs/03_architecture/README.md) | Business analysis, diagrams, architecture and decisions |
+| [OSINT Agent ТЗ v1](docs/OSINT_AGENT_TZ_V1.md) | Current requirements and acceptance criteria |
+| [Stage 03 — Architecture Review](docs/03_architecture/README.md) | Business analysis, diagrams and architecture decisions |
 | [Stage 04 — Testing](docs/04_testing/README.md) | Acceptance test design and execution rules |
-| [Stage 05 — Implementation](docs/05_implementation/01_STORAGE_SEMANTICS_PLAN.md) | Reviewed minimal implementation plan |
-| [Stage 06 — Verification](docs/06_verification/README.md) | Current verification and rationalization stage |
-| [Component Traceability Map](docs/06_verification/09_COMPONENT_TRACEABILITY_MAP.md) | component → contract → test → status |
-| [Dependency Split](docs/06_verification/10_DEPENDENCY_SPLIT.md) | Current vs DEV vs legacy dependency decision |
-| [Legacy Cleanup Report](docs/06_verification/11_LEGACY_CLEANUP_REPORT.md) | evidence-based removal of old runtime/core code |
-| [Telegram Experiment Audit](docs/06_verification/12_TELEGRAM_EXPERIMENT_AUDIT.md) | why the unapproved concrete transport PoC was removed |
-| [LLM Gateway Disposition](docs/06_verification/13_LLM_GATEWAY_DISPOSITION.md) | why the unrelated policy-control experiment was removed from the active tree |
-| [Traceability Matrix](docs/TRACEABILITY_MATRIX.md) | requirement → architecture → test → code |
-| [Donor KB: Telegram](docs/DONOR_KB_TELEGRAM_INTELLIGENCE_V0_1.md) | Research notes for future transport selection |
+| [Stage 06 — Verification](docs/06_verification/README.md) | Current verification/rationalization evidence |
+| [Full Project Audit](docs/06_verification/14_FULL_PROJECT_AUDIT_2026-08-09.md) | Full-project findings and remediation priorities |
+| [Semantic Remediation Plan](docs/06_verification/15_SEMANTIC_REMEDIATION_PLAN.md) | Contract for cumulative evidence, reuse metric and file hashing |
+| [Traceability Matrix](docs/TRACEABILITY_MATRIX.md) | requirement → architecture → test → code → evidence |
+| [Donor KB: Telegram](docs/DONOR_KB_TELEGRAM_INTELLIGENCE_V0_1.md) | Research notes for future transport selection; not approval |
 
 ## Directory map
 
@@ -95,8 +95,8 @@ Material gate changes and cleanup decisions also receive dedicated Stage 06 repo
 |---|---|
 | `father_osint/` | Current FATHER OSINT DEV implementation |
 | `scripts/` | Canonical DEV execution adapters |
-| `tests/` | Current contract/architecture/DEV verification assets |
-| `data/` | DEV fixtures and runtime data references |
+| `tests/` | Current executable contract evidence |
+| `data/` | DEV fixtures/runtime data references |
 | `config/` | Draft mission/profile/policy inputs |
 | `docs/` | Requirements, architecture, tests, decisions, verification and journal |
 
@@ -114,13 +114,14 @@ father_osint/transports/      FUTURE BOUNDARY / NO APPROVED IMPLEMENTATION
 
 ## Dependencies
 
-- `requirements.txt` — current runtime dependencies; current core is stdlib-only.
-- `requirements-dev.txt` — verification/test dependencies.
-- `requirements-legacy.txt` — historical dependency record only; not required for the current DEV product.
+- `requirements.txt` — current runtime dependency declaration; the DEV core is stdlib-only.
+- `requirements-dev.txt` — verification/test dependencies (`pytest`).
+
+Historical prototype dependencies are retained in Git history and audit documents, not in the active dependency surface.
 
 ## DEV vs PROD
 
-The current project works in **DEV / SIMPLIFIED** mode. Fixtures and public/simple sources are preferred until the contract is proven. Real MTProto sessions, Tor gateways, proxy rotation, schedulers, secrets infrastructure, LLM provider routing and battle monitoring are deferred to separate requirements and PROD gates.
+The current project is **DEV / SIMPLIFIED**. Real MTProto sessions, Tor gateways, proxy rotation, schedulers, secrets infrastructure, production LLM routing, battle monitoring, Knowledge Gate and autonomous KB publication remain separate future requirements.
 
 ## Change policy
 

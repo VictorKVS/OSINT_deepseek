@@ -1,0 +1,20 @@
+[
+  {
+    "source_locator": "https://t.me/example_ai/101",
+    "title": "Example AI channel",
+    "raw_text": "TDLib remains an official Telegram client library candidate for MTProto integrations.",
+    "published_at": "2026-08-08T10:00:00+00:00",
+    "author": "example_ai",
+    "tags": ["telegram", "tdlib", "mtproto"],
+    "metadata": {"message_id": "101", "channel": "example_ai"}
+  },
+  {
+    "source_locator": "https://t.me/example_ai/102",
+    "title": "Example AI channel",
+    "raw_text": "A new inference runtime was announced with lower memory consumption.",
+    "published_at": "2026-08-08T11:00:00+00:00",
+    "author": "example_ai",
+    "tags": ["ai", "runtime", "inference"],
+    "metadata": {"message_id": "102", "channel": "example_ai"}
+  }
+]

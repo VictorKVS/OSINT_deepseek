@@ -1,173 +1,217 @@
 # Stage 03 — Formal Architecture Review
 
-**Status:** OPEN  
+**Status:** IN PROGRESS — FIRST FILE-LEVEL PASS COMPLETE  
 **Decision:** PASS is not granted yet.
 
-This document is the architecture gate. It is deliberately stricter than a design note: every significant component and information flow must be justified by approved requirements and business value before test design starts.
+This document is the architecture gate. Every significant component and information flow must be justified by approved requirements and business value before test design starts.
 
 ## 1. Review dimensions
 
-| Dimension | Question | Current assessment |
+| Dimension | Assessment | WHY |
 |---|---|---|
-| Business fit | Does the structure solve the stated research-supply problem? | PARTIAL PASS |
-| Role separation | Are OSINT, Analyst and Socrates responsibilities distinct? | PASS conceptually |
-| Contract completeness | Are inputs/outputs sufficient and explicit? | REVIEW REQUIRED |
-| Simplicity | Is anything present without demonstrated need? | REVIEW REQUIRED |
-| Failure behavior | Are failures visible and bounded? | PARTIAL PASS |
-| DEV/PROD separation | Is production complexity deferred? | PASS conceptually |
-| Traceability | Can every component be mapped to requirement/test? | INCOMPLETE |
-| Legacy isolation | Is old code prevented from becoming implicit architecture? | PARTIAL PASS |
-| Technology neutrality | Are unapproved technologies avoided in logical design? | PASS with exceptions |
-| Operability | Can a maintainer understand what happens and why? | IMPROVING |
+| Business fit | PASS | architecture supports research supply rather than expert decision-making |
+| Role separation | PASS | OSINT collects, Analyst interprets, Socrates reviews |
+| Contract completeness | PARTIAL PASS | contracts are mostly adequate but provenance/dedup semantics required correction |
+| Simplicity | PARTIAL PASS | duplicate pipeline implementations remain |
+| Failure behavior | PARTIAL PASS | collector errors are exposed; broader restart/storage semantics need tests |
+| DEV/PROD separation | PASS | fixtures are sufficient; Telegram transport is frozen/deferred |
+| Traceability | PARTIAL PASS | core components mapped, tests not yet executed |
+| Legacy isolation | PASS CONCEPTUALLY | legacy directories are explicitly outside current architecture |
+| Technology neutrality | PASS | no PROD transport/database is approved by the logical design |
+| Operability | PARTIAL PASS | documentation is now navigable; test evidence still missing |
 
-## 2. Component review
+## 2. End-to-end business flow
 
-### `models.py`
-
-**Purpose:** stage contracts.  
-**Architecture question:** does it contain only information needed across stage boundaries?
-
-Review actions:
-
-- validate every `ResearchTask` field against ТЗ;
-- classify each field as REQUIRED / OPTIONAL / REMOVE;
-- confirm `Material` does not contain Analyst/Socrates judgments;
-- confirm `MaterialPackage` exposes collection gaps and stop cause.
-
-**Gate status:** OPEN.
-
-### `agent.py`
-
-**Purpose:** bounded collector orchestration.  
-**Required behaviors:** collector eligibility, item limits, error isolation, packaging, storage handoff.
-
-**Concern:** orchestration must not silently evolve into source analysis or production scheduler logic.
-
-**Gate status:** REVIEW AGAINST TESTABLE REQUIREMENTS.
-
-### `collectors/`
-
-**Purpose:** source acquisition boundary.
-
-`FixtureCollector` is justified by DEV strategy. `TelegramCollector` is a contract experiment. No production source transport is required for Stage 3 acceptance.
-
-**Gate status:** KEEP DEV fixture; DEFER production transport decision.
-
-### `storage.py`
-
-**Purpose:** inspectable DEV persistence and exact deduplication.
-
-**Questions:**
-
-- why must task/package records also be stored here, if they are?
-- which data is canonical versus derived?
-- what is the expected behavior after process restart?
-
-**Gate status:** OPEN.
-
-### `analysis.py` / `socrates.py`
-
-These exist to prove handoffs, not to establish final expert algorithms.
-
-**Architecture risk:** repository scope creep from "OSINT worker" into the whole Knowledge Factory.
-
-**Decision candidate:** retain as DEV harness, clearly mark as non-production and outside core OSINT ownership.
-
-### `pipeline.py` / `review_pipeline.py`
-
-**Problem:** overlapping orchestration paths are already visible.
-
-Before any extension:
-
-```text
-KEEP one / MERGE / DELETE one / justify two separate use cases
+```mermaid
+flowchart LR
+    BA[Business / Project Need] --> AN[Analyst]
+    AN -->|ResearchTask| OS[OSINT Agent]
+    OS -->|bounded request| CO[Collector]
+    CO -->|Material observations| OS
+    OS --> ST[(DEV Material Store)]
+    OS -->|MaterialPackage| AN2[Analyst]
+    AN2 -->|Analysis| SO[Socrates]
+    SO -->|research gap| AN
+    SO -->|PASS| NEXT[Later Knowledge Gate]
 ```
 
-No decision is allowed based merely on which file was written first.
+Business reason for every hop:
 
-### `transports/` and `telegram_bridge/`
-
-Experimental. Architecture review does not approve Teleproto, Node.js, MTProto session management or production Telegram integration.
-
-**Gate status:** DEFER / FROZEN.
-
-### legacy `core/`, `services/`, old scripts
-
-Must remain outside FATHER OSINT v1 unless a requirement and acceptance test explicitly pull them in.
-
-**Gate status:** LEGACY / NOT IN CURRENT ARCHITECTURE.
-
-## 3. Flow review
-
-Each flow must be explainable as `source → object → destination → reason`.
-
-| Flow | Object | Why it exists | Review |
+| From | Object | To | WHY |
 |---|---|---|---|
-| Analyst → OSINT | ResearchTask | bounded explicit research order | KEEP, verify fields |
-| OSINT → Collector | ResearchTask / source scope | execute source-specific acquisition | KEEP |
-| Collector → OSINT | Material / error | normalize acquisition result | KEEP |
-| OSINT → Store | Material | preserve inspectable research material | KEEP, verify ownership |
-| OSINT → Analyst | MaterialPackage | complete delivery incl. errors/gaps | KEEP |
-| Analyst → OSINT | follow-up ResearchTask | fill material gaps | KEEP, bounded |
-| Analyst → Socrates | Analysis | independent review | DEV harness / wider factory boundary |
-| Socrates → OSINT | targeted follow-up via ResearchTask | collect missing evidence | KEEP conceptually, ownership review |
+| Analyst | ResearchTask | OSINT | convert an analytical information gap into a bounded acquisition order |
+| OSINT | ResearchTask/source scope | Collector | isolate source-specific acquisition mechanics |
+| Collector | Material observation | OSINT | return evidence material without interpretation |
+| OSINT | Material/raw payload | Store | preserve inspectable DEV evidence and provenance |
+| OSINT | MaterialPackage | Analyst | deliver materials, errors and stop reason through one source-neutral contract |
+| Analyst | Analysis | Socrates | independent challenge before later knowledge publication |
+| Socrates/Analyst | follow-up ResearchTask | OSINT | close a material gap without letting collection become unbounded |
 
-## 4. Architecture anti-pattern checks
+## 3. File-by-file architecture decisions
 
-The review must reject the architecture if it finds:
+### `father_osint/models.py` — **KEEP WITH CONTRACT CHANGE LATER**
 
-- a component with no requirement owner;
-- a database/framework chosen before workload/contract evidence;
-- two modules doing the same job without explicit use cases;
-- hidden context required to understand an interface;
-- production credentials/infrastructure needed to run DEV acceptance;
-- analysis/truth logic embedded in source collectors;
-- silent collector failures;
-- infinite or unbounded agent loops;
-- undocumented legacy dependencies;
-- "future flexibility" used as the only reason for extra abstraction.
+**Owner:** cross-stage contracts.  
+**Inputs/outputs:** data objects only.  
+**WHY:** `ResearchTask`, `Material`, `MaterialPackage` are required by the approved information flows.
 
-## 5. Risk register for this gate
+Decision:
+- KEEP the three-contract concept;
+- no source intelligence or truth score may enter these models;
+- Stage 04 tests must validate required/optional fields;
+- terminology must treat `Material` as a source observation, not as unique truth.
 
-| ID | Risk | Severity | Required action before PASS |
-|---|---|---|---|
-| AR-01 | contracts may reflect code rather than approved need | HIGH | field-by-field contract review |
-| AR-02 | duplicate pipeline implementations | MEDIUM | choose/justify/merge after behavior comparison |
-| AR-03 | Analyst/Socrates scope may blur repository ownership | MEDIUM | document package boundary |
-| AR-04 | experimental Telegram code may be mistaken for approved | HIGH | keep frozen/deferred labels |
-| AR-05 | traceability incomplete | HIGH | map each KEEP component to requirement + planned test |
-| AR-06 | legacy components may be accidentally reused | MEDIUM | explicit inclusion rule |
-| AR-07 | DEV storage semantics not fully specified | MEDIUM | define persistence/dedup/restart expectations |
+### `father_osint/agent.py` — **KEEP**
 
-## 6. Required decisions before Stage 3 PASS
+**Owner:** OSINT orchestration boundary.  
+**Input:** `ResearchTask`.  
+**Output:** `MaterialPackage`.  
+**WHY:** one place is needed to select compatible collectors, enforce item bounds, isolate failures and package results.
 
-- [ ] approve or change the business boundary;
-- [ ] approve the actor/responsibility matrix;
-- [ ] review `ResearchTask` field by field;
-- [ ] review `Material` field by field;
-- [ ] review `MaterialPackage` field by field;
-- [ ] decide fate of `pipeline.py` vs `review_pipeline.py`;
-- [ ] decide whether Analyst/Socrates code remains here as DEV harness;
-- [ ] define exact DEV storage responsibility;
-- [ ] update Traceability Matrix with all components marked KEEP/CHANGE/DELETE/DEFER;
-- [ ] ensure every KEEP item has a Stage 4 acceptance test to be written.
+Supported by code review: the current implementation selects eligible collectors, enforces `max_items`, catches collector exceptions and records explicit stop reasons. It does not perform analytical interpretation.
 
-## 7. Stage 3 exit criterion
+Restrictions:
+- do not add Analyst/Socrates logic;
+- do not turn it into the future scheduler;
+- do not embed transport credentials or source-specific parsing.
 
-Architecture review passes only when:
+### `father_osint/collectors/dev.py` — **KEEP (DEV ONLY)**
+
+**Owner:** deterministic acquisition fixture.  
+**WHY:** proves the collector contract without production credentials or network dependencies.
+
+Stage 04 must test filtering, missing fixture behavior and mapping to `Material`.
+
+### `father_osint/collectors/telegram.py` — **KEEP AS CONTRACT / DEFER LIVE USE**
+
+**Owner:** Telegram source-facing normalization boundary.  
+**WHY:** keeping source normalization separate from protocol transport protects the OSINT/Analyst contract from TDLib/Teleproto/etc. changes.
+
+No transport is approved by keeping this file.
+
+### `father_osint/storage.py` — **CHANGE REQUIRED BEFORE APPROVAL**
+
+**Owner:** DEV evidence persistence.
+
+Architecture defect discovered during review: current global content-hash dedup causes `save_material()` to reject a second material with identical payload. That can erase provenance when two different source locators publish the same content.
+
+Required semantic split:
 
 ```text
-Approved business need
-        ↓
-Approved information flows
-        ↓
-Approved component responsibilities
-        ↓
-Approved contracts
-        ↓
-Known risks + deferred decisions
-        ↓
-Traceable test obligations
+SOURCE OBSERVATION A ─┐
+                     ├──► RAW PAYLOAD HASH X (store once)
+SOURCE OBSERVATION B ─┘
 ```
 
-At that point Stage 4 may design tests. Until then, no new feature code should be added.
+The raw payload may be deduplicated physically; source observations must remain independently traceable.
+
+This finding has already been fed back into ТЗ/AC-02. No code fix is allowed until Stage 04 specifies the failing and expected cases.
+
+### `father_osint/analysis.py` — **KEEP AS DEV HARNESS / NOT OSINT CORE**
+
+**Owner:** temporary Analyst-side contract demonstrator.  
+**WHY:** useful for proving the `MaterialPackage → Analysis → follow-up task` handoff.
+
+Restrictions:
+- not a final Analyst implementation;
+- no claim that deterministic string processing represents expert analysis;
+- may later move to a separate Knowledge Factory package.
+
+### `father_osint/socrates.py` — **KEEP AS DEV HARNESS / CHANGE EXPECTATIONS**
+
+**Owner:** temporary review-side demonstrator.
+
+Current implementation mainly checks source availability/gaps. It does **not** actually establish that findings are supported by specific materials. Therefore it is suitable only for pipeline testing, not for expert Socrates quality acceptance.
+
+Stage 04 tests should verify its bounded DEV behavior, not epistemic correctness.
+
+### `father_osint/pipeline.py` — **DELETE CANDIDATE / FREEZE**
+
+It orchestrates `OSINT → Analyst`, while `review_pipeline.py` already contains the superset `OSINT → Analyst → Socrates` flow. No independent business use case currently justifies two orchestration implementations.
+
+Do not delete yet. Stage 04 regression tests must first show that `review_pipeline.py` covers the required bounded-loop behavior.
+
+### `father_osint/review_pipeline.py` — **KEEP PROVISIONALLY**
+
+**Owner:** DEV end-to-end orchestration harness.  
+**WHY:** directly maps to the approved DEV process and includes the maximum-cycle guard.
+
+Not a production workflow engine.
+
+### `father_osint/transports/teleproto.py` — **DEFER / FROZEN**
+
+Production transport selection is outside the current gate. The file is an experiment only. It creates Node/subprocess/environment dependencies that are unnecessary for DEV acceptance.
+
+### `telegram_bridge/` — **DEFER / FROZEN**
+
+Same reason as `TeleprotoTransport`. It must not become an implicit prerequisite for Stage 04.
+
+### `core/`, `services/`, root legacy scripts — **DEFER / LEGACY**
+
+No approved requirement currently pulls them into FATHER OSINT v1. Existing code is not architectural evidence.
+
+## 4. Major architecture finding: provenance vs deduplication
+
+The first detailed review found a real contract defect before test execution: deduplicating identical content and discarding the later `Material` record loses the fact that multiple sources carried the same payload.
+
+This is exactly why Stage 03 exists.
+
+Correct conceptual model for v1:
+
+```mermaid
+flowchart LR
+    S1[Source locator A] --> O1[Material observation A]
+    S2[Source locator B] --> O2[Material observation B]
+    O1 --> H[Payload hash X]
+    O2 --> H
+    H --> R[(one raw payload object)]
+```
+
+We are **not** adding a graph database or complex provenance engine. The requirement is only that separate observations survive while raw storage may be reused.
+
+## 5. Pipeline decision
+
+Preferred DEV path:
+
+```text
+ResearchTask
+  → OSINTAgent
+  → MaterialPackage
+  → SimpleAnalyst
+  → SimpleSocrates
+  → PASS or bounded follow-up ResearchTask
+```
+
+`review_pipeline.py` represents this complete path. `pipeline.py` is therefore frozen as a likely redundant predecessor until Stage 04 tests prove safe removal.
+
+## 6. Risks remaining before Stage 03 PASS
+
+| ID | Risk | Severity | Required action |
+|---|---|---|---|
+| AR-01 | storage loses multi-source provenance | HIGH | design Stage 04 test and then change implementation |
+| AR-02 | duplicate pipeline implementations | MEDIUM | prove review pipeline coverage; then remove/retire simple pipeline |
+| AR-03 | Analyst/Socrates stubs mistaken for final expert agents | MEDIUM | preserve DEV-HARNESS labels in docs/tests |
+| AR-04 | experimental Telegram transport mistaken for approved | HIGH | remain DEFERRED/FROZEN |
+| AR-05 | tests have not been executed | HIGH | Stage 04 test review followed by runs |
+| AR-06 | storage restart/corrupt-line behavior not specified | LOW/MEDIUM | define only the behavior needed by DEV acceptance |
+
+## 7. Stage 03 gate status
+
+Completed:
+- [x] business boundary reviewed;
+- [x] actor/responsibility flow reviewed;
+- [x] core files classified KEEP/CHANGE/DELETE-CANDIDATE/DEFER;
+- [x] experimental and legacy boundaries identified;
+- [x] one requirement defect found and sent back to ТЗ;
+- [x] preferred DEV pipeline selected provisionally.
+
+Still required:
+- [ ] update Stage 04 test obligations for corrected AC-02;
+- [ ] review existing tests against the corrected requirements before executing them;
+- [ ] prove `review_pipeline.py` covers required loop behavior;
+- [ ] after test evidence, resolve `pipeline.py` final deletion/retirement;
+- [ ] implement storage provenance correction only after its test is approved.
+
+**Stage 03 verdict:** `CONDITIONAL PASS TO TEST DESIGN`.
+
+This authorizes Stage 04 **test design/review only**. It does not authorize new feature development or production integration.

@@ -1,6 +1,0 @@
-# Historical dependencies for legacy Ollama/GPU/Windows prototype scripts.
-# These are NOT dependencies of the current FATHER OSINT DEV core.
-ollama>=0.1.0
-colorama>=0.4.6
-psutil>=5.9.0
-gputil>=1.4.0

@@ -36,7 +36,7 @@ def main() -> None:
 
     print(f"task_id={package.task_id}")
     print(f"materials={len(package.materials)}")
-    print(f"duplicates_skipped={package.duplicates_skipped}")
+    print(f"payloads_reused={package.payloads_reused}")
     print(f"errors={len(package.collection_errors)}")
     print(f"stop_reason={package.stop_reason}")
     print()

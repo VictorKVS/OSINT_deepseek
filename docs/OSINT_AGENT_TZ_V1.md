@@ -1,11 +1,11 @@
 # Техническое задание: FATHER OSINT Agent v1
 
-**Status:** DRAFT FOR REQUIREMENTS REVIEW  
-**Implementation status:** existing code is PROTOTYPE / UNVERIFIED until reconciled with this document.
+**Status:** REQUIREMENTS REVIEWED / ARCHITECTURE FEEDBACK APPLIED  
+**Implementation status:** existing code remains PROTOTYPE / UNVERIFIED until Stage 03 and Stage 04 are completed.
 
 ## 1. Purpose
 
-OSINT Agent is a research supplier inside FATHER Knowledge Factory. It receives a research task from Analyst, obtains relevant materials from permitted sources, preserves provenance, removes obvious duplicates and returns a structured `MaterialPackage`.
+OSINT Agent is a research supplier inside FATHER Knowledge Factory. It receives a research task from Analyst, obtains relevant materials from permitted sources, preserves provenance, reduces redundant payload storage and returns a structured `MaterialPackage`.
 
 The OSINT Agent does not decide truth, does not select architecture, does not publish into KB and does not replace Analyst or Socrates.
 
@@ -36,13 +36,13 @@ Minimum `ResearchTask` contract:
 
 Minimum `MaterialPackage`:
 - task identifier;
-- collected materials;
-- duplicates skipped;
+- collected material observations;
+- payload duplicates detected/reused;
 - collection errors;
 - stop reason;
 - notes when required.
 
-Minimum material record:
+Minimum material observation record:
 - source type;
 - source locator;
 - title or fallback identifier;
@@ -50,8 +50,12 @@ Minimum material record:
 - publication time when known;
 - author/publisher when known;
 - collection time;
-- content hash;
+- content hash when payload exists;
 - source-specific metadata.
+
+### Provenance rule
+
+Two different source observations may contain byte-identical or text-identical content. The system may store the payload once by hash, but **must not erase the fact that the same content was observed at different source locators**. Payload deduplication and source-observation deduplication are different concerns.
 
 ## 5. Required behavior
 
@@ -59,7 +63,7 @@ Minimum material record:
 2. Select only collectors compatible with requested source types.
 3. Collect permitted material without analytical conclusions.
 4. Preserve source locator and original material/reference.
-5. Deduplicate obvious identical content.
+5. Reuse storage for obvious identical payloads without destroying independent source provenance records.
 6. Isolate collector failure so one source does not necessarily destroy the whole package.
 7. Stop at a declared limit or after collectors are exhausted.
 8. Return explicit errors/gaps instead of silently inventing material.
@@ -70,7 +74,7 @@ DEV v1 uses simple deterministic collectors and prepared fixtures/public inputs.
 
 Allowed now:
 - JSON/text fixtures;
-- local append-only storage;
+- local inspectable storage;
 - deterministic Analyst/Socrates stubs;
 - bounded 1-3 cycle research loops;
 - experimental transport code kept isolated and unapproved.
@@ -92,12 +96,13 @@ Deferred to PROD gate:
 - code boundary between collector and transport;
 - failures visible in result;
 - local storage suitable for inspection;
-- no unbounded agent loops.
+- no unbounded agent loops;
+- source provenance must survive payload deduplication.
 
 ## 8. Acceptance criteria
 
 AC-01: valid ResearchTask with matching fixture collectors returns a non-empty MaterialPackage.  
-AC-02: identical raw content is not stored twice as independent material.  
+AC-02: identical payloads may reuse one stored raw object, but distinct source observations remain separately traceable.  
 AC-03: absence of eligible collector returns explicit error/stop reason.  
 AC-04: max_items bounds collection.  
 AC-05: collector exception is recorded without corrupting already collected material.  

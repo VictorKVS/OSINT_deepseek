@@ -70,7 +70,7 @@ class Material:
 class MaterialPackage:
     task_id: str
     materials: list[Material] = field(default_factory=list)
-    duplicates_skipped: int = 0
+    payloads_reused: int = 0
     collection_errors: list[str] = field(default_factory=list)
     notes: str = ""
     stop_reason: str = "completed"

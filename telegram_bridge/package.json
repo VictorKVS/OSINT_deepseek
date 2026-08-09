@@ -1,8 +1,0 @@
-{
-  "name": "father-telegram-bridge",
-  "private": true,
-  "type": "module",
-  "dependencies": {
-    "teleproto": "^1.228.4"
-  }
-}

@@ -3,13 +3,14 @@
 **Purpose:** living engineering journal for the project.  
 **Started:** 2026-08-09  
 **Current stage:** **Stage 06 — Verification and Repository Rationalization**  
-**Rule:** update this journal whenever a gate is passed, a material architectural decision changes, a defect changes the contract, a component is added/removed, or the next plan changes.
+**Current milestone:** **M2 — Dependency and legacy cleanup gate**  
+**Rule:** update this journal whenever a gate changes, a material defect changes the contract, an architectural decision changes, a component is added/removed, or the roadmap changes.
 
 ---
 
-## 1. Why this journal exists
+# 1. Engineering principle
 
-The project is deliberately being developed under the FATHER engineering principle:
+FATHER development follows this chain:
 
 ```text
 REQUIREMENT / ТЗ
@@ -35,15 +36,15 @@ VERIFICATION
 EXPERIENCE / KB
 ```
 
-The journal prevents the project from becoming a pile of code whose purpose is remembered only by its author. It records **what changed, why it changed, what evidence exists, what is still unverified, and what comes next**.
+> **NO CODE BEFORE CONTRACT.**
 
-This is not a marketing changelog. Failed hypotheses, deferred experiments and deleted code are part of the engineering history and remain visible.
+A component is not justified because it is interesting or already exists. It must have an approved purpose, owner, input/output contract, test and WHY.
+
+The journal records failed hypotheses and deferred experiments as well as successful changes.
 
 ---
 
-# 2. Executive status
-
-## Current product boundary
+# 2. Current product boundary
 
 ```text
 Analyst
@@ -51,9 +52,8 @@ Analyst
   ▼
 OSINTAgent
   │
-  ├─ Collectors
-  │    ├─ DEV FixtureCollector
-  │    └─ TelegramCollector contract
+  ├─ FixtureCollector          [DEV]
+  └─ TelegramCollector         [transport-neutral boundary]
   │
   ▼
 Material / provenance
@@ -62,200 +62,134 @@ MaterialStore
   ▼
 MaterialPackage
   ▼
-SimpleAnalyst       [DEV simulator]
+SimpleAnalyst                  [DEV simulator]
   ▼
-SimpleSocrates      [DEV simulator]
+SimpleSocrates                 [DEV simulator]
   │
   ├─ RESEARCH_MORE → ResearchTask → OSINT
   └─ PASS → DEV phase output
 
-Future, NOT YET IMPLEMENTED:
+NOT YET IMPLEMENTED:
 Knowledge Gate → KB → FATHER → Expert Agents
 ```
 
-## Current repository disposition
+Responsibilities remain deliberately narrow:
+
+```text
+OSINT      = collect and preserve requested material
+Analyst    = interpret material
+Socrates   = review/challenge and request more evidence
+KB stage   = future controlled publication
+FATHER     = future consumer/distributor of approved knowledge
+```
+
+---
+
+# 3. Repository disposition
 
 | Area | Status | Meaning |
 |---|---|---|
 | `father_osint/` | **CURRENT DEV PRODUCT** | canonical current development package |
 | `tests/` | **CURRENT VERIFICATION ASSETS** | executable contract evidence |
-| `scripts/run_dev_osint.py` | **KEEP** | direct DEV OSINT runner |
+| `scripts/run_dev_osint.py` | **KEEP** | direct fixture OSINT runner |
 | `scripts/run_dev_pipeline.py` | **KEEP / CANONICAL DEV RUNNER** | bounded OSINT→Analyst→Socrates runner |
-| `config/` | **DRAFT PROFILE/POLICY INPUTS** | not automatic runtime truth |
+| `.github/workflows/dev-verification.yml` | **KEEP / ACTIVE CI** | clean-checkout DEV baseline verification |
+| `config/` | **DRAFT PROFILE/POLICY INPUTS** | design inputs, not automatic runtime truth |
 | `data/dev/` | **TEST FIXTURES ONLY** | deterministic test data, not verified intelligence |
 | `core/` | **LEGACY** | old observability/runtime prototype |
-| old root/runtime scripts | **LEGACY** | old Ollama/GPU/Windows prototype cluster |
-| `services/llm-gateway/` | **FROZEN EXPERIMENTAL SUBPROJECT** | actually a cognitive policy prototype, not approved LLM gateway |
-| `father_osint/transports/teleproto.py` | **EXPERIMENTAL / NOT APPROVED** | one transport hypothesis only |
-| live Telegram / Node bridge | **DEFERRED** | excluded from current DEV acceptance |
+| old root/Ollama/GPU/PowerShell scripts | **LEGACY** | historical local runtime cluster |
+| `services/llm-gateway/` | **FROZEN EXPERIMENTAL SUBPROJECT** | cognitive-policy prototype, not approved LLM gateway |
+| `father_osint/transports/teleproto.py` | **EXPERIMENTAL / NOT APPROVED** | transport hypothesis only |
+| live Telegram / Node bridge | **DEFERRED** | excluded from DEV acceptance |
 
 ---
 
-# 3. Development history
+# 4. Development history and WHY
 
-## Phase A — Initial OSINT/FATHER concept
+## A — Practical FATHER split
 
-### Goal
-Turn the earlier OSINT prototype into a worker inside a larger FATHER Knowledge Factory.
+**Problem:** early design discussion was drifting toward a universal expert/superintelligence system before a basic workflow existed.
 
-### Key separation adopted
+**Decision:** cut back to the minimum useful production chain: OSINT → Analyst → Socrates.
+
+**WHY:** each role becomes understandable, replaceable and testable. Deep identity/causality/knowledge machinery is added only when a concrete requirement demands it.
+
+**Result:** PASS.
+
+---
+
+## B — Simplified DEV mode
+
+**Decision:** prove workflow using fixtures and simple/public sources before battle-grade integrations.
+
+Deferred from current acceptance:
+- Telegram credentials;
+- Tor/dark-web gateway;
+- proxy rotation;
+- distributed queues/databases;
+- production scheduler;
+- monitoring infrastructure;
+- live LLM gateway.
+
+**WHY:** infrastructure must not obscure whether the basic contracts work.
+
+**Result:** PASS.
+
+---
+
+## C — Governance correction: NO CODE BEFORE CONTRACT
+
+**Trigger:** files were being added faster than the technical specification and architecture were being validated.
+
+**Decision:** stop feature expansion and introduce formal gates.
+
+Added:
+- project governance;
+- OSINT ТЗ;
+- business/process analysis;
+- architecture views;
+- formal architecture review;
+- test design pack;
+- implementation-review pack;
+- traceability matrix;
+- repository audits;
+- directory READMEs.
+
+**WHY:** avoid years of debugging a pile of mutually inconsistent files.
+
+**Result:** PASS / permanent project rule.
+
+---
+
+## D — Architecture review found provenance defect
+
+**Old behavior:** two sources containing identical text could collapse into one Material because content hash was treated as observation identity.
 
 ```text
-OSINT      = finds and preserves requested materials
-Analyst    = interprets collected materials
-Socrates   = challenges/weighs the analysis and requests more evidence
-KB stage   = future controlled publication of reviewed knowledge
-FATHER     = consumes/distributes knowledge; it is not the source collector itself
+Source A ─ same bytes X ─┐
+                         ├─ WRONG → one observation
+Source B ─ same bytes X ─┘
 ```
 
-### Why
-Earlier discussion was drifting toward a universal expert/superintelligence model. That created unnecessary identity graphs, causality theory and highly detailed epistemic machinery before the basic workflow existed. The architecture was deliberately cut back using an Occam-style minimum necessary for the actual task.
-
-**Decision:** build a practical factory chain first; deepen any stage only when a concrete requirement justifies it.
-
----
-
-## Phase B — First DEV implementation
-
-### Added
-- `father_osint/models.py`
-- `father_osint/agent.py`
-- `father_osint/storage.py`
-- DEV collectors/fixtures
-- Telegram collector boundary
-- deterministic `SimpleAnalyst`
-- deterministic `SimpleSocrates`
-- bounded review pipeline
-- DEV runner scripts
-- tests
-
-### Intended purpose
-Prove handoffs and contracts without production infrastructure.
-
-### DEV principle
-No live Telegram credentials, Tor, proxy rotation, distributed databases, production scheduler or battle monitoring are required merely to prove the workflow.
-
----
-
-## Phase C — Project governance correction: NO CODE BEFORE CONTRACT
-
-### Problem discovered
-Implementation was growing faster than the project specification. This would eventually create large debugging and refactoring debt.
-
-### Decision
-Feature development was paused and the project was reorganized around formal gates.
-
-### Added project-control artifacts
-- `docs/PROJECT_GOVERNANCE.md`
-- `docs/OSINT_AGENT_TZ_V1.md`
-- architecture review pack
-- business/process analysis
-- acceptance-test pack
-- implementation plan pack
-- traceability matrix
-- repository audit documentation
-- README files for major directories
-
-### Engineering rule adopted
-
-> **NO CODE BEFORE CONTRACT.**
-
-A new component must answer:
-1. Which requirement needs it?
-2. Which architecture boundary owns it?
-3. What enters it?
-4. What leaves it?
-5. Why is the simpler existing mechanism insufficient?
-6. Which acceptance test proves it?
-
----
-
-## Phase D — Stage 03: Architecture and business-process review
-
-### What was reviewed
-The system was analyzed as a business/information process rather than only as Python classes:
-- actors;
-- inputs and outputs;
-- SIPOC/value-chain reasoning;
-- system context;
-- sequence/data flows;
-- failure paths;
-- DEV/PROD boundary;
-- responsibilities and WHY for each stage.
-
-### Core architecture retained
-
-```text
-ResearchTask
-   ↓
-OSINTAgent
-   ↓
-Collectors
-   ↓
-Material
-   ↓
-MaterialStore
-   ↓
-MaterialPackage
-   ↓
-Analyst
-   ↓
-Socrates
-```
-
-### Major architecture defect discovered
-The original storage behavior treated identical content hashes as if they represented the same source observation.
-
-Example:
-
-```text
-Source A ── same text X ─┐
-                         ├─ old behavior → one Material
-Source B ── same text X ─┘
-```
-
-That destroyed provenance.
-
-### Contract correction
-A **source observation** and a **raw payload** are different things.
-
-Correct model:
+**Correct contract:** source observation and raw payload are different objects.
 
 ```text
 Source A observation ─┐
-                      ├─ content_hash X → raw/X.txt
+                      ├─ hash X → raw/X.txt
 Source B observation ─┘
 ```
 
-Equal bytes may share one raw blob, but separate observations must remain separate records.
+**WHY:** repeated publication by independent sources is itself evidence/provenance and must not disappear.
 
-### Why this mattered
-This became the first practical demonstration of the FATHER process: architecture review changed the requirement before implementation was patched.
+**Process followed:** requirement correction → test correction → failing test → implementation plan → minimal fix.
+
+**Result:** PASS.
 
 ---
 
-## Phase E — Stage 04: Test design before fix
+## E — Test-before-fix storage correction
 
-### Work completed
-Existing tests were reviewed against acceptance criteria before production code was changed.
-
-### Important finding
-An old test encoded the same incorrect assumption as the old storage implementation: identical text from two sources was expected to collapse to one Material.
-
-### Decision
-The test contract was corrected first.
-
-### Added/clarified acceptance behavior
-- preservation of provenance across identical payloads;
-- restart semantics;
-- collector isolation;
-- `max_items` behavior;
-- missing collector behavior;
-- deterministic fixtures;
-- bounded OSINT→Analyst→Socrates loop;
-- transport-neutral Telegram collector boundary.
-
-### First focused run
+Initial focused run after correcting the test contract:
 
 ```text
 7 tests
@@ -263,193 +197,131 @@ The test contract was corrected first.
 2 failed
 ```
 
-Both failures reproduced the storage/provenance defect expected from the reviewed architecture.
+Both failures reproduced the expected storage/provenance defect.
 
----
-
-## Phase F — Stage 05: Minimal implementation correction
-
-### Alternatives considered
-The storage fix was treated as an implementation decision, not an improvised patch.
-
-### Selected minimal solution
+Minimal implementation changed `father_osint/storage.py` only:
 - preserve every Material/source observation;
-- content-address raw text by SHA-256;
-- reuse an existing raw blob when bytes are equal;
-- do not introduce a database or semantic-dedup engine yet.
+- SHA-256-address raw text;
+- reuse equal raw blobs;
+- no database or semantic deduplication yet.
 
-### Production file changed
-`father_osint/storage.py` only.
-
-### Focused regression
+Regression:
 
 ```text
-7 tests
-7 passed
-0 failed
+7/7 PASS
 ```
 
-### Later reconstructed DEV slice verification
+Later reconstructed current DEV slice:
 
 ```text
-15 tests collected
-15 passed
-0 failed
+15/15 PASS
 ```
 
-**Important limitation:** this was not yet a complete local checkout verification of every historical repository asset. It proved the current DEV slice, not the entire legacy repository environment.
+**Result:** PASS.
 
 ---
 
-## Phase G — Pipeline rationalization
+## F — Pipeline rationalization
 
-### Problem
-Two overlapping orchestration paths existed:
-- older `pipeline.py` — OSINT↔Analyst loop;
-- `review_pipeline.py` — OSINT→Analyst→Socrates loop.
+**Problem:** two overlapping orchestration paths existed.
 
-### Process followed
-1. architecture comparison;
-2. test comparison;
-3. migrate `run_dev_pipeline.py`;
-4. migrate pipeline tests;
-5. search for remaining canonical references;
-6. only then delete the redundant pipeline.
+- old `pipeline.py` — OSINT↔Analyst;
+- `review_pipeline.py` — OSINT→Analyst→Socrates.
 
-### Result
-`father_osint/pipeline.py` was removed.
+**Process:** compare architecture → migrate runner → migrate tests → search dependencies → delete only after proof.
 
-`father_osint/review_pipeline.py` is now the canonical bounded DEV orchestration path.
+**Decision:** `review_pipeline.py` is canonical; old `pipeline.py` removed.
 
-### Why
-This was the first cleanup performed through evidence rather than aesthetic preference.
+**WHY:** one bounded orchestration path is easier to verify and maintain.
+
+**Result:** PASS.
 
 ---
 
-## Phase H — Legacy core audit
+## G — Legacy core/runtime audit
 
-### `core/agent_tracker.py`
-Useful ideas found:
-- trace ID;
-- agent/tool activity;
-- failures;
-- duration;
-- result statistics.
+Reviewed old:
+- `core/agent_tracker.py`;
+- `core/logger.py`;
+- `run.py`;
+- Windows/PowerShell crash and stress tools;
+- Ollama/RTX/local smart-agent scripts.
 
-### Decision
-Legacy implementation is not part of current FATHER OSINT. The concept is retained for a future explicit observability contract.
-
-Do **not** preserve or attempt to expose hidden model reasoning. Future traces should record explicit inputs, actions, tool events, outputs, errors, timing and formal WHY fields only.
-
-### `core/logger.py`
-Found to mix system CPU/RAM/GPU monitoring with logging.
-
-### Decision
-Legacy implementation is deferred/cleanup candidate. Future logs/metrics must be designed separately from OSINT domain behavior.
-
----
-
-## Phase I — Legacy runtime audit
-
-Reviewed:
-- `run.py`
-- `start.ps1`
-- `crash_analyzer.ps1`
-- `system_stress_test.ps1`
-- old `scripts/smart_agent.py`
-- `monitor.py`
-- `rtx3060_agent.py`
-- `deepseek_safe.py`
-- `hello_agent.py`
-
-### Finding
-These form an older local Ollama/RTX3060/Windows runtime experiment. They are not the present OSINT product architecture.
-
-### Useful experience retained
+Useful concepts retained for future requirements:
+- explicit agent execution traces;
 - health checks;
 - runtime supervision;
 - crash evidence;
 - resource protection;
-- observability.
+- metrics/logging.
 
-### Decision
-Preserve as legacy until final cleanup gate; do not allow them to drive current dependencies or architecture.
+**Decision:** implementation remains legacy; concepts may later be redesigned behind explicit observability/runtime contracts.
+
+Hidden model reasoning is not an observability requirement. Future traces record explicit inputs/actions/tool events/outputs/errors/timing/formal WHY only.
+
+**Result:** AUDITED / cleanup pending M2.
 
 ---
 
-## Phase J — `services/llm-gateway/` audit
+## H — Experimental `services/llm-gateway` audit
 
-### Finding
-Despite the name, the subsystem is not currently an LLM provider gateway. It is a cognitive policy prototype:
+**Finding:** despite the name, this is currently a cognitive-policy prototype:
 
 ```text
 FastAPI
-  ↓
+   ↓
 Sphinx intent/risk heuristics
-  ↓
+   ↓
 Enigma YAML rules
-  ↓
+   ↓
 Judge
-  ↓
+   ↓
 ALLOW / DENY / QUARANTINE / SIMULATE
 ```
 
-### Risks found
-- manually assigned, uncalibrated risk values;
-- regex-driven semantic claims;
-- duplicated policy logic (`Enigma` and another policy engine);
-- no real provider routing/cost/fallback/token-management gateway behavior.
+Problems:
+- uncalibrated hand-written risk numbers;
+- regex-based semantic judgments;
+- duplicated policy engines;
+- no true LLM provider routing/cost/fallback/token gateway behavior.
 
-### Useful pattern retained
+Useful future pattern:
 
 ```text
 interpretation
    ↓
-deterministic versioned policy
+versioned deterministic policy
    ↓
-decision + reason + matched rule + audit trail
+decision + matched rule + reason + audit trail
 ```
 
-### Decision
-**FROZEN EXPERIMENTAL SUBPROJECT / NO CURRENT INTEGRATION.**
+**Decision:** FROZEN EXPERIMENT / NO CURRENT INTEGRATION.
+
+**Result:** PASS as classification.
 
 ---
 
-## Phase K — Config and data audit
+## I — Config/data audit
 
-### `config/high_technology_watchlist.yaml`
-Found to combine several concepts:
-- mission profile;
-- topic priorities;
-- source classes;
-- signal classes;
-- future KB routing;
-- escalation policy;
-- output governance.
+`high_technology_watchlist.yaml` mixes mission, topics, source classes, routing, escalation and governance.
 
-### Decision
-Treat as a design/profile artifact, not one executable truth source.
+**Decision:** treat it as a draft design/profile artifact, not one executable truth source.
 
-The numeric values such as `1.0`, `0.95`, `0.75`, source priorities, etc. are **not calibrated confidence/trust scores**. They may represent provisional attention priorities only until a requirement and measurement method exist.
+Numbers such as `1.0`, `0.95`, `0.75` are **not confidence/trust values** until a calibration method and benchmark exist.
 
-### `data/dev/`
-Confirmed as deterministic fixture data.
+`data/dev/` is fixture data only.
 
-### Invariant
+> Fixture data proves program behavior, not truth about the external world.
 
-> Fixture data proves software behavior, not truth about the external world.
-
-DEV fixture content must never silently enter a future Knowledge Base as verified intelligence.
+**Result:** PASS as boundary definition.
 
 ---
 
-## Phase L — Current `father_osint/` component traceability review
+## J — Component traceability review
 
-A formal component map was created in:
+Created `docs/06_verification/09_COMPONENT_TRACEABILITY_MAP.md`.
 
-`docs/06_verification/09_COMPONENT_TRACEABILITY_MAP.md`
-
-### Current classification
+Current classification:
 
 | Component | Status |
 |---|---|
@@ -463,193 +335,295 @@ A formal component map was created in:
 | `review_pipeline.py` | DEV ORCHESTRATION |
 | `transports/teleproto.py` | EXPERIMENTAL / NOT APPROVED |
 
-### Current architectural conclusion
-The current core is sufficiently small. The largest near-term risk is **premature growth**, not lack of components.
+**Conclusion:** the current risk is premature growth, not missing components.
+
+**Result:** PASS.
 
 ---
 
-# 4. Important decisions and reasons
+## K — 2026-08-09: Clean-checkout Stage 06 verification
+
+**Trigger:** previous 15/15 run proved a reconstructed DEV slice but did not prove actual clean repository checkout behavior.
+
+**Stage:** Stage 06 / M1.
+
+### CI infrastructure discovery
+
+Earlier GitHub Actions runs failed before creating any job. The workflow was reduced to a minimal valid form. After correction, GitHub created and executed the job normally.
+
+**Classification:** `ENV/CI`.
+
+### First real clean-checkout execution
+
+A fresh GitHub-hosted Ubuntu runner successfully completed:
+
+```text
+checkout                 PASS
+Python 3.12              PASS
+import father_osint      PASS
+pytest collection        15 tests
+pytest                   15/15 PASS
+```
+
+Then the runner failed:
+
+```text
+python scripts/run_dev_osint.py
+ModuleNotFoundError: No module named 'father_osint'
+```
+
+**Classification:** `IMPL` — script entrypoint/import-path defect.
+
+### Test-first response
+
+Added `tests/test_runner_entrypoints.py` before correcting the scripts.
+
+It permanently requires both canonical entrypoints to execute successfully from repository root:
+- `scripts/run_dev_osint.py`;
+- `scripts/run_dev_pipeline.py`.
+
+### Minimal implementation correction
+
+Both runner scripts now explicitly establish repository root before importing `father_osint`.
+
+Static review also found an obsolete field reference in `run_dev_pipeline.py`:
+
+```text
+cycle.review.reasons   # stale / invalid
+```
+
+Current `SocratesReview` contract contains:
+
+```text
+issues
+questions
+```
+
+The runner was corrected to the current domain contract rather than polluting the model with a compatibility field.
+
+### Final clean-checkout result
+
+Verified commit:
+
+`aecbdbcf2dcb5bb9ea47d0edc6c0c670dc032b2c`
+
+Environment:
+- Ubuntu 24.04;
+- CPython 3.12.13;
+- pytest 9.1.1.
+
+Evidence:
+
+```text
+father_osint import       PASS
+17 tests collected
+17 passed
+0 failed
+0 errors
+run_dev_osint.py          PASS
+run_dev_pipeline.py       PASS
+```
+
+DEV OSINT runner:
+
+```text
+materials=2
+duplicates_skipped=0
+errors=0
+stop_reason=collectors_exhausted
+```
+
+Canonical review runner:
+
+```text
+pipeline_stop=review_passed
+cycles=1
+materials=2
+socrates=PASS
+```
+
+The clean baseline required only Python + pytest. It did not require Ollama/GPU monitoring/Teleproto/Telegram credentials/Tor/legacy PowerShell/experimental LLM service.
+
+Full evidence: `docs/06_verification/TEST_REPORT_004.md`.
+
+**Decision:** **M1 PASS on a clean Linux checkout.**
+
+**Not claimed:** production readiness, Windows-specific validation, live Telegram, Knowledge Gate or expert-quality Analyst/Socrates.
+
+---
+
+# 5. Decision register
 
 | ID | Decision | WHY | Revisit when |
 |---|---|---|---|
-| J-001 | OSINT collects; Analyst interprets; Socrates reviews | keeps responsibilities narrow and testable | concrete evidence requires boundary change |
-| J-002 | DEV before battle-grade integrations | proves contracts without secrets/infrastructure noise | DEV acceptance passes and PROD requirements exist |
-| J-003 | No code before contract | prevents architecture from being invented in implementation | never; this is project governance |
-| J-004 | Preserve source observations even for equal payloads | provenance is intelligence evidence | only if a stronger observation identity model is specified |
-| J-005 | Analyst/Socrates remain deterministic DEV simulators | current goal is workflow proof, not expert AI | expert requirements and evaluation datasets exist |
-| J-006 | `review_pipeline.py` is canonical; old `pipeline.py` deleted | one bounded orchestration path is simpler | only if a new orchestration requirement appears |
-| J-007 | Teleproto is not approved by existence | transport must pass donor/ADR/benchmark process | live Telegram stage |
-| J-008 | Legacy core/runtime is not current architecture | old prototype addressed different local runtime concerns | future observability/runtime-supervision requirements |
-| J-009 | `services/llm-gateway` frozen | current code is policy prototype, not justified gateway dependency | approved LLM routing/control-plane requirement |
-| J-010 | Config weights are not confidence/trust | values are uncalibrated | benchmark/calibration methodology exists |
-| J-011 | Fixtures never become KB evidence automatically | test data and intelligence evidence are different classes | never; provenance separation remains mandatory |
+| J-001 | OSINT collects; Analyst interprets; Socrates reviews | narrow/testable responsibilities | concrete requirement proves boundary must change |
+| J-002 | DEV before battle integrations | prove contracts without infrastructure noise | PROD requirements approved |
+| J-003 | NO CODE BEFORE CONTRACT | prevent implementation-defined architecture | permanent governance rule |
+| J-004 | Equal payload does not collapse observations | provenance must survive | stronger observation-identity contract approved |
+| J-005 | Analyst/Socrates are DEV simulators | workflow proof precedes expert AI | evaluation data + expert requirements exist |
+| J-006 | One canonical `review_pipeline.py` | reduce orchestration ambiguity | new orchestration requirement appears |
+| J-007 | Teleproto is not approved by existence | transport requires donor/ADR/benchmark | live Telegram stage |
+| J-008 | Legacy runtime is not current architecture | historical prototype solved different concerns | observability/runtime requirement appears |
+| J-009 | `services/llm-gateway` frozen | not currently a justified LLM gateway | routing/control-plane requirement approved |
+| J-010 | Config weights are not trust/confidence | values are uncalibrated | calibration methodology exists |
+| J-011 | Fixtures never become KB evidence automatically | test data ≠ intelligence evidence | permanent provenance invariant |
+| J-012 | Canonical runners must work from repo root | documented execution path must be reproducible | packaging model changes |
+| J-013 | CI clean checkout is Stage 06 baseline evidence | reproducible fresh filesystem run removes reconstruction ambiguity | CI architecture changes |
 
 ---
 
-# 5. Known open issues / uncertainties
+# 6. Open issues
 
-## V-01 — Full local repository verification still required
-Focused/current DEV-slice tests have passed, but a complete clean local checkout must still prove:
-- imports;
-- test collection;
-- full `pytest`;
-- canonical DEV runners;
-- absence of accidental legacy dependencies;
-- behavior after legacy cleanup.
+## V-01 — Windows-specific validation
+Clean Linux checkout now passes. Windows-specific developer-machine behavior remains unverified. It is not currently a blocker for the logical DEV baseline, but should be checked before declaring cross-platform DEV v1.
 
-## V-02 — GitHub Actions currently unreliable/unresolved
-Earlier CI attempts failed before useful Python job evidence was produced. Treat this as CI configuration/environment work, not as proof that the DEV code fails.
+## V-02 — Dependency model
+Root `requirements.txt` still reflects legacy Ollama/GPU concerns. Current FATHER OSINT DEV baseline proved it needs only Python + pytest for verification.
 
-## V-03 — Root dependency model is still polluted by legacy needs
-Ollama/GPU/monitoring dependencies historically present in root requirements are not automatically justified for the current pure-Python DEV core.
+## V-03 — Legacy cleanup
+Legacy components are classified, but archive/delete actions must now be performed group-by-group with regression after each group.
 
-## V-04 — Legacy deletion gate not complete
-Legacy files have been classified but should not be mass-deleted until a full checkout dependency scan and archival decision are completed.
+## V-04 — CI maintenance warning
+GitHub warns that third-party actions historically targeting Node 20 are being forced to Node 24. This is CI maintenance, not a FATHER application failure.
 
-## V-05 — Production source transports not selected
-Telegram live transport remains an experimental decision. TDLib/other candidates require their own current donor verification and benchmark before approval.
+## V-05 — Production transports
+No live Telegram transport is approved. Candidate selection requires current donor verification + ADR + benchmark.
 
-## V-06 — No Knowledge Gate yet
-This is intentional. KB publication logic must not be added until its requirements, object model, review semantics and acceptance tests are approved.
+## V-06 — Knowledge Gate
+Intentionally absent. Its requirements, object model, review semantics and tests must be designed before implementation.
 
 ---
 
-# 6. Forward plan
+# 7. Roadmap
 
-## Milestone M1 — Complete Stage 06 repository verification
+## M1 — Clean repository verification
 
-**Goal:** prove what the repository actually needs before further cleanup or features.
+**Status:** ✅ PASS on GitHub clean Linux checkout.
 
-Sequence:
+Evidence:
+- import passes;
+- 17 tests collect;
+- 17/17 pass;
+- both canonical DEV runners pass;
+- legacy/experimental dependencies are not required.
+
+Report: `docs/06_verification/TEST_REPORT_004.md`.
+
+---
+
+## M2 — Dependency and legacy cleanup gate
+
+**Status:** ▶ CURRENT.
+
+Sequence for each cleanup group:
 
 ```text
-clean local checkout
+classify purpose
     ↓
-record Python/environment snapshot
+search approved dependencies
     ↓
-python import check
+preserve useful requirement/experience
     ↓
-pytest --collect-only
+archive/delete implementation
     ↓
-full pytest
+clean-checkout CI regression
     ↓
-run_dev_osint.py
-    ↓
-run_dev_pipeline.py
-    ↓
-search imports/references to legacy cluster
-    ↓
-TEST_REPORT_004
+journal result
 ```
 
-**Exit criteria:** reproducible evidence showing which current components pass and which failures are code/test/environment/legacy issues.
+Planned groups:
+1. root dependency files;
+2. `core/` legacy package;
+3. old root/PowerShell runtime files;
+4. old Ollama/GPU scripts;
+5. frozen experimental services/transport placement review.
+
+**Exit criterion:** current DEV product can be installed/read/run without accidental legacy dependencies or misleading launch paths.
 
 ---
 
-## Milestone M2 — Dependency and legacy cleanup gate
+## M3 — Documentation consistency
 
-Only after M1:
+- all README files reflect actual post-cleanup structure;
+- no deleted files remain in traceability/docs;
+- dependency/install instructions show current DEV vs legacy separation;
+- architecture diagrams and journal match the repository.
 
-- separate current DEV requirements from legacy experimental dependencies;
-- decide archive vs delete for `core/`;
-- decide archive vs delete for old root/PowerShell/Ollama scripts;
-- preserve useful engineering lessons in docs before deleting implementations;
-- rerun full regression after each cleanup group.
-
-**Exit criteria:** canonical project path can be understood and run without accidental legacy dependencies.
+**Exit criterion:** a new engineer can understand the project without chat history.
 
 ---
 
-## Milestone M3 — Documentation consistency pass
+## M4 — DEV v1 baseline freeze
 
-- root README must reflect current stage, not historical Stage 03;
-- docs index must match actual completed cleanup/migrations;
-- every active directory README must identify owner, status, input/output and current gate;
-- traceability matrix must point to current files only.
-
-**Exit criteria:** a new engineer can determine the current product path without reading chat history.
-
----
-
-## Milestone M4 — Freeze DEV v1 baseline
-
-After Stage 06 passes:
-
-- tag/record a DEV v1 baseline;
+- perform final clean checkout regression;
+- optionally verify Windows developer execution;
+- freeze current DEV contracts;
+- record deferred items;
 - create final DEV acceptance report;
-- freeze canonical contracts (`ResearchTask`, `Material`, `MaterialPackage`);
-- record explicit deferred items.
+- tag/record baseline.
 
-**Exit criteria:** we know exactly what DEV v1 proves and what it does not prove.
+**Exit criterion:** exact statement of what DEV v1 proves and does not prove.
 
 ---
 
-## Milestone M5 — Choose next requirement, not next technology
+## M5 — Select next requirement, not next technology
 
-Possible next work must be selected by business need. Candidate directions include:
-- real Web/GitHub collector;
-- live Telegram transport;
+Possible future directions:
+- Web/GitHub live collector;
+- Telegram live transport;
 - Analyst v1;
 - Socrates v1;
 - Knowledge Gate/KB contract;
 - observability;
 - production scheduling/security.
 
-Before choosing, write the requirement and business reason. Do not activate a technology simply because code already exists.
+Selection requires a business need and ТЗ before implementation.
 
 ---
 
-# 7. Journal update protocol
+# 8. Journal update protocol
 
-For every material development event append an entry using this template:
+For each material event append/update using:
 
 ```markdown
-## YYYY-MM-DD — [short title]
-
-**Stage:**  
-**Trigger / problem:**  
-**Decision:**  
-**WHY:**  
-**Files/documents affected:**  
-**Tests/evidence:**  
-**Result:** PASS / PARTIAL / REWORK / DEFERRED  
-**New risks/open questions:**  
+## YYYY-MM-DD — [title]
+**Stage:**
+**Trigger/problem:**
+**Decision:**
+**WHY:**
+**Files/documents affected:**
+**Tests/evidence:**
+**Result:** PASS / PARTIAL / REWORK / DEFERRED
+**New risks/open questions:**
 **Next action:**
 ```
 
-A normal code commit does not need a journal entry unless it changes architecture, a contract, a gate, a major defect status or the roadmap.
+Routine commits do not require an entry unless they change architecture, contract, gate, defect status or roadmap.
 
 ---
 
-# 8. Current journal checkpoint — 2026-08-09
+# 9. Current checkpoint — 2026-08-09
 
-**Stage:** Stage 06 — Verification and Repository Rationalization  
-**Result:** **IN PROGRESS**
+**Stage:** Stage 06  
+**Milestone:** M2 — Dependency and legacy cleanup  
+**Status:** **ACTIVE**
 
-### Done
-- FATHER responsibility split established.
-- DEV simplified mode established.
-- project governance and NO CODE BEFORE CONTRACT adopted.
-- ТЗ and architecture/business-analysis packs created.
-- storage/provenance defect discovered through architecture review.
-- acceptance tests corrected before implementation.
-- minimal storage fix implemented and focused regression passed.
-- current DEV slice reached 15/15 focused tests in reconstructed verification.
-- canonical review pipeline selected; redundant old pipeline removed after dependency migration.
-- legacy `core/` audited.
-- legacy runtime/Ollama/RTX scripts audited.
-- experimental policy/"LLM gateway" subsystem audited and frozen.
-- config/data boundaries audited.
-- current `father_osint/` component traceability map created.
-
-### Not done yet
-- complete clean local checkout verification;
-- final dependency split;
-- evidence-based legacy archive/delete pass;
-- stable CI;
-- DEV v1 baseline/tag;
-- PROD source transport selection;
-- Knowledge Gate/KB implementation.
+### Completed
+- responsibility split;
+- simplified DEV mode;
+- governance and NO CODE BEFORE CONTRACT;
+- ТЗ/business analysis/architecture/test packs;
+- provenance contract correction;
+- test-first storage fix;
+- pipeline rationalization;
+- legacy core/runtime audit;
+- experimental policy service audit;
+- config/data audit;
+- current component traceability map;
+- working GitHub clean-checkout CI;
+- runner entrypoint acceptance tests;
+- **17/17 clean-checkout tests PASS**;
+- both canonical DEV runners PASS.
 
 ### Immediate next action
-**Run/prepare the complete Stage 06 verification on a clean local checkout, produce the next full test report, then perform evidence-based dependency/legacy cleanup.**
+**Begin M2 with the dependency split: define minimal current DEV dependencies separately from legacy experimental dependencies, verify no current test/runner imports legacy packages, then rerun clean CI before any legacy deletion.**

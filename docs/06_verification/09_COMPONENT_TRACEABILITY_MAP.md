@@ -1,7 +1,7 @@
 # FATHER OSINT — Component Traceability Map
 
-**Status:** DEV verification artifact  
-**Scope:** `father_osint/` current package  
+**Status:** DEV verification artifact / semantic remediation applied  
+**Scope:** current `father_osint/` package  
 **Rule:** requirement → contract → component → output → test. No component is promoted to PROD merely because code exists.
 
 ## Product chain
@@ -13,105 +13,86 @@ flowchart LR
     A --> C[Collector]
     C --> M[Material]
     M --> S[MaterialStore]
-    A --> P[MaterialPackage]
-    P --> N[SimpleAnalyst]
+    A --> P[Cycle MaterialPackage]
+    P --> CP[Cumulative Evidence Package]
+    CP --> N[SimpleAnalyst]
     N --> Q[SimpleSocrates]
     Q -->|research_more| T
     Q -->|pass| O[DEV phase output]
 ```
 
-The current package proves this bounded development chain only. It does not implement a production Knowledge Gate, autonomous KB publication, scheduler, distributed storage, or a production Telegram transport.
+The current package proves this bounded development chain only. It does not implement a production Knowledge Gate, autonomous KB publication, scheduler, distributed storage or a production Telegram transport.
 
 ## Component register
 
 | Component | Responsibility | Input | Output | Verification | Current status |
 |---|---|---|---|---|---|
-| `models.py` | Cross-stage DEV contracts | constructor data | `ResearchTask`, `Material`, `MaterialPackage` | MVP + architecture acceptance tests | DEV CORE |
-| `agent.py` | Collection orchestration only | `ResearchTask`, collectors | `MaterialPackage` | MVP + architecture acceptance | DEV CORE |
-| `storage.py` | Append-only DEV provenance storage; content-addressed raw blobs | tasks/materials/packages | JSONL + raw blobs | MVP/architecture tests | DEV CORE |
+| `models.py` | Cross-stage DEV contracts | constructor data | `ResearchTask`, `Material`, `MaterialPackage` | MVP + semantic tests | DEV CORE |
+| `agent.py` | Collection orchestration only | `ResearchTask`, collectors | per-cycle `MaterialPackage` | MVP + architecture tests | DEV CORE |
+| `storage.py` | Append-only provenance; text blob reuse; file SHA-256 | tasks/materials/packages | JSONL + raw text blobs | MVP + semantic tests | DEV CORE |
 | `collectors/dev.py` | Deterministic fixture acquisition | fixture + task | `Material` stream | DEV pipeline tests | TEST SUPPORT |
-| `collectors/telegram.py` | Telegram source adapter boundary; no analysis | `ResearchTask`, `TelegramTransport` | Telegram `Material` stream | Telegram collector test | DEV BOUNDARY |
-| `analysis.py` | Deterministic handoff/gap detector | task + package | `Analysis` | simple analyst tests | DEV SIMULATOR |
-| `socrates.py` | Deterministic evidence/gap review | task + package + analysis | `SocratesReview` | simple Socrates tests | DEV SIMULATOR |
-| `review_pipeline.py` | Bounded OSINT→Analyst→Socrates loop | initial task | cycles + stop reason | review/dev pipeline tests | DEV ORCHESTRATION |
-| `transports/teleproto.py` | Experimental Node bridge to Telegram MTProto transport | `ResearchTask` | `TelegramMessage[]` | no production acceptance evidence | EXPERIMENTAL / NOT APPROVED |
-| `collectors/__init__.py`, `transports/__init__.py`, package `__init__.py` | package exports/boundaries | imports | public Python surface | import coverage indirectly | SUPPORT |
+| `collectors/telegram.py` | Telegram source adapter boundary; no analysis | `ResearchTask`, `TelegramTransport` | Telegram `Material` stream | Telegram collector tests | DEV BOUNDARY |
+| `analysis.py` | Deterministic handoff/gap detector | task + evidence package | `Analysis` | simple analyst tests | DEV SIMULATOR |
+| `socrates.py` | Deterministic evidence/gap review | task + evidence + analysis | `SocratesReview` | simple Socrates tests | DEV SIMULATOR |
+| `review_pipeline.py` | Bounded cumulative OSINT→Analyst→Socrates loop | initial task | cycles + cumulative evidence + stop reason | pipeline + semantic tests | DEV ORCHESTRATION |
+| `transports/` | Reserved transport implementation boundary | future adapter | `TelegramTransport` implementation | none approved | FUTURE BOUNDARY |
+| package `__init__.py` files | package exports/boundaries | imports | public Python surface | import/runner coverage | SUPPORT |
 
 ## Architectural findings
 
-### F-01 — OSINT boundary is correct
+### F-01 — OSINT boundary remains narrow
 
-`OSINTAgent` coordinates collectors and persistence and returns a material package. It does not analyze findings or write knowledge. This matches the intended ecosystem separation:
+`OSINTAgent` coordinates collectors and persistence and returns collected material. It does not decide truth or write knowledge.
 
-```text
-Analyst asks
-    ↓
-OSINT collects
-    ↓
-Analyst interprets
-    ↓
-Socrates reviews/weighs
-    ↓
-future Knowledge Gate
-```
+### F-02 — Material is observation/evidence transport, not knowledge
 
-### F-02 — `Material` is observation/evidence transport, not knowledge
+A Material record contains source locator, raw text or original local file path, timestamps, author, metadata and content hash. Collection does not make a statement true.
 
-A `Material` record contains source locator, raw payload/local path, timestamps, author, metadata and content hash. It must never be treated as an approved fact solely because it was collected.
+### F-03 — payload reuse and observation identity are separate
 
-### F-03 — storage preserves provenance
+Equal raw-text payloads may reuse one SHA-256-addressed blob, while every source observation remains a separate append-only record. The metric is `payloads_reused`; no observation is implied to be skipped.
 
-Equal payload bytes may reuse a SHA-256 raw blob, but source observations remain separate records. This is the correct DEV behavior: content equality must not silently collapse provenance.
+### F-04 — file-only evidence is hashable
 
-### F-04 — Analyst and Socrates are deliberately fake/minimal
+When `raw_text` is absent and `local_path` points to an existing file, SHA-256 is calculated over the original bytes. Missing local files fail explicitly.
 
-`SimpleAnalyst` and `SimpleSocrates` are deterministic DEV simulators. They validate contracts, handoffs, gaps and bounded follow-up behavior. They are not expert intelligence engines and must not accumulate domain sophistication during this phase.
+### F-05 — follow-up research is cumulative
 
-### F-05 — Telegram collector boundary is good; transport is not approved
+Each review cycle keeps its own collection package, while Analyst and Socrates review cumulative evidence from the entire bounded research run. Narrow follow-up tasks therefore do not erase earlier source coverage.
 
-`TelegramCollector` depends on a minimal `TelegramTransport` protocol, so TDLib/GramJS/another backend can later be benchmarked without changing the collection contract. `TeleprotoTransport` is one experimental implementation and must remain replaceable.
+### F-06 — Analyst and Socrates remain deliberately minimal
 
-### F-06 — production concerns remain intentionally absent
+`SimpleAnalyst` and `SimpleSocrates` are deterministic DEV simulators. They validate handoffs, gaps and bounded follow-up behavior; they are not expert reasoning engines.
 
-Do not add yet:
+### F-07 — Telegram transport is deliberately unchosen
 
+`TelegramCollector` depends on a minimal `TelegramTransport` protocol. No TDLib/GramJS/other implementation is approved merely because a prototype once existed. Selection remains a future donor/ADR/benchmark task.
+
+## Production concerns intentionally absent
+
+Do not add without a new requirement and acceptance gate:
 - autonomous KB promotion;
 - production confidence scoring;
 - permanent source trust weights;
 - distributed queues/databases;
 - scheduler/orchestrator infrastructure;
 - live credentials in repository;
-- dark-web/live Telegram production access merely to make the DEV pipeline look complete.
+- Tor/dark-web or live Telegram access merely to make DEV look complete.
 
-Those require their own requirement, ADR, donor review, threat review and acceptance criteria.
-
-## Traceability gates for every future change
+## Traceability gate for future change
 
 ```text
-1. REQUIREMENT
-   What problem are we solving?
-        ↓
-2. ARCHITECTURE
-   Which existing boundary owns it?
-        ↓
-3. CONTRACT
-   What exact input/output changes?
-        ↓
-4. TEST FIRST
-   What observable behavior proves it?
-        ↓
-5. IMPLEMENTATION
-   Smallest code that passes the test.
-        ↓
-6. VERIFICATION
-   Unit + integration + architecture acceptance.
-        ↓
-7. DOCUMENTATION / ADR
-   Why was this design retained?
+1 REQUIREMENT
+2 ARCHITECTURE OWNER
+3 INPUT/OUTPUT CONTRACT
+4 TEST FIRST
+5 MINIMAL IMPLEMENTATION
+6 CLEAN VERIFICATION
+7 DOCUMENTATION / ADR / JOURNAL
 ```
 
-If step 1–4 is missing, implementation stops.
+If steps 1–4 are missing, implementation stops.
 
 ## Current verdict
 
-`father_osint/` has a coherent small DEV core. The main risk is no longer missing architecture; it is premature growth. The next engineering action should therefore be verification of the existing tests and gaps, not adding more agents, databases or intelligence logic.
+The small DEV core is internally coherent after semantic remediation. The next risk is documentation drift or premature feature growth, not a need for more infrastructure.

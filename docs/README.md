@@ -7,9 +7,15 @@ PROJECT_GOVERNANCE
         ↓
 OSINT_AGENT_TZ_V1
         ↓
-ARCHITECTURE_DEV_V1
+REQUIREMENTS REVIEW
+        ↓
+03_architecture/  ← CURRENT STAGE
+        ↓
+ARCHITECTURE REVIEW GATE
         ↓
 TEST_PLAN_V1 + TRACEABILITY_MATRIX
+        ↓
+IMPLEMENTATION PLAN
         ↓
 IMPLEMENTATION
         ↓
@@ -18,13 +24,25 @@ TEST EVIDENCE
 KEEP / CHANGE / DELETE / DEFER
 ```
 
+## Current project stage
+
+**Stage 03 — Architecture + Business Analysis / OPEN.**
+
+The current work is to prove what enters each stage, what leaves it, who owns the transition, why the component exists, which failure modes must be visible and which technical decisions are intentionally deferred.
+
+Main pack: [03_architecture/README.md](03_architecture/README.md)
+
 ## Active documents
 
 - `PROJECT_GOVERNANCE.md` — engineering lifecycle and gates.
 - `OSINT_AGENT_TZ_V1.md` — current technical specification.
-- `ARCHITECTURE_DEV_V1.md` — minimal DEV architecture.
-- `TEST_PLAN_V1.md` — required order of verification.
-- `TRACEABILITY_MATRIX.md` — requirements to code/tests mapping.
+- `ARCHITECTURE_DEV_V1.md` — earlier minimal DEV architecture; now input to formal Stage 3 review.
+- `03_architecture/01_BUSINESS_ANALYSIS.md` — actors, SIPOC, value stream, business boundaries and functional decomposition.
+- `03_architecture/02_ARCHITECTURE_VIEWS.md` — system context, process, data, failure and DEV/PROD views.
+- `03_architecture/03_ARCHITECTURE_REVIEW.md` — formal architecture gate, risks and unresolved decisions.
+- `03_architecture/04_DECISION_REGISTER.md` — WHY and architecture decision register.
+- `TEST_PLAN_V1.md` — required order of verification; execution follows Stage 3 PASS.
+- `TRACEABILITY_MATRIX.md` — requirements to code/tests mapping; must be updated as part of Stage 3 exit.
 - `REPOSITORY_AUDIT_2026-08-09.md` — current file inventory/status.
 
 ## Research/history

@@ -1,5 +1,3 @@
-"""Transport adapters used by source collectors."""
+"""Transport adapter boundary for future approved source integrations."""
 
-from .teleproto import TeleprotoTransport
-
-__all__ = ["TeleprotoTransport"]
+__all__: list[str] = []

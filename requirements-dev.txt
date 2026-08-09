@@ -1,0 +1,3 @@
+# Current FATHER OSINT DEV verification dependencies.
+# Runtime package `father_osint` currently uses the Python standard library only.
+pytest>=9.0,<10

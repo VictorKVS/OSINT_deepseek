@@ -1,4 +1,4 @@
-﻿# Python
+# Python
 __pycache__/
 *.py[cod]
 *$py.class
@@ -23,12 +23,18 @@ build/
 logs/
 *.log
 
-# Data
+# Runtime/local data
+data/osint/
+data/osint_dev/
+data/runtime/
 *.db
 *.sqlite
-data/
+
+# Generic local JSON, with explicit versioned-fixture exceptions
 *.json
 !example.json
+!data/dev/*.json
+!data/dev/**/*.json
 
 # OS
 .DS_Store

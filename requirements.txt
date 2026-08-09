@@ -1,4 +1,8 @@
-﻿ollama>=0.1.0
-colorama>=0.4.6
-psutil>=5.9.0
-gputil>=1.4.0
+# Current FATHER OSINT DEV runtime dependencies.
+# The approved `father_osint` DEV core currently uses the Python standard library only.
+#
+# For verification/tests install:
+#   python -m pip install -r requirements-dev.txt
+#
+# Historical Ollama/GPU dependencies were moved to:
+#   requirements-legacy.txt

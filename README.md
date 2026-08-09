@@ -60,7 +60,7 @@ run_dev_osint.py PASS
 run_dev_pipeline.py PASS
 ```
 
-Historical Ollama/GPU/workstation code and the old `core/` package were removed only after their useful engineering lessons were documented and clean CI proved that the current FATHER OSINT path did not depend on them.
+Historical Ollama/GPU/workstation code, the old `core/` package and the unapproved Teleproto/Node Telegram transport PoC were removed only after their useful engineering lessons were documented and clean CI proved that the current FATHER OSINT path did not depend on them.
 
 ## Development journal
 
@@ -83,6 +83,8 @@ Material gate changes and cleanup decisions also receive dedicated Stage 06 repo
 | [Stage 06 — Verification](docs/06_verification/README.md) | Current verification and rationalization stage |
 | [Component Traceability Map](docs/06_verification/09_COMPONENT_TRACEABILITY_MAP.md) | component → contract → test → status |
 | [Dependency Split](docs/06_verification/10_DEPENDENCY_SPLIT.md) | Current vs DEV vs legacy dependency decision |
+| [Legacy Cleanup Report](docs/06_verification/11_LEGACY_CLEANUP_REPORT.md) | evidence-based removal of old runtime/core code |
+| [Telegram Experiment Audit](docs/06_verification/12_TELEGRAM_EXPERIMENT_AUDIT.md) | why the unapproved concrete transport PoC was removed |
 | [Traceability Matrix](docs/TRACEABILITY_MATRIX.md) | requirement → architecture → test → code |
 | [Donor KB: Telegram](docs/DONOR_KB_TELEGRAM_INTELLIGENCE_V0_1.md) | Research notes for future transport selection |
 
@@ -97,7 +99,6 @@ Material gate changes and cleanup decisions also receive dedicated Stage 06 repo
 | `config/` | Draft mission/profile/policy inputs |
 | `docs/` | Requirements, architecture, tests, decisions, verification and journal |
 | `services/` | Experimental/frozen subprojects; not implicit current dependencies |
-| `telegram_bridge/` | Experimental/deferred Telegram transport bridge |
 
 ## Current disposition
 
@@ -108,8 +109,8 @@ scripts/run_dev_pipeline.py   KEEP / CANONICAL DEV RUNNER
 tests/                        CURRENT VERIFICATION
 config/                       DRAFT PROFILE/POLICY INPUTS
 data/dev/                     TEST FIXTURES ONLY
+father_osint/transports/      FUTURE BOUNDARY / NO APPROVED IMPLEMENTATION
 services/llm-gateway/         FROZEN EXPERIMENTAL SUBPROJECT
-Teleproto/live Telegram       EXPERIMENTAL / DEFERRED
 ```
 
 ## Dependencies

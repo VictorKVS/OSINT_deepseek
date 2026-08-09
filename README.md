@@ -1,6 +1,8 @@
 # OSINT_deepseek / FATHER Knowledge Factory
 
-> **Status:** PROJECT / DEV / **STAGE 06 — VERIFICATION AND REPOSITORY RATIONALIZATION**
+> **Status:** PROJECT / DEV / **DEV v1 BASELINE FROZEN**
+>
+> **Stage 06:** ✅ COMPLETE — Verification and Repository Rationalization
 >
 > **Engineering rule:** **NO CODE BEFORE CONTRACT.** Requirements are reviewed first, then architecture, acceptance tests, implementation plan, code, verification and experience capture.
 
@@ -36,7 +38,7 @@ flowchart TD
     V --> E[9. Experience -> KB]
 ```
 
-## Verified DEV baseline
+## Frozen DEV v1 baseline
 
 Current clean-checkout CI proves:
 
@@ -56,23 +58,27 @@ run_dev_osint.py PASS
 run_dev_pipeline.py PASS
 ```
 
-The current semantic baseline also proves:
+The frozen semantic baseline proves:
 - equal payload does not collapse independent source observations;
 - raw text payloads may be reused by SHA-256 without dropping provenance;
 - file-only Material is hashed from original file bytes;
 - missing local files fail explicitly;
 - follow-up research accumulates evidence across cycles;
-- research loops remain hard bounded.
+- research loops remain hard bounded;
+- collector failures remain isolated and visible;
+- Telegram collection stays independent of a concrete transport library.
 
 Historical Ollama/GPU/workstation code, old `core/`, `vip/`, the unapproved Teleproto/Node bridge and the unrelated experimental policy/"llm-gateway" prototype were removed only after their useful engineering lessons were documented and clean CI proved the current product did not depend on them.
 
-## Development journal
+## Development control
 
 Living history, WHY decisions, completed work, risks and roadmap:
 
 **[Development Journal](docs/DEVELOPMENT_JOURNAL.md)**
 
-Stage-specific evidence is under `docs/06_verification/`; material changes also receive entries under `docs/journal/`.
+Formal freeze record:
+
+**[DEV v1 Baseline Freeze](docs/06_verification/16_DEV_V1_BASELINE_FREEZE.md)**
 
 ## Key documentation
 
@@ -83,9 +89,10 @@ Stage-specific evidence is under `docs/06_verification/`; material changes also 
 | [OSINT Agent ТЗ v1](docs/OSINT_AGENT_TZ_V1.md) | Current requirements and acceptance criteria |
 | [Stage 03 — Architecture Review](docs/03_architecture/README.md) | Business analysis, diagrams and architecture decisions |
 | [Stage 04 — Testing](docs/04_testing/README.md) | Acceptance test design and execution rules |
-| [Stage 06 — Verification](docs/06_verification/README.md) | Current verification/rationalization evidence |
+| [Stage 06 — Verification](docs/06_verification/README.md) | Completed verification/rationalization evidence |
 | [Full Project Audit](docs/06_verification/14_FULL_PROJECT_AUDIT_2026-08-09.md) | Full-project findings and remediation priorities |
 | [Semantic Remediation Plan](docs/06_verification/15_SEMANTIC_REMEDIATION_PLAN.md) | Contract for cumulative evidence, reuse metric and file hashing |
+| [DEV v1 Freeze](docs/06_verification/16_DEV_V1_BASELINE_FREEZE.md) | Formal frozen baseline and change-control gate |
 | [Traceability Matrix](docs/TRACEABILITY_MATRIX.md) | requirement → architecture → test → code → evidence |
 | [Donor KB: Telegram](docs/DONOR_KB_TELEGRAM_INTELLIGENCE_V0_1.md) | Research notes for future transport selection; not approval |
 
@@ -93,9 +100,9 @@ Stage-specific evidence is under `docs/06_verification/`; material changes also 
 
 | Directory | Role |
 |---|---|
-| `father_osint/` | Current FATHER OSINT DEV implementation |
+| `father_osint/` | Frozen FATHER OSINT DEV v1 implementation |
 | `scripts/` | Canonical DEV execution adapters |
-| `tests/` | Current executable contract evidence |
+| `tests/` | Verified executable contract evidence |
 | `data/` | DEV fixtures/runtime data references |
 | `config/` | Draft mission/profile/policy inputs |
 | `docs/` | Requirements, architecture, tests, decisions, verification and journal |
@@ -103,10 +110,10 @@ Stage-specific evidence is under `docs/06_verification/`; material changes also 
 ## Current disposition
 
 ```text
-father_osint/                 CURRENT DEV PRODUCT
+father_osint/                 DEV v1 BASELINE
 scripts/run_dev_osint.py      KEEP
 scripts/run_dev_pipeline.py   KEEP / CANONICAL DEV RUNNER
-tests/                        CURRENT VERIFICATION
+tests/                        VERIFIED CONTRACT EVIDENCE
 config/                       DRAFT PROFILE/POLICY INPUTS
 data/dev/                     TEST FIXTURES ONLY
 father_osint/transports/      FUTURE BOUNDARY / NO APPROVED IMPLEMENTATION
@@ -121,17 +128,31 @@ Historical prototype dependencies are retained in Git history and audit document
 
 ## DEV vs PROD
 
-The current project is **DEV / SIMPLIFIED**. Real MTProto sessions, Tor gateways, proxy rotation, schedulers, secrets infrastructure, production LLM routing, battle monitoring, Knowledge Gate and autonomous KB publication remain separate future requirements.
+The frozen baseline is **DEV / SIMPLIFIED**, not production readiness. Real MTProto sessions, Tor gateways, proxy rotation, schedulers, secrets infrastructure, production LLM routing, battle monitoring, generic Artifact ingestion, local transcription, Knowledge Gate and autonomous KB publication remain separate future requirements.
+
+## Next milestone
+
+**M5 — choose the next approved business requirement.**
+
+Candidate capabilities already recorded:
+- live Telegram Radar transport;
+- generic Artifact/Ingestion layer;
+- local-first transcription;
+- Knowledge Gate foundation.
+
+We choose by business value and reusable capability, not by which technology is most interesting.
 
 ## Change policy
 
-Before adding a new file, service, database, agent or dependency, answer:
+Before modifying the frozen baseline or adding a file, service, database, agent or dependency, answer:
 
 1. Which approved requirement requires it?
-2. Which architecture element owns it?
-3. Which business/process flow does it participate in?
+2. Is this a defect fix or a new capability?
+3. Which architecture element owns it?
 4. What enters it and what must leave it?
-5. Why is the component needed instead of a simpler existing mechanism?
+5. Why is it needed instead of a simpler existing mechanism?
 6. Which acceptance test will prove it works?
+7. Does it break a frozen invariant or add an external dependency?
+8. What is the rollback path?
 
 If these questions have no clear answers, the change is not implementation-ready.

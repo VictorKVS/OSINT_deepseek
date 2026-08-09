@@ -1,10 +1,10 @@
 # Stage 06 — Dependency Audit Before Cleanup
 
-**Status:** REVIEWED / MIGRATION ALLOWED / DELETION NOT YET ALLOWED
+**Status:** DUPLICATE PIPELINE CLEANUP COMPLETED / LEGACY CLEANUP STILL FROZEN
 
 ## Purpose
 
-Prove which files are actually depended on before any cleanup. The rule is:
+Prove which files are actually depended on before cleanup. The rule is:
 
 ```text
 observe dependency
@@ -14,6 +14,8 @@ classify owner/purpose
 migrate caller
       ↓
 rerun tests
+      ↓
+scan repository
       ↓
 only then delete obsolete implementation
 ```
@@ -38,86 +40,75 @@ DevReviewPipeline
 PASS / follow-up / max_cycles
 ```
 
-`father_osint/review_pipeline.py` is the current canonical bounded DEV orchestration because it includes both Analyst and Socrates and preserves the maximum-cycle stop condition.
+`father_osint/review_pipeline.py` is the canonical bounded DEV orchestration because it includes Analyst and Socrates and preserves the maximum-cycle stop condition.
 
-## Duplicate pipeline finding
+## Duplicate pipeline resolution
 
-### `father_osint/pipeline.py`
+### Removed: `father_osint/pipeline.py`
 
-Role: older partial orchestration.
-
-Path:
+The old implementation provided only:
 
 ```text
 OSINT → Analyst → optional follow-up
 ```
 
-It does not include Socrates. Its useful semantics are:
+Useful semantics from it were retained in the canonical path:
 
-- stop when Analyst has no follow-up;
-- hard maximum cycle limit;
-- expose final analysis.
+- bounded cycle count;
+- stop when no follow-up is required;
+- access to the final cycle state.
 
-Those semantics are already covered by `DevReviewPipeline` plus acceptance tests.
+Before deletion:
 
-**Decision:** `DELETE CANDIDATE`, but retain until callers are migrated and regression is rerun.
+1. `scripts/run_dev_pipeline.py` was migrated to `DevReviewPipeline`;
+2. `tests/test_dev_pipeline.py` was migrated to the canonical review pipeline;
+3. architecture acceptance tests already covered bounded review behavior;
+4. focused DEV verification passed on the reconstructed current DEV slice;
+5. repository code search after migration returned no remaining `DevResearchPipeline` references;
+6. the recursive repository tree was inspected before deletion.
+
+**Decision:** `DELETE COMPLETED`.
+
+This is the first cleanup executed through the full FATHER chain rather than by visual judgement.
+
+## Canonical files after cleanup
 
 ### `father_osint/review_pipeline.py`
 
-Role: current complete DEV orchestration.
-
-Path:
-
-```text
-OSINT → Analyst → Socrates → optional follow-up → bounded stop
-```
-
 **Decision:** `KEEP / CANONICAL DEV PIPELINE`.
 
-## Known caller requiring migration
+### `scripts/run_dev_pipeline.py`
 
-`scripts/run_dev_pipeline.py` imports `DevResearchPipeline` from `father_osint.pipeline`.
+**Decision:** `KEEP / CANONICAL DEV EXECUTABLE SCENARIO`.
 
-Current dependency:
-
-```text
-run_dev_pipeline.py
-       ↓
-father_osint.pipeline.DevResearchPipeline
-```
-
-Required dependency:
+It now executes:
 
 ```text
-run_dev_pipeline.py
-       ↓
-father_osint.review_pipeline.DevReviewPipeline
+OSINT → Analyst → Socrates
 ```
 
-The script should also print Socrates review state so the executable DEV scenario matches the approved architecture.
+and reports the review state.
 
-**Decision:** `CHANGE / MIGRATE`.
+### `tests/test_dev_pipeline.py`
 
-## Test dependency requiring migration
+**Decision:** `KEEP` for now.
 
-`tests/test_dev_pipeline.py` currently tests `DevResearchPipeline` directly. Its two useful invariants are already required at the canonical layer:
+It retains two explicit regression invariants:
 
 1. complete evidence can stop in one cycle;
 2. unresolved research is hard bounded.
 
-Equivalent acceptance coverage exists in `tests/test_architecture_acceptance.py` for `DevReviewPipeline`.
+Overlap with architecture acceptance tests may be reconsidered later, but duplication of test intent is not currently harmful enough to justify immediate deletion.
 
-**Decision:** `MIGRATE OR RETIRE AFTER REGRESSION`.
-
-Do not delete this test in the same step as migration. First run the canonical tests and compare behavior.
-
-## Legacy groups
+## Legacy groups — still frozen
 
 ### `core/`
 
 Contains legacy `agent_tracker.py` and `logger.py`. The current `father_osint` DEV package does not declare them as part of its contract.
 
-**Decision:** `LEGACY / ISOLATE`. No deletion before a full repository import/runtime scan.
+**Decision:** `LEGACY / ISOLATE`.
+
+No deletion until their callers and historical purpose are mapped.
 
 ### `services/llm-gateway/`
 
@@ -125,32 +116,58 @@ Independent experimental subsystem with its own API/core/simulation/enigma/sphin
 
 **Decision:** `DEFER / OUTSIDE CURRENT OSINT DEV ACCEPTANCE BOUNDARY`.
 
+It must not be merged into the current OSINT architecture merely because it already exists in the repository.
+
 ### root scripts and PowerShell
 
 Historical runtime/stress tooling remains outside the approved DEV path.
 
-**Decision:** `LEGACY / DEFER` until local checkout confirms whether they are still intentionally used.
+**Decision:** `LEGACY / DEFER` until its dependencies and intended ownership are audited.
 
-## Dependency gate result
+### Telegram live transport / bridge
 
-### Allowed now
+Experimental transport remains outside the simplified DEV execution boundary.
 
-- migrate `scripts/run_dev_pipeline.py` to `DevReviewPipeline`;
-- add/adjust tests for the canonical pipeline;
-- rerun focused verification.
+**Decision:** `DEFER`.
 
-### Not allowed yet
+## Cleanup evidence chain
 
-- delete `father_osint/pipeline.py`;
-- delete legacy `core/`;
-- delete root PowerShell/runtime scripts;
-- merge `services/llm-gateway` into current architecture.
+```text
+Architecture decision
+        ↓
+Tests designed
+        ↓
+15/15 focused DEV tests passed
+        ↓
+Caller migration
+        ↓
+Repository reference scan
+        ↓
+Old pipeline deleted
+        ↓
+Next: legacy dependency mapping
+```
 
-## Exit condition
+## Next gate
 
-Deletion of `father_osint/pipeline.py` becomes allowed only when all are true:
+The next cleanup target is **not automatically another deletion**.
 
-- no current DEV script imports it;
-- canonical `DevReviewPipeline` tests pass;
-- focused DEV scenario passes;
-- local/full-repository verification finds no remaining required caller.
+Stage 06 now moves to legacy ownership/dependency classification:
+
+```text
+core/
+root runtime scripts
+PowerShell diagnostics
+services/llm-gateway/
+Telegram experimental transport
+```
+
+For every group we must answer:
+
+- What business/engineering purpose did it serve?
+- Is that purpose still required by the approved OSINT scope?
+- Who calls it?
+- Does it contain reusable knowledge even if the implementation is obsolete?
+- Should it be KEEP, ARCHIVE, DEFER, MIGRATE, or DELETE?
+
+Only after those answers may another destructive change be authorized.

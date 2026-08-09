@@ -1,4 +1,9 @@
 from pathlib import Path
+import sys
+
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
 from father_osint.agent import OSINTAgent
 from father_osint.analysis import SimpleAnalyst
@@ -10,7 +15,7 @@ from father_osint.storage import MaterialStore
 
 
 def main() -> None:
-    root = Path(__file__).resolve().parents[1]
+    root = ROOT
     store = MaterialStore(root / "data" / "osint_dev_pipeline")
 
     agent = OSINTAgent(
@@ -55,10 +60,14 @@ def main() -> None:
             print("gaps:")
             for gap in cycle.analysis.gaps:
                 print(f"  - {gap}")
-        if cycle.review.reasons:
-            print("review_reasons:")
-            for reason in cycle.review.reasons:
-                print(f"  - {reason}")
+        if cycle.review.issues:
+            print("review_issues:")
+            for issue in cycle.review.issues:
+                print(f"  - {issue}")
+        if cycle.review.questions:
+            print("review_questions:")
+            for question in cycle.review.questions:
+                print(f"  - {question}")
         print()
 
 

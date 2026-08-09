@@ -35,6 +35,5 @@ jobs:
       - name: Run DEV OSINT fixture scenario
         run: python scripts/run_dev_osint.py
 
-      - name: Run legacy DEV pipeline diagnostic
-        continue-on-error: true
+      - name: Run canonical DEV review pipeline scenario
         run: python scripts/run_dev_pipeline.py

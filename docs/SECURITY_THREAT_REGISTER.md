@@ -1,7 +1,7 @@
 # FATHER / OSINT_deepseek — Security & Software Supply-Chain Threat Register
 
 **Status:** living register  
-**Scope:** source code, dependencies, donor projects, CI/CD, secrets, build/release chain, runtime integrations and future AI/file-processing surfaces.  
+**Scope:** source code, dependencies, donor projects, CI/CD, secrets, build/release chain, runtime integrations, containers, agentic tooling and future AI/file-processing surfaces.  
 **Scoring:** qualitative until evidence supports calibration.
 
 ## States
@@ -38,7 +38,7 @@
 | S20 | Archive/decompression bomb exhausts resources | M6 ingestion | Medium | High | size/depth/ratio limits; bounded extraction; timeout/quota | MONITOR | archive support |
 | S21 | External AI/transcription service receives sensitive evidence | M7/API | Medium | Critical | local-first; explicit data classification; provider privacy review; human approval for sensitive use | MONITOR | external provider enabled |
 | S22 | External service changes retention/privacy/terms silently | APIs | Medium | High | provider registry; periodic re-verification; replaceable interface | MONITOR | provider approval/change |
-| S23 | AI model/tool-call injection causes untrusted content to drive actions | future agentic Analyst/tool layer | Medium | Critical | model proposes, deterministic policy/code executes; tool allowlist; untrusted-content boundary; approval gates | MONITOR | executable LLM tools introduced |
+| S23 | AI model/tool-call injection causes untrusted content to drive actions | agentic Analyst/tool layer | Medium | Critical | model proposes, deterministic policy/code executes; tool allowlist; untrusted-content boundary; approval gates | MONITOR | executable LLM tools introduced |
 | S24 | Model/package provenance unknown or tampered | local AI models | Medium | High | source/license/hash/model version inventory; controlled download/update | MONITOR | local model adoption |
 | S25 | Security scanner becomes false assurance | all | Medium | High | scanners are evidence inputs, not approval authority; manual architecture/threat review remains | CONTROLLED | any "green scan = secure" decision |
 | S26 | Security findings are discovered but not tracked to closure | governance | Medium | High | finding → register/issue → owner/gate → evidence → close/reopen | OPEN | first automated security findings |
@@ -46,24 +46,62 @@
 | S28 | New dependency unnecessarily increases attack surface | architecture | Medium | High | dependency budget mindset; stdlib/existing capability first; architecture justification | CONTROLLED | dependency proposal |
 | S29 | Supply-chain security monitoring stops after baseline freeze | governance | Medium | Critical | APPROVED → MONITORED lifecycle; event-driven recheck; future automation/watch | OPEN | any frozen baseline |
 | S30 | Security controls block delivery through uncontrolled tool sprawl | DevSecOps process | Medium | Medium | smallest useful toolchain; one control per threat where possible; evidence-driven additions | CONTROLLED | security-tool proposal |
+| S31 | Direct prompt injection overrides agent intent | LLM/agent | Medium | Critical | content is untrusted; policy/tool gate; no model-authorized execution; security regression corpus | MONITOR | LLM agent introduced |
+| S32 | Indirect prompt injection in Telegram/web/PDF/file content | retrieval/ingestion | High when agentic | Critical | source boundary; retrieved instructions never modify policy; action justification tied to ResearchTask | MONITOR | agent reads external content |
+| S33 | Agent tool abuse / excessive agency | tool runtime | Medium | Critical | default deny; allowlists; parameter validation; quotas; separate read/write tools; approval for high-impact actions | MONITOR | executable tools introduced |
+| S34 | Confused-deputy privilege escalation | agents/services | Medium | Critical | propagate user/task auth context; server-side auth; no global admin credential inheritance | MONITOR | multi-role/runtime services |
+| S35 | Agent exfiltrates secrets through output/tool/network | LLM/tools/egress | Medium | Critical | secrets out of prompts; scoped credentials; output redaction; egress policy/logging | MONITOR | secrets + agents coexist |
+| S36 | Memory/KB poisoning | KB/memory | Medium | Critical | observation != knowledge; Knowledge Gate; provenance; retraction/rollback; review state | MONITOR | persistent memory/KB introduced |
+| S37 | RAG/retrieval poisoning manipulates context | retrieval index | Medium | High/Critical | provenance-aware retrieval; corpus change audit; content != instruction; source diversity controls | MONITOR | retrieval layer introduced |
+| S38 | Hallucinated tool execution/result is accepted as real | agent orchestration | Medium | Critical | executor-issued result IDs only; evidence references must resolve; UI separates narrative vs execution | MONITOR | tool-calling agents |
+| S39 | Agent runaway loop causes cost/rate/resource exhaustion | orchestration | Medium | High | hard limits on cycles/calls/time/data/cost; cancellation; fail closed | MONITOR | autonomous loops |
+| S40 | Cross-agent delegation increases privilege | multi-agent | Medium | Critical | delegation cannot raise privilege; task scope propagated; privileged step independently authorized | MONITOR | multi-agent system |
+| S41 | Generated code/script executes unsafely | code interpreter/sandbox | Medium | Critical | treat generated code as untrusted; sandbox; no host secrets/network by default; limits; audit | MONITOR | generated code execution |
+| S42 | Model/provider update changes security behavior | AI supply chain | Medium | High | model/provider version inventory; security/eval regression; auth kept outside model | MONITOR | model upgrade/provider change |
+| S43 | Privileged/root container compromises host | containers | Medium | Critical | non-root where practical; no privileged mode; least capabilities; runtime hardening | MONITOR | containers introduced |
+| S44 | Docker/container socket exposure grants host-level control | containers/orchestrator | Medium | Critical | no ordinary app mount of Docker socket; isolate exceptional orchestrator | MONITOR | container orchestration |
+| S45 | Dangerous host mounts enable escape/data theft | containers | Medium | Critical | explicit minimal mounts; no broad host/home/SSH/secrets mounts; read-only where possible | MONITOR | containers introduced |
+| S46 | Excessive Linux capabilities/device exposure | containers | Medium | Critical | drop capabilities; add only justified; no devices without review | MONITOR | containers introduced |
+| S47 | Mutable/compromised container image enters runtime | container supply chain | Medium | Critical | trusted registry; digest/version inventory; scan; SBOM/provenance; promotion policy | MONITOR | images introduced |
+| S48 | Container escape/runtime/kernel vulnerability | container runtime | Low/Medium | Critical | supported runtime/kernel; patch watch; isolation-in-depth; do not treat containers as perfect sandbox | MONITOR | containers introduced |
+| S49 | Secrets baked into container image/layers | images/build | Medium | Critical | build/runtime secret mechanisms; image/history scan; no secret ARG/COPY | MONITOR | container builds |
+| S50 | Unrestricted container/agent egress enables exfiltration/SSRF | network | Medium | Critical | egress allowlist/deny-by-default for risky sandboxes; destination policy; DNS/redirect validation | MONITOR | containers/agents introduced |
+| S51 | Lateral movement between services | service network | Medium | Critical | segmentation; service identity; least privilege; no shared global secrets | MONITOR | multi-service deployment |
+| S52 | Container/parser resource exhaustion | runtime | Medium | High | CPU/memory/PID/storage/time quotas; queue/input limits | MONITOR | containers/parsers introduced |
+| S53 | Shared writable volume poisons code/config/evidence | containers/storage | Medium | High/Critical | minimize shared mutable volumes; permissions; separate evidence from executable/config paths | MONITOR | shared volumes |
+| S54 | SSRF reaches internal/cloud metadata or management endpoints | web/agents/connectors | Medium | Critical | destination validation; network segmentation; block metadata/management networks; egress policy | MONITOR | URL fetch/tool introduced |
+| S55 | Command injection through adapters/parsers/tools | runtime | Medium | Critical | no shell by default; structured APIs; argument allowlists; escaping not sole control | MONITOR | external command execution |
+| S56 | Path traversal / arbitrary file access | file handling | Medium | Critical | canonical paths; rooted storage; deny traversal/symlink abuse; tests | MONITOR | M6/file writes |
+| S57 | Unsafe deserialization / object injection | APIs/storage | Low/Medium | Critical | safe formats; schema validation; never load untrusted executable serialization | MONITOR | serialization introduced |
+| S58 | XXE / unsafe XML parsing | document/API parsers | Low/Medium | High/Critical | external entities disabled; hardened parser; resource limits | MONITOR | XML support |
+| S59 | Web UI attacks (XSS/CSRF/clickjacking) | future UI | Medium | High | framework protections; CSP; CSRF protection; output encoding; security headers | MONITOR | UI introduced |
+| S60 | Authentication/session replay or token theft | future API/UI | Medium | Critical | secure session/token lifecycle; expiry/rotation; MFA for privileged roles; replay controls where applicable | MONITOR | authenticated UI/API |
 
 ## Current priority queue
 
 ### Must address before / during M5 transport implementation
 
-`S02, S05, S06, S07, S08, S14, S15, S16, S17, S26, S29`
+`S02, S05, S06, S07, S08, S14, S15, S16, S17, S18, S26, S29`
 
 ### Must address before M6 freeze
 
-Add `S18, S19, S20`.
+Add `S19, S20, S56, S58` plus parser/container controls if those surfaces exist.
 
 ### Must address before M7 / external AI-service use
 
-Add `S21, S22, S23, S24` as applicable.
+Add `S21, S22, S24, S42` as applicable.
+
+### Must address before executable agent tooling
+
+Add `S23, S31-S41, S54, S55` and any auth/network controls exposed by the tool surface.
+
+### Must address before containerized production
+
+Add `S12, S43-S53` plus SBOM/image provenance and runtime patch monitoring.
 
 ### Must address before product release
 
-Add `S03, S04, S10, S11, S12, S13, S27` according to the actual release architecture.
+Add `S03, S04, S10, S11, S13, S27` according to the actual release architecture.
 
 ## Finding lifecycle
 
@@ -87,4 +125,6 @@ REOPEN ON NEW EVIDENCE
 
 ## Rule
 
-No threat is removed because a tool currently reports zero findings. Risks tied to third-party software, credentials, upstream maintenance and supply-chain integrity remain living controls for the lifetime of the project.
+No threat is removed because a tool currently reports zero findings. Risks tied to third-party software, credentials, upstream maintenance, agent authority, runtime isolation and supply-chain integrity remain living controls for the lifetime of the project.
+
+Detailed agent/container model: `AI_AGENT_SECURITY_THREAT_MODEL.md`.

@@ -4,7 +4,9 @@
 >
 > **Stage 06:** ✅ COMPLETE — Verification and Repository Rationalization
 >
-> **Engineering rule:** **NO CODE BEFORE CONTRACT.** Requirements are reviewed first, then architecture, acceptance tests, implementation plan, code, verification and experience capture.
+> **Current development:** **Stage 07 / M5 — Telegram Radar**
+>
+> **Engineering rule:** **NO CODE BEFORE CONTRACT.** Requirements are reviewed first, including commercial/reuse potential, then architecture, acceptance tests, implementation plan, code, verification and experience capture.
 
 This repository is evolving from the original `OSINT_deepseek` prototype into the first practical worker of the FATHER ecosystem: an OSINT supplier for the Knowledge Factory.
 
@@ -26,17 +28,42 @@ flowchart LR
 
 ```mermaid
 flowchart TD
-    R[1. Requirements / ТЗ] --> RV[2. Requirements Review]
-    RV --> A[3. Architecture + Business Analysis]
-    A --> AV[Architecture Review Gate]
-    AV -->|PASS| T[4. Acceptance Test Design]
+    R[1. Requirements / ТЗ] --> CR[2. Commercial + Reuse Review]
+    CR --> RV[3. Requirements Review]
+    RV --> A[4. Architecture + Business Analysis]
+    A --> CR2[Commercial + Reuse Recheck]
+    CR2 --> AV[Architecture Review Gate]
+    AV -->|PASS| T[5. Acceptance Test Design]
     AV -->|REWORK| R
-    T --> P[5. Implementation Plan]
-    P --> C[6. Code]
-    C --> TR[7. Test Run]
-    TR --> V[8. Verification / Acceptance]
-    V --> E[9. Experience -> KB]
+    T --> P[6. Implementation Plan]
+    P --> C[7. Code]
+    C --> TR[8. Test Run]
+    TR --> V[9. Verification / Acceptance]
+    V --> PR[10. Product Registry Recheck]
+    PR --> E[11. Experience -> KB / baseline]
 ```
+
+## Commercial product direction
+
+Commercialization is a **separate product-development track**, not a substitute for the core engineering roadmap. Every reusable block should be reviewed before development, during architecture review and after verification for additional lawful uses and product opportunities.
+
+The living registry is here:
+
+**[Commercial Product Opportunity Registry](docs/PRODUCT_OPPORTUNITY_REGISTRY.md)**
+
+It tracks potential products built from shared FATHER blocks, including competitive/channel intelligence, content-origin and propagation analysis, brand/reputation monitoring, technology/market radar, research tooling, security/risk use cases and future marketing/advertising/analytics scenarios where appropriate and lawful.
+
+Principle:
+
+```text
+ONE VERIFIED CORE
+      ↓
+Telegram Radar / Artifact / Provenance / Analyst / Socrates / KB
+      ↓
+MANY PRODUCT ASSEMBLIES
+```
+
+Commercial ideas may influence reusable interfaces and metadata, but they must not contaminate the core with one customer's domain logic or bypass requirements, legal constraints, tests, donor review, benchmarks or architecture gates.
 
 ## Frozen DEV v1 baseline
 
@@ -85,11 +112,13 @@ Formal freeze record:
 | Pack | Purpose |
 |---|---|
 | [Development Journal](docs/DEVELOPMENT_JOURNAL.md) | Living history, status, WHY decisions and roadmap |
+| [Commercial Product Registry](docs/PRODUCT_OPPORTUNITY_REGISTRY.md) | Separate living product track: reusable blocks → commercial opportunities, priorities and review gates |
 | [Project Governance](docs/PROJECT_GOVERNANCE.md) | Mandatory engineering chain and gates |
 | [OSINT Agent ТЗ v1](docs/OSINT_AGENT_TZ_V1.md) | Current requirements and acceptance criteria |
 | [Stage 03 — Architecture Review](docs/03_architecture/README.md) | Business analysis, diagrams and architecture decisions |
 | [Stage 04 — Testing](docs/04_testing/README.md) | Acceptance test design and execution rules |
 | [Stage 06 — Verification](docs/06_verification/README.md) | Completed verification/rationalization evidence |
+| [Stage 07 — Next Requirement](docs/07_next_requirement/) | M5 Telegram Radar requirements, donor research and PoC planning |
 | [Full Project Audit](docs/06_verification/14_FULL_PROJECT_AUDIT_2026-08-09.md) | Full-project findings and remediation priorities |
 | [Semantic Remediation Plan](docs/06_verification/15_SEMANTIC_REMEDIATION_PLAN.md) | Contract for cumulative evidence, reuse metric and file hashing |
 | [DEV v1 Freeze](docs/06_verification/16_DEV_V1_BASELINE_FREEZE.md) | Formal frozen baseline and change-control gate |
@@ -105,7 +134,7 @@ Formal freeze record:
 | `tests/` | Verified executable contract evidence |
 | `data/` | DEV fixtures/runtime data references |
 | `config/` | Draft mission/profile/policy inputs |
-| `docs/` | Requirements, architecture, tests, decisions, verification and journal |
+| `docs/` | Requirements, architecture, tests, decisions, verification, product registry and journal |
 
 ## Current disposition
 
@@ -116,7 +145,7 @@ scripts/run_dev_pipeline.py   KEEP / CANONICAL DEV RUNNER
 tests/                        VERIFIED CONTRACT EVIDENCE
 config/                       DRAFT PROFILE/POLICY INPUTS
 data/dev/                     TEST FIXTURES ONLY
-father_osint/transports/      FUTURE BOUNDARY / NO APPROVED IMPLEMENTATION
+father_osint/transports/      M5 EXTENSION BOUNDARY / NO APPROVED IMPLEMENTATION
 ```
 
 ## Dependencies
@@ -132,13 +161,20 @@ The frozen baseline is **DEV / SIMPLIFIED**, not production readiness. Real MTPr
 
 ## Next milestone
 
-**M5 — choose the next approved business requirement.**
+**M5 — Telegram Radar.**
 
-Candidate capabilities already recorded:
-- live Telegram Radar transport;
-- generic Artifact/Ingestion layer;
-- local-first transcription;
-- Knowledge Gate foundation.
+Current M5 sequence:
+- requirements and commercial/reuse review;
+- donor verification;
+- bounded TDLib and GramJS PoCs;
+- common benchmark and security/operations review;
+- ADR transport selection;
+- acceptance tests before product-path implementation.
+
+Later planned core milestones remain:
+- M6 — generic Artifact/Ingestion layer;
+- M7 — local-first transcription/extraction;
+- M8 — Knowledge Gate foundation.
 
 We choose by business value and reusable capability, not by which technology is most interesting.
 
@@ -147,12 +183,14 @@ We choose by business value and reusable capability, not by which technology is 
 Before modifying the frozen baseline or adding a file, service, database, agent or dependency, answer:
 
 1. Which approved requirement requires it?
-2. Is this a defect fix or a new capability?
-3. Which architecture element owns it?
-4. What enters it and what must leave it?
-5. Why is it needed instead of a simpler existing mechanism?
-6. Which acceptance test will prove it works?
-7. Does it break a frozen invariant or add an external dependency?
-8. What is the rollback path?
+2. Which commercial or non-commercial reuse scenarios could benefit from this block?
+3. Is this a defect fix or a new capability?
+4. Which architecture element owns it?
+5. What enters it and what must leave it?
+6. Why is it needed instead of a simpler existing mechanism?
+7. Which acceptance test will prove it works?
+8. Does it break a frozen invariant or add an external dependency?
+9. What is the rollback path?
+10. Does the implementation remain reusable rather than embedding one product's domain logic into the core?
 
 If these questions have no clear answers, the change is not implementation-ready.

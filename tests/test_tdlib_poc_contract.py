@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pytest
 
-from poc.tdlib.auth import AuthStep, next_auth_step
+from poc.tdlib.auth import AuthActionRequired, AuthStep, next_auth_step
 from poc.tdlib.requests import (
     get_chat_history_request,
     search_public_chat_request,
@@ -18,18 +18,32 @@ def auth_update(state_type: str):
     }
 
 
-def test_tdlib_parameters_keep_runtime_paths_explicit():
+def test_tdlib_parameters_require_encrypted_runtime_state():
     request = set_tdlib_parameters_request(
         api_id=123,
         api_hash="secret-hash",
         database_directory="runtime/tdlib/db",
         files_directory="runtime/tdlib/files",
+        database_encryption_key="local-db-key",
     )
     assert request["@type"] == "setTdlibParameters"
     assert request["api_id"] == 123
     assert request["api_hash"] == "secret-hash"
+    assert request["database_encryption_key"] == "local-db-key"
     assert request["use_secret_chats"] is False
     assert request["database_directory"].endswith("runtime/tdlib/db")
+    assert redact(request)["database_encryption_key"] == "<redacted>"
+
+
+def test_tdlib_parameters_reject_empty_database_key():
+    with pytest.raises(ValueError):
+        set_tdlib_parameters_request(
+            api_id=123,
+            api_hash="secret-hash",
+            database_directory="runtime/tdlib/db",
+            files_directory="runtime/tdlib/files",
+            database_encryption_key="",
+        )
 
 
 def test_public_locator_is_normalized_without_business_logic():
@@ -59,6 +73,21 @@ def test_auth_state_machine_builds_code_request_only_when_supplied():
     assert step is not None
     assert step.request == {"@type": "checkAuthenticationCode", "code": "12345"}
     assert redact(step.request)["code"] == "<redacted>"
+
+
+def test_auth_state_machine_supports_current_email_code_state():
+    step = next_auth_step(auth_update("authorizationStateWaitEmailCode"), email_code="6789")
+    assert step is not None
+    assert step.request == {
+        "@type": "checkAuthenticationEmailCode",
+        "code": {"@type": "emailAddressAuthenticationCode", "code": "6789"},
+    }
+    assert redact(step.request)["code"] == "<redacted>"
+
+
+def test_registration_fails_closed_for_poc():
+    with pytest.raises(AuthActionRequired):
+        next_auth_step(auth_update("authorizationStateWaitRegistration"))
 
 
 def test_ready_state_has_no_follow_up_request():

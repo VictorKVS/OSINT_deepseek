@@ -27,6 +27,7 @@ logs/
 data/osint/
 data/osint_dev/
 data/runtime/
+.runtime/
 *.db
 *.sqlite
 

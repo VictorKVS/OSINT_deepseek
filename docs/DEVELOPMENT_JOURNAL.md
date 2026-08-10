@@ -5,7 +5,7 @@
 **Current stage:** **Stage 07 — M5 Telegram Radar Requirements & Donor Verification**  
 **Frozen baseline:** **DEV v1 / Stage 06 COMPLETE**  
 **Current milestone:** **M5 — Telegram transport PoC preparation**  
-**Rule:** update this journal whenever a gate, contract, architecture decision, material defect, component disposition or roadmap changes.
+**Rule:** update this journal whenever a gate, contract, architecture decision, material defect, component disposition, commercial/reuse opportunity or roadmap changes.
 
 ---
 
@@ -14,11 +14,15 @@
 ```text
 REQUIREMENT / ТЗ
       ↓
+COMMERCIAL + REUSE REVIEW
+      ↓
 REQUIREMENTS REVIEW
       ↓
 BUSINESS + PROCESS ANALYSIS
       ↓
 ARCHITECTURE
+      ↓
+COMMERCIAL + REUSE RECHECK
       ↓
 ARCHITECTURE REVIEW
       ↓
@@ -32,12 +36,16 @@ TEST / RUN
       ↓
 VERIFICATION
       ↓
+PRODUCT REGISTRY RECHECK
+      ↓
 EXPERIENCE / KB
 ```
 
 > **NO CODE BEFORE CONTRACT.**
 
 A component is not justified because it is interesting, fashionable or already present in the repository. It must have a concrete approved purpose, owner, input/output contract, acceptance evidence and WHY.
+
+Commercial/reuse review is now a permanent gate. Before development starts we ask what other products can reuse the block, what low-cost metadata/interfaces should be preserved, what logic must remain product-specific, and whether a new commercial opportunity appears. The question is reopened during architecture review and after verification. A valid answer may be "no commercial change"; we do not add complexity merely to preserve hypothetical products.
 
 ---
 
@@ -90,6 +98,7 @@ Responsibilities remain narrow:
 | `config/` | **DRAFT INPUTS** | mission/profile/policy ideas, not calibrated truth |
 | `data/dev/` | **TEST FIXTURES ONLY** | behavior evidence, never intelligence evidence |
 | `father_osint/transports/` | **M5 EXTENSION BOUNDARY** | live implementation unapproved pending PoC/ADR |
+| `docs/PRODUCT_OPPORTUNITY_REGISTRY.md` | **LIVING PRODUCT CONTROL** | commercial possibilities + mandatory reuse review |
 | removed legacy/runtime/VIP/gateway/Teleproto code | **GIT HISTORY / AUDIT ONLY** | not current architecture |
 
 ---
@@ -172,6 +181,21 @@ Important correction: the earlier donor notes claimed a 2026 GramJS release cade
 
 Detailed evidence: `docs/07_next_requirement/03_TELEGRAM_TRANSPORT_DONOR_RESEARCH_2026-08-10.md`.
 
+### J-017 — Commercial/reuse review becomes a permanent engineering gate
+Every requirement and material architecture change must now be reviewed for reusable product value **before implementation**, then revisited during architecture review and after verification/baseline freeze.
+
+Questions include:
+- which current/future products can reuse this block;
+- what low-cost metadata or interfaces are worth preserving now;
+- what domain-specific logic must remain outside reusable core;
+- whether technology choice creates commercial lock-in;
+- whether a new opportunity should be added to the product registry;
+- whether existing star priorities should be raised, lowered or retired.
+
+This does **not** authorize speculative overengineering. Primary requirement and simplicity remain dominant.
+
+Control document: `docs/PRODUCT_OPPORTUNITY_REGISTRY.md`.
+
 ---
 
 ## 5. DEV v1 verification result
@@ -211,15 +235,21 @@ Planning records:
 - `docs/07_next_requirement/01_M5_CAPABILITY_PRIORITY.md`
 - `docs/07_next_requirement/02_TELEGRAM_RADAR_REQUIREMENTS_V0_1.md`
 - `docs/07_next_requirement/03_TELEGRAM_TRANSPORT_DONOR_RESEARCH_2026-08-10.md`
+- `docs/07_next_requirement/04_TDLIB_POC_TEST_PLAN.md`
+- `docs/07_next_requirement/05_TELEGRAM_IMPLEMENTATION_PATTERN_REVIEW_2026-08-10.md`
 
 M5 business requirement:
 
 > FATHER OSINT shall collect requested public Telegram channel material through a replaceable approved transport and return provenance-preserving `Material` records with bounded execution and explicit failures.
 
+Commercial/reuse implications already identified for M5 include Competitive & Channel Intelligence, Content Origin & Propagation Analytics, Brand/Reputation Monitoring, Technology/Market Radar, Source/Channel Quality Analytics and later controlled Risk Intelligence. These opportunities justify preserving stable IDs, timestamps, edit/forward/reply metadata, source locator and content hashes where doing so does not complicate the primary collection contract.
+
 Current gate:
 
 ```text
 requirements              PASS / draft approved direction
+   ↓
+commercial/reuse review   PASS / registry opened
    ↓
 donor SOURCE_VERIFIED     PASS for shortlist
    ↓
@@ -230,6 +260,8 @@ identical benchmark
 security/operations review
    ↓
 ADR transport selection
+   ↓
+commercial/reuse recheck
    ↓
 acceptance tests
    ↓
@@ -270,6 +302,8 @@ Both candidates must prove the same scenario:
 
 Current action: **execute two bounded Telegram transport PoCs, starting with TDLib, without modifying frozen DEV v1 contracts.**
 
+Every subsequent requirement starts with the commercial/reuse gate before architecture and code.
+
 ---
 
 ## 10. Journal update template
@@ -280,11 +314,13 @@ Stage / milestone
 Trigger / problem
 Decision
 WHY
+Commercial / reuse review
 Files/components affected
 Acceptance test / evidence
 Result: PASS / PARTIAL / REWORK / DEFERRED
 New risks
-Next action
+Registry changes
+Next action / next reuse-review gate
 ```
 
 Small formatting-only commits do not require a separate architectural journal entry.

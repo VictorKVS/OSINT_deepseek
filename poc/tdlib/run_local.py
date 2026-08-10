@@ -3,6 +3,7 @@ from __future__ import annotations
 import getpass
 import json
 import os
+import time
 from pathlib import Path
 
 from poc.tdlib.auth import AuthActionRequired, next_auth_step
@@ -17,9 +18,22 @@ def require_env(name: str) -> str:
     return value
 
 
+def _as_auth_update(message: dict[str, object]) -> dict[str, object] | None:
+    """Normalize both auth updates and getAuthorizationState responses."""
+    message_type = message.get("@type")
+    if message_type == "updateAuthorizationState":
+        return message
+    if isinstance(message_type, str) and message_type.startswith("authorizationState"):
+        return {
+            "@type": "updateAuthorizationState",
+            "authorization_state": message,
+        }
+    return None
+
+
 def main() -> None:
-    api_id = int(require_env("TELEGRAM_API_ID"))
-    api_hash = require_env("TELEGRAM_API_HASH")
+    api_id = int(require_env("TELEGRAM_API_ID").strip())
+    api_hash = require_env("TELEGRAM_API_HASH").strip()
     db_key = require_env("FATHER_TDLIB_DB_KEY")
     tdjson_path = require_env("TDJSON_LIBRARY")
     tdjson_sha256 = require_env("TDJSON_SHA256")
@@ -44,12 +58,31 @@ def main() -> None:
     print("TDLib PoC local bootstrap started. Secrets are not printed.")
     print(f"Verified tdjson SHA-256: {bridge.library_sha256}")
 
+    # Managed JSON clients created with td_create_client_id() do not emit updates
+    # until the first request is sent. Explicitly ask for the current auth state
+    # before entering the receive loop.
+    bridge.send({"@type": "getAuthorizationState"})
+    first_auth_deadline = time.monotonic() + 15.0
+    saw_auth_state = False
+
     while True:
-        update = bridge.receive(1.0)
+        message = bridge.receive(1.0)
+        if message is None:
+            if not saw_auth_state and time.monotonic() >= first_auth_deadline:
+                raise SystemExit(
+                    "TDLib bootstrap timed out before the first authorization state; "
+                    "the managed client produced no response/update after getAuthorizationState"
+                )
+            continue
+
+        if message.get("@type") == "error":
+            safe_error = redact(message)
+            raise SystemExit(f"TDLib returned an error during authorization: {safe_error}")
+
+        update = _as_auth_update(message)
         if update is None:
             continue
-        if update.get("@type") != "updateAuthorizationState":
-            continue
+        saw_auth_state = True
 
         state = (update.get("authorization_state") or {}).get("@type")
         kwargs = {

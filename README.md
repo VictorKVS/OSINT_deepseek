@@ -43,6 +43,22 @@ flowchart TD
     PR --> E[11. Experience -> KB / baseline]
 ```
 
+## Project control
+
+The project is managed by **capability and evidence gates**, not invented calendar deadlines or cosmetic completion percentages.
+
+**[Capability Roadmap & Project Control](docs/PROJECT_ROADMAP_AND_CONTROL.md)** — integrated MUST/SHOULD/OPTION roadmap, dependency/critical-path diagrams, gate-based progress dashboard, project threat/risk matrix, opportunity paths and immediate controlled backlog.
+
+Planning rule:
+
+```text
+MUST    = required core capability / next gate
+SHOULD  = materially reduces risk or strengthens several paths
+OPTION  = commercial/product opportunity; promoted only by evidence
+```
+
+Roadmap, risk register, product registry, journal and traceability are reviewed together whenever a material gate or decision changes.
+
 ## Commercial product direction
 
 Commercialization is a **separate product-development track**, not a substitute for the core engineering roadmap. Every reusable block should be reviewed before development, during architecture review and after verification for additional lawful uses and product opportunities.
@@ -111,6 +127,7 @@ Formal freeze record:
 
 | Pack | Purpose |
 |---|---|
+| [Capability Roadmap & Project Control](docs/PROJECT_ROADMAP_AND_CONTROL.md) | Goals, dependencies, progress gates, project risks, opportunity paths and controlled backlog |
 | [Development Journal](docs/DEVELOPMENT_JOURNAL.md) | Living history, status, WHY decisions and roadmap |
 | [Commercial Product Registry](docs/PRODUCT_OPPORTUNITY_REGISTRY.md) | Separate living product track: reusable blocks → commercial opportunities, priorities and review gates |
 | [Project Governance](docs/PROJECT_GOVERNANCE.md) | Mandatory engineering chain and gates |
@@ -134,7 +151,7 @@ Formal freeze record:
 | `tests/` | Verified executable contract evidence |
 | `data/` | DEV fixtures/runtime data references |
 | `config/` | Draft mission/profile/policy inputs |
-| `docs/` | Requirements, architecture, tests, decisions, verification, product registry and journal |
+| `docs/` | Requirements, architecture, tests, decisions, verification, product registry, roadmap/control and journal |
 
 ## Current disposition
 

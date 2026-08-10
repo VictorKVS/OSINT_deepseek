@@ -16,6 +16,16 @@ class Collector(Protocol):
         ...
 
 
+def safe_collector_error(collector_name: str, exc: Exception) -> str:
+    """Return a stable user-facing error without exception payload leakage.
+
+    Collector/library exception messages may contain URLs, request parameters,
+    account identifiers or credentials. Detailed diagnostics belong in a local
+    privileged debug channel, not in evidence packages.
+    """
+    return f"{collector_name}: {type(exc).__name__}"
+
+
 class OSINTAgent:
     """Read/collect worker for the FATHER Knowledge Factory.
 
@@ -62,7 +72,7 @@ class OSINTAgent:
                     if payload_reused:
                         package.payloads_reused += 1
             except Exception as exc:  # collector isolation is intentional at the orchestration boundary
-                package.collection_errors.append(f"{collector.name}: {type(exc).__name__}: {exc}")
+                package.collection_errors.append(safe_collector_error(collector.name, exc))
 
         if package.collection_errors and not package.materials:
             package.stop_reason = "collection_failed"

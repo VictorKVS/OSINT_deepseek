@@ -6,7 +6,7 @@
 >
 > **Current development:** **Stage 07 / M5 — Telegram Radar**
 >
-> **Engineering rule:** **NO CODE BEFORE CONTRACT.** Requirements are reviewed first, including commercial/reuse potential, then architecture, acceptance tests, implementation plan, code, verification and experience capture.
+> **Engineering rule:** **NO CODE BEFORE CONTRACT.** Requirements are reviewed first, including commercial/reuse potential and security/supply-chain impact, then architecture, acceptance tests, implementation plan, code, verification and experience capture.
 
 This repository is evolving from the original `OSINT_deepseek` prototype into the first practical worker of the FATHER ecosystem: an OSINT supplier for the Knowledge Factory.
 
@@ -29,18 +29,20 @@ flowchart LR
 ```mermaid
 flowchart TD
     R[1. Requirements / ТЗ] --> CR[2. Commercial + Reuse Review]
-    CR --> RV[3. Requirements Review]
-    RV --> A[4. Architecture + Business Analysis]
+    CR --> SR[3. Security + Supply-Chain Review]
+    SR --> RV[4. Requirements Review]
+    RV --> A[5. Architecture + Business Analysis]
     A --> CR2[Commercial + Reuse Recheck]
-    CR2 --> AV[Architecture Review Gate]
-    AV -->|PASS| T[5. Acceptance Test Design]
+    CR2 --> TM[Threat Model / Top-100 Coverage]
+    TM --> AV[Architecture Review Gate]
+    AV -->|PASS| T[6. Acceptance + Security Test Design]
     AV -->|REWORK| R
-    T --> P[6. Implementation Plan]
-    P --> C[7. Code]
-    C --> TR[8. Test Run]
-    TR --> V[9. Verification / Acceptance]
-    V --> PR[10. Product Registry Recheck]
-    PR --> E[11. Experience -> KB / baseline]
+    T --> P[7. Implementation Plan]
+    P --> C[8. Code]
+    C --> TR[9. Test + SAST/SCA/Secrets]
+    TR --> V[10. Verification / Acceptance]
+    V --> PR[11. Product + Security Registry Recheck]
+    PR --> E[12. Experience -> KB / baseline]
 ```
 
 ## Project control
@@ -57,7 +59,20 @@ SHOULD  = materially reduces risk or strengthens several paths
 OPTION  = commercial/product opportunity; promoted only by evidence
 ```
 
-Roadmap, risk register, product registry, journal and traceability are reviewed together whenever a material gate or decision changes.
+Roadmap, risk register, product registry, security register, journal and traceability are reviewed together whenever a material gate or decision changes.
+
+## Security / DevSecOps direction
+
+Security is a permanent cross-cutting workstream. Approved libraries, GitHub Actions, binaries, models, containers, services and donor-derived components remain under lifecycle monitoring after adoption.
+
+Key security governance:
+
+- **[DevSecOps & Software Supply-Chain Governance](docs/SECURITY_SUPPLY_CHAIN_CONTROL.md)**
+- **[Security & Supply-Chain Threat Register](docs/SECURITY_THREAT_REGISTER.md)**
+- **[FATHER Security Top-100 Control Catalog](docs/SECURITY_TOP100_CONTROL_CATALOG.md)**
+- **[Operations Governance Model](docs/OPERATIONS_GOVERNANCE_MODEL.md)**
+
+The Top-100 is an internal coverage catalog built from authoritative security families and project-specific risks; it is a coverage aid, not a replacement for threat modelling. Operational roles are planned separately for production: Director/Product Owner, Security Administrator/Security Officer, System Administrator/DevOps, Analyst/Operator, End User and Developer/Maintainer.
 
 ## Commercial product direction
 
@@ -130,6 +145,10 @@ Formal freeze record:
 | [Capability Roadmap & Project Control](docs/PROJECT_ROADMAP_AND_CONTROL.md) | Goals, dependencies, progress gates, project risks, opportunity paths and controlled backlog |
 | [Development Journal](docs/DEVELOPMENT_JOURNAL.md) | Living history, status, WHY decisions and roadmap |
 | [Commercial Product Registry](docs/PRODUCT_OPPORTUNITY_REGISTRY.md) | Separate living product track: reusable blocks → commercial opportunities, priorities and review gates |
+| [DevSecOps & Supply Chain](docs/SECURITY_SUPPLY_CHAIN_CONTROL.md) | Secure development, dependency/upstream lifecycle and supply-chain gates |
+| [Security Threat Register](docs/SECURITY_THREAT_REGISTER.md) | Living technical/security/supply-chain threat register |
+| [Security Top-100](docs/SECURITY_TOP100_CONTROL_CATALOG.md) | Broad weakness/attack-surface coverage catalog for every engineering gate |
+| [Operations Governance](docs/OPERATIONS_GOVERNANCE_MODEL.md) | Planned production roles, separation of duties, monitoring and operational control domains |
 | [Project Governance](docs/PROJECT_GOVERNANCE.md) | Mandatory engineering chain and gates |
 | [OSINT Agent ТЗ v1](docs/OSINT_AGENT_TZ_V1.md) | Current requirements and acceptance criteria |
 | [Stage 03 — Architecture Review](docs/03_architecture/README.md) | Business analysis, diagrams and architecture decisions |
@@ -151,7 +170,7 @@ Formal freeze record:
 | `tests/` | Verified executable contract evidence |
 | `data/` | DEV fixtures/runtime data references |
 | `config/` | Draft mission/profile/policy inputs |
-| `docs/` | Requirements, architecture, tests, decisions, verification, product registry, roadmap/control and journal |
+| `docs/` | Requirements, architecture, tests, decisions, verification, product registry, security governance, roadmap/control and journal |
 
 ## Current disposition
 
@@ -176,24 +195,27 @@ Historical prototype dependencies are retained in Git history and audit document
 
 The frozen baseline is **DEV / SIMPLIFIED**, not production readiness. Real MTProto sessions, Tor gateways, proxy rotation, schedulers, secrets infrastructure, production LLM routing, battle monitoring, generic Artifact ingestion, local transcription, Knowledge Gate and autonomous KB publication remain separate future requirements.
 
+Production operation additionally requires the planned operations governance controls: role separation, RBAC/authentication, privileged access, change management, vulnerability/patch management, backup/restore, incident response, security/event monitoring, audit and access review.
+
 ## Next milestone
 
 **M5 — Telegram Radar.**
 
 Current M5 sequence:
 - requirements and commercial/reuse review;
+- security/supply-chain review and Top-100 threat coverage;
 - donor verification;
 - bounded TDLib and GramJS PoCs;
 - common benchmark and security/operations review;
 - ADR transport selection;
-- acceptance tests before product-path implementation.
+- acceptance/security tests before product-path implementation.
 
 Later planned core milestones remain:
 - M6 — generic Artifact/Ingestion layer;
 - M7 — local-first transcription/extraction;
 - M8 — Knowledge Gate foundation.
 
-We choose by business value and reusable capability, not by which technology is most interesting.
+We choose by business value, security evidence and reusable capability, not by which technology is most interesting.
 
 ## Change policy
 
@@ -201,13 +223,14 @@ Before modifying the frozen baseline or adding a file, service, database, agent 
 
 1. Which approved requirement requires it?
 2. Which commercial or non-commercial reuse scenarios could benefit from this block?
-3. Is this a defect fix or a new capability?
-4. Which architecture element owns it?
-5. What enters it and what must leave it?
-6. Why is it needed instead of a simpler existing mechanism?
-7. Which acceptance test will prove it works?
-8. Does it break a frozen invariant or add an external dependency?
-9. What is the rollback path?
-10. Does the implementation remain reusable rather than embedding one product's domain logic into the core?
+3. Which new security threat/Top-100 topics become applicable?
+4. Is this a defect fix or a new capability?
+5. Which architecture element owns it?
+6. What enters it and what must leave it?
+7. Why is it needed instead of a simpler existing mechanism?
+8. Which acceptance/security test will prove it works?
+9. Does it break a frozen invariant or add an external dependency?
+10. What is the rollback/disable/replacement path?
+11. Does the implementation remain reusable rather than embedding one product's domain logic into the core?
 
 If these questions have no clear answers, the change is not implementation-ready.

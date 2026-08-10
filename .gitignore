@@ -30,6 +30,13 @@ data/runtime/
 *.db
 *.sqlite
 
+# TDLib PoC/runtime state — session databases and downloaded files must never enter Git
+.tdlib/
+tdlib-data/
+tdlib-files/
+poc/tdlib/runtime/
+poc/tdlib/session/
+
 # Generic local JSON, with explicit versioned-fixture exceptions
 *.json
 !example.json

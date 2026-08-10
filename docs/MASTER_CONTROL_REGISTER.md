@@ -14,12 +14,12 @@ Alternative terminal states: `DEFERRED`, `REJECTED`, `SUPERSEDED`.
 
 | ID | Type | Title | Outcome / why | Depends on | Security / risk links | Evidence required | State | Next action |
 |---|---|---|---|---|---|---|---|---|
-| REQ-M5-001 | REQ | Live Telegram Radar | collect requested public Telegram material through replaceable transport with provenance and bounded failure | DEV v1 | S02,S06,S07,S14,S15,S16,S17 + Top-100 applicable topics | M5 acceptance contract + verified implementation | ACTIVE / SECURITY CONDITION | prepare locally verified TDLib runtime |
-| POC-M5-001 | POC | TDLib transport PoC | produce real operational/security evidence before transport ADR | REQ-M5-001 | session secrecy, rate handling, restart/checkpoint, upstream/supply chain | repeatable harness + raw observations + failure results | ACTIVE / LOCAL PROVENANCE REQUIRED | pin/build TDLib, record tdjson hash, then bootstrap |
-| SEC-M5-001 | SEC | Telegram session / transport security gate | prove live credentials/session cannot leak and transport can be disabled/replaced safely | REQ-M5-001 | S06,S07,S15,S16 + agent/content threat model where applicable | threat-model review + log/session tests + upstream verification | VERIFY | confirm local binary provenance + GitHub owner settings |
-| SEC-AUDIT-M5-001 | SEC | Pre-M5 full project security audit | prevent real Telegram credentials/session from entering an unverified runtime | current repo + TDLib PoC | S02,S03,S06,S07,S13,S15,S16,S26,S29,S52 | audit + remediation evidence | CONDITIONAL PASS | use `18_PRE_M5_SECURITY_REMEDIATION_2026-08-10.md`; remaining owner/local controls |
+| REQ-M5-001 | REQ | Live Telegram Radar | collect requested public Telegram material through replaceable transport with provenance and bounded failure | DEV v1 | S02,S06,S07,S14,S15,S16,S17 + Top-100 applicable topics | M5 acceptance contract + verified implementation | ACTIVE / SECURITY CONDITION | execute controlled local authorization and bounded public-source PoC |
+| POC-M5-001 | POC | TDLib transport PoC | produce real operational/security evidence before transport ADR | REQ-M5-001 | session secrecy, rate handling, restart/checkpoint, upstream/supply chain | repeatable harness + raw observations + failure results | ACTIVE / LOCAL RUNTIME VERIFIED | run POC-TD-01 controlled local authorization using verified binary |
+| SEC-M5-001 | SEC | Telegram session / transport security gate | prove live credentials/session cannot leak and transport can be disabled/replaced safely | REQ-M5-001 | S06,S07,S15,S16 + agent/content threat model where applicable | threat-model review + log/session tests + upstream verification | VERIFY | use exact verified tdjson hash; confirm local credential/session controls + owner settings |
+| SEC-AUDIT-M5-001 | SEC | Pre-M5 full project security audit | prevent real Telegram credentials/session from entering an unverified runtime | current repo + TDLib PoC | S02,S03,S06,S07,S13,S15,S16,S26,S29,S52 | audit + remediation + local runtime evidence | CONDITIONAL PASS | `18_PRE_M5_SECURITY_REMEDIATION_2026-08-10.md` + `19_TDLIB_WINDOWS_LOCAL_RUNTIME_EVIDENCE_2026-08-11.md` |
 
-WIP limit remains unchanged. Security remediation is part of the existing M5 streams, not a new product milestone.
+WIP limit remains unchanged. Security remediation and local runtime verification are part of the existing M5 streams, not a new product milestone.
 
 ## Active security findings from SEC-AUDIT-M5-001
 
@@ -27,7 +27,7 @@ WIP limit remains unchanged. Security remediation is part of the existing M5 str
 |---|---|---|---|---|---|
 | SEC-2026-001 | HIGH | default TDLib `.runtime/tdlib` path was not ignored | live auth | CONTROLLED | `.runtime/` ignore policy + regression state |
 | SEC-2026-002 | HIGH | TDLib initialization/encryption flow was stale | live auth | CONTROLLED | current schema + mandatory external DB key + tests |
-| SEC-2026-003 | HIGH | `tdjson` native library lacked provenance/hash gate | live auth | VERIFY LOCAL | code requires exact path/hash; record actual approved upstream/build/hash before credentials |
+| SEC-2026-003 | HIGH | `tdjson` native library lacked provenance/hash gate | live auth | CONTROLLED FOR CURRENT LOCAL POC BINARY | official source commit `022d60202e446ad1287b9fb68e687c8a0760788b`; clean build; tdjson SHA-256 `D0BD83317A5BEE2C3758378F564C3C34FAE621166CD545E6B693665E690B8A8E`; runtime self-report matched commit |
 | SEC-2026-004 | HIGH lifecycle | Dependabot vulnerability alerts disabled | M5 supply-chain readiness | OWNER ACTION | enable alerts in GitHub Advanced Security and verify |
 | SEC-2026-005 | MEDIUM-HIGH | pending TDLib update queue was unbounded | live stress/reliability | CONTROLLED | bounded buffer + overflow counter + negative test |
 | SEC-2026-006 | MEDIUM-HIGH | collector exception text could leak sensitive values | live collector | CONTROLLED | stable type-only persisted errors + disclosure regression test |

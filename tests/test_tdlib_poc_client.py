@@ -39,6 +39,21 @@ def test_call_correlates_response_and_keeps_unrelated_update():
     assert "@extra" in bridge.sent[0]
 
 
+def test_pending_updates_are_bounded_and_loss_is_observable():
+    bridge = FakeBridge([
+        {"@type": "updateNewMessage", "message": {"id": 1}},
+        {"@type": "updateNewMessage", "message": {"id": 2}},
+        {"@type": "updateNewMessage", "message": {"id": 3}},
+        {"@type": "chat", "id": 42, "@extra": "AUTO"},
+    ])
+    client = TdJsonClient(bridge, max_pending_updates=2)
+
+    client.call({"@type": "getChat", "chat_id": 42}, timeout_seconds=0.5)
+
+    assert [item["message"]["id"] for item in client.pending_updates] == [2, 3]
+    assert client.dropped_pending_updates == 1
+
+
 def test_call_surfaces_tdlib_error_structurally():
     bridge = FakeBridge([
         {"@type": "error", "code": 400, "message": "CHAT_NOT_FOUND", "@extra": "AUTO"}

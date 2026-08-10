@@ -51,6 +51,8 @@ The project is managed by **capability and evidence gates**, not invented calend
 
 **[Capability Roadmap & Project Control](docs/PROJECT_ROADMAP_AND_CONTROL.md)** — integrated MUST/SHOULD/OPTION roadmap, dependency/critical-path diagrams, gate-based progress dashboard, project threat/risk matrix, opportunity paths and immediate controlled backlog.
 
+**[Project Execution Control](docs/PROJECT_EXECUTION_CONTROL.md)** — approved lean execution model: seven living control objects, Definition of Ready/Done, WIP limits, work-item classes, Senior Council invocation threshold, Change Impact Analysis, ADR threshold, technical-debt rule and documentation hierarchy.
+
 Planning rule:
 
 ```text
@@ -58,6 +60,16 @@ MUST    = required core capability / next gate
 SHOULD  = materially reduces risk or strengthens several paths
 OPTION  = commercial/product opportunity; promoted only by evidence
 ```
+
+Default WIP is deliberately constrained:
+
+```text
+1 active core milestone
+1 active security workstream attached to it
+1 active research/PoC stream attached to it
+```
+
+Current approved WIP: **M5 Telegram Radar + M5 security/supply-chain controls + TDLib PoC**. M6/M7/M8 and product MVPs stay queued until a gate promotes them.
 
 Roadmap, risk register, product registry, security register, journal and traceability are reviewed together whenever a material gate or decision changes.
 
@@ -143,6 +155,7 @@ Formal freeze record:
 | Pack | Purpose |
 |---|---|
 | [Capability Roadmap & Project Control](docs/PROJECT_ROADMAP_AND_CONTROL.md) | Goals, dependencies, progress gates, project risks, opportunity paths and controlled backlog |
+| [Project Execution Control](docs/PROJECT_EXECUTION_CONTROL.md) | Lean execution rules, DoR/DoD, WIP limits, work-item classes, ADR/change-impact thresholds and process-overengineering control |
 | [Development Journal](docs/DEVELOPMENT_JOURNAL.md) | Living history, status, WHY decisions and roadmap |
 | [Commercial Product Registry](docs/PRODUCT_OPPORTUNITY_REGISTRY.md) | Separate living product track: reusable blocks → commercial opportunities, priorities and review gates |
 | [DevSecOps & Supply Chain](docs/SECURITY_SUPPLY_CHAIN_CONTROL.md) | Secure development, dependency/upstream lifecycle and supply-chain gates |
@@ -205,8 +218,9 @@ Current M5 sequence:
 - requirements and commercial/reuse review;
 - security/supply-chain review and Top-100 threat coverage;
 - donor verification;
-- bounded TDLib and GramJS PoCs;
-- common benchmark and security/operations review;
+- **TDLib PoC (current evidence-producing task);**
+- GramJS comparison only if TDLib evidence leaves a material decision gap;
+- security/operations review;
 - ADR transport selection;
 - acceptance/security tests before product-path implementation.
 
@@ -219,12 +233,12 @@ We choose by business value, security evidence and reusable capability, not by w
 
 ## Change policy
 
-Before modifying the frozen baseline or adding a file, service, database, agent or dependency, answer:
+Before modifying the frozen baseline or adding a file, service, database, agent or dependency, apply the compact Change Impact Analysis in `PROJECT_EXECUTION_CONTROL.md` and answer at minimum:
 
 1. Which approved requirement requires it?
 2. Which commercial or non-commercial reuse scenarios could benefit from this block?
 3. Which new security threat/Top-100 topics become applicable?
-4. Is this a defect fix or a new capability?
+4. Is this `DEFECT`, `RISK/SEC`, `DEBT`, `REQ` or `OPP`?
 5. Which architecture element owns it?
 6. What enters it and what must leave it?
 7. Why is it needed instead of a simpler existing mechanism?

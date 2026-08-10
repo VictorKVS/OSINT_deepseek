@@ -20,14 +20,16 @@ def next_auth_step(
     *,
     parameters_request: dict[str, Any] | None = None,
     phone_number: str | None = None,
+    email_address: str | None = None,
+    email_code: str | None = None,
     code: str | None = None,
     password: str | None = None,
-    database_encryption_key: str = "",
 ) -> AuthStep | None:
-    """Translate TDLib authorization-state updates into explicit local actions.
+    """Translate current TDLib authorization updates into explicit local actions.
 
-    This is intentionally deterministic. It never invents credentials and never
-    reads secrets from Git-tracked configuration.
+    The function is deterministic: credentials are never invented, persisted, or
+    read from Git-tracked configuration. New/unknown auth states fail closed at the
+    local harness instead of being silently bypassed.
     """
     if update.get("@type") != "updateAuthorizationState":
         return None
@@ -43,18 +45,31 @@ def next_auth_step(
             raise AuthActionRequired("TDLib parameters are required")
         return AuthStep(state=state_type, request=parameters_request)
 
-    if state_type == "authorizationStateWaitEncryptionKey":
-        return AuthStep(
-            state=state_type,
-            request={"@type": "checkDatabaseEncryptionKey", "encryption_key": database_encryption_key},
-        )
-
     if state_type == "authorizationStateWaitPhoneNumber":
         if not phone_number:
             return AuthStep(state=state_type, operator_prompt="Enter Telegram phone number locally")
         return AuthStep(
             state=state_type,
             request={"@type": "setAuthenticationPhoneNumber", "phone_number": phone_number},
+        )
+
+    if state_type == "authorizationStateWaitEmailAddress":
+        if not email_address:
+            return AuthStep(state=state_type, operator_prompt="Enter Telegram email address locally")
+        return AuthStep(
+            state=state_type,
+            request={"@type": "setAuthenticationEmailAddress", "email_address": email_address},
+        )
+
+    if state_type == "authorizationStateWaitEmailCode":
+        if not email_code:
+            return AuthStep(state=state_type, operator_prompt="Enter Telegram email code locally")
+        return AuthStep(
+            state=state_type,
+            request={
+                "@type": "checkAuthenticationEmailCode",
+                "code": {"@type": "emailAddressAuthenticationCode", "code": email_code},
+            },
         )
 
     if state_type == "authorizationStateWaitCode":
@@ -73,7 +88,15 @@ def next_auth_step(
             request={"@type": "checkAuthenticationPassword", "password": password},
         )
 
-    if state_type in {"authorizationStateReady", "authorizationStateLoggingOut", "authorizationStateClosing", "authorizationStateClosed"}:
+    if state_type == "authorizationStateWaitRegistration":
+        raise AuthActionRequired("PoC does not register new Telegram accounts; use an existing account")
+
+    if state_type in {
+        "authorizationStateReady",
+        "authorizationStateLoggingOut",
+        "authorizationStateClosing",
+        "authorizationStateClosed",
+    }:
         return AuthStep(state=state_type)
 
-    return AuthStep(state=str(state_type or "unknown"))
+    return AuthStep(state=str(state_type or "unknown"), operator_prompt="Unsupported TDLib authorization state")

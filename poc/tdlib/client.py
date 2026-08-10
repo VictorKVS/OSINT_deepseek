@@ -23,13 +23,23 @@ class TdLibResponseError(RuntimeError):
 class TdJsonClient:
     """Small synchronous facade over TDLib's async JSON interface for PoC use.
 
-    Unrelated updates are retained instead of silently discarded so live-update
-    experiments can consume them later.
+    Unrelated updates are retained in a bounded buffer instead of silently
+    discarded. If the buffer is saturated, the oldest update is dropped and the
+    loss counter is incremented so the PoC can detect overload explicitly.
     """
 
-    def __init__(self, bridge: TdJsonBridge) -> None:
+    def __init__(self, bridge: TdJsonBridge, *, max_pending_updates: int = 1000) -> None:
+        if max_pending_updates <= 0:
+            raise ValueError("max_pending_updates must be > 0")
         self.bridge = bridge
-        self.pending_updates: deque[dict[str, Any]] = deque()
+        self.max_pending_updates = max_pending_updates
+        self.pending_updates: deque[dict[str, Any]] = deque(maxlen=max_pending_updates)
+        self.dropped_pending_updates = 0
+
+    def _retain_update(self, response: dict[str, Any]) -> None:
+        if len(self.pending_updates) >= self.max_pending_updates:
+            self.dropped_pending_updates += 1
+        self.pending_updates.append(response)
 
     def call(self, request: dict[str, Any], *, timeout_seconds: float = 10.0) -> dict[str, Any]:
         if timeout_seconds <= 0:
@@ -51,7 +61,7 @@ class TdJsonClient:
                 continue
 
             if response.get("@extra") != correlation_id:
-                self.pending_updates.append(response)
+                self._retain_update(response)
                 continue
 
             if response.get("@type") == "error":

@@ -14,26 +14,26 @@ Alternative terminal states: `DEFERRED`, `REJECTED`, `SUPERSEDED`.
 
 | ID | Type | Title | Outcome / why | Depends on | Security / risk links | Evidence required | State | Next action |
 |---|---|---|---|---|---|---|---|---|
-| REQ-M5-001 | REQ | Live Telegram Radar | collect requested public Telegram material through replaceable transport with provenance and bounded failure | DEV v1 | S02,S06,S07,S14,S15,S16,S17 + Top-100 applicable topics | M5 acceptance contract + verified implementation | ACTIVE / SECURITY HOLD | clear pre-live security blockers |
-| POC-M5-001 | POC | TDLib transport PoC | produce real operational/security evidence before transport ADR | REQ-M5-001 | session secrecy, rate handling, restart/checkpoint, upstream/supply chain | repeatable harness + raw observations + failure results | ACTIVE / LIVE RUN BLOCKED | remediate SEC-AUDIT-M5-001 before credentials |
-| SEC-M5-001 | SEC | Telegram session / transport security gate | prove live credentials/session cannot leak and transport can be disabled/replaced safely | REQ-M5-001 | S06,S07,S15,S16 + agent/content threat model where applicable | threat-model review + log/session tests + upstream verification | ACTIVE | execute remediation waves A/B |
-| SEC-AUDIT-M5-001 | SEC | Pre-M5 full project security audit | prevent real Telegram credentials/session from entering an unverified runtime | current repo + TDLib PoC | S02,S03,S06,S07,S13,S15,S16,S26,S29,S52 | `06_verification/17_PRE_M5_SECURITY_AUDIT_2026-08-10.md` + re-verification evidence | STOP / REWORK | close live-PoC blockers then re-audit |
+| REQ-M5-001 | REQ | Live Telegram Radar | collect requested public Telegram material through replaceable transport with provenance and bounded failure | DEV v1 | S02,S06,S07,S14,S15,S16,S17 + Top-100 applicable topics | M5 acceptance contract + verified implementation | ACTIVE / SECURITY CONDITION | prepare locally verified TDLib runtime |
+| POC-M5-001 | POC | TDLib transport PoC | produce real operational/security evidence before transport ADR | REQ-M5-001 | session secrecy, rate handling, restart/checkpoint, upstream/supply chain | repeatable harness + raw observations + failure results | ACTIVE / LOCAL PROVENANCE REQUIRED | pin/build TDLib, record tdjson hash, then bootstrap |
+| SEC-M5-001 | SEC | Telegram session / transport security gate | prove live credentials/session cannot leak and transport can be disabled/replaced safely | REQ-M5-001 | S06,S07,S15,S16 + agent/content threat model where applicable | threat-model review + log/session tests + upstream verification | VERIFY | confirm local binary provenance + GitHub owner settings |
+| SEC-AUDIT-M5-001 | SEC | Pre-M5 full project security audit | prevent real Telegram credentials/session from entering an unverified runtime | current repo + TDLib PoC | S02,S03,S06,S07,S13,S15,S16,S26,S29,S52 | audit + remediation evidence | CONDITIONAL PASS | use `18_PRE_M5_SECURITY_REMEDIATION_2026-08-10.md`; remaining owner/local controls |
 
-WIP limit is currently full. Security audit remediation is an allowed interruption of the existing M5 security/PoC streams; it does not open a new product milestone.
+WIP limit remains unchanged. Security remediation is part of the existing M5 streams, not a new product milestone.
 
 ## Active security findings from SEC-AUDIT-M5-001
 
 | ID | Severity | Finding | Blocks | State | Required evidence |
 |---|---|---|---|---|---|
-| SEC-2026-001 | HIGH | default TDLib `.runtime/tdlib` path is not covered by current `.gitignore` | live auth | ACTIVE | ignore/outside-worktree control + test |
-| SEC-2026-002 | HIGH | TDLib initialization/encryption flow is stale vs current upstream schema | live auth | ACTIVE | pinned schema + non-empty external DB key + tests |
-| SEC-2026-003 | HIGH | `tdjson` native library loaded without recorded provenance/hash | live auth | ACTIVE | exact upstream/build/hash evidence |
-| SEC-2026-004 | HIGH lifecycle | Dependabot vulnerability alerts disabled | M5 supply-chain readiness | ACTIVE | repository setting/control enabled and verified |
-| SEC-2026-005 | MEDIUM-HIGH | unbounded TDLib pending update queue | live stress/reliability | ACTIVE | bounded queue/overflow policy + negative test |
-| SEC-2026-006 | MEDIUM-HIGH | collector exception text persisted without centralized sanitization | live collector | ACTIVE | safe structured error/redaction tests |
+| SEC-2026-001 | HIGH | default TDLib `.runtime/tdlib` path was not ignored | live auth | CONTROLLED | `.runtime/` ignore policy + regression state |
+| SEC-2026-002 | HIGH | TDLib initialization/encryption flow was stale | live auth | CONTROLLED | current schema + mandatory external DB key + tests |
+| SEC-2026-003 | HIGH | `tdjson` native library lacked provenance/hash gate | live auth | VERIFY LOCAL | code requires exact path/hash; record actual approved upstream/build/hash before credentials |
+| SEC-2026-004 | HIGH lifecycle | Dependabot vulnerability alerts disabled | M5 supply-chain readiness | OWNER ACTION | enable alerts in GitHub Advanced Security and verify |
+| SEC-2026-005 | MEDIUM-HIGH | pending TDLib update queue was unbounded | live stress/reliability | CONTROLLED | bounded buffer + overflow counter + negative test |
+| SEC-2026-006 | MEDIUM-HIGH | collector exception text could leak sensitive values | live collector | CONTROLLED | stable type-only persisted errors + disclosure regression test |
 | SEC-2026-007 | MEDIUM | DEV dependency is range-pinned, not reproducibly locked | M5 freeze | QUEUED | approved lock/update strategy |
 | SEC-2026-008 | MEDIUM | repository has no declared license | external distribution/commercial posture | QUEUED | explicit project license/no-license decision |
-| SEC-2026-009 | UNVERIFIED | secret scanning / push protection / branch rules not attestable via current connector | production/release; secret scan before auth | VERIFY OWNER SETTINGS | owner-side evidence |
+| SEC-2026-009 | UNVERIFIED/PARTIAL | connector cannot attest all GitHub secret/ruleset settings | production/release | VERIFY OWNER SETTINGS | public secret scanning is platform-provided; verify Dependabot/branch/ruleset/push settings as applicable |
 
 ## Next queued decisions
 

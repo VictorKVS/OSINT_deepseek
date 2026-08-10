@@ -2,7 +2,7 @@
 
 **Status:** living product registry  
 **Purpose:** track commercial products that can be built from reusable FATHER blocks without duplicating core capabilities.  
-**Rule:** product ideas do not change the engineering sequence by themselves. Core blocks are completed according to approved requirements; commercial products are assembled on top of verified blocks.
+**Rule:** commercial reuse is reviewed **before development starts** and revisited at every material engineering gate. Product ideas do not bypass requirements, tests, donor review, benchmarks or architecture gates.
 
 ## Priority legend
 
@@ -13,6 +13,43 @@
 - ★☆☆☆☆ — low priority or unclear business case.
 
 Stars are **product-priority judgments**, not statistical scores and not market forecasts. They must be revised as we collect real customer evidence.
+
+---
+
+## Permanent Product-Reuse Gate
+
+Every new requirement, module or material architecture change must answer the following **before implementation begins**:
+
+```text
+BUSINESS REQUIREMENT
+      ↓
+PRIMARY USE CASE
+      ↓
+PRODUCT-REUSE REVIEW
+      ├── What other products can use this block?
+      ├── Which data/metadata should be preserved now?
+      ├── Which interfaces must stay domain-neutral?
+      ├── What should remain product-specific outside the core?
+      ├── Does this create a new commercial opportunity?
+      └── Does an existing opportunity become stronger/weaker?
+      ↓
+REQUIREMENTS REVIEW
+      ↓
+ARCHITECTURE
+      ↓
+TESTS / IMPLEMENTATION / VERIFICATION
+```
+
+This review is **not one-time**. It is reopened at least at:
+
+1. **Requirements / ТЗ** — before code: identify reusable value and commercial variants.
+2. **Architecture review** — confirm interfaces support reuse without contaminating the core.
+3. **Donor / technology selection** — check whether a technology creates lock-in that damages other product paths.
+4. **Acceptance-test design** — preserve behavior/metadata needed by approved reuse scenarios where cost is low and justified.
+5. **Verification / baseline freeze** — update which products are now technically feasible.
+6. **Post-MVP / customer evidence** — revise stars, pricing hypotheses, scope and even retire weak ideas.
+
+The purpose is **option preservation**, not speculative overengineering. A possible future product does not justify arbitrary complexity. We preserve reusable interfaces and low-cost metadata only when they do not weaken the primary requirement.
 
 ---
 
@@ -127,11 +164,13 @@ PRODUCT ASSEMBLY
 
 A new commercial idea should first answer:
 
-1. Which existing blocks provide at least most of the required capability?
+1. Which existing blocks provide most of the required capability?
 2. What genuinely product-specific layer is missing?
 3. Can the product be delivered without contaminating the reusable core with domain-specific logic?
 4. Is there a recurring buyer problem rather than only an interesting technical demo?
 5. Can value be demonstrated with a small bounded MVP?
+6. Which current requirement or block should preserve a low-cost option for this product?
+7. What evidence would cause us to lower its star priority or remove it entirely?
 
 ---
 
@@ -153,13 +192,62 @@ Priority stars
 Status
 WHY
 Last reviewed
+Next review gate
 ```
 
 Priority stars must be revisited after customer interviews, competitor research, cost estimates and MVP results.
 
+### Mandatory review record for every engineering milestone
+
+Each milestone/requirement should contain a compact section:
+
+```text
+COMMERCIAL / REUSE REVIEW
+
+Primary capability:
+Reusable core block(s):
+Existing products strengthened:
+New product opportunities discovered:
+Low-cost metadata/interfaces worth preserving now:
+Product-specific logic that must stay outside core:
+Commercial risks / lock-in:
+Registry changes:
+Next review gate:
+```
+
+A valid result may be **"no commercial change"**. The requirement is to ask the question and record the answer, not to invent a product for every module.
+
 ---
 
-## Engineering sequence remains unchanged
+## Engineering sequence
+
+Commercial/reuse analysis is now part of the formal engineering chain:
+
+```text
+BUSINESS REQUIREMENT / ТЗ
+      ↓
+COMMERCIAL + REUSE REVIEW
+      ↓
+REQUIREMENTS REVIEW
+      ↓
+BUSINESS / PROCESS ANALYSIS
+      ↓
+ARCHITECTURE
+      ↓
+COMMERCIAL + REUSE RECHECK
+      ↓
+ARCHITECTURE REVIEW
+      ↓
+ACCEPTANCE TEST DESIGN
+      ↓
+IMPLEMENTATION
+      ↓
+VERIFICATION
+      ↓
+PRODUCT REGISTRY RECHECK
+      ↓
+BASELINE / EXPERIENCE / KB
+```
 
 Current core roadmap remains:
 
@@ -173,4 +261,4 @@ M7 Local transcription / extraction
 M8 Knowledge Gate
 ```
 
-Commercial thinking influences interface design and reusable metadata, but **does not bypass requirements, tests, donor review, benchmarks or architecture gates**.
+Commercial thinking influences interface design and reusable metadata, but **does not justify speculative complexity and does not bypass engineering gates**.

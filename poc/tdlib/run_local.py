@@ -45,6 +45,12 @@ def main() -> None:
     files_dir.mkdir(parents=True, exist_ok=True)
 
     bridge = TdJsonBridge(tdjson_path, tdjson_sha256)
+
+    # Native TDLib verbosity 3 logs request bodies, including api_hash and the
+    # database encryption key. Reduce verbosity before sending any secret-bearing
+    # authorization request. Python-side output is separately redacted below.
+    bridge.execute({"@type": "setLogVerbosityLevel", "new_verbosity_level": 1})
+
     parameters = set_tdlib_parameters_request(
         api_id=api_id,
         api_hash=api_hash,
@@ -55,7 +61,7 @@ def main() -> None:
 
     phone_number: str | None = os.getenv("TELEGRAM_PHONE_NUMBER")
     email_address: str | None = None
-    print("TDLib PoC local bootstrap started. Secrets are not printed.")
+    print("TDLib PoC local bootstrap started. Secret-bearing native logs are suppressed.")
     print(f"Verified tdjson SHA-256: {bridge.library_sha256}")
 
     # Managed JSON clients created with td_create_client_id() do not emit updates
@@ -64,6 +70,7 @@ def main() -> None:
     bridge.send({"@type": "getAuthorizationState"})
     first_auth_deadline = time.monotonic() + 15.0
     saw_auth_state = False
+    parameters_sent = False
 
     while True:
         message = bridge.receive(1.0)
@@ -85,6 +92,13 @@ def main() -> None:
         saw_auth_state = True
 
         state = (update.get("authorization_state") or {}).get("@type")
+
+        # getAuthorizationState can race with updateAuthorizationState and expose
+        # the same WaitTdlibParameters state twice. setTdlibParameters is one-shot;
+        # sending it twice produces "Unexpected setTdlibParameters".
+        if state == "authorizationStateWaitTdlibParameters" and parameters_sent:
+            continue
+
         kwargs = {
             "parameters_request": parameters,
             "phone_number": phone_number,
@@ -115,6 +129,8 @@ def main() -> None:
             raise SystemExit(f"Authorization stopped safely: {step.operator_prompt}")
         if step and step.request:
             bridge.send(step.request)
+            if step.state == "authorizationStateWaitTdlibParameters":
+                parameters_sent = True
         if step and step.state == "authorizationStateReady":
             print("TDLib authorization ready. Local PoC session initialized.")
             return

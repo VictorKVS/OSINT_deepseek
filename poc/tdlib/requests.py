@@ -10,14 +10,23 @@ def set_tdlib_parameters_request(
     api_hash: str,
     database_directory: str,
     files_directory: str,
+    database_encryption_key: str,
     system_language_code: str = "en",
     device_model: str = "FATHER-OSINT-PoC",
     application_version: str = "0.1",
 ) -> dict[str, Any]:
+    """Build the current TDLib initialization request.
+
+    The database encryption key is mandatory for the PoC. We deliberately do not
+    fall back to an empty key because the local TDLib database may contain account
+    and message state.
+    """
     if api_id <= 0:
         raise ValueError("api_id must be > 0")
     if not api_hash.strip():
         raise ValueError("api_hash must not be empty")
+    if not database_encryption_key:
+        raise ValueError("database_encryption_key must not be empty")
 
     db_dir = str(Path(database_directory).expanduser())
     files_dir = str(Path(files_directory).expanduser())
@@ -27,6 +36,7 @@ def set_tdlib_parameters_request(
         "use_test_dc": False,
         "database_directory": db_dir,
         "files_directory": files_dir,
+        "database_encryption_key": database_encryption_key,
         "use_file_database": True,
         "use_chat_info_database": True,
         "use_message_database": True,
@@ -37,8 +47,6 @@ def set_tdlib_parameters_request(
         "device_model": device_model,
         "system_version": "Python",
         "application_version": application_version,
-        "enable_storage_optimizer": True,
-        "ignore_file_names": False,
     }
 
 

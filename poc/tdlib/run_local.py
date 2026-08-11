@@ -11,10 +11,27 @@ from poc.tdlib.requests import set_tdlib_parameters_request
 from poc.tdlib.tdjson_bridge import TdJsonBridge, redact
 
 
+DEFAULT_AUTH_TRANSITION_TIMEOUT_SECONDS = 5.0
+RECEIVE_SLICE_SECONDS = 1.0
+
+
 def require_env(name: str) -> str:
     value = os.getenv(name)
     if not value:
         raise SystemExit(f"Missing required local environment variable: {name}")
+    return value
+
+
+def _positive_float_env(name: str, default: float) -> float:
+    raw = os.getenv(name)
+    if raw is None:
+        return default
+    try:
+        value = float(raw)
+    except ValueError as exc:
+        raise SystemExit(f"{name} must be a positive number") from exc
+    if value <= 0:
+        raise SystemExit(f"{name} must be a positive number")
     return value
 
 
@@ -32,11 +49,19 @@ def _as_auth_update(message: dict[str, object]) -> dict[str, object] | None:
 
 
 def main() -> None:
-    api_id = int(require_env("TELEGRAM_API_ID").strip())
+    try:
+        api_id = int(require_env("TELEGRAM_API_ID").strip())
+    except ValueError as exc:
+        raise SystemExit("TELEGRAM_API_ID must be an integer") from exc
+
     api_hash = require_env("TELEGRAM_API_HASH").strip()
     db_key = require_env("FATHER_TDLIB_DB_KEY")
     tdjson_path = require_env("TDJSON_LIBRARY")
     tdjson_sha256 = require_env("TDJSON_SHA256")
+    auth_transition_timeout = _positive_float_env(
+        "FATHER_TDLIB_AUTH_TRANSITION_TIMEOUT",
+        DEFAULT_AUTH_TRANSITION_TIMEOUT_SECONDS,
+    )
 
     runtime_root = Path(os.getenv("FATHER_TDLIB_RUNTIME", ".runtime/tdlib")).resolve()
     db_dir = runtime_root / "db"
@@ -72,14 +97,33 @@ def main() -> None:
     saw_auth_state = False
     parameters_sent = False
 
+    # TDLib auth calls are asynchronous. Once we send an auth request, require
+    # explicit progress (a new authorization state or a TDLib error) within a
+    # bounded receive budget. Each empty td_receive(RECEIVE_SLICE_SECONDS) consumes
+    # that much budget; the real bridge blocks for up to the requested slice, while
+    # tests can exercise the same contract deterministically without sleeping.
+    transition_waiting_for: str | None = None
+    transition_budget_seconds = 0.0
+
     while True:
-        message = bridge.receive(1.0)
+        receive_slice = RECEIVE_SLICE_SECONDS
+        if transition_waiting_for is not None:
+            receive_slice = min(RECEIVE_SLICE_SECONDS, transition_budget_seconds)
+
+        message = bridge.receive(receive_slice)
         if message is None:
             if not saw_auth_state and time.monotonic() >= first_auth_deadline:
                 raise SystemExit(
                     "TDLib bootstrap timed out before the first authorization state; "
                     "the managed client produced no response/update after getAuthorizationState"
                 )
+            if transition_waiting_for is not None:
+                transition_budget_seconds -= receive_slice
+                if transition_budget_seconds <= 0:
+                    raise SystemExit(
+                        "TDLib timed out waiting for authorization transition after "
+                        f"{transition_waiting_for}"
+                    )
             continue
 
         if message.get("@type") == "error":
@@ -90,6 +134,8 @@ def main() -> None:
         if update is None:
             continue
         saw_auth_state = True
+        transition_waiting_for = None
+        transition_budget_seconds = 0.0
 
         state = (update.get("authorization_state") or {}).get("@type")
 
@@ -129,6 +175,8 @@ def main() -> None:
             raise SystemExit(f"Authorization stopped safely: {step.operator_prompt}")
         if step and step.request:
             bridge.send(step.request)
+            transition_waiting_for = str(step.request.get("@type") or step.state)
+            transition_budget_seconds = auth_transition_timeout
             if step.state == "authorizationStateWaitTdlibParameters":
                 parameters_sent = True
         if step and step.state == "authorizationStateReady":

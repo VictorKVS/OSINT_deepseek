@@ -50,6 +50,25 @@ def _as_auth_update(message: dict[str, object]) -> dict[str, object] | None:
     return None
 
 
+def _connection_state_name(message: dict[str, object]) -> str | None:
+    """Return only the public TDLib connection-state type for safe diagnostics."""
+    if message.get("@type") != "updateConnectionState":
+        return None
+    state = message.get("state")
+    if not isinstance(state, dict):
+        return None
+    state_type = state.get("@type")
+    return state_type if isinstance(state_type, str) else None
+
+
+def _print_connection_state(message: dict[str, object]) -> bool:
+    state = _connection_state_name(message)
+    if state is None:
+        return False
+    print(json.dumps({"connection_state": state}, ensure_ascii=False))
+    return True
+
+
 def main() -> None:
     try:
         api_id = int(require_env("TELEGRAM_API_ID").strip())
@@ -136,6 +155,9 @@ def main() -> None:
             safe_error = redact(message)
             raise SystemExit(f"TDLib returned an error during authorization: {safe_error}")
 
+        if _print_connection_state(message):
+            continue
+
         update = _as_auth_update(message)
         if update is None:
             continue
@@ -189,6 +211,8 @@ def main() -> None:
                     f"TDLib returned an error for authorization request {request_type}: {safe_error}"
                 ) from exc
             except TdLibTimeoutError as exc:
+                for pending in client.drain_pending_updates():
+                    _print_connection_state(pending)
                 raise SystemExit(
                     f"TDLib timed out waiting for response to authorization request {request_type}"
                 ) from exc

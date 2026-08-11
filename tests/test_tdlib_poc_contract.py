@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from pathlib import Path
+
 import pytest
 
 from poc.tdlib.auth import AuthActionRequired, AuthStep, next_auth_step
@@ -31,7 +33,7 @@ def test_tdlib_parameters_require_encrypted_runtime_state():
     assert request["api_hash"] == "secret-hash"
     assert request["database_encryption_key"] == "local-db-key"
     assert request["use_secret_chats"] is False
-    assert request["database_directory"].endswith("runtime/tdlib/db")
+    assert Path(request["database_directory"]).parts[-3:] == ("runtime", "tdlib", "db")
     assert redact(request)["database_encryption_key"] == "<redacted>"
 
 

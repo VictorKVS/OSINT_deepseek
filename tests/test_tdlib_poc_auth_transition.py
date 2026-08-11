@@ -24,7 +24,10 @@ class FakeBridge:
         self.receive_calls += 1
         if self.responses:
             return self.responses.popleft()
-        if self.receive_calls > 6:
+        # The production harness uses a five-slice bounded transition budget.
+        # Allow that budget to expire before the test guard can fire. The guard
+        # remains here only to protect the suite if bounded behavior regresses.
+        if self.receive_calls > 10:
             raise RuntimeError("TEST_GUARD_UNBOUNDED_RECEIVE")
         return None
 

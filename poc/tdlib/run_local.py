@@ -4,9 +4,11 @@ import getpass
 import json
 import os
 import time
+from collections import deque
 from pathlib import Path
 
 from poc.tdlib.auth import AuthActionRequired, next_auth_step
+from poc.tdlib.client import TdJsonClient, TdLibResponseError, TdLibTimeoutError
 from poc.tdlib.requests import set_tdlib_parameters_request
 from poc.tdlib.tdjson_bridge import TdJsonBridge, redact
 
@@ -70,6 +72,8 @@ def main() -> None:
     files_dir.mkdir(parents=True, exist_ok=True)
 
     bridge = TdJsonBridge(tdjson_path, tdjson_sha256)
+    client = TdJsonClient(bridge)
+    queued_messages: deque[dict[str, object]] = deque()
 
     # Native TDLib verbosity 3 logs request bodies, including api_hash and the
     # database encryption key. Reduce verbosity before sending any secret-bearing
@@ -97,11 +101,9 @@ def main() -> None:
     saw_auth_state = False
     parameters_sent = False
 
-    # TDLib auth calls are asynchronous. Once we send an auth request, require
-    # explicit progress (a new authorization state or a TDLib error) within a
-    # bounded receive budget. Each empty td_receive(RECEIVE_SLICE_SECONDS) consumes
-    # that much budget; the real bridge blocks for up to the requested slice, while
-    # tests can exercise the same contract deterministically without sleeping.
+    # After a successful correlated auth request, require the next authorization
+    # state within a bounded receive budget. Updates observed while waiting for the
+    # correlated request response are retained by TdJsonClient and replayed here.
     transition_waiting_for: str | None = None
     transition_budget_seconds = 0.0
 
@@ -110,7 +112,11 @@ def main() -> None:
         if transition_waiting_for is not None:
             receive_slice = min(RECEIVE_SLICE_SECONDS, transition_budget_seconds)
 
-        message = bridge.receive(receive_slice)
+        if queued_messages:
+            message = queued_messages.popleft()
+        else:
+            message = bridge.receive(receive_slice)
+
         if message is None:
             if not saw_auth_state and time.monotonic() >= first_auth_deadline:
                 raise SystemExit(
@@ -174,8 +180,22 @@ def main() -> None:
         if step and step.operator_prompt and not step.request:
             raise SystemExit(f"Authorization stopped safely: {step.operator_prompt}")
         if step and step.request:
-            bridge.send(step.request)
-            transition_waiting_for = str(step.request.get("@type") or step.state)
+            request_type = str(step.request.get("@type") or step.state)
+            try:
+                response = client.call(step.request, timeout_seconds=auth_transition_timeout)
+            except TdLibResponseError as exc:
+                safe_error = redact(exc.response)
+                raise SystemExit(
+                    f"TDLib returned an error for authorization request {request_type}: {safe_error}"
+                ) from exc
+            except TdLibTimeoutError as exc:
+                raise SystemExit(
+                    f"TDLib timed out waiting for response to authorization request {request_type}"
+                ) from exc
+
+            print(json.dumps(redact({"authorization_request": request_type, "result": response.get("@type")}), ensure_ascii=False))
+            queued_messages.extend(client.drain_pending_updates())
+            transition_waiting_for = request_type
             transition_budget_seconds = auth_transition_timeout
             if step.state == "authorizationStateWaitTdlibParameters":
                 parameters_sent = True

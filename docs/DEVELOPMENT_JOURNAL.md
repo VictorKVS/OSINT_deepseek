@@ -324,3 +324,126 @@ Next action / next reuse-review gate
 ```
 
 Small formatting-only commits do not require a separate architectural journal entry.
+
+---
+
+## 11. 2026-08-12 — M5 live Telegram path proven; Senior Engineering Council established
+
+**Stage / milestone:** Stage 07 / M5 Telegram Radar  
+**Trigger / problem:** TDLib authorization stalled in `connectionStateConnecting`; direct Windows connectivity to Telegram failed; project needed to separate network-path failure from transport implementation failure and then reassess the M5 critical path.  
+**Decision:** preserve a verified Telethon fallback/reference path, keep TDLib as a candidate rather than an automatic winner, and move the next architectural target toward a common Telegram transport contract plus Telegram → FATHER `Material` integration. Establish an extractable Senior Engineering Council with an independent Principal Critic for material decisions.  
+
+### Evidence achieved
+
+```text
+Direct Windows → Telegram TCP 443       FAIL
+AmneziaVPN route → Telegram TCP 443     PASS
+Legacy Telethon authorized session      PASS
+Public Telegram channel acquisition     PASS
+Configured request limit 100/channel    PASS
+Observed text messages processed        356 total
+Cyrillic regex regression               PASS after fix
+UTF-8-clean legacy reader tests         PASS
+Local config/session path unit contract PASS
+```
+
+Observed text-message counts in the live 100-request run:
+
+```text
+durov        97/100
+telegram    100/100
+meduzalive   89/100
+tjournal     70/100
+```
+
+This proves a usable live acquisition path but does **not** close M5.
+
+### Current M5 interpretation
+
+```text
+Network reachability                 PASS
+Verified Telethon fallback/reference PASS
+TDLib under corrected network        PENDING
+Transport ADR                        PENDING
+Common TelegramTransport contract    NEXT
+Telegram → canonical Material        NEXT
+Restart/rate/isolation acceptance    PENDING
+ResearchTask → Telegram → Socrates   PENDING
+
+M5 overall                           ACTIVE / PARTIAL PASS
+```
+
+### Architecture direction
+
+The next implementation must not become another standalone Telegram reader. Target boundary:
+
+```text
+TelegramCollector
+      ↓
+TelegramTransport protocol
+      ├── TDLibTransport
+      └── TelethonTransport / verified fallback
+      ↓
+TelegramMessage DTO
+      ↓
+MaterialFactory
+      ↓
+Material + provenance + hash
+```
+
+Additional transport investigation must now prove that it changes the transport decision or removes a blocker on this integration path.
+
+### J-018 — Verified live fallback does not equal transport approval
+
+Telethon live behavior is accepted as **verified fallback/reference evidence**. It is not automatically promoted to production transport because maintenance/supply-chain/freshness review and final ADR remain separate gates.
+
+TDLib remains a candidate primary transport, but continued debugging is no longer allowed to block higher-value integration work merely because TDLib is technologically preferred.
+
+Detailed evidence: `docs/journal/J-018_M5_LIVE_TELEGRAM_PATH_AND_ENGINEERING_COUNCIL_2026-08-12.md`.
+
+### J-019 — Extractable Senior Engineering Council
+
+A new internal module `engineering_council/` is established as a contract-first governance/decision component designed for later extraction into a separate repository or service.
+
+Council roles:
+- Senior System / Solution Architect;
+- Senior Software Engineer / Technical Lead;
+- Senior Systems / Business Analyst;
+- Senior Product Lead;
+- Senior Project / Delivery Lead;
+- Principal Engineering Critic / Red-Team Reviewer.
+
+The Principal Critic is independent from delivery ownership. Its job is to attack proposals with credible alternatives, hidden assumptions, falsification conditions, failure modes, evidence-quality challenges and explicit abandon/revisit criteria. Blocking criticism must cite a violated requirement/invariant, missing required evidence, credible dominating alternative, Critical/High unresolved risk, irreversible coupling or contradiction with measured evidence.
+
+Other roles must defend or revise their recommendations point-by-point. Majority agreement cannot override a failed acceptance/security gate.
+
+Council contract: `engineering_council/README.md`.  
+Adversarial review protocol: `engineering_council/REVIEW_PROTOCOL.md`.
+
+### Senior critique of current project path
+
+The project now has enough governance. The principal delivery risk is no longer absence of process; it is allowing process and transport fascination to outgrow evidence-producing product capability.
+
+Therefore the immediate council question is:
+
+> What is the smallest replaceable Telegram transport path that can reliably produce canonical FATHER `Material` records while preserving provenance and operational safety?
+
+The Critic must challenge whether another donor PoC or deeper TDLib work still changes the decision before it consumes critical-path capacity.
+
+### Commercial / reuse review
+
+No new product is promoted by this event alone. Existing Telegram-dependent opportunities become more credible because live acquisition is proven. Transport contracts must remain product-neutral.
+
+### Result
+
+**PARTIAL PASS.** A real Telegram acquisition path exists and a verified fallback/reference implementation is preserved. M5 remains open until transport decision, Material integration and end-to-end acceptance evidence exist.
+
+### Next action
+
+1. Finish live local-path validation of the preserved legacy fallback.
+2. Run TDLib under corrected network only if the result can materially change the ADR.
+3. Principal Critic decides whether GramJS comparative PoC is still information-positive.
+4. Define common `TelegramTransport` + `TelegramMessage` contracts.
+5. Prove Telegram → `Material` + provenance + hash.
+6. Write live restart/rate/isolation/checkpoint acceptance tests.
+7. Produce transport ADR from measured evidence.

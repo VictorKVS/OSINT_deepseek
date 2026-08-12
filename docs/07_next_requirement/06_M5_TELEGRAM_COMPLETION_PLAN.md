@@ -75,7 +75,7 @@ Required:
 - live checkpoint/restart/reconciliation proof;
 - provenance/evidence not lost across restart.
 
-**Status:** contract PASS; live restart proof OPEN.
+**Status:** PASS. Contract tests cover save-before-checkpoint, restart persistence, bounded FloodWait/retry and channel isolation. Live Windows/VPN runs proved checkpoint creation, process restart, existing checkpoint detection (`resumed_sources=1`), raw-payload reuse (`payloads_reused=10`, `new_raw_payload_files=0`), new observation append, and continued Analyst→Socrates PASS. Evidence: `docs/journal/J-022_M5_LIVE_RESTART_RECONCILIATION_PASS_2026-08-12.md`.
 
 ### G5 — OSINT Expert search planning
 Required:
@@ -85,7 +85,7 @@ Required:
 - Analyst may suggest sources but does not own acquisition tactics;
 - search plan records scope, exclusions, limits and failure/reporting behavior.
 
-**Status:** OPEN.
+**Status:** NEXT / OPEN.
 
 ### G6 — Reconnaissance and refinement
 Required:
@@ -161,8 +161,8 @@ Before M5 DONE:
 ## Immediate execution order
 
 ```text
-1. Live checkpoint/restart/reconciliation
-2. Telegram SearchPlan contract
+1. Live checkpoint/restart/reconciliation   PASS
+2. Telegram SearchPlan contract             NEXT
 3. Reconnaissance → refinement cycle
 4. EvidenceAssessment model
 5. ResearchSufficiency MINIMUM/GOOD/DESIRED

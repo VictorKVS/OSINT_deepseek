@@ -94,7 +94,7 @@ Required:
 - refinement of search plan before expensive/deep collection;
 - ability to stop when added collection has low marginal value.
 
-**Status:** NEXT / OPEN.
+**Status:** DEV PASS. `father_osint/reconnaissance.py` implements bounded sampling, observed source landscape, recurring terms, external domains, forward-origin candidates, explicit gaps, versioned SearchPlan refinement and marginal-value/stop behavior. Contract tests are GREEN in GitHub Actions. Live proof remains pending because local Telegram credentials/session are deliberately outside the autonomous environment. Evidence: `docs/journal/J-024_M5_G6_RECONNAISSANCE_DEV_PASS_2026-08-13.md`.
 
 ### G7 — Evidence quality assessment
 Required dimensions (initial non-calibrated policy model):
@@ -111,7 +111,7 @@ Rules:
 - no single score is treated as truth probability without calibration evidence;
 - tool/source labels do not automatically confer reliability.
 
-**Status:** OPEN.
+**Status:** NEXT / OPEN.
 
 ### G8 — Research sufficiency
 Required levels:
@@ -163,8 +163,8 @@ Before M5 DONE:
 ```text
 1. Live checkpoint/restart/reconciliation   PASS
 2. Telegram SearchPlan contract             PASS
-3. Reconnaissance → refinement cycle        NEXT
-4. EvidenceAssessment model
+3. Reconnaissance → refinement cycle        DEV PASS / live pending
+4. EvidenceAssessment model                 NEXT
 5. ResearchSufficiency MINIMUM/GOOD/DESIRED
 6. Counter-evidence behavior
 7. AcquisitionReport to Analyst

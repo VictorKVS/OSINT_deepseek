@@ -1,7 +1,11 @@
 import pytest
 
 from father_osint.models import Material
-from father_osint.reliability import DurableObservationWriter, JsonCheckpointStore
+from father_osint.reliability import (
+    DurableObservationWriter,
+    JsonCheckpointStore,
+    SourceCheckpoint,
+)
 
 
 class RecordingStore:
@@ -56,7 +60,7 @@ def test_failed_material_save_does_not_advance_checkpoint(tmp_path):
     events = []
     checkpoints = RecordingCheckpointStore(tmp_path / "checkpoints.json", events)
     checkpoints.commit(
-        __import__("father_osint.reliability", fromlist=["SourceCheckpoint"]).SourceCheckpoint(
+        SourceCheckpoint(
             source_type="telegram",
             source_key="100",
             cursor="539",
@@ -72,7 +76,8 @@ def test_failed_material_save_does_not_advance_checkpoint(tmp_path):
             cursor="540",
         )
 
-    assert events == [("save", pytest.ANY)]
+    assert len(events) == 1
+    assert events[0][0] == "save"
     assert checkpoints.load("telegram", "100").cursor == "539"
 
 

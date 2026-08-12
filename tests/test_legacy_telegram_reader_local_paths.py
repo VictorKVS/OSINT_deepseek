@@ -13,16 +13,20 @@ def test_default_legacy_paths_live_beside_module():
 def test_reader_uses_explicit_paths(monkeypatch, tmp_path):
     config_path = tmp_path / "config.yaml"
     session_path = tmp_path / "reader_session"
+    synthetic_config = {
+        "telegram": {
+            "api_id": 123,
+            "api_hash": "synthetic",
+            "phone_number": "+10000000000",
+            "channels": [],
+            "collection": {"limit_per_channel": 100},
+        }
+    }
 
-    config_path.write_text(
-        "telegram:\n"
-        "  api_id: 123\n"
-        "  api_hash: synthetic\n"
-        "  phone_number: '+10000000000'\n"
-        "  channels: []\n"
-        "  collection:\n"
-        "    limit_per_channel: 100\n",
-        encoding="utf-8",
+    monkeypatch.setattr(
+        simple_reader.TelegramReader,
+        "load_config",
+        staticmethod(lambda _path: synthetic_config),
     )
 
     reader = simple_reader.TelegramReader(

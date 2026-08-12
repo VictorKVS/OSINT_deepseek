@@ -9,6 +9,10 @@ continues to evolve.
 
 Secrets are never embedded here. Runtime credentials/configuration are loaded
 from the local YAML configuration supplied by the operator.
+
+PyYAML and Telethon are deliberately imported lazily so this isolated legacy
+fallback does not expand the frozen core DEV dependency surface merely by being
+present in the repository.
 """
 
 import asyncio
@@ -17,9 +21,6 @@ import re
 from collections import Counter
 from datetime import datetime
 from pathlib import Path
-
-import yaml
-from telethon import TelegramClient
 
 
 MODULE_DIR = Path(__file__).resolve().parent
@@ -48,11 +49,25 @@ class TelegramReader:
     @staticmethod
     def load_config(config_path):
         """Загружает конфигурацию из UTF-8 YAML."""
+        try:
+            import yaml
+        except ModuleNotFoundError as exc:
+            raise RuntimeError(
+                "PyYAML is required only for live legacy Telegram execution"
+            ) from exc
+
         with open(config_path, "r", encoding="utf-8") as file:
             return yaml.safe_load(file)
 
     async def connect(self):
         """Подключается к Telegram с использованием сохранённой Telethon-сессии."""
+        try:
+            from telethon import TelegramClient
+        except ModuleNotFoundError as exc:
+            raise RuntimeError(
+                "Telethon is required only for live legacy Telegram execution"
+            ) from exc
+
         tg_config = self.config["telegram"]
         self.client = TelegramClient(
             str(self.session_path),

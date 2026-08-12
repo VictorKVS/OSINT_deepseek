@@ -11,6 +11,7 @@ if str(REPO_ROOT) not in sys.path:
 
 from father_osint.collectors.telegram import TelegramCollector
 from father_osint.models import MaterialPackage, ResearchTask
+from father_osint.reasoning import DeterministicEvidenceAnalyst, DeterministicSocrates
 from father_osint.storage import MaterialStore
 from father_osint.transports.telethon import TelethonTransport
 
@@ -47,7 +48,10 @@ def count_raw_payload_files(path: Path) -> int:
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description="M5 live proof: Telethon -> TelegramMessage -> Material -> MaterialStore"
+        description=(
+            "M5 live proof: Telethon -> TelegramMessage -> Material -> "
+            "MaterialStore -> MaterialPackage -> Analyst -> Socrates"
+        )
     )
     parser.add_argument("--config", type=Path, default=DEFAULT_CONFIG)
     parser.add_argument("--session", type=Path, default=DEFAULT_SESSION)
@@ -111,6 +115,10 @@ def main() -> int:
     )
     store.save_package(package)
 
+    analyst = DeterministicEvidenceAnalyst()
+    analysis = analyst.analyze(package)
+    critique = DeterministicSocrates().critique(package, analysis)
+
     material_records_after = count_jsonl_records(store.materials_file)
     raw_payload_files_after = count_raw_payload_files(store.raw_dir)
     observations_appended = material_records_after - material_records_before
@@ -118,6 +126,7 @@ def main() -> int:
 
     reuse_expectation_met = payloads_reused >= args.expect_reuse_min
     observations_preserved = observations_appended == len(materials)
+    reasoning_passed = critique.verdict == "PASS"
 
     if not materials:
         status = "NO_MATERIAL"
@@ -128,6 +137,9 @@ def main() -> int:
     elif not observations_preserved:
         status = "OBSERVATION_APPEND_FAILED"
         exit_code = 4
+    elif not reasoning_passed:
+        status = "REASONING_REVIEW_FAILED"
+        exit_code = 5
     else:
         status = "PASS"
         exit_code = 0
@@ -147,8 +159,14 @@ def main() -> int:
         "raw_payload_files_before": raw_payload_files_before,
         "raw_payload_files_after": raw_payload_files_after,
         "new_raw_payload_files": new_raw_payload_files,
+        "analysis_claims": len(analysis.claims),
+        "analysis_limitations": analysis.limitations,
+        "socrates_verdict": critique.verdict,
+        "socrates_challenged_claims": len(critique.challenged_claim_ids),
+        "reasoning_passed": reasoning_passed,
         "output": str(args.output),
         "first_material": None,
+        "first_claim": None,
     }
 
     if materials:
@@ -163,6 +181,15 @@ def main() -> int:
             "chat_id": first.metadata.get("chat_id"),
             "message_id": first.metadata.get("message_id"),
             "transport": first.metadata.get("transport"),
+        }
+
+    if analysis.claims:
+        first_claim = analysis.claims[0]
+        summary["first_claim"] = {
+            "claim_id": first_claim.claim_id,
+            "statement": first_claim.statement,
+            "evidence_ids": first_claim.evidence_ids,
+            "confidence": first_claim.confidence,
         }
 
     print(json.dumps(summary, ensure_ascii=False, indent=2))

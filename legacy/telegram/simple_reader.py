@@ -8,7 +8,7 @@ path as an explicit fallback/reference implementation while the TDLib transport
 continues to evolve.
 
 Secrets are never embedded here. Runtime credentials/configuration are loaded
-from the existing YAML configuration supplied by the operator.
+from the local YAML configuration supplied by the operator.
 """
 
 import asyncio
@@ -22,8 +22,18 @@ import yaml
 from telethon import TelegramClient
 
 
+MODULE_DIR = Path(__file__).resolve().parent
+DEFAULT_CONFIG_PATH = MODULE_DIR / "config.yaml"
+DEFAULT_SESSION_PATH = MODULE_DIR / "reader_session"
+
+
 class TelegramReader:
-    def __init__(self, config_path="collector/telegram/config.yaml"):
+    def __init__(self, config_path=None, session_path=None):
+        config_path = Path(config_path) if config_path else DEFAULT_CONFIG_PATH
+        session_path = Path(session_path) if session_path else DEFAULT_SESSION_PATH
+
+        self.config_path = config_path
+        self.session_path = session_path
         self.config = self.load_config(config_path)
         self.client = None
         self.stats = {
@@ -45,7 +55,7 @@ class TelegramReader:
         """Подключается к Telegram с использованием сохранённой Telethon-сессии."""
         tg_config = self.config["telegram"]
         self.client = TelegramClient(
-            "reader_session",
+            str(self.session_path),
             tg_config["api_id"],
             tg_config["api_hash"],
         )
@@ -189,7 +199,8 @@ class TelegramReader:
         output_directory.mkdir(exist_ok=True)
         filename = output_directory / (
             "telegram_analysis_"
-            f"{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+            f"{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+            ".json"
         )
 
         with open(filename, "w", encoding="utf-8") as file:

@@ -53,6 +53,59 @@ class Critic(Protocol):
     def critique(self, package: MaterialPackage, analysis: AnalysisResult) -> CritiqueResult: ...
 
 
+class DeterministicEvidenceAnalyst:
+    """Build evidence-backed observation claims without inferring truth.
+
+    This analyst is intentionally conservative. Each claim only states that a
+    source material was observed and preserves a short source-text excerpt as
+    quoted evidence context. It does not transform a source statement into an
+    asserted real-world fact. A future LLM analyst may add semantic claims only
+    behind the same EvidenceClaim contract.
+    """
+
+    def __init__(self, excerpt_chars: int = 240) -> None:
+        if excerpt_chars <= 0:
+            raise ValueError("excerpt_chars must be > 0")
+        self.excerpt_chars = excerpt_chars
+
+    def analyze(self, package: MaterialPackage) -> AnalysisResult:
+        claims: list[EvidenceClaim] = []
+        limitations: list[str] = []
+
+        for material in package.materials:
+            text = (material.raw_text or "").strip()
+            if not text:
+                limitations.append(
+                    f"material {material.material_id} has no raw_text for deterministic analysis"
+                )
+                continue
+
+            excerpt = " ".join(text.split())[: self.excerpt_chars]
+            statement = (
+                f"Observed {material.source_type} source '{material.title}' "
+                f"at {material.source_locator}: {excerpt}"
+            )
+            claims.append(
+                EvidenceClaim(
+                    statement=statement,
+                    evidence_ids=[material.material_id],
+                    confidence=1.0,
+                )
+            )
+
+        if package.collection_errors:
+            limitations.extend(package.collection_errors)
+        if not package.materials:
+            limitations.append("MaterialPackage contains no materials")
+
+        return AnalysisResult(
+            task_id=package.task_id,
+            package_id=package.package_id,
+            claims=claims,
+            limitations=limitations,
+        )
+
+
 class DeterministicSocrates:
     """Minimal evidence-integrity critic; no LLM and no source-specific logic."""
 

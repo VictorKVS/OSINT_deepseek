@@ -27,6 +27,7 @@ logs/
 data/osint/
 data/osint_dev/
 data/runtime/
+data/m5_live_telegram/
 .runtime/
 *.db
 *.sqlite
@@ -37,6 +38,11 @@ tdlib-data/
 tdlib-files/
 poc/tdlib/runtime/
 poc/tdlib/session/
+
+# Telegram local credentials/session state
+legacy/telegram/config.yaml
+*.session
+*.session-journal
 
 # Generic local JSON, with explicit versioned-fixture exceptions
 *.json

@@ -158,3 +158,97 @@ def test_telethon_transport_skips_non_text_objects_without_overclaiming_count(tm
 
     messages = transport.search(ResearchTask(question="collect", max_items=2))
     assert [message.message_id for message in messages] == ["2"]
+
+
+def test_channel_failure_is_isolated_and_next_channel_is_collected(tmp_path):
+    class PartialFailureClient(FakeClient):
+        async def get_entity(self, channel):
+            username = str(channel).lstrip("@")
+            if username == "broken":
+                raise RuntimeError("synthetic channel failure")
+            return FakeEntity(id=1002, username=username, title=f"Channel {username}")
+
+    transport = TelethonTransport(
+        api_id=123,
+        api_hash="synthetic",
+        session_path=tmp_path / "reader_session",
+        channels=["@broken", "@working"],
+        per_channel_limit=1,
+        client_factory=PartialFailureClient,
+    )
+
+    messages = transport.search(ResearchTask(question="collect", max_items=1))
+
+    assert len(messages) == 1
+    assert messages[0].chat_id == "working"
+    assert len(transport.last_errors) == 1
+    assert "broken" in transport.last_errors[0]
+
+
+def test_bounded_flood_wait_retries_once_then_succeeds(tmp_path):
+    class FloodWaitError(Exception):
+        def __init__(self, seconds):
+            super().__init__(f"wait {seconds}")
+            self.seconds = seconds
+
+    class FloodOnceClient(FakeClient):
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            self.calls = 0
+
+        async def get_messages(self, entity, limit):
+            self.calls += 1
+            if self.calls == 1:
+                raise FloodWaitError(2)
+            return await super().get_messages(entity, limit)
+
+    sleeps = []
+
+    async def fake_sleep(seconds):
+        sleeps.append(seconds)
+
+    transport = TelethonTransport(
+        api_id=123,
+        api_hash="synthetic",
+        session_path=tmp_path / "reader_session",
+        channels=["@durov"],
+        per_channel_limit=1,
+        max_flood_wait_retries=1,
+        max_flood_wait_seconds=5,
+        client_factory=FloodOnceClient,
+        sleep_func=fake_sleep,
+    )
+
+    messages = transport.search(ResearchTask(question="collect", max_items=1))
+
+    assert len(messages) == 1
+    assert sleeps == [2]
+    assert transport.last_errors == []
+
+
+def test_flood_wait_above_bound_is_recorded_and_channel_skipped(tmp_path):
+    class FloodWaitError(Exception):
+        def __init__(self, seconds):
+            super().__init__(f"wait {seconds}")
+            self.seconds = seconds
+
+    class LongFloodClient(FakeClient):
+        async def get_messages(self, entity, limit):
+            raise FloodWaitError(120)
+
+    transport = TelethonTransport(
+        api_id=123,
+        api_hash="synthetic",
+        session_path=tmp_path / "reader_session",
+        channels=["@durov"],
+        per_channel_limit=1,
+        max_flood_wait_retries=1,
+        max_flood_wait_seconds=5,
+        client_factory=LongFloodClient,
+    )
+
+    messages = transport.search(ResearchTask(question="collect", max_items=1))
+
+    assert messages == []
+    assert len(transport.last_errors) == 1
+    assert "above bound" in transport.last_errors[0]

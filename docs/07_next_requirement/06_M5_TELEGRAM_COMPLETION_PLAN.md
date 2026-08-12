@@ -85,7 +85,7 @@ Required:
 - Analyst may suggest sources but does not own acquisition tactics;
 - search plan records scope, exclusions, limits and failure/reporting behavior.
 
-**Status:** NEXT / OPEN.
+**Status:** PASS for deterministic Telegram baseline and live protocol proof. A real live run completed `ResearchRequest → SearchPlan → ACCEPT → COLLECTING → EvidencePackage → ANALYSIS → CLOSED` with `protocol_passed=true`, explicit KB/algorithm lineage and an auditable distinction between requested `GOOD` and achieved `MINIMUM` sufficiency. Evidence: `docs/journal/J-023_M5_G5_LIVE_SEARCH_PLAN_PROTOCOL_PASS_2026-08-13.md`.
 
 ### G6 — Reconnaissance and refinement
 Required:
@@ -94,7 +94,7 @@ Required:
 - refinement of search plan before expensive/deep collection;
 - ability to stop when added collection has low marginal value.
 
-**Status:** OPEN.
+**Status:** NEXT / OPEN.
 
 ### G7 — Evidence quality assessment
 Required dimensions (initial non-calibrated policy model):
@@ -162,8 +162,8 @@ Before M5 DONE:
 
 ```text
 1. Live checkpoint/restart/reconciliation   PASS
-2. Telegram SearchPlan contract             NEXT
-3. Reconnaissance → refinement cycle
+2. Telegram SearchPlan contract             PASS
+3. Reconnaissance → refinement cycle        NEXT
 4. EvidenceAssessment model
 5. ResearchSufficiency MINIMUM/GOOD/DESIRED
 6. Counter-evidence behavior

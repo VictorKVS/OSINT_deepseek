@@ -11,8 +11,15 @@ if str(REPO_ROOT) not in sys.path:
 
 from father_osint.collectors.telegram import TelegramCollector
 from father_osint.models import MaterialPackage, ResearchTask
+from father_osint.protocol import (
+    EvidencePackage,
+    PlanDecision,
+    ResearchRequest,
+    ResearchWorkflow,
+)
 from father_osint.reasoning import DeterministicEvidenceAnalyst, DeterministicSocrates
 from father_osint.reliability import DurableObservationWriter, JsonCheckpointStore
+from father_osint.search_planning import DeterministicTelegramSearchPlanner
 from father_osint.storage import MaterialStore
 from father_osint.transports.telethon import TelethonTransport
 
@@ -45,12 +52,13 @@ def count_raw_payload_files(path: Path) -> int:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="M5 live Telegram evidence/restart proof")
+    parser = argparse.ArgumentParser(description="M5 live Telegram evidence/restart/search-plan proof")
     parser.add_argument("--config", type=Path, default=DEFAULT_CONFIG)
     parser.add_argument("--session", type=Path, default=DEFAULT_SESSION)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--max-items", type=int, default=10)
     parser.add_argument("--expect-reuse-min", type=int, default=0)
+    parser.add_argument("--sufficiency", choices=["MINIMUM", "GOOD", "DESIRABLE"], default="GOOD")
     parser.add_argument(
         "--checkpoint",
         type=Path,
@@ -77,11 +85,43 @@ def main() -> int:
     channels = telegram.get("channels", [])
     per_channel_limit = telegram.get("collection", {}).get("limit_per_channel", 100)
 
+    request = ResearchRequest(
+        objective="Collect and preserve evidence from configured Telegram sources for M5 validation",
+        research_questions=[
+            "What relevant source observations are available in the configured Telegram channels?",
+            "Can each collected observation retain stable provenance and survive repeat collection?",
+        ],
+        required_sufficiency=args.sufficiency,
+        acceptance_criteria=[
+            "All attempted Telegram sources and failures are observable",
+            "Collected materials preserve message identity and provenance",
+            "Repeated payloads do not destroy new observation provenance",
+            "Contradictions and unverified claims are not silently promoted to facts",
+        ],
+        constraints=[f"max_items={args.max_items}", "source_class=telegram"],
+    )
+    workflow = ResearchWorkflow(request.case_id)
+    workflow.transition("ISSUED", actor_role="ANALYST", reason="ResearchRequest issued")
+    workflow.transition("PLANNING", actor_role="OSINT_EXPERT", reason="OSINT planning started")
+
+    planned = DeterministicTelegramSearchPlanner().plan(request)
+    workflow.transition("PLAN_REVIEW", actor_role="OSINT_EXPERT", reason="SearchPlanProposal ready")
+    plan_decision = PlanDecision(
+        case_id=request.case_id,
+        search_plan_id=planned.plan.search_plan_id,
+        status="ACCEPT",
+        reason_codes=["M5_CONTROLLED_TELEGRAM_PROOF"],
+        decided_by="ANALYST",
+    )
+    workflow.apply_plan_decision(plan_decision)
+    workflow.transition("COLLECTING", actor_role="OSINT_EXPERT", reason="Approved SearchPlan execution")
+
     task = ResearchTask(
-        question="M5 live Telegram canonical Material proof",
-        source_types=["telegram"],
+        question=request.objective,
+        topics=request.research_questions,
+        source_types=planned.plan.source_classes,
         max_items=args.max_items,
-        requested_by="m5-live-proof",
+        requested_by="OSINT_EXPERT",
     )
     transport = TelethonTransport(
         api_id=int(telegram["api_id"]),
@@ -133,10 +173,44 @@ def main() -> int:
         task_id=task.task_id,
         materials=materials,
         payloads_reused=payloads_reused,
+        collection_errors=list(getattr(transport, "last_errors", []) or []),
         stop_reason="completed",
-        notes="M5 live Telethon reference adapter proof",
+        notes="M5 live Telethon reference adapter proof executed from approved SearchPlan",
     )
     store.save_package(package)
+
+    evidence_package = EvidencePackage(
+        case_id=request.case_id,
+        request_id=request.request_id,
+        search_plan_id=planned.plan.search_plan_id,
+        requested_sufficiency=request.required_sufficiency,
+        achieved_sufficiency="MINIMUM",
+        material_refs=[material.material_id for material in materials],
+        evidence_refs=[material.material_id for material in materials],
+        source_attempts=[
+            {
+                "source_class": "telegram",
+                "configured_sources": len(channels),
+                "collection_errors": list(package.collection_errors),
+            }
+        ],
+        provenance_refs=[material.source_locator for material in materials],
+        limitations=list(planned.plan.limitations),
+        critical_gaps=(
+            ["Non-Telegram corroboration is not covered by this source-specific live proof"]
+            if request.required_sufficiency in {"GOOD", "DESIRABLE"}
+            else []
+        ),
+        coverage={
+            "configured_sources": len(channels),
+            "materials_collected": len(materials),
+            "collection_errors": len(package.collection_errors),
+        },
+        decision_record_refs=[planned.decision_record.decision_id],
+    )
+
+    workflow.transition("EVIDENCE_DELIVERED", actor_role="OSINT_EXPERT", reason="EvidencePackage delivered")
+    workflow.transition("ANALYSIS", actor_role="ANALYST", reason="EvidencePackage accepted for analysis")
 
     analysis = DeterministicEvidenceAnalyst().analyze(package)
     critique = DeterministicSocrates().critique(package, analysis)
@@ -149,6 +223,7 @@ def main() -> int:
     reuse_expectation_met = payloads_reused >= args.expect_reuse_min
     observations_preserved = observations_appended == len(materials)
     reasoning_passed = critique.verdict == "PASS"
+    protocol_passed = workflow.state == "ANALYSIS" and plan_decision.status == "ACCEPT"
     restart_reconciliation_passed = (
         not args.resume
         or (
@@ -174,11 +249,29 @@ def main() -> int:
         status, exit_code = "REASONING_REVIEW_FAILED", 5
     elif not restart_reconciliation_passed:
         status, exit_code = "RESTART_RECONCILIATION_FAILED", 6
+    elif not protocol_passed:
+        status, exit_code = "ROLE_PROTOCOL_FAILED", 7
     else:
+        workflow.transition("CLOSED", actor_role="ANALYST", reason="M5 controlled proof completed")
         status, exit_code = "PASS", 0
 
     summary = {
         "status": status,
+        "case_id": request.case_id,
+        "research_request_id": request.request_id,
+        "required_sufficiency": request.required_sufficiency,
+        "search_plan_id": planned.plan.search_plan_id,
+        "search_plan_version": planned.plan.version,
+        "search_plan_algorithm": planned.plan.algorithm_version,
+        "search_plan_knowledge_version": planned.plan.knowledge_version,
+        "search_plan_knowledge_refs": planned.plan.knowledge_refs,
+        "plan_decision": plan_decision.status,
+        "workflow_state": workflow.state,
+        "workflow_history": workflow.history,
+        "protocol_passed": protocol_passed,
+        "evidence_package_id": evidence_package.package_id,
+        "evidence_achieved_sufficiency": evidence_package.achieved_sufficiency,
+        "evidence_critical_gaps": evidence_package.critical_gaps,
         "task_id": task.task_id,
         "package_id": package.package_id,
         "materials": len(materials),

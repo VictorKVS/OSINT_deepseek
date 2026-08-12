@@ -12,6 +12,7 @@ if str(REPO_ROOT) not in sys.path:
 from father_osint.collectors.telegram import TelegramCollector
 from father_osint.models import MaterialPackage, ResearchTask
 from father_osint.reasoning import DeterministicEvidenceAnalyst, DeterministicSocrates
+from father_osint.reliability import DurableObservationWriter, JsonCheckpointStore
 from father_osint.storage import MaterialStore
 from father_osint.transports.telethon import TelethonTransport
 
@@ -25,10 +26,7 @@ def load_local_config(path: Path) -> dict:
     try:
         import yaml
     except ImportError as exc:
-        raise RuntimeError(
-            "PyYAML is required only for this live operator runner"
-        ) from exc
-
+        raise RuntimeError("PyYAML is required only for this live operator runner") from exc
     with path.open("r", encoding="utf-8") as handle:
         return yaml.safe_load(handle)
 
@@ -47,21 +45,22 @@ def count_raw_payload_files(path: Path) -> int:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(
-        description=(
-            "M5 live proof: Telethon -> TelegramMessage -> Material -> "
-            "MaterialStore -> MaterialPackage -> Analyst -> Socrates"
-        )
-    )
+    parser = argparse.ArgumentParser(description="M5 live Telegram evidence/restart proof")
     parser.add_argument("--config", type=Path, default=DEFAULT_CONFIG)
     parser.add_argument("--session", type=Path, default=DEFAULT_SESSION)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--max-items", type=int, default=10)
+    parser.add_argument("--expect-reuse-min", type=int, default=0)
     parser.add_argument(
-        "--expect-reuse-min",
-        type=int,
-        default=0,
-        help="Fail unless at least this many raw payloads were reused in this run",
+        "--checkpoint",
+        type=Path,
+        default=None,
+        help="JSON checkpoint path; defaults to <output>/checkpoints.json when --resume is used",
+    )
+    parser.add_argument(
+        "--resume",
+        action="store_true",
+        help="Enable save-before-checkpoint and prove restart/reconciliation semantics",
     )
     return parser
 
@@ -84,7 +83,6 @@ def main() -> int:
         max_items=args.max_items,
         requested_by="m5-live-proof",
     )
-
     transport = TelethonTransport(
         api_id=int(telegram["api_id"]),
         api_hash=str(telegram["api_hash"]),
@@ -95,15 +93,40 @@ def main() -> int:
     collector = TelegramCollector(transport)
     store = MaterialStore(args.output)
 
+    checkpoint_path = args.checkpoint or (args.output / "checkpoints.json")
+    checkpoint_store = JsonCheckpointStore(checkpoint_path) if args.resume else None
+    durable_writer = DurableObservationWriter(store, checkpoint_store) if checkpoint_store else None
+
     material_records_before = count_jsonl_records(store.materials_file)
     raw_payload_files_before = count_raw_payload_files(store.raw_dir)
-
     store.save_task(task)
 
     materials = []
     payloads_reused = 0
+    resumed_sources = 0
+    checkpoint_commits = 0
+    seen_source_keys: set[str] = set()
+
     for material in collector.collect(task):
-        payloads_reused += int(store.save_material(material))
+        source_key = str(material.metadata.get("chat_id") or material.source_locator)
+        cursor = str(material.metadata.get("message_id") or material.content_hash)
+
+        if checkpoint_store and source_key not in seen_source_keys:
+            if checkpoint_store.load(material.source_type, source_key) is not None:
+                resumed_sources += 1
+            seen_source_keys.add(source_key)
+
+        if durable_writer:
+            payloads_reused += int(
+                durable_writer.save_then_checkpoint(
+                    material=material,
+                    source_key=source_key,
+                    cursor=cursor,
+                )
+            )
+            checkpoint_commits += 1
+        else:
+            payloads_reused += int(store.save_material(material))
         materials.append(material)
 
     package = MaterialPackage(
@@ -115,8 +138,7 @@ def main() -> int:
     )
     store.save_package(package)
 
-    analyst = DeterministicEvidenceAnalyst()
-    analysis = analyst.analyze(package)
+    analysis = DeterministicEvidenceAnalyst().analyze(package)
     critique = DeterministicSocrates().critique(package, analysis)
 
     material_records_after = count_jsonl_records(store.materials_file)
@@ -127,22 +149,33 @@ def main() -> int:
     reuse_expectation_met = payloads_reused >= args.expect_reuse_min
     observations_preserved = observations_appended == len(materials)
     reasoning_passed = critique.verdict == "PASS"
+    restart_reconciliation_passed = (
+        not args.resume
+        or (
+            checkpoint_commits == len(materials)
+            and observations_preserved
+            and all(
+                checkpoint_store.load(
+                    material.source_type,
+                    str(material.metadata.get("chat_id") or material.source_locator),
+                ) is not None
+                for material in materials
+            )
+        )
+    )
 
     if not materials:
-        status = "NO_MATERIAL"
-        exit_code = 2
+        status, exit_code = "NO_MATERIAL", 2
     elif not reuse_expectation_met:
-        status = "REUSE_EXPECTATION_FAILED"
-        exit_code = 3
+        status, exit_code = "REUSE_EXPECTATION_FAILED", 3
     elif not observations_preserved:
-        status = "OBSERVATION_APPEND_FAILED"
-        exit_code = 4
+        status, exit_code = "OBSERVATION_APPEND_FAILED", 4
     elif not reasoning_passed:
-        status = "REASONING_REVIEW_FAILED"
-        exit_code = 5
+        status, exit_code = "REASONING_REVIEW_FAILED", 5
+    elif not restart_reconciliation_passed:
+        status, exit_code = "RESTART_RECONCILIATION_FAILED", 6
     else:
-        status = "PASS"
-        exit_code = 0
+        status, exit_code = "PASS", 0
 
     summary = {
         "status": status,
@@ -164,6 +197,12 @@ def main() -> int:
         "socrates_verdict": critique.verdict,
         "socrates_challenged_claims": len(critique.challenged_claim_ids),
         "reasoning_passed": reasoning_passed,
+        "checkpoint_enabled": checkpoint_store is not None,
+        "resume_requested": args.resume,
+        "resumed_sources": resumed_sources,
+        "checkpoint_commits": checkpoint_commits,
+        "restart_reconciliation_passed": restart_reconciliation_passed,
+        "checkpoint_path": str(checkpoint_path) if checkpoint_store else None,
         "output": str(args.output),
         "first_material": None,
         "first_claim": None,

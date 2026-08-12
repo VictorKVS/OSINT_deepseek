@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import asyncio
-from collections.abc import Callable, Sequence
+from collections.abc import Awaitable, Callable, Sequence
 from pathlib import Path
 from typing import Any
 
@@ -12,12 +12,9 @@ from ..models import ResearchTask
 class TelethonTransport:
     """Reference Telethon adapter for the M5 integration path.
 
-    This adapter deliberately requires an already-authorized local Telethon
-    session. Interactive authorization, credential enrollment, VPN management,
-    persistence/checkpointing, and analysis are outside this transport.
-
-    Telethon is imported lazily so the frozen core test/dependency surface does
-    not depend on the optional runtime library.
+    The adapter requires an already-authorized local session. Channel failures
+    are isolated, FloodWait retries are explicitly bounded, and all optional
+    Telethon imports remain outside the frozen core dependency surface.
     """
 
     def __init__(
@@ -28,7 +25,10 @@ class TelethonTransport:
         session_path: str | Path,
         channels: Sequence[str],
         per_channel_limit: int = 100,
+        max_flood_wait_retries: int = 1,
+        max_flood_wait_seconds: int = 30,
         client_factory: Callable[..., Any] | None = None,
+        sleep_func: Callable[[float], Awaitable[Any]] | None = None,
     ) -> None:
         if api_id <= 0:
             raise ValueError("api_id must be > 0")
@@ -36,6 +36,10 @@ class TelethonTransport:
             raise ValueError("api_hash must not be empty")
         if per_channel_limit <= 0:
             raise ValueError("per_channel_limit must be > 0")
+        if max_flood_wait_retries < 0:
+            raise ValueError("max_flood_wait_retries must be >= 0")
+        if max_flood_wait_seconds < 0:
+            raise ValueError("max_flood_wait_seconds must be >= 0")
 
         normalized_channels = [str(channel).strip() for channel in channels if str(channel).strip()]
         if not normalized_channels:
@@ -46,17 +50,13 @@ class TelethonTransport:
         self.session_path = Path(session_path)
         self.channels = tuple(normalized_channels)
         self.per_channel_limit = per_channel_limit
+        self.max_flood_wait_retries = max_flood_wait_retries
+        self.max_flood_wait_seconds = max_flood_wait_seconds
         self._client_factory = client_factory
+        self._sleep_func = sleep_func or asyncio.sleep
+        self.last_errors: list[str] = []
 
     def search(self, task: ResearchTask) -> list[TelegramMessage]:
-        """Return at most task.max_items text-bearing messages.
-
-        The current canonical TelegramTransport protocol is synchronous. The
-        Telethon backend is asynchronous, so this reference adapter owns a
-        bounded event loop at the adapter boundary. It intentionally refuses to
-        nest inside an already-running loop; an async transport contract can be
-        introduced later only through an explicit architecture change.
-        """
         try:
             asyncio.get_running_loop()
         except RuntimeError:
@@ -71,6 +71,7 @@ class TelethonTransport:
     async def _search_async(self, task: ResearchTask) -> list[TelegramMessage]:
         client = self._build_client()
         results: list[TelegramMessage] = []
+        self.last_errors = []
 
         await client.connect()
         try:
@@ -85,22 +86,63 @@ class TelethonTransport:
 
                 remaining = task.max_items - len(results)
                 request_limit = min(self.per_channel_limit, remaining)
-                entity = await client.get_entity(channel)
-                messages = await client.get_messages(entity, limit=request_limit)
+
+                try:
+                    entity = await client.get_entity(channel)
+                    messages = await self._get_messages_with_bounded_flood_wait(
+                        client=client,
+                        entity=entity,
+                        limit=request_limit,
+                        channel=str(channel),
+                    )
+                except Exception as exc:  # channel-level isolation boundary
+                    self.last_errors.append(
+                        f"{channel}: {exc.__class__.__name__}: {exc}"
+                    )
+                    continue
 
                 for message in messages:
                     text = getattr(message, "message", None) or getattr(message, "text", None)
                     if not text:
                         continue
 
-                    mapped = self._map_message(entity, message, str(text))
-                    results.append(mapped)
+                    results.append(self._map_message(entity, message, str(text)))
                     if len(results) >= task.max_items:
                         break
         finally:
             await client.disconnect()
 
         return results
+
+    async def _get_messages_with_bounded_flood_wait(
+        self,
+        *,
+        client: Any,
+        entity: Any,
+        limit: int,
+        channel: str,
+    ) -> Any:
+        attempts = 0
+        while True:
+            try:
+                return await client.get_messages(entity, limit=limit)
+            except Exception as exc:
+                if exc.__class__.__name__ != "FloodWaitError":
+                    raise
+
+                wait_seconds = int(getattr(exc, "seconds", 0) or 0)
+                if wait_seconds > self.max_flood_wait_seconds:
+                    raise RuntimeError(
+                        f"FloodWait for {channel} is {wait_seconds}s, above bound "
+                        f"{self.max_flood_wait_seconds}s"
+                    ) from exc
+                if attempts >= self.max_flood_wait_retries:
+                    raise RuntimeError(
+                        f"FloodWait retry budget exhausted for {channel}"
+                    ) from exc
+
+                attempts += 1
+                await self._sleep_func(wait_seconds)
 
     def _build_client(self):
         factory = self._client_factory

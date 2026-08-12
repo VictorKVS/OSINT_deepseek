@@ -32,6 +32,19 @@ def load_local_config(path: Path) -> dict:
         return yaml.safe_load(handle)
 
 
+def count_jsonl_records(path: Path) -> int:
+    if not path.exists():
+        return 0
+    with path.open("r", encoding="utf-8") as handle:
+        return sum(1 for line in handle if line.strip())
+
+
+def count_raw_payload_files(path: Path) -> int:
+    if not path.exists():
+        return 0
+    return sum(1 for item in path.iterdir() if item.is_file())
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description="M5 live proof: Telethon -> TelegramMessage -> Material -> MaterialStore"
@@ -40,6 +53,12 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--session", type=Path, default=DEFAULT_SESSION)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--max-items", type=int, default=10)
+    parser.add_argument(
+        "--expect-reuse-min",
+        type=int,
+        default=0,
+        help="Fail unless at least this many raw payloads were reused in this run",
+    )
     return parser
 
 
@@ -47,6 +66,8 @@ def main() -> int:
     args = build_parser().parse_args()
     if args.max_items <= 0:
         raise SystemExit("--max-items must be > 0")
+    if args.expect_reuse_min < 0:
+        raise SystemExit("--expect-reuse-min must be >= 0")
 
     config = load_local_config(args.config)
     telegram = config["telegram"]
@@ -70,6 +91,9 @@ def main() -> int:
     collector = TelegramCollector(transport)
     store = MaterialStore(args.output)
 
+    material_records_before = count_jsonl_records(store.materials_file)
+    raw_payload_files_before = count_raw_payload_files(store.raw_dir)
+
     store.save_task(task)
 
     materials = []
@@ -87,12 +111,42 @@ def main() -> int:
     )
     store.save_package(package)
 
+    material_records_after = count_jsonl_records(store.materials_file)
+    raw_payload_files_after = count_raw_payload_files(store.raw_dir)
+    observations_appended = material_records_after - material_records_before
+    new_raw_payload_files = raw_payload_files_after - raw_payload_files_before
+
+    reuse_expectation_met = payloads_reused >= args.expect_reuse_min
+    observations_preserved = observations_appended == len(materials)
+
+    if not materials:
+        status = "NO_MATERIAL"
+        exit_code = 2
+    elif not reuse_expectation_met:
+        status = "REUSE_EXPECTATION_FAILED"
+        exit_code = 3
+    elif not observations_preserved:
+        status = "OBSERVATION_APPEND_FAILED"
+        exit_code = 4
+    else:
+        status = "PASS"
+        exit_code = 0
+
     summary = {
-        "status": "PASS" if materials else "NO_MATERIAL",
+        "status": status,
         "task_id": task.task_id,
         "package_id": package.package_id,
         "materials": len(materials),
         "payloads_reused": payloads_reused,
+        "expect_reuse_min": args.expect_reuse_min,
+        "reuse_expectation_met": reuse_expectation_met,
+        "material_records_before": material_records_before,
+        "material_records_after": material_records_after,
+        "observations_appended": observations_appended,
+        "observations_preserved": observations_preserved,
+        "raw_payload_files_before": raw_payload_files_before,
+        "raw_payload_files_after": raw_payload_files_after,
+        "new_raw_payload_files": new_raw_payload_files,
         "output": str(args.output),
         "first_material": None,
     }
@@ -112,7 +166,7 @@ def main() -> int:
         }
 
     print(json.dumps(summary, ensure_ascii=False, indent=2))
-    return 0 if materials else 2
+    return exit_code
 
 
 if __name__ == "__main__":

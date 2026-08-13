@@ -7,7 +7,10 @@ from uuid import uuid4
 from father_osint.models import utc_now_iso
 
 
-SUFFICIENCY_LEVELS = {"MINIMUM", "GOOD", "DESIRABLE"}
+REQUESTED_SUFFICIENCY_LEVELS = {"MINIMUM", "GOOD", "DESIRABLE"}
+ACHIEVED_SUFFICIENCY_LEVELS = {"INSUFFICIENT", "MINIMUM", "GOOD", "DESIRABLE"}
+# Backward-compatible alias for existing callers that mean requested/target level.
+SUFFICIENCY_LEVELS = REQUESTED_SUFFICIENCY_LEVELS
 PLAN_DECISIONS = {"ACCEPT", "AMEND", "REJECT"}
 WORKFLOW_STATES = {
     "DRAFT",
@@ -75,8 +78,8 @@ class ResearchRequest:
             raise ValueError("objective must not be empty")
         if not self.research_questions:
             raise ValueError("research_questions must not be empty")
-        if self.required_sufficiency not in SUFFICIENCY_LEVELS:
-            raise ValueError(f"required_sufficiency must be one of {sorted(SUFFICIENCY_LEVELS)}")
+        if self.required_sufficiency not in REQUESTED_SUFFICIENCY_LEVELS:
+            raise ValueError(f"required_sufficiency must be one of {sorted(REQUESTED_SUFFICIENCY_LEVELS)}")
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -111,8 +114,8 @@ class SearchPlan:
             raise ValueError("case_id and request_id must not be empty")
         if not self.source_classes or not self.methods or not self.search_sequence:
             raise ValueError("source_classes, methods and search_sequence must not be empty")
-        if self.expected_sufficiency not in SUFFICIENCY_LEVELS:
-            raise ValueError(f"expected_sufficiency must be one of {sorted(SUFFICIENCY_LEVELS)}")
+        if self.expected_sufficiency not in REQUESTED_SUFFICIENCY_LEVELS:
+            raise ValueError(f"expected_sufficiency must be one of {sorted(REQUESTED_SUFFICIENCY_LEVELS)}")
         if self.version <= 0:
             raise ValueError("version must be > 0")
         if not self.knowledge_refs and not self.knowledge_gap:
@@ -171,9 +174,9 @@ class EvidencePackage:
     def __post_init__(self) -> None:
         self.requested_sufficiency = self.requested_sufficiency.upper()
         self.achieved_sufficiency = self.achieved_sufficiency.upper()
-        if self.requested_sufficiency not in SUFFICIENCY_LEVELS:
+        if self.requested_sufficiency not in REQUESTED_SUFFICIENCY_LEVELS:
             raise ValueError("invalid requested_sufficiency")
-        if self.achieved_sufficiency not in SUFFICIENCY_LEVELS:
+        if self.achieved_sufficiency not in ACHIEVED_SUFFICIENCY_LEVELS:
             raise ValueError("invalid achieved_sufficiency")
 
     def to_dict(self) -> dict[str, Any]:
@@ -200,8 +203,10 @@ class ResearchGap:
         self.required_sufficiency = self.required_sufficiency.upper()
         if not self.question.strip() or not self.why_needed.strip() or not self.missing_evidence_type.strip():
             raise ValueError("ResearchGap question/why_needed/missing_evidence_type must not be empty")
-        if self.current_sufficiency not in SUFFICIENCY_LEVELS or self.required_sufficiency not in SUFFICIENCY_LEVELS:
-            raise ValueError("invalid sufficiency level")
+        if self.current_sufficiency not in ACHIEVED_SUFFICIENCY_LEVELS:
+            raise ValueError("invalid current_sufficiency")
+        if self.required_sufficiency not in REQUESTED_SUFFICIENCY_LEVELS:
+            raise ValueError("invalid required_sufficiency")
 
 
 class ResearchWorkflow:

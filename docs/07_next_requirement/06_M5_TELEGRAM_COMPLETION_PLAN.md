@@ -117,7 +117,7 @@ Rules:
 Required levels:
 - MINIMUM;
 - GOOD;
-- DESIRED.
+- DESIRABLE.
 
 Assessment must consider coverage, diversity, independence, primary evidence, counter-evidence and critical gaps rather than raw material count.
 
@@ -130,12 +130,12 @@ critical gaps: ...
 recommended next search: ...
 ```
 
-**Status:** NEXT / OPEN.
+**Status:** DEV PASS. `father_osint/sufficiency.py` implements explicit `INSUFFICIENT / MINIMUM / GOOD / DESIRABLE` policy outcomes using coverage, diversity, independent evidence, primary evidence, counter-evidence search, evidence-quality context and critical gaps. Raw item count is not a promotion criterion. The protocol now correctly separates requested levels from achieved levels so `INSUFFICIENT` can be represented as an outcome but never requested as a target. Dedicated G8 acceptance tests are GREEN: 103 passed, 2 skipped. Evidence: `docs/journal/J-026_M5_G8_RESEARCH_SUFFICIENCY_DEV_PASS_2026-08-13.md`.
 
 ### G9 — Counter-evidence / alternative search
 For material analytical questions, OSINT search plan must include a deliberate attempt to find evidence inconsistent with the leading hypothesis or record why such search is not applicable.
 
-**Status:** OPEN.
+**Status:** NEXT / OPEN.
 
 ### G10 — Transparent acquisition report
 Analyst receives not only materials but also:
@@ -165,8 +165,8 @@ Before M5 DONE:
 2. Telegram SearchPlan contract             PASS
 3. Reconnaissance → refinement cycle        DEV PASS / live pending
 4. EvidenceAssessment model                 DEV PASS
-5. ResearchSufficiency MINIMUM/GOOD/DESIRED NEXT
-6. Counter-evidence behavior
+5. ResearchSufficiency policy               DEV PASS
+6. Counter-evidence behavior                NEXT
 7. AcquisitionReport to Analyst
 8. Full live scenario
 9. Council final review / M5 DONE

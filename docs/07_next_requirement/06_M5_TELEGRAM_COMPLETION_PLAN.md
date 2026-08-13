@@ -111,7 +111,7 @@ Rules:
 - no single score is treated as truth probability without calibration evidence;
 - tool/source labels do not automatically confer reliability.
 
-**Status:** NEXT / OPEN.
+**Status:** DEV PASS. `father_osint/evidence_quality.py` preserves seven categorical dimensions separately, refuses an uncalibrated aggregate truth probability, keeps reliability `UNKNOWN` without source-history evidence, and treats repeated identical payloads as derivative repetition rather than independent corroboration. Dedicated G7 acceptance tests are GREEN: 97 passed, 2 skipped. Evidence: `docs/journal/J-025_M5_G7_EVIDENCE_QUALITY_DEV_PASS_2026-08-13.md`.
 
 ### G8 — Research sufficiency
 Required levels:
@@ -130,7 +130,7 @@ critical gaps: ...
 recommended next search: ...
 ```
 
-**Status:** OPEN.
+**Status:** NEXT / OPEN.
 
 ### G9 — Counter-evidence / alternative search
 For material analytical questions, OSINT search plan must include a deliberate attempt to find evidence inconsistent with the leading hypothesis or record why such search is not applicable.
@@ -164,8 +164,8 @@ Before M5 DONE:
 1. Live checkpoint/restart/reconciliation   PASS
 2. Telegram SearchPlan contract             PASS
 3. Reconnaissance → refinement cycle        DEV PASS / live pending
-4. EvidenceAssessment model                 NEXT
-5. ResearchSufficiency MINIMUM/GOOD/DESIRED
+4. EvidenceAssessment model                 DEV PASS
+5. ResearchSufficiency MINIMUM/GOOD/DESIRED NEXT
 6. Counter-evidence behavior
 7. AcquisitionReport to Analyst
 8. Full live scenario

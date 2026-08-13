@@ -21,6 +21,49 @@ Alternative terminal states: `DEFERRED`, `REJECTED`, `SUPERSEDED`.
 
 WIP limit remains unchanged. Security remediation and local runtime verification are part of the existing M5 streams, not a new product milestone.
 
+## Repository audit reconciliation — 2026-08-13
+
+This section is the current priority override until older M5 rows above are reconciled with the latest live evidence. The audit found that implementation/evidence has advanced faster than this control register: the integrated G6-G10 live runner has already passed on a real Telegram path, while older rows still describe TDLib authorization as the next critical action.
+
+### Priority queue
+
+| Priority | ID | Work | Why now | Exit evidence | Disposition |
+|---|---|---|---|---|---|
+| **P0** | AUDIT-001 | Reconcile control plane with actual `main` state | stale roadmap/status can cause duplicate PoCs, wrong sequencing and false milestone reporting | DEVELOPMENT_JOURNAL + MASTER_CONTROL_REGISTER + M5 gate docs agree on current state | **ACTIVE** |
+| **P0** | G11-M5-001 | Live hypothesis-driven counter-evidence scenario | current integrated live proof leaves G9 `NOT_APPLICABLE`; M5 must prove REQUIRED counter-evidence behavior before closure | actual counter-evidence attempt, lineage, result and negative/insufficient case | **NEXT PRODUCT GATE** |
+| **P0** | M5-SRC-001 | Explain one-observable-source result and prove intended multi-source behavior | current live run achieved only `MINIMUM` sufficiency and surfaced independence/source-coverage gaps | bounded live run showing intended source selection/coverage or documented accepted limitation | **ACTIVE INVESTIGATION** |
+| **P0** | ADR-M5-001 | Final transport ADR + fallback posture | live Telethon path exists; TDLib research must no longer consume critical path without decision value | explicit primary/fallback decision, revisit triggers, security/maintenance evidence | **READY AFTER G11/SOURCE REVIEW** |
+| **P0** | SEC-M5-FINAL | Final secrets/session/log hygiene review | real credentials and sessions are now part of the operator path | no secrets/session material in repo/log evidence; owner settings reviewed; failure paths tested | **REQUIRED BEFORE M5 DONE** |
+| **P1** | CI-2026-001 | Reconcile Dependabot action upgrades | four dependency PRs are open; current workflows still pin older major action generations | each PR tested against current CI and merged, deferred with reason, or superseded | **QUEUED / DO NOT BLIND-MERGE** |
+| **P1** | REL-2026-001 | Dependency reproducibility decision | `requirements-dev.txt` remains range-based; freeze/release claims need an explicit policy | approved lock/update strategy with CI evidence | **QUEUED** |
+| **P1** | GOV-2026-001 | Reduce duplicate status surfaces | journal, Tree_F evidence, gate docs and control register can drift | named authoritative status source + update rule + obsolete status markers | **QUEUED** |
+| **P2** | DOC-2026-001 | README/status cleanup after M5 gate | external repo view should reflect current proven capability, not intermediate history | README synchronized after G11/ADR decision | **DEFER UNTIL P0 CLOSED** |
+| **P2** | M6-START | Universal Artifact/Ingestion | valuable next product capability, but starting before M5 closure would increase WIP and blur evidence | M5 DONE/FROZEN | **BLOCKED BY M5** |
+
+### Explicit exclusions / stop-doing rules
+
+The following work is **excluded from the current critical path** unless new evidence changes the decision:
+
+- no additional Telegram donor/GramJS PoC merely for completeness; run it only if the Principal Critic records a material unresolved ADR question that it can answer;
+- no deeper TDLib debugging merely because TDLib is technologically preferred; require a stated decision-changing hypothesis before more effort;
+- no M6/M7/M8 implementation while M5 G11, source-coverage, final security and ADR gates remain open;
+- no promotion of synthetic fixtures, DEV simulators or Telegram-only acquisition evidence into VERIFIED professional/domain knowledge;
+- no aggregate truth/confidence probability built from evidence-quality scores without a separately approved calibrated model;
+- no restoration of removed legacy runtime/gateway/VIP code except via a new requirement and evidence-backed reuse decision;
+- no new governance layer, council, register or status document unless an existing control cannot represent the required decision;
+- no blind Dependabot merge across major Action versions; CI/security compatibility evidence is required first;
+- no production/cross-platform claim until Windows-specific and clean-host evidence required by the applicable gate is recorded.
+
+### Audit milestone interpretation
+
+Current proven state is stronger than the old M5 planning rows but narrower than M5 completion:
+
+`live acquisition + provenance/restart + G6-G10 integrated exploratory PASS` **is proven**; `hypothesis-driven G9 execution + intended multi-source coverage + final transport/security decision + M5 freeze` **is not yet proven**.
+
+Therefore the critical path is now:
+
+`G11 counter-evidence live proof → source-coverage resolution → final security review → transport ADR/Critic review → M5 acceptance/freeze → M6`.
+
 ## Active security findings from SEC-AUDIT-M5-001
 
 | ID | Severity | Finding | Blocks | State | Required evidence |

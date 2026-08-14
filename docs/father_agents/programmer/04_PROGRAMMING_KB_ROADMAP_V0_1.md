@@ -216,12 +216,160 @@ These thresholds may be revised only through an evidence-backed roadmap record; 
 
 ```text
 P0 evidence contract       STARTED
-P1 coverage matrix         NEXT
-P2 canonical sources       STARTED / seed 7
-P3 fundamentals            NOT STARTED
+P1 coverage matrix         STARTED
+P2 canonical sources       STARTED / 15 source cards
+P3 fundamentals            STARTED / 7 provisional Knowledge Objects
 P4 security/devsecops      BASELINES IDENTIFIED
 P5 reliability/performance NOT STARTED
 P6 decision engine         DESIGN OUTLINE
 P7 evaluation corpus       NOT STARTED
 P8 executable integration  NOT AUTHORIZED
 ```
+
+## 8. Cross-FATHER agent evolution — captured future path
+
+This section records high-value ideas that must not be lost, while explicitly keeping them **outside the current M5 critical path and outside Programmer runtime implementation**.
+
+### F0 — Three flagship professional agents
+Initial professional development focus:
+- `PROGRAMMER`;
+- `ARCHITECT`;
+- `SECURITY`.
+
+Other professional agents are added only after their knowledge bases and evaluation material reach a usable evidence threshold.
+
+### F1 — Qualification levels are permissions, not separate agents
+Use one professional agent with evidence-backed qualification states rather than cloning Junior/Master/Senior agents.
+
+Initial model:
+- **Junior** — follows approved instructions/contracts; no material autonomous design decisions;
+- **Master** — may discover alternatives and propose improvements; material changes require approval;
+- **Senior** — may select bounded engineering routes independently, but must produce strong evidence, alternatives, risks and validation.
+
+Promotion must depend on measured performance history, not prompt wording or self-declaration.
+
+### F2 — Independent Principal Critic
+The Critic is independent from the authoring agent and attempts to falsify material decisions.
+
+Required review dimensions:
+- false or hidden assumptions;
+- missing evidence;
+- credible counterexamples;
+- stronger/dominating alternatives;
+- security and reliability failures;
+- economic/cost errors;
+- unnecessary complexity;
+- unmeasured claims represented explicitly as `UNKNOWN` / `UNMEASURED`, never invented numbers.
+
+### F3 — Experience / Failure / Counterexample memory
+Successful and failed work both become structured experience:
+
+```text
+failure
+→ normalized failure record
+→ root cause
+→ fix
+→ regression test
+→ candidate knowledge rule
+→ independent review
+→ trusted/limited KB object
+```
+
+A single successful anecdote must not automatically become universal knowledge.
+
+### F4 — Agent Arena / Tournament system
+After the KB and evaluation corpus are mature enough, create controlled competitions between multiple runs/versions/strategies of the same professional agent.
+
+Minimum prerequisites:
+- objective acceptance criteria;
+- hidden or independently controlled evaluation tasks;
+- reproducible sandbox/tool execution where applicable;
+- scorecard separating speed from correctness, safety and evidence quality;
+- tournament history and weakness map.
+
+Arena progression should move from ordinary coverage tasks to weakness-driven, adversarial and novel-combination tasks rather than endlessly generating low-information repetitions.
+
+### F5 — Adversarial Agent Researcher / FATHER immune system
+In an isolated, authorized sandbox, research attacks against FATHER agents themselves, including prompt/tool/memory/data poisoning and permission-confusion classes.
+
+Learning loop:
+
+```text
+attack scenario
+→ observed failure
+→ root cause
+→ countermeasure
+→ regression test
+→ defensive rule
+→ distribution to affected agents
+```
+
+This is a future security research capability, not authorization for uncontrolled external attack activity.
+
+### F6 — Secure Knowledge / IP Vault
+Do not assume a fixed per-agent storage size such as 1–5 TB before measurement.
+
+Preferred logical model:
+
+```text
+SHARED KNOWLEDGE CORE
+  ├─ PROGRAMMER delta
+  ├─ ARCHITECT delta
+  └─ SECURITY delta
+```
+
+Separate public/open material from proprietary material. Candidate protected IP includes:
+- decision graphs and proprietary relation weights;
+- calibrated source/decision coefficients;
+- hidden evaluation corpus;
+- tournament/failure corpus;
+- routing and decision policies;
+- proprietary mappings;
+- customer-specific intelligence and results.
+
+Actual LLM provider model weights are not to be confused with FATHER-owned decision/knowledge weights.
+
+### F7 — Economics and cost instrumentation
+Do not hard-code speculative prices. Build measurable cost models first.
+
+Track at minimum:
+- storage hot/warm/cold/backup/replication/egress;
+- inference and retrieval cost;
+- sandbox/tool/compute cost;
+- critic/judge/human-review cost;
+- `cost per task`;
+- `cost per validated competence`;
+- training/evaluation cost;
+- support and risk reserve;
+- commercial unit economics and ROI.
+
+Real provider tariffs and measured usage are substituted only when the architecture and workload are known.
+
+### F8 — Learning research only after evidence corpus exists
+Tournament history and verified experience may later support:
+- retrieval/policy improvement;
+- supervised fine-tuning;
+- preference tuning;
+- distillation;
+- reward modelling / reinforcement learning where justified.
+
+RAG/history alone must not be mislabeled as model-weight training. Any deeper training path requires measurable gain over the simpler retrieval/policy baseline and an explicit economic case.
+
+### Future execution order
+
+```text
+PROGRAMMER_KB + ARCHITECTURE_KB + SECURITY_KB
+→ evidence contracts
+→ qualification metrics
+→ independent Critic
+→ evaluation corpus
+→ experience/failure memory
+→ Mini Arena
+→ tournament history / weakness maps
+→ controlled adversarial-agent research
+→ secure IP Vault at production-sensitive scale
+→ learning-method research
+→ measured commercial economics
+```
+
+**Current disposition:** CAPTURED / DEFERRED. These ideas are preserved as the post-KB evolution path and do not displace the current M5 product gate.

@@ -63,6 +63,7 @@ The agent SHALL NOT:
 - `07_PROGRAMMING_KB_SOURCE_CARDS_BATCH_B_PYTHON_BACKEND_2026-08-14.md` — Python/backend canonical source batch.
 - `08_PROGRAMMING_KB_KNOWLEDGE_OBJECTS_SEED_V0_1.md` — first provisional Knowledge Objects.
 - `09_PROGRAMMING_KB_GRAPH_VOLUME_TIME_MODEL_V0_1.md` — graph node/edge/weight model, storage-envelope estimates, creation-time ranges and build conditions.
+- `10_PROGRAMMER_QUALIFICATION_TRAINING_PLAN_V0_1.md` — Junior/Master/Senior qualification training, classical problem corpus, everyday engineering cases, AI task generation, hidden evaluation and GitHub/IP-Vault storage boundary.
 
 ## Core knowledge domains
 

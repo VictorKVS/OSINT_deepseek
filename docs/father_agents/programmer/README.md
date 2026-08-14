@@ -58,6 +58,11 @@ The agent SHALL NOT:
 - `02_PROGRAMMING_KB_EVIDENCE_MODEL_V0_1.md` — evidence hierarchy, knowledge-object schema and sufficiency rules.
 - `03_PROGRAMMING_KB_SOURCE_REGISTER_SEED_2026-08-14.md` — first verified authoritative source register and acquisition backlog.
 - `04_PROGRAMMING_KB_ROADMAP_V0_1.md` — staged build plan and measurable gates.
+- `05_PROGRAMMING_KB_COVERAGE_MATRIX_V0_1.md` — 12-domain professional coverage and explicit gaps.
+- `06_PROGRAMMING_KB_CANONICAL_SOURCE_CARDS_SEED_V0_1.md` — canonical engineering source cards.
+- `07_PROGRAMMING_KB_SOURCE_CARDS_BATCH_B_PYTHON_BACKEND_2026-08-14.md` — Python/backend canonical source batch.
+- `08_PROGRAMMING_KB_KNOWLEDGE_OBJECTS_SEED_V0_1.md` — first provisional Knowledge Objects.
+- `09_PROGRAMMING_KB_GRAPH_VOLUME_TIME_MODEL_V0_1.md` — graph node/edge/weight model, storage-envelope estimates, creation-time ranges and build conditions.
 
 ## Core knowledge domains
 

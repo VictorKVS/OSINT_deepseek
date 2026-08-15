@@ -59,7 +59,7 @@ The agent SHALL NOT:
 ## Initial knowledge products
 
 - `01_PROGRAMMER_AGENT_PRODUCT_PASSPORT_V0_1.md` — role, inputs/outputs and decision contract.
-- `02_PROGRAMMING_KB_EVIDENCE_MODEL_V0_1.md` — evidence hierarchy, knowledge-object schema and sufficiency rules.
+- `02_PROGRAMMING_KB_EVIDENCE_MODEL_V0_1.md` — evidence hierarchy, exact source locators, metric provenance, knowledge-object schema and decision sufficiency rules.
 - `03_PROGRAMMING_KB_SOURCE_REGISTER_SEED_2026-08-14.md` — first verified authoritative source register and acquisition backlog.
 - `04_PROGRAMMING_KB_ROADMAP_V0_1.md` — staged build plan and measurable gates.
 - `05_PROGRAMMING_KB_COVERAGE_MATRIX_V0_1.md` — 12-domain professional coverage and explicit gaps.
@@ -69,6 +69,8 @@ The agent SHALL NOT:
 - `09_PROGRAMMING_KB_GRAPH_VOLUME_TIME_MODEL_V0_1.md` — graph node/edge/weight model, storage-envelope estimates, creation-time ranges and build conditions.
 - `10_PROGRAMMER_QUALIFICATION_TRAINING_PLAN_V0_1.md` — Junior/Master/Senior qualification training, classical problem corpus, everyday engineering cases, AI task generation, hidden evaluation and GitHub/IP-Vault storage boundary.
 - `11_AGENT_ENGINEERING_COMPETENCY_V0_1.md` — mandatory capability to engineer, benchmark and improve AI-agent instances and seed the future FATHER Agent Factory.
+- `12_PROGRAMMER_CLASSIC_AND_PUBLIC_TASK_CORPUS_MAP_V0_1.md` — classical/public task sources, copyright boundary and progression from drills to systems, production and agent-factory qualification.
+- `13_DUAL_MODE_PROJECT_ENGINEERING_DOSSIER_V0_1.md` — one canonical project engineering record rendered in two roles: explanatory Teaching View and compact Production Card; Analyst → Tester → Programmer → Verification → A/B/n experiment → Experience/KB feedback.
 
 ## Core knowledge domains
 
@@ -88,6 +90,10 @@ The agent SHALL NOT:
 ### Mandatory cross-cutting competency
 
 **Agent Engineering** spans the 12 domains and is mandatory for Programmer qualification: agent contracts, model/tool integration, retrieval/memory, permissions, orchestration, evaluation, hidden tests, observability, cost, robustness, versioning, rollback and measured best-instance selection.
+
+### Project engineering memory
+
+Material projects should produce a stable-ID engineering dossier in which Analyst requirements/diagrams, Tester acceptance/tests, Programmer decisions/metrics/sources, implementation, verification, experiments and experience records share one traceable graph. The same underlying record can be rendered as a Teaching View with explanations or as a compact Production Card without tutorial prose.
 
 ## Governing rule
 

@@ -31,6 +31,8 @@ data/m5_live_telegram/
 # Knowledge Factory live acquisition: exact originals, extracted text and local registries stay local.
 # Only sanitized review exports under reports/pdn_live/ may be committed for review.
 data/knowledge_factory/
+# Operator-assisted official imports are local exact source bytes and must never enter public Git.
+data/operator_import/
 .runtime/
 *.db
 *.sqlite

@@ -13,6 +13,7 @@ if str(REPO_ROOT) not in sys.path:
 
 from father_osint.artifact_identity import MarkerValidatingFetcher
 from father_osint.knowledge_factory_store import KnowledgeFactoryStore
+from father_osint.official_transport import RobustOfficialArtifactFetcher
 from father_osint.pdn_batch import PdnOfficialBatchRunner, load_registry
 
 
@@ -94,20 +95,31 @@ def main() -> int:
     parser.add_argument("--root", default=str(DEFAULT_ROOT))
     parser.add_argument("--export-review", default=str(DEFAULT_EXPORT))
     parser.add_argument("--max-chunk-chars", type=int, default=2400)
+    parser.add_argument(
+        "--minimum-timeout-seconds",
+        type=float,
+        default=45.0,
+        help="Minimum per-transport timeout for slow official sites; remains bounded.",
+    )
     args = parser.parse_args()
 
     registry = load_registry(args.registry)
     marker_map = build_marker_map(registry)
     store = KnowledgeFactoryStore(args.root)
+    transport = RobustOfficialArtifactFetcher(
+        minimum_timeout_seconds=args.minimum_timeout_seconds,
+    )
     result = PdnOfficialBatchRunner(
         store,
-        fetcher=MarkerValidatingFetcher(marker_map),
+        fetcher=MarkerValidatingFetcher(marker_map, inner=transport),
         max_chunk_chars=args.max_chunk_chars,
     ).run(registry)
     exported = export_sanitized_review(store, result, Path(args.export_review))
 
     payload = {
         "registry_id": result.registry_id,
+        "transport": "urllib_then_tls_verifying_curl",
+        "minimum_timeout_seconds": args.minimum_timeout_seconds,
         "counters": result.counters,
         "local_review_json": result.review_json_path,
         "local_review_md": result.review_md_path,

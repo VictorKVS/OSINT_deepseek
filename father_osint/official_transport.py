@@ -13,9 +13,14 @@ class CurlArtifactFetcher:
 
     The command is executed without a shell. TLS verification remains enabled;
     this class intentionally never passes curl's insecure/-k option.
-    """
 
-    user_agent = "FATHER-KnowledgeFactory/0.2"
+    Some public publication archives behave differently for HEAD vs GET and
+    may require ordinary redirect-cookie handling. The fallback therefore uses
+    curl's cookie engine for redirects, but does not inject authentication or
+    bypass access control. It also leaves curl's normal User-Agent unchanged so
+    sites that reject project-specific crawler identifiers can still return the
+    same public document a normal curl client receives.
+    """
 
     def __init__(self, executable: str | None = None) -> None:
         self.executable = executable or shutil.which("curl.exe") or shutil.which("curl")
@@ -27,9 +32,12 @@ class CurlArtifactFetcher:
         timeout = max(1, int(timeout_seconds))
         connect_timeout = max(1, min(timeout, 15))
         tmp_name: str | None = None
+        cookie_name: str | None = None
         try:
             with tempfile.NamedTemporaryFile(prefix="father-kf-", suffix=".artifact", delete=False) as tmp:
                 tmp_name = tmp.name
+            with tempfile.NamedTemporaryFile(prefix="father-kf-", suffix=".cookies", delete=False) as cookie:
+                cookie_name = cookie.name
 
             command = [
                 self.executable,
@@ -50,8 +58,14 @@ class CurlArtifactFetcher:
                 str(timeout),
                 "--max-filesize",
                 str(max_bytes),
-                "--user-agent",
-                self.user_agent,
+                "--cookie",
+                cookie_name,
+                "--cookie-jar",
+                cookie_name,
+                "--header",
+                "Accept: text/html,application/xhtml+xml,application/json;q=0.9,*/*;q=0.8",
+                "--header",
+                "Accept-Language: ru-RU,ru;q=0.9,en;q=0.7",
                 "--output",
                 tmp_name,
                 "--write-out",
@@ -93,6 +107,8 @@ class CurlArtifactFetcher:
         finally:
             if tmp_name:
                 Path(tmp_name).unlink(missing_ok=True)
+            if cookie_name:
+                Path(cookie_name).unlink(missing_ok=True)
 
 
 class RobustOfficialArtifactFetcher:

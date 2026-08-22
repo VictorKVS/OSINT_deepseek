@@ -14,6 +14,7 @@ if str(REPO_ROOT) not in sys.path:
 from father_osint.document_compiler import DocumentCompilerError, extract_visible_text
 from father_osint.garant_timeline import official_evidence_requests, parse_garant_timeline_text
 from father_osint.legal_source_bundle import LegalSourceBundle
+from father_osint.odt_extract import OdtExtractionError, extract_odt_text
 
 
 DEFAULT_BUNDLES = REPO_ROOT / "config" / "pdn_source_bundles.json"
@@ -34,10 +35,11 @@ def _load_bundles(path: Path) -> tuple[LegalSourceBundle, ...]:
 
 
 def _candidate_inputs(input_dir: Path, document_id: str) -> tuple[Path, ...]:
-    # Prefer a rendered-text capture over browser-saved HTML, but inspect all
-    # available candidates so stale shell HTML cannot mask a valid .txt file.
+    # Prefer the application's own downloaded ODT over rendered clipboard text
+    # and browser shell HTML. Inspect all available candidates so stale local
+    # files cannot mask a newer identity-valid artifact.
     candidates: list[Path] = []
-    for suffix in (".txt", ".html", ".htm"):
+    for suffix in (".odt", ".txt", ".html", ".htm"):
         candidate = input_dir / f"{document_id}{suffix}"
         if candidate.is_file():
             candidates.append(candidate)
@@ -48,6 +50,12 @@ def _mime_for(path: Path) -> str:
     if path.suffix.casefold() in {".html", ".htm"}:
         return "text/html"
     return "text/plain"
+
+
+def _extract_candidate_text(path: Path, data: bytes) -> str:
+    if path.suffix.casefold() == ".odt":
+        return extract_odt_text(data)
+    return extract_visible_text(data, _mime_for(path))
 
 
 def _empty_basis_counts() -> dict[str, int]:
@@ -65,7 +73,7 @@ def _missing_identity_markers(text: str, markers: tuple[str, ...]) -> list[str]:
 
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="Extract only amendment/version metadata from operator-saved GARANT pages"
+        description="Extract only amendment/version metadata from operator-saved GARANT working copies"
     )
     parser.add_argument("--bundles", default=str(DEFAULT_BUNDLES))
     parser.add_argument("--input-dir", default=str(DEFAULT_INPUT))
@@ -103,7 +111,7 @@ def main() -> int:
                 "status": "INPUT_PENDING",
                 "source_id": provider.source_id,
                 "source_url": provider.url,
-                "expected_input": str(input_dir / f"{bundle.document_id}.txt"),
+                "expected_input": str(input_dir / f"{bundle.document_id}.odt"),
             })
             continue
 
@@ -117,8 +125,8 @@ def main() -> int:
         for candidate in source_paths:
             try:
                 candidate_bytes = candidate.read_bytes()
-                candidate_text = extract_visible_text(candidate_bytes, _mime_for(candidate))
-            except (DocumentCompilerError, ValueError) as exc:
+                candidate_text = _extract_candidate_text(candidate, candidate_bytes)
+            except (DocumentCompilerError, OdtExtractionError, ValueError) as exc:
                 extraction_failures += 1
                 candidate_diagnostics.append({
                     "file": candidate.name,
@@ -290,7 +298,7 @@ def main() -> int:
         "Every amendment event stays `OFFICIAL_EVIDENCE_PENDING` until an A0/A1 publication/effectiveness anchor is attached.",
         "Publication-relative rules explicitly request an A0/A1 official-publication date; no calendar date is inferred from GARANT alone.",
         "Every timeline capture must pass document identity markers before amendment parsing.",
-        "Multiple local capture formats may coexist; the runner chooses the first identity-valid capture, preferring rendered .txt over saved HTML.",
+        "Multiple local capture formats may coexist; the runner chooses the first identity-valid capture, preferring GARANT-downloaded ODT, then rendered .txt, then saved HTML.",
         "Each local GARANT capture is linked by SHA-256 only; no full GARANT text is exported or mirrored.",
     ]
     plan.write_text("\n".join(lines) + "\n", encoding="utf-8", newline="\n")

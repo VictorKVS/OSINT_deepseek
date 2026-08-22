@@ -21,7 +21,7 @@ from .knowledge_factory import (
 from .knowledge_factory_store import KnowledgeFactoryStore
 
 
-PARSER_VERSION = "legal-preliminary-v1"
+PARSER_VERSION = "legal-preliminary-v2"
 
 
 class DocumentCompilerError(RuntimeError):
@@ -185,7 +185,9 @@ class CompileResult:
 
 _CHAPTER_RE = re.compile(r"^Глава\s+([0-9IVXLCDM]+(?:[.][0-9]+)?)\.?\s*(.*)$", re.IGNORECASE)
 _SECTION_RE = re.compile(r"^Раздел\s+([0-9IVXLCDM]+(?:[.][0-9]+)?)\.?\s*(.*)$", re.IGNORECASE)
+_ROMAN_SECTION_RE = re.compile(r"^([IVXLCDM]+)\.\s+(.+)$", re.IGNORECASE)
 _ARTICLE_RE = re.compile(r"^Статья\s+(\d+(?:[.][0-9]+)?)\.?\s*(.*)$", re.IGNORECASE)
+_POINT_RE = re.compile(r"^(\d+(?:[.]\d+)*)\.\s*(.*)$")
 
 
 def _split_long_text(text: str, max_chars: int) -> list[str]:
@@ -225,6 +227,14 @@ def _split_long_text(text: str, max_chars: int) -> list[str]:
 
 
 def parse_legal_structure(document_id: str, version_id: str, text: str) -> tuple[list[StructureNode], list[str]]:
+    """Build deterministic preliminary legal structure without semantic promotion.
+
+    Federal laws are primarily article-based. Government/agency acts commonly
+    use roman-numbered sections plus numbered points (including 8.1, 8.2, ...).
+    Both forms are preserved as explicit D4 structure; BODY is a fail-soft
+    fallback only when neither articles nor numbered points can be recovered.
+    """
+
     lines = text.splitlines()
     root_id = _stable_id("STR", document_id, version_id, "document")
     nodes: list[StructureNode] = [
@@ -243,48 +253,67 @@ def parse_legal_structure(document_id: str, version_id: str, text: str) -> tuple
     ]
     warnings: list[str] = []
     current_parent = root_id
-    current_article: dict[str, Any] | None = None
+    current_parent_locator = "document"
+    current_unit: dict[str, Any] | None = None
     article_count = 0
+    point_count = 0
+    unit_ordinal = 0
+    structural_ordinal = 0
+    point_occurrences: dict[tuple[str, str], int] = {}
 
-    def flush_article() -> None:
-        nonlocal current_article, article_count
-        if current_article is None:
+    def flush_unit() -> None:
+        nonlocal current_unit, article_count, point_count, unit_ordinal
+        if current_unit is None:
             return
-        body = "\n".join(current_article["body"]).strip()
-        title = current_article["title"]
-        locator = current_article["locator"]
+        body = "\n".join(current_unit["body"]).strip()
+        title = current_unit["title"]
+        locator = current_unit["locator"]
         content = f"{title}\n{body}".strip()
         node_id = _stable_id("STR", document_id, version_id, locator, content)
-        article_count += 1
+        unit_ordinal += 1
+        node_type = current_unit["node_type"]
+        if node_type == "ARTICLE":
+            article_count += 1
+        elif node_type == "POINT":
+            point_count += 1
         nodes.append(
             StructureNode(
                 node_id=node_id,
                 document_id=document_id,
                 version_id=version_id,
-                node_type="ARTICLE",
+                node_type=node_type,
                 locator=locator,
                 title=title,
                 text=body,
-                parent_node_id=current_article["parent"],
-                ordinal=article_count,
+                parent_node_id=current_unit["parent"],
+                ordinal=unit_ordinal,
                 content_sha256=_sha256_text(content),
             )
         )
-        current_article = None
+        current_unit = None
 
-    structural_ordinal = 0
     for line in lines:
         chapter = _CHAPTER_RE.match(line)
         section = _SECTION_RE.match(line)
+        roman_section = _ROMAN_SECTION_RE.match(line)
         article = _ARTICLE_RE.match(line)
+        point = _POINT_RE.match(line)
 
-        if chapter or section:
-            flush_article()
-            match = chapter or section
-            assert match is not None
-            node_type = "CHAPTER" if chapter else "SECTION"
-            number = match.group(1)
-            trailing = match.group(2).strip()
+        if chapter or section or roman_section:
+            flush_unit()
+            if chapter:
+                node_type = "CHAPTER"
+                number = chapter.group(1)
+                trailing = chapter.group(2).strip()
+            elif section:
+                node_type = "SECTION"
+                number = section.group(1)
+                trailing = section.group(2).strip()
+            else:
+                assert roman_section is not None
+                node_type = "SECTION"
+                number = roman_section.group(1).upper()
+                trailing = roman_section.group(2).strip()
             title = f"{node_type.title()} {number}" + (f". {trailing}" if trailing else "")
             locator = f"{node_type.lower()}:{number}"
             node_id = _stable_id("STR", document_id, version_id, locator, title)
@@ -304,14 +333,16 @@ def parse_legal_structure(document_id: str, version_id: str, text: str) -> tuple
                 )
             )
             current_parent = node_id
+            current_parent_locator = locator
             continue
 
         if article:
-            flush_article()
+            flush_unit()
             number = article.group(1)
             trailing = article.group(2).strip()
             title = f"Статья {number}" + (f". {trailing}" if trailing else "")
-            current_article = {
+            current_unit = {
+                "node_type": "ARTICLE",
                 "locator": f"article:{number}",
                 "title": title,
                 "body": [],
@@ -319,13 +350,31 @@ def parse_legal_structure(document_id: str, version_id: str, text: str) -> tuple
             }
             continue
 
-        if current_article is not None:
-            current_article["body"].append(line)
+        if point:
+            flush_unit()
+            number = point.group(1)
+            trailing = point.group(2).strip()
+            base_locator = f"{current_parent_locator}/point:{number}"
+            occurrence_key = (current_parent_locator, number)
+            occurrence = point_occurrences.get(occurrence_key, 0) + 1
+            point_occurrences[occurrence_key] = occurrence
+            locator = base_locator if occurrence == 1 else f"{base_locator}#{occurrence}"
+            current_unit = {
+                "node_type": "POINT",
+                "locator": locator,
+                "title": f"Пункт {number}",
+                "body": [trailing] if trailing else [],
+                "parent": current_parent,
+            }
+            continue
 
-    flush_article()
+        if current_unit is not None:
+            current_unit["body"].append(line)
 
-    if article_count == 0:
-        warnings.append("no article headings detected; fallback BODY structure created")
+    flush_unit()
+
+    if article_count == 0 and point_count == 0:
+        warnings.append("no article or numbered point headings detected; fallback BODY structure created")
         body_id = _stable_id("STR", document_id, version_id, "body", text)
         nodes.append(
             StructureNode(
@@ -355,7 +404,7 @@ def build_chunks(
     if max_chunk_chars < 300:
         raise ValueError("max_chunk_chars must be >= 300")
     chunks: list[DocumentChunk] = []
-    candidates = [node for node in nodes if node.node_type in {"ARTICLE", "BODY"}]
+    candidates = [node for node in nodes if node.node_type in {"ARTICLE", "POINT", "BODY"}]
     for node in candidates:
         source_text = f"{node.title}\n{node.text}".strip()
         for index, piece in enumerate(_split_long_text(source_text, max_chunk_chars), start=1):

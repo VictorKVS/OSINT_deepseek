@@ -1,0 +1,32 @@
+{
+  "schema_version": "1.0",
+  "status": "SEED_NEEDS_LIVE_VERIFICATION",
+  "sources": [
+    {
+      "source_id": "SRC-RU-PRAVO-001",
+      "name": "Official Internet Portal of Legal Information",
+      "domains": ["pravo.gov.ru", "publication.pravo.gov.ru"],
+      "trust_tier": "A0_OFFICIAL_PUBLICATION",
+      "material_profiles": ["LEGAL"],
+      "trust_basis": ["official_publication_channel", "state_legal_information_system"],
+      "authority_scope": ["federal_laws", "presidential_acts", "government_acts", "federal_executive_acts"],
+      "search_methods": ["exact_number", "title", "issuing_authority", "publication_date", "registration_number", "full_text"],
+      "monitoring_enabled": true,
+      "monitoring_cadence": "DAILY",
+      "verification_evidence": ["VERIFY_AGAINST_OFFICIAL_PORTAL_ABOUT_AND_LEGAL_BASIS"]
+    },
+    {
+      "source_id": "SRC-RU-GOV-001",
+      "name": "Government of the Russian Federation",
+      "domains": ["government.ru"],
+      "trust_tier": "A1_OFFICIAL_ORGAN",
+      "material_profiles": ["LEGAL", "WEB"],
+      "trust_basis": ["official_issuing_organ_site"],
+      "authority_scope": ["government_documents", "government_context"],
+      "search_methods": ["exact_number", "title", "publication_date", "full_text"],
+      "monitoring_enabled": true,
+      "monitoring_cadence": "DAILY",
+      "verification_evidence": ["VERIFY_DOMAIN_AND_DOCUMENT_SECTION_AGAINST_OFFICIAL_SITE"]
+    }
+  ]
+}

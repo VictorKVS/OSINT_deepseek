@@ -12,6 +12,8 @@ def test_one_click_pdn_auto_runner_is_bounded_and_fail_closed():
     assert "scripts\\run_pdn_d10_d12.py" in cmd
     assert "scripts\\audit_pdn_d10_d12.py" in cmd
     assert "scripts\\run_pdn_d13_review_queue.py" in cmd
+    assert "scripts\\audit_pdn_d13.py" in cmd
+    assert "scripts\\prepare_pdn_d14_review.py" in cmd
     assert cmd.count("--document-id") == 4
     assert "if errorlevel 1 goto :fail" in cmd
     assert "D14 remains NEEDS_REVIEW" in cmd

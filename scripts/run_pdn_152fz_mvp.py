@@ -2,7 +2,13 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from pathlib import Path
+
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
 
 from father_osint.acquisition import AcquisitionRequest, AcquisitionService
 from father_osint.document_compiler import DocumentCompiler
@@ -18,7 +24,6 @@ from father_osint.knowledge_factory_store import KnowledgeFactoryStore
 from father_osint.source_policy import MaterialProfile, SourcePolicy, TrustTier
 
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_CONFIG = REPO_ROOT / "config" / "pdn_mvp_152fz.json"
 
 

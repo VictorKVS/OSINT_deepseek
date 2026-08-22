@@ -40,6 +40,17 @@ def test_d13_builder_prepares_review_queue_but_does_not_complete_d14_or_d15():
     assert "D15" in script
 
 
+def test_d13_quality_gate_validates_graph_and_blocks_d15():
+    script = Path("scripts/audit_pdn_d13.py").read_text(encoding="utf-8")
+
+    assert "DUPLICATE_GRAPH_NODE_IDS" in script
+    assert "DUPLICATE_GRAPH_EDGE_IDS" in script
+    assert "GRAPH_EDGE_ENDPOINT_MISSING" in script
+    assert "D14_NOT_NEEDS_REVIEW_FOR_ALL_DOCUMENTS" in script
+    assert "D15_PREMATURELY_ADVANCED" in script
+    assert "autonomous_kb_promotion" in script
+
+
 def test_one_click_runner_reaches_d13_in_order_and_stops_before_autonomous_review():
     cmd = Path("RUN_PDN_KNOWLEDGE_FACTORY_AUTO.cmd").read_text(encoding="utf-8")
 
@@ -52,6 +63,7 @@ def test_one_click_runner_reaches_d13_in_order_and_stops_before_autonomous_revie
         "scripts\\run_pdn_d10_d12.py",
         "scripts\\audit_pdn_d10_d12.py",
         "scripts\\run_pdn_d13_review_queue.py",
+        "scripts\\audit_pdn_d13.py",
     ]
     positions = [cmd.index(value) for value in expected]
     assert positions == sorted(positions)

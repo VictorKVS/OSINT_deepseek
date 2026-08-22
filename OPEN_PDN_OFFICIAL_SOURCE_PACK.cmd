@@ -7,24 +7,23 @@ echo FATHER Knowledge Factory - PDN OFFICIAL SOURCE PACK
 echo Trusted A0/A1 acquisition first; GARANT is HOLD.
 echo ============================================================
 echo.
-echo Opening trusted state-source pages for the four P0 documents...
+
+set "PYTHON_EXE="
+if exist ".venv\Scripts\python.exe" set "PYTHON_EXE=.venv\Scripts\python.exe"
+if not defined PYTHON_EXE if exist "venv\Scripts\python.exe" set "PYTHON_EXE=venv\Scripts\python.exe"
+if not defined PYTHON_EXE set "PYTHON_EXE=python"
+
+%PYTHON_EXE% scripts\start_pdn_official_source_pack_session.py
+set "RC=%ERRORLEVEL%"
+if not "%RC%"=="0" (
+  echo.
+  echo FAIL: could not start source-pack acquisition session.
+  pause
+  exit /b %RC%
+)
+
 echo.
-
-rem 152-FZ: official federal agency collection page containing the document entry.
-start "" "https://voda.gov.ru/otkrytoe-agentstvo/informatsiya-o-prokhozhdenii-gossluzhby/"
-
-rem PP 1119: official Government of Russia document page with downloadable document.
-start "" "https://government.ru/docs/6339/"
-
-rem FSTEC Order 21: official Federal Water Resources Agency document card with Download action.
-start "" "https://voda.gov.ru/otkrytoe-agentstvo/normativnye-dokumenty/559246/"
-
-rem FSB Order 378: official Federal Water Resources Agency document card with Download action.
-start "" "https://voda.gov.ru/otkrytoe-agentstvo/normativnye-dokumenty/559247/"
-
-echo Pages opened.
-echo.
-echo Download the document from each official page into your normal Downloads folder.
-echo Do not use GARANT for this P0 acquisition slice.
+echo Save each opened official publication page with Ctrl+S as HTML into Downloads.
+echo Then run RUN_PDN_OFFICIAL_SOURCE_PACK_INVENTORY.cmd
 echo.
 pause

@@ -11,6 +11,7 @@ from .source_policy import TrustTier
 class LegalSourceRole(str, Enum):
     PUBLICATION_EVIDENCE = "PUBLICATION_EVIDENCE"
     GOVERNMENT_COPY = "GOVERNMENT_COPY"
+    VERSION_TIMELINE_PROVIDER = "VERSION_TIMELINE_PROVIDER"
     CONSOLIDATED_REFERENCE = "CONSOLIDATED_REFERENCE"
     VERIFICATION_REFERENCE = "VERIFICATION_REFERENCE"
 
@@ -33,6 +34,7 @@ class LegalSourceRepresentation:
     redistribution_allowed: bool = False
     artifact_locator: str | None = None
     edition: str | None = None
+    timeline_priority: int | None = None
     notes: tuple[str, ...] = ()
 
     def __post_init__(self) -> None:
@@ -46,8 +48,13 @@ class LegalSourceRepresentation:
             TrustTier.A1_OFFICIAL_ORGAN,
         }:
             raise ValueError("publication evidence must be A0/A1")
-        if self.role == LegalSourceRole.CONSOLIDATED_REFERENCE and self.trust_tier != TrustTier.A2_AUTHORITATIVE:
-            raise ValueError("consolidated references must be A2_AUTHORITATIVE")
+        if self.role in {
+            LegalSourceRole.VERSION_TIMELINE_PROVIDER,
+            LegalSourceRole.CONSOLIDATED_REFERENCE,
+        } and self.trust_tier != TrustTier.A2_AUTHORITATIVE:
+            raise ValueError("timeline/consolidated references must be A2_AUTHORITATIVE")
+        if self.timeline_priority is not None and self.timeline_priority < 1:
+            raise ValueError("timeline_priority must be >= 1")
         if self.mode in {RepresentationMode.VERIFY_ONLY, RepresentationMode.REFERENCE_ONLY} and self.redistribution_allowed:
             raise ValueError("verify/reference-only sources cannot be marked redistributable")
 
@@ -63,6 +70,7 @@ class LegalSourceRepresentation:
             redistribution_allowed=bool(data.get("redistribution_allowed", False)),
             artifact_locator=data.get("artifact_locator"),
             edition=data.get("edition"),
+            timeline_priority=data.get("timeline_priority"),
             notes=tuple(data.get("notes", [])),
         )
 
@@ -115,9 +123,28 @@ class LegalSourceBundle:
             if item.mode in {RepresentationMode.VERIFY_ONLY, RepresentationMode.REFERENCE_ONLY}
         )
 
+    def timeline_providers(self) -> tuple[LegalSourceRepresentation, ...]:
+        return tuple(
+            sorted(
+                (
+                    item
+                    for item in self.representations
+                    if item.role == LegalSourceRole.VERSION_TIMELINE_PROVIDER
+                ),
+                key=lambda item: item.timeline_priority or 999,
+            )
+        )
+
+    def preferred_timeline_provider(self) -> LegalSourceRepresentation | None:
+        providers = self.timeline_providers()
+        return providers[0] if providers else None
+
     def has_authoritative_consolidated_reference(self) -> bool:
         return any(
-            item.role == LegalSourceRole.CONSOLIDATED_REFERENCE
+            item.role in {
+                LegalSourceRole.VERSION_TIMELINE_PROVIDER,
+                LegalSourceRole.CONSOLIDATED_REFERENCE,
+            }
             and item.trust_tier == TrustTier.A2_AUTHORITATIVE
             for item in self.representations
         )

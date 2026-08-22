@@ -28,8 +28,26 @@ _ACT_RE = re.compile(
     re.IGNORECASE,
 )
 
+# Browser-saved GARANT HTML may collapse block boundaries so an amending act
+# and its effective-rule text become one logical line. This tolerant matcher
+# intentionally looks only for act identity metadata and does not mirror legal
+# or commentary text.
+_ACT_INLINE_RE = re.compile(
+    r"(?P<title>(?:Федеральный\s+закон|Приказ\s+[^\n]{1,220}?))\s+от\s+"
+    r"(?P<day>\d{1,2})\s+(?P<month>января|февраля|марта|апреля|мая|июня|июля|августа|сентября|октября|ноября|декабря)\s+"
+    r"(?P<year>\d{4})\s*г\.?\s*(?:№|N)\s*"
+    r"(?P<number>[0-9A-Za-zА-Яа-яЁё\-–—]+)",
+    re.IGNORECASE,
+)
+
 _DATE_RE = re.compile(
     r"(?P<day>\d{1,2})\s+(?P<month>января|февраля|марта|апреля|мая|июня|июля|августа|сентября|октября|ноября|декабря)\s+(?P<year>\d{4})\s*г\.?'?",
+    re.IGNORECASE,
+)
+
+_EFFECTIVE_INLINE_RE = re.compile(
+    r"(?P<rule>Изменени[яе]\s+вступ\w*\s+в\s+сил\w*\s+.{0,500}?)"
+    r"(?=(?:\s+См\.|\s+(?:Федеральный\s+закон|Приказ\s+)\b|$))",
     re.IGNORECASE,
 )
 
@@ -128,6 +146,55 @@ def _is_effective_rule(line: str) -> bool:
     return "изменени" in lowered and "вступ" in lowered and "сил" in lowered
 
 
+def _dedupe_events(events: list[GarantAmendmentEvent]) -> list[GarantAmendmentEvent]:
+    deduped: list[GarantAmendmentEvent] = []
+    seen: set[tuple[str, str]] = set()
+    for event in events:
+        key = (event.amending_act_date, event.amending_act_number.casefold())
+        if key in seen:
+            continue
+        seen.add(key)
+        deduped.append(event)
+    return deduped
+
+
+def _recover_inline_events(text: str) -> list[GarantAmendmentEvent]:
+    """Recover timeline metadata when browser HTML collapses logical lines.
+
+    The scan is bounded to the text between consecutive act-identity matches.
+    An event is emitted only when an explicit "Изменения вступ... в силу..."
+    rule is present in the same segment. This avoids treating arbitrary legal
+    citations inside the document body as amendment events.
+    """
+
+    flat = " ".join(text.replace("\xa0", " ").split())
+    matches = list(_ACT_INLINE_RE.finditer(flat))
+    events: list[GarantAmendmentEvent] = []
+
+    for index, match in enumerate(matches):
+        segment_end = matches[index + 1].start() if index + 1 < len(matches) else min(len(flat), match.end() + 1200)
+        segment = flat[match.end():segment_end]
+        rule_match = _EFFECTIVE_INLINE_RE.search(segment)
+        if not rule_match:
+            continue
+        effective_rule = " ".join(rule_match.group("rule").split())
+        events.append(
+            GarantAmendmentEvent(
+                amending_act_title=" ".join(match.group("title").split()),
+                amending_act_number=match.group("number").strip(),
+                amending_act_date=_iso_date(
+                    match.group("day"),
+                    match.group("month"),
+                    match.group("year"),
+                ),
+                effective_dates=_extract_explicit_dates(effective_rule),
+                effective_rule=effective_rule,
+            )
+        )
+
+    return _dedupe_events(events)
+
+
 def parse_garant_timeline_text(
     *,
     document_id: str,
@@ -180,14 +247,9 @@ def parse_garant_timeline_text(
             )
         )
 
-    deduped: list[GarantAmendmentEvent] = []
-    seen: set[tuple[str, str]] = set()
-    for event in events:
-        key = (event.amending_act_date, event.amending_act_number.casefold())
-        if key in seen:
-            continue
-        seen.add(key)
-        deduped.append(event)
+    deduped = _dedupe_events(events)
+    if not deduped:
+        deduped = _recover_inline_events(text)
 
     future_signal = any(
         "будущ" in line.casefold().replace("ё", "е") and "редакц" in line.casefold().replace("ё", "е")

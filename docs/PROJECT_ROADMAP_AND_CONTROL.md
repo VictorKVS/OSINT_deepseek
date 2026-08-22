@@ -1,195 +1,522 @@
 # FATHER / OSINT_deepseek — Capability Roadmap & Project Control
 
 **Status:** living project-management baseline  
-**Planning model:** capability/evidence driven; **no calendar deadlines yet**  
-**Purpose:** manage the project as a senior product/engineering program: goals, dependencies, gates, risks, progress, commercial options and decision paths.
+**Current priority:** **P0 Knowledge Factory Conveyor**  
+**Planning model:** capability/evidence driven; no invented completion percentages or dates  
+**Purpose:** build one evidence-to-execution platform that turns trusted sources into governed knowledge, requirements, implementation choices, workforce decisions and auditable outcomes.
 
-## 1. Planning principle
+---
 
-We do not invent dates before delivery capacity is known. We plan by **achievable capability states** and evidence.
+## 1. North-star product
 
-Three classes are used:
+The project is no longer defined as a Telegram/OSINT collector. OSINT is one acquisition capability inside a larger system.
 
-- **MUST** — required to make the core trustworthy/useful or to unlock the next approved stage.
-- **SHOULD** — strongly desirable because it reduces operational risk or materially strengthens several product paths.
-- **OPTION** — preserves or creates a commercial/product opportunity; it becomes MUST only after an approved requirement/customer hypothesis justifies it.
+The completed product idea is:
 
-No OPTION may contaminate the reusable core or bypass the engineering gates.
-
-## 2. North-star capability
-
-```mermaid
-flowchart LR
-    Q[Research need] --> O[OSINT collection]
-    O --> A[Artifacts + provenance]
-    A --> X[Extraction]
-    X --> N[Analyst]
-    N --> S[Socrates]
-    S --> K[Knowledge Gate / KB]
-    K --> F[FATHER]
-    F --> E[Expert agents / product assemblies]
+```text
+SOURCE / LAW / ORDER / STANDARD / BOOK / TECHNICAL EVIDENCE
+        ↓
+KNOWLEDGE FACTORY
+        ↓
+WHAT IS TRUE / REQUIRED / APPLICABLE?
+        ↓
+REGULATION ENGINEERING
+        ↓
+WHAT MUST BE DONE AND HOW CAN IT BE VERIFIED?
+        ↓
+COMPLIANCE / IMPLEMENTATION DESIGN
+        ↓
+WHAT VALID IMPLEMENTATION OPTIONS EXIST?
+        ↓
+ROLE & RESPONSIBILITY ENGINEERING
+        ↓
+WHO MUST DO IT?
+        ↓
+WORKFORCE & COMPETENCY ENGINEERING
+        ↓
+WHAT SKILLS / LEVEL / CAPACITY ARE REQUIRED?
+        ↓
+SOURCING DECISION
+        ↓
+KEEP INTERNAL / TRAIN / HIRE / OUTSOURCE / HYBRID / AUTOMATE
+        ↓
+COST / TIME / QUALITY / RELIABILITY / RISK COMPARISON
+        ↓
+DECISION + IMPLEMENTATION PLAN
+        ↓
+EVIDENCE OF EXECUTION / AUDIT
+        ↓
+OBSERVED OUTCOME / EXPERIENCE
+        ↓
+GOLDEN SOLUTION / REUSABLE PATTERN
+        ↓
+REGULATORY DIGITAL TWIN
 ```
 
-FATHER itself is an orchestrator/consumer of governed knowledge and expert capabilities. Collection, analysis, challenge and knowledge publication remain separable responsibilities.
+The system must answer not only **“what does the document say?”**, but eventually:
+
+1. What applies to this organization/system/process?
+2. What exactly must be done?
+3. What are valid implementation alternatives?
+4. Which alternative is cheaper/faster/more reliable/lower-risk under current constraints?
+5. Which roles are responsible?
+6. Do current people have the required competence and capacity?
+7. Is it better to train, hire, outsource, use a hybrid model or automate part of the work?
+8. What evidence proves implementation?
+9. What happened in practice and which solution should be reused next time?
+
+---
+
+## 2. Permanent engineering principles
+
+- **NO CODE BEFORE CONTRACT.**
+- Evidence/provenance survives every transformation.
+- Exact-original status requires actual bytes and computed SHA-256.
+- Knowledge objects are typed; FACT, REQUIREMENT, CLAIM, HYPOTHESIS, OPINION and RECOMMENDATION are not interchangeable.
+- Reuse before rediscovery/re-extraction/reimplementation.
+- Differences become conflict candidates before being declared contradictions.
+- Applicability is explicit and contextual.
+- No single opaque “truth”, “quality”, “employee reliability” or “best solution” percentage.
+- Cost, time, quality, reliability, operational burden and risk remain separate measurable dimensions.
+- Every recommendation exposes alternatives, assumptions, evidence and reasons.
+- Role separation is preserved: User / Analyst / OSINT Expert / Knowledge Curator / Reviewer / Administrator / Security Administrator / System Owner.
+- Human/critic gates remain where legal, security, publication or high-impact decisions require them.
+
+---
 
 ## 3. Integrated capability roadmap
 
-| ID | Capability outcome | Class | Depends on | Done when / evidence gate | Product options strengthened | State |
-|---|---|---|---|---|---|---|
-| B0 | Frozen DEV v1 semantic baseline | MUST | — | clean CI + 21 tests + canonical runners + freeze record | all | **DONE / FROZEN** |
-| M5 | Live Telegram Radar | MUST | B0 | approved transport ADR; bounded catch-up + live updates + reconciliation; checkpoint-after-save; source isolation; restart test; provenance preserved; DEV regression green | Competitive Intelligence, Content Propagation, Brand Monitoring, Trend Radar | **ACTIVE** |
-| M5.1 | TDLib PoC | MUST | M5 requirements | repeatable harness and raw metrics against approved public test sources; restart/rate/error/session behavior documented | all Telegram-based products | **NEXT** |
-| M5.2 | GramJS comparative PoC | SHOULD | M5 requirements | same contract/harness where technically possible; operational and maintenance evidence recorded | transport optionality | PLANNED |
-| M5.3 | Transport ADR + product-path acceptance contract | MUST | M5.1/M5.2 | decision based on measured evidence; rollback path; acceptance tests written before implementation | all Telegram-based products | BLOCKED BY POC |
-| M6 | Universal Artifact / Ingestion | MUST | M5 stable boundary | original preserved; SHA-256; detected type; normalized derivative; provenance; safe routing for audio/video/image/docs; no extension-only trust | Research Workspace, Content Propagation, Meeting Intelligence, multi-source products | PLANNED |
-| M6.1 | Media/document metadata preservation | SHOULD | M6 | low-cost metadata contract documented/tested; originals never silently replaced | Content Origin, Evidence Workspace, Risk Intelligence | PLANNED |
-| M7 | Local-first extraction/transcription | MUST | M6 | local processing path works without mandatory third-party service; language retained; output traceable to Artifact | Meeting Intelligence, private research, evidence processing | PLANNED |
-| M7.1 | External transcription provider registry | SHOULD | M7 policy | explicit caution/privacy classification; providers replaceable; never default for sensitive material | convenience / fallback | PLANNED |
-| M8 | Knowledge Gate foundation | MUST | stable evidence + analysis contracts | candidate knowledge cannot enter governed KB without provenance, review state and explicit gate decision | FATHER expert ecosystem, Technology Radar, Supplier Monitoring | PLANNED |
-| M8.1 | Knowledge revision/history | MUST | M8 | superseded/retracted knowledge remains auditable; no silent destructive overwrite | all knowledge products | PLANNED |
-| P1 | Competitive & Channel Intelligence MVP | OPTION ★★★★★ | M5 + thin reporting | bounded watchlist produces source-grounded daily/weekly brief with links/evidence | direct commercial product | OPPORTUNITY |
-| P2 | Content Origin & Propagation MVP | OPTION ★★★★★ | M5; stronger with M6 | earliest-observed + similarity/forward timeline without unsupported authorship accusation | media/PR/research | OPPORTUNITY |
-| P3 | Brand / Reputation Monitoring MVP | OPTION ★★★★★ | M5 + entity/watchlist/reporting | narrative changes and amplification surfaced with evidence | PR/brand | OPPORTUNITY |
-| P4 | Technology / Market Radar MVP | OPTION ★★★★★ | M5 + M6 + later KB | repeatable domain watch produces evidence-grounded horizon brief | R&D/investors/strategy | OPPORTUNITY |
-| P5 | Consent-Based Risk Intelligence | OPTION ★★★★☆ | M5/M6 + identity evidence + legal/access policy | risk scenarios surface evidence for human review; no automated guilt verdict | corporate security/compliance | CONTROLLED FUTURE |
+| ID | Capability outcome | Class | Depends on | Done when / evidence gate | State |
+|---|---|---|---|---|---|
+| B0 | Frozen DEV v1 semantic baseline | MUST | — | canonical runners and frozen behavior remain regression-green | **DONE / FROZEN** |
+| KF0 | Source trust + exact acquisition D0-D3 | MUST | B0 | trusted source → exact bytes → MIME/size/SHA-256 → version → audit; BASIC/PRO/STRESS green | **ACTIVE P0** |
+| KF1 | Document Compiler D4-D5 | MUST | KF0 | structure and chunks have stable IDs and exact source locators | PLANNED |
+| KF2 | Knowledge Engineering D6-D12 | MUST | KF1 | concepts/definitions/requirements/entities/relations/conflicts extracted with provenance, competency questions, reuse and constraints | PLANNED |
+| KF3 | Governed KB D13-D15 | MUST | KF2 | graph/table/document reconcile; expert review; no direct autonomous promotion; KB-ready package | PLANNED |
+| KF4 | Change monitoring + bounded invalidation/reuse | MUST | KF3 | changed source/method invalidates only affected dependency subgraph; unchanged knowledge reused | PLANNED |
+| UX1 | Role-based Web Shell | MUST | KF0 contracts | login/role routing, role dashboards, alerts, global search, My KB, Admin, Security and Owner workspaces | PLANNED / CONTRACT NEXT |
+| UX2 | Knowledge Workspace | MUST | KF1/KF2 | synchronized Graph / Table / Document / Clause / Evidence / Timeline views | PLANNED |
+| UX3 | “Find → verify → insert into my KB” workflow | MUST | KF2/KF3 | user can search global knowledge and REUSE / REFERENCE / CONTEXT MAP / DERIVE without duplicate truth models | PLANNED |
+| RE1 | Requirement & Applicability Engineering | MUST | KF3 | source clauses become typed requirements with actor/action/object/condition/deadline/evidence/applicability | FUTURE CORE |
+| RE2 | Requirement-to-Control mapping | MUST | RE1 | each requirement maps to verifiable control objectives and evidence expectations | FUTURE CORE |
+| CD1 | Compliance / Implementation Pattern Library | MUST | RE2 | reusable implementation patterns linked to requirements/controls, prerequisites and evidence | FUTURE CORE |
+| CD2 | Valid implementation alternatives | MUST | CD1 | system distinguishes prescriptive requirements from outcome-based requirements and enumerates only legally/technically permissible options | FUTURE CORE |
+| DI1 | Cost / Time / Risk / Reliability comparison | MUST | CD2 | alternatives compared using explicit measured/estimated dimensions and assumptions; no opaque winner score | FUTURE CORE |
+| RM1 | Role & Responsibility Matrix | MUST | RE2/CD1 | each control/process maps to accountable/responsible/review/security/admin roles with segregation-of-duties checks | FUTURE CORE |
+| WC1 | Competency Model per Role | MUST | RM1 | each role has skills, levels, evidence, experience/capacity requirements and criticality | FUTURE CORE |
+| WC2 | Person/Team Capability Matrix | SHOULD | WC1 | current staff capability/capacity mapped to required role profiles with explicit gaps and evidence | FUTURE CORE |
+| WC3 | Workforce sourcing alternatives | MUST | WC1/WC2 | Internal / Train / Hire / Outsource / Hybrid / Automate options generated with constraints | FUTURE CORE |
+| WC4 | Workforce cost/time/quality/reliability model | MUST | WC3 | TCO, time-to-competency, coverage, backup/bus-factor, SLA/vendor dependence, rework and observed quality compared separately | FUTURE CORE |
+| DI2 | Decision Intelligence | MUST | DI1/WC4 | recommendation records selected/rejected options, assumptions, evidence, constraints, reviewer and revisit trigger | FUTURE CORE |
+| EX1 | Implementation & Evidence Tracker | MUST | DI2 | selected solution moves through plan → execution → verification → evidence package → audit state | FUTURE CORE |
+| EX2 | Outcome / feedback capture | SHOULD | EX1 | actual cost/time/incidents/rework/quality recorded against the decision hypothesis | FUTURE CORE |
+| GS1 | Golden Solutions Library | MUST | EX2 | repeated verified patterns can become GOLDEN / LIMITED / REJECTED METHOD/SOLUTION through Champion/Challenger evidence | FUTURE CORE |
+| RDT1 | Regulatory Digital Twin | OPTION→TARGET | KF3 + RE1 + DI2 + EX2 | simulate requirements/applicability/options/cost/workforce/implementation consequences and compare scenarios before changes | STRATEGIC TARGET |
 
-## 4. Dependency / critical-path view
+---
 
-```mermaid
-flowchart TD
-    B0[DEV v1 baseline DONE] --> M5[M5 Telegram Radar]
-    M5 --> M6[M6 Artifact / Ingestion]
-    M6 --> M7[M7 Local Extraction]
-    M7 --> M8[M8 Knowledge Gate]
+## 4. Current critical path
 
-    M5 --> P1[P1 Competitive Intelligence]
-    M5 --> P3[P3 Brand Monitoring]
-    M5 --> P2[P2 Content Propagation]
-    M6 --> P2
-    M5 --> P4[P4 Technology Radar]
-    M6 --> P4
-    M8 --> P4
-    M5 --> P5[P5 Risk Intelligence]
-    M6 --> P5
-
-    M5 --> T1[TDLib PoC]
-    M5 --> T2[GramJS PoC]
-    T1 --> ADR[Transport ADR]
-    T2 --> ADR
-    ADR --> M5D[M5 acceptance + implementation]
-```
-
-**Current critical path:** M5 requirements → TDLib PoC → comparative evidence where justified → ADR → acceptance tests → M5 implementation/verification.
-
-## 5. Progress dashboard
-
-Progress is **gate-based**, not fake percentage-complete. A milestone moves only when its evidence exists.
-
-| Workstream | Requirements | Donor/Research | Architecture | Acceptance tests | Implementation | Verification | Overall |
-|---|---|---|---|---|---|---|---|
-| DEV v1 | PASS | PASS | PASS | PASS | PASS | PASS | **FROZEN** |
-| M5 Telegram Radar | PASS/draft reviewed | **ACTIVE** | pattern review done; final pending ADR | planned | not started | not started | **ACTIVE** |
-| M6 Artifact | concept | preliminary | not started | not started | not started | not started | QUEUED |
-| M7 Local extraction | concept | preliminary | not started | not started | not started | not started | QUEUED |
-| M8 Knowledge Gate | concept | not started | not started | not started | not started | not started | QUEUED |
-| Commercial product track | registry active | market evidence not yet systematic | reuse gate active | per-product later | not started | not started | DISCOVERY |
-
-### Delivery graph
-
-```mermaid
-flowchart LR
-    D0[Completed: DEV v1] --> D1[Active: M5 research/PoC]
-    D1 --> D2[Gate: transport ADR]
-    D2 --> D3[Gate: M5 acceptance tests]
-    D3 --> D4[Build + verify M5]
-    D4 --> D5[Unlock M6 and early ★★★★★ MVP experiments]
-```
-
-## 6. Project threat / risk matrix
-
-This is a **project risk register**, separate from cybersecurity threat modelling of the runtime system. Risk values are qualitative until measured evidence exists.
-
-| ID | Project threat | Likelihood | Impact | Early warning | Treatment / control | Owner/Gate | State |
-|---|---|---|---|---|---|---|---|
-| R1 | Architecture overengineering before validated need | High | High | growing models/files without acceptance use | Occam rule; no code before contract; MUST/SHOULD/OPTION separation | Requirements + architecture review | CONTROLLED |
-| R2 | Technology fascination drives architecture | Medium | High | library selected before contract/benchmark | donor research → PoC → benchmark → ADR | M5 ADR and every donor gate | ACTIVE CONTROL |
-| R3 | Telegram upstream/library becomes stale or operationally fragile | Medium | High | release/commit decline, unresolved issues, session failures | replaceable transport boundary; compare donors; rollback | M5 | OPEN |
-| R4 | Data/provenance loss during normalization/dedup | Medium | Critical | source observations collapse or originals replaced | frozen provenance invariants; hash originals; checkpoint-after-save | M5/M6 tests | CONTROLLED |
-| R5 | Checkpoint advances before durable save | Medium | Critical | gaps after crash/restart | checkpoint only after MaterialStore success; restart tests | M5 acceptance | OPEN UNTIL TESTED |
-| R6 | External services create privacy/cost/vendor lock-in | Medium | High | sensitive data sent by default; API becomes mandatory | local-first; provider abstraction; explicit caution registry | M7 architecture | PLANNED CONTROL |
-| R7 | Commercial options pollute reusable core | Medium | High | customer-specific fields/logic enter core contracts | permanent commercial/reuse gate; product adapters outside core | every architecture review | CONTROLLED |
-| R8 | Commercial work distracts from critical core path | Medium | Medium | many MVP branches before M5/M6 stable | product registry ≠ implementation backlog; capability dependencies enforced | roadmap review | CONTROLLED |
-| R9 | False analytical attribution: correlation presented as authorship/causality/guilt | Medium | Critical | language such as “stole”, “is extremist”, “caused” without evidence | evidence-grounded wording; Socrates; human review; earliest-observed ≠ true origin | Analyst/product acceptance | FUTURE CONTROL |
-| R10 | Identity mistakes join different people/accounts | Medium | Critical | decisions rely on name/handle alone | minimal identity-evidence layer only when product requires it; unresolved allowed | Person/Risk product gate | FUTURE CONTROL |
-| R11 | Legal/privacy scope creep in person/risk products | Medium | Critical | collection exceeds approved purpose or basis | separate controlled product; purpose/access/audit policy; human review | legal/product gate | FUTURE CONTROL |
-| R12 | Repository/documentation diverges from code | Medium | High | README/traceability says behavior not proven by tests | journal + traceability + freeze evidence + CI; update at every gate | verification | ACTIVE CONTROL |
-| R13 | Tests prove mocks but not real operational behavior | Medium | High | fixture PASS while restart/rate/session fails live | bounded real-source PoCs + failure injection + clean restart | M5/M6 verification | OPEN |
-| R14 | Secrets/session leakage into Git/logs/artifacts | Low/Medium | Critical | session/config appears in repo or CI output | secrets outside repo; permissions; redaction; secret scan before PROD | M5 security review | OPEN |
-| R15 | Unbounded collection creates cost/storage/rate-limit problems | Medium | High | uncontrolled history/backfill/media | bounded tasks; quotas; source isolation; media deferred to M6 | M5/M6 | OPEN |
-
-### Risk escalation rule
-
-A **Critical** impact risk blocks baseline freeze when its required control is in scope and unverified. High risks require an explicit treatment/acceptance record. Risks are never closed because they are inconvenient; they close only with evidence or an explicit scope decision.
-
-## 7. Opportunity / path register relationship
-
-`PRODUCT_OPPORTUNITY_REGISTRY.md` answers **what could become a product**. This roadmap answers **which reusable capability paths make those products possible**.
+All unrelated product expansion remains HOLD while the conveyor is being proven.
 
 ```text
-Capability roadmap        Product registry
-       │                         │
-       ├── unlocks ─────────────►│
-       │                         │
-       ◄── creates requirements ─┤
-       │                         │
-       └──── review at gates ────┘
+B0 frozen baseline
+   ↓
+KF0 D0-D3 exact acquisition
+   ↓
+BASIC → PROFESSIONAL → STRESS
+   ↓
+KF1 structure/chunks
+   ↓
+KF2 knowledge objects/relations/conflicts
+   ↓
+KF3 reviewed KB-ready
+   ↓
+KF4 monitoring/reuse
 ```
 
-Every milestone review must therefore record:
+The web skeleton may proceed in parallel only against stable contracts and must not create a second truth model.
 
-1. Which MUST capability moved forward?
-2. Which risk changed?
-3. Which product opportunities became easier/harder?
-4. Did a new opportunity appear?
-5. Is any OPTION now justified as SHOULD/MUST by evidence?
-6. Did any commercial idea reveal a cheap metadata/interface decision worth preserving now?
-7. What is the next evidence-producing task on the critical path?
+Historical Telegram work remains useful as an acquisition adapter and regression asset, but it is **not** the current product critical path.
 
-## 8. Senior project-control cadence — event driven, not date driven
+---
 
-Until delivery velocity is known, reviews happen on **events/gates**, not arbitrary calendar dates:
+## 5. Role-based product architecture
 
-- requirement created/changed;
-- donor/technology shortlist changed;
-- PoC completed;
-- architecture/ADR proposed;
-- acceptance tests approved;
-- implementation changes frozen baseline;
-- verification completed;
-- major defect/risk discovered;
-- new commercial hypothesis added;
-- product hypothesis receives real customer/market evidence.
+The web product is intentionally role-oriented rather than one universal dashboard.
 
-Each review updates: roadmap state, risk register, product registry, journal, traceability and next gate.
+| Role | Primary workspace | Main metrics | Main alerts |
+|---|---|---|---|
+| User / Viewer | Search + My Knowledge Bases | searches, reused objects, watched KB freshness | changed knowledge, stale source, conflict affecting my KB |
+| Analyst | Research / applicability / conflict workspace | CQs answered, gaps, conflicts, review queue, rework | unresolved applicability, conflict candidate, evidence gap |
+| OSINT Expert | Sources / acquisition | sources verified, acquisition attempts/success/failures, version changes | source unavailable, hash/version change, policy violation |
+| Knowledge Curator | Concepts / mappings / graph quality | duplicates, mappings, orphan rate, provenance/locator coverage | duplicate candidate, unsafe merge, shape violation |
+| Reviewer / Critic | D14 review queue | PASS/REWORK/INCONCLUSIVE, review time, recurring defects | promotion request, unsupported claim, dependency/circularity |
+| Administrator | Users/workspaces/jobs/storage/integrations | users, queues, job health, storage, API/worker state | runtime failure, queue backlog, capacity issue |
+| Security Administrator | Security/audit/privileged actions | privileged events, policy violations, integrity mismatches, access reviews | privilege escalation, secret exposure, audit mismatch, publication attempt |
+| System Owner | Factory/portfolio/decision dashboard | throughput, reuse, rework, cost, bottlenecks, unresolved critical gaps/risks | critical risk, degradation, cost/rework growth, role coverage gap |
 
-## 9. Immediate controlled backlog
+Admin and Security Admin remain separate roles; one does not automatically inherit the other.
 
-1. **MUST:** execute TDLib PoC exactly against the approved PoC contract; record raw results.
-2. **SHOULD:** decide whether GramJS comparative PoC still adds decision value after TDLib evidence; if yes, run same comparable scenarios.
-3. **MUST:** produce Telegram transport ADR with operational/security/maintenance evidence.
-4. **MUST:** write M5 acceptance tests before product-path implementation.
-5. **MUST:** implement and verify M5 without breaking DEV v1 invariants.
-6. **SHOULD:** at M5 verification, reassess M6 interface and ★★★★★ product options using actual collected metadata.
-7. **OPTION:** define the smallest Competitive Intelligence and Content Propagation MVP contracts, but do not divert implementation from M5 critical path until their dependencies are satisfied.
+---
 
-## 10. Definition of project success at this stage
+## 6. Regulation Engineering layer
 
-Success is not “many features” and not a speculative percentage. It is a sequence of verified capabilities where:
+### Goal
 
-- each block has a justified requirement and clear owner;
-- interfaces remain reusable where reuse is cheap and real;
-- evidence/provenance is not sacrificed;
-- risks are visible before they become incidents;
-- commercial options are continuously discovered and ranked;
-- product hypotheses do not derail the core;
-- every completed capability leaves the next decision easier, not harder.
+Convert governed knowledge into executable compliance engineering objects.
+
+```text
+SOURCE CLAUSE
+   ↓
+REQUIREMENT
+   ↓
+APPLICABILITY
+   ↓
+CONTROL OBJECTIVE
+   ↓
+VERIFICATION / EVIDENCE EXPECTATION
+```
+
+A requirement record should eventually include:
+
+- source and exact locator;
+- current/version status;
+- actor;
+- action/obligation/prohibition/permission;
+- object/subject;
+- conditions/exceptions;
+- applicability guard;
+- deadline/frequency where present;
+- expected evidence;
+- related controls;
+- conflicts/context splits;
+- review state.
+
+Prescriptive requirements restrict implementation choices. Outcome-based requirements permit alternative implementation patterns subject to evidence.
+
+---
+
+## 7. Compliance Design / implementation alternatives
+
+For each applicable control objective:
+
+```text
+REQUIREMENT
+   ↓
+CONTROL
+   ↓
+PATTERN CANDIDATES
+   ├─ A
+   ├─ B
+   ├─ C
+   └─ D
+   ↓
+LEGAL / TECHNICAL ELIGIBILITY FILTER
+   ↓
+COST / TIME / RELIABILITY / RISK / OPERATIONS / AUDITABILITY
+   ↓
+DECISION
+```
+
+Example solution dimensions:
+
+- CAPEX;
+- licenses/subscriptions;
+- implementation/integration cost;
+- operation/support cost;
+- training cost;
+- time-to-compliance;
+- availability / RTO / RPO where applicable;
+- failure modes / SPOF;
+- human-error exposure;
+- vendor dependency / exit cost;
+- auditability / evidence quality;
+- residual risk;
+- maintenance/upgrade burden.
+
+The platform may offer optimization preferences such as lowest cost, fastest, highest reliability, lowest operational burden or balanced, but must expose the trade-offs and must not hide mandatory requirements behind an optimization score.
+
+---
+
+## 8. Role & Workforce / Competency Engineering
+
+This is a planned core layer, not a side HR feature.
+
+### 8.1 Requirement-to-role chain
+
+```text
+Requirement
+   ↓
+Control
+   ↓
+Process / Activity
+   ↓
+Role
+   ↓
+Competency
+   ↓
+Required level / capacity
+```
+
+### 8.2 Role profile
+
+Each role will contain:
+
+- responsibilities;
+- required decisions/actions;
+- required technical/domain/legal skills;
+- required skill level;
+- experience/certification evidence where meaningful;
+- required availability/capacity/FTE;
+- critical functions;
+- prohibited role combinations / segregation of duties;
+- backup/continuity requirements.
+
+### 8.3 Person/team profile
+
+Where lawful and appropriate, compare current capability to role demand using explicit evidence rather than subjective labels.
+
+Possible dimensions:
+
+- skill coverage by required level;
+- verified experience;
+- task/review history;
+- rework/error rate in comparable work;
+- certifications/training;
+- availability/capacity;
+- backup person availability;
+- single-person dependency / bus factor.
+
+No opaque “employee reliability 87%” score.
+
+### 8.4 Sourcing alternatives
+
+For every material competency/capacity gap, compare:
+
+1. keep current staff;
+2. train/upskill;
+3. hire;
+4. outsource;
+5. hybrid internal + external;
+6. automate part of the function where legally/operationally appropriate.
+
+### 8.5 Workforce economics
+
+Internal TCO may include:
+
+```text
+salary + taxes + recruiting/onboarding + training + certification
++ tooling + management + backup coverage + replacement/downtime risk
+```
+
+Outsource TCO may include:
+
+```text
+contract + SLA + integration + vendor control + audit
++ dependency + transition/exit cost + retained internal oversight
+```
+
+Training decisions additionally require `time_to_competency`; an otherwise cheap training path is not sufficient when the role must be covered before the person can realistically reach the required level.
+
+---
+
+## 9. Decision Intelligence and experience loop
+
+Every significant implementation/workforce choice becomes a reusable Decision Record:
+
+```text
+DECISION
+- requirement/control
+- organization/system context
+- alternatives considered
+- selected option
+- rejected options
+- constraints
+- estimated cost/time/risk/quality/reliability
+- evidence/method versions
+- approver/reviewer
+- revisit trigger
+```
+
+After implementation, estimates are compared with observed results:
+
+```text
+estimated vs actual cost
+estimated vs actual time
+incidents/failures
+review/rework burden
+SLA/availability
+control verification results
+human effort
+maintenance burden
+```
+
+This closes the learning loop:
+
+```text
+DECISION
+   ↓
+IMPLEMENTATION
+   ↓
+OBSERVED OUTCOME
+   ↓
+METHOD/SOLUTION EVALUATION
+   ↓
+GOLDEN / LIMITED / REJECTED
+   ↓
+REUSE IN NEXT PROJECT
+```
+
+The system therefore accumulates organizational experience rather than repeatedly starting projects from zero.
+
+---
+
+## 10. Regulatory Digital Twin strategic target
+
+Once requirements, implementation patterns, workforce profiles, cost/risk models and outcome history exist in a common graph, the platform can model alternative scenarios before changing the real organization.
+
+Examples:
+
+- a new regulation enters into force;
+- a requirement changes applicability;
+- a certified product is replaced;
+- an internal specialist leaves;
+- outsourcing cost increases;
+- a deadline is shortened;
+- a control is automated;
+- a new system enters scope.
+
+The Digital Twin should answer:
+
+```text
+What changes?
+Which requirements/controls/roles are affected?
+What becomes non-compliant?
+What implementation alternatives exist?
+What skills/capacity are missing?
+What will each scenario cost?
+How long will it take?
+What new risks/dependencies appear?
+What evidence will be required?
+```
+
+This remains a strategic target and must be built only after the underlying Knowledge/Requirement/Decision data is trustworthy.
+
+---
+
+## 11. Quality and production metrics
+
+Metrics are multidimensional and retain provenance.
+
+### Knowledge Factory
+
+- source verification coverage;
+- exact-original acquisition success/failure;
+- bytes and artifact reuse;
+- provenance/locator coverage;
+- precision/recall/F1 on reviewed gold sets;
+- competency-question coverage;
+- constraint conformance;
+- conflict/gap classifications;
+- reuse/rework ratio;
+- time to D15;
+- human review minutes;
+- cost where measurable.
+
+### Regulation / Compliance Design
+
+- requirements with explicit applicability;
+- requirements mapped to controls;
+- controls with verification evidence model;
+- valid implementation patterns per control;
+- unhandled requirement gaps;
+- decision rework after review;
+- estimate-vs-actual variance after implementation.
+
+### Workforce Engineering
+
+- role coverage;
+- critical-function coverage;
+- competency gaps by level;
+- required vs available FTE/capacity;
+- single-person dependency;
+- backup coverage;
+- time-to-competency;
+- internal vs outsource TCO components;
+- observed quality/rework/SLA outcomes by sourcing model.
+
+Speedup, completion forecasts or comparative quality claims are published only when sufficient measured telemetry exists.
+
+---
+
+## 12. Current progress dashboard
+
+| Workstream | Current state | Next evidence gate |
+|---|---|---|
+| Frozen DEV v1 | **DONE / FROZEN** | remain regression-green |
+| Knowledge Factory D0-D3 | **ACTIVE P0** | mixed-profile BASIC/PRO/STRESS acceptance |
+| Knowledge Engineering methodology/metrics | **CONTRACT + EXECUTABLE BASE** | complete KnowledgeScope/CQ/constraints/gold corpus |
+| Document Compiler D4-D5 | QUEUED | structure/chunk contract after D0-D3 |
+| Semantic D6-D12 | QUEUED | typed extraction/reuse/conflict fixtures |
+| Governed D13-D15 | QUEUED | review/promotion/projection reconciliation |
+| Role-based website | PLANNED | web shell + route/RBAC/navigation contract |
+| Regulation Engineering | ROADMAP | requirement/applicability object model |
+| Compliance Design | ROADMAP | implementation-pattern model |
+| Workforce & Competency Engineering | **ROADMAP / APPROVED DIRECTION** | role→competency→capacity schema and sourcing decision model |
+| Decision Intelligence | ROADMAP | multi-criteria decision record + comparison model |
+| Golden Solutions | ROADMAP | observed-outcome evaluation loop |
+| Regulatory Digital Twin | STRATEGIC TARGET | unlocked by trustworthy lower layers |
+
+---
+
+## 13. Immediate controlled backlog
+
+1. **MUST:** finish mixed-profile D0-D3 BASIC / PROFESSIONAL / STRESS acceptance.
+2. **MUST:** complete machine-readable SourcePolicy verification/reconciliation path.
+3. **MUST:** preserve frozen DEV v1 regression and security checks.
+4. **SHOULD/PARALLEL CONTRACT:** finish KnowledgeScope/Competency Question and shape-validation fixtures without bypassing D0-D3.
+5. **MUST NEXT:** Document Compiler D4-D5.
+6. **MUST AFTER:** D6-D15 through one bounded corpus.
+7. **MUST UI:** build role-based web skeleton against stable contracts: User / Analyst / OSINT / Curator / Reviewer / Admin / Security Admin / Owner.
+8. **MUST UI SCENARIO:** global search → verify source/applicability → reuse/reference/context-map into My KB → preview/review/audit.
+9. **ROADMAP DESIGN:** define Requirement/Control/Implementation Pattern schemas.
+10. **ROADMAP DESIGN:** define Role/Competency/Person-Team/Capacity/Sourcing option schemas and evidence rules.
+
+No later layer may pull implementation capacity away from the current P0 conveyor until its required upstream data exists.
+
+---
+
+## 14. Definition of complete product idea
+
+The project reaches its intended strategic form when a user can move through this entire evidence chain without losing provenance:
+
+```text
+“Что требует нормативный акт?”
+        ↓
+“Относится ли это ко мне?”
+        ↓
+“Что конкретно нужно сделать?”
+        ↓
+“Какими допустимыми способами это можно сделать?”
+        ↓
+“Что дешевле / быстрее / надёжнее / проще / менее рискованно?”
+        ↓
+“Какие роли должны это выполнить?”
+        ↓
+“Какие компетенции и мощности нужны?”
+        ↓
+“Есть ли они у нас?”
+        ↓
+“Обучить / нанять / аутсорс / hybrid / автоматизировать?”
+        ↓
+“Какой вариант выбран и почему?”
+        ↓
+“Как доказать выполнение?”
+        ↓
+“Что получилось фактически?”
+        ↓
+“Стоит ли это решение сделать GOLDEN и переиспользовать?”
+```
+
+That is the completed thought: **trusted knowledge → requirement → engineering solution → people/capability → decision → execution evidence → organizational learning**.

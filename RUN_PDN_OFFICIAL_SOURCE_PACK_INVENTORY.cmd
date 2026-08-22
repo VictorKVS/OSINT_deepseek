@@ -3,8 +3,8 @@ setlocal
 cd /d "%~dp0"
 
 echo ============================================================
-echo FATHER Knowledge Factory - PDN OFFICIAL SOURCE PACK INVENTORY
-echo Downloads -^> candidate exact bytes -^> MIME guess -^> SHA256
+echo FATHER Knowledge Factory - PDN OFFICIAL SOURCE PACK D0-D3
+echo clean A0 session HTML -^> identity -^> exact bytes -^> SHA256
 echo ============================================================
 echo.
 
@@ -18,9 +18,9 @@ set "RC=%ERRORLEVEL%"
 
 echo.
 if "%RC%"=="0" (
-  echo PASS: official-download candidates found. Candidate status is not yet D3 verified.
+  echo PASS: all four official publication captures closed D0-D3.
 ) else (
-  echo PARTIAL: no matching official-download candidates found yet.
+  echo PARTIAL: some official publication HTML captures are still missing or failed identity checks.
 )
 
 pause

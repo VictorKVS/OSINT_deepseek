@@ -26,17 +26,27 @@ DEFAULT_EXPORT = REPO_ROOT / "reports" / "pdn_live"
 SUPPORTED_SUFFIXES = (".html", ".htm", ".txt", ".json")
 
 
-def _resolve_repo_path(value: str | Path) -> Path:
-    """Resolve CLI paths consistently on Windows/Linux before relative_to checks."""
-
+def _repo_path(value: str | Path) -> Path:
     path = Path(value)
     if not path.is_absolute():
         path = REPO_ROOT / path
     return path.resolve()
 
 
+def _bounded_registry(registry: dict, document_ids: list[str]) -> dict:
+    if not document_ids:
+        return registry
+    requested = list(dict.fromkeys(document_ids))
+    by_id = {item["document_id"]: item for item in registry["documents"]}
+    missing = [document_id for document_id in requested if document_id not in by_id]
+    if missing:
+        raise ValueError("unknown --document-id values: " + ", ".join(missing))
+    bounded = dict(registry)
+    bounded["documents"] = [by_id[document_id] for document_id in requested]
+    return bounded
+
+
 def discover_files(registry: dict, inbox: Path) -> tuple[dict[str, Path], list[dict[str, object]]]:
-    inbox = _resolve_repo_path(inbox)
     files_by_url: dict[str, Path] = {}
     inventory: list[dict[str, object]] = []
     for item in registry["documents"]:
@@ -67,7 +77,7 @@ def discover_files(registry: dict, inbox: Path) -> tuple[dict[str, Path], list[d
             })
             continue
 
-        path = existing[0].resolve()
+        path = existing[0]
         data = path.read_bytes()
         files_by_url[source_url] = path
         inventory.append({
@@ -108,14 +118,20 @@ def main() -> int:
     parser.add_argument("--inbox", default=str(DEFAULT_INBOX))
     parser.add_argument("--export-review", default=str(DEFAULT_EXPORT))
     parser.add_argument("--max-chunk-chars", type=int, default=2400)
+    parser.add_argument(
+        "--document-id",
+        action="append",
+        default=[],
+        help="Bound this run to one or more document IDs; may be repeated.",
+    )
     args = parser.parse_args()
 
-    registry_path = _resolve_repo_path(args.registry)
-    inbox = _resolve_repo_path(args.inbox)
-    root = _resolve_repo_path(args.root)
-    export_review = _resolve_repo_path(args.export_review)
+    registry_path = _repo_path(args.registry)
+    inbox = _repo_path(args.inbox)
+    root = _repo_path(args.root)
+    export_review = _repo_path(args.export_review)
 
-    registry = load_registry(registry_path)
+    registry = _bounded_registry(load_registry(registry_path), list(args.document_id))
     inbox.mkdir(parents=True, exist_ok=True)
     files_by_url, inventory = discover_files(registry, inbox)
 
@@ -135,6 +151,7 @@ def main() -> int:
     payload = {
         "registry_id": result.registry_id,
         "mode": "operator_assisted_official_import",
+        "requested_document_ids": list(args.document_id),
         "inbox": str(inbox),
         "supported_suffixes": list(SUPPORTED_SUFFIXES),
         "inventory": inventory,

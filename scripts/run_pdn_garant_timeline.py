@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import sys
 from pathlib import Path
@@ -12,7 +13,7 @@ if str(REPO_ROOT) not in sys.path:
 
 from father_osint.document_compiler import DocumentCompilerError, extract_visible_text
 from father_osint.garant_timeline import official_evidence_requests, parse_garant_timeline_text
-from father_osint.legal_source_bundle import LegalSourceBundle, LegalSourceRole
+from father_osint.legal_source_bundle import LegalSourceBundle
 
 
 DEFAULT_BUNDLES = REPO_ROOT / "config" / "pdn_source_bundles.json"
@@ -84,7 +85,9 @@ def main() -> int:
             continue
 
         try:
-            text = extract_visible_text(source_path.read_bytes(), _mime_for(source_path))
+            source_bytes = source_path.read_bytes()
+            source_capture_sha256 = hashlib.sha256(source_bytes).hexdigest()
+            text = extract_visible_text(source_bytes, _mime_for(source_path))
             capture = parse_garant_timeline_text(
                 document_id=bundle.document_id,
                 source_url=provider.url,
@@ -103,12 +106,20 @@ def main() -> int:
             continue
 
         local_path = local_root / f"{bundle.document_id}.timeline.json"
+        local_payload = capture.to_dict()
+        local_payload["source_capture_sha256"] = source_capture_sha256
+        local_payload["source_capture_bytes"] = len(source_bytes)
         local_path.write_text(
-            json.dumps(capture.to_dict(), ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+            json.dumps(local_payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
             encoding="utf-8",
         )
 
-        requests = list(official_evidence_requests(capture))
+        requests = list(
+            official_evidence_requests(
+                capture,
+                source_capture_sha256=source_capture_sha256,
+            )
+        )
         evidence_requests.extend(requests)
         records.append({
             "record_type": "TIMELINE_CAPTURE",
@@ -116,6 +127,8 @@ def main() -> int:
             "status": "TIMELINE_METADATA_READY",
             "source_id": provider.source_id,
             "source_url": provider.url,
+            "source_capture_sha256": source_capture_sha256,
+            "source_capture_bytes": len(source_bytes),
             "events": len(capture.events),
             "future_edition_signalled": capture.future_edition_signalled,
             "semantic_text_mirrored": False,
@@ -168,6 +181,7 @@ def main() -> int:
     lines += [
         "",
         "Every amendment event stays `OFFICIAL_EVIDENCE_PENDING` until an A0/A1 publication/effectiveness anchor is attached.",
+        "Each local GARANT capture is linked by SHA-256 only; no full GARANT text is exported or mirrored.",
     ]
     plan.write_text("\n".join(lines) + "\n", encoding="utf-8", newline="\n")
 

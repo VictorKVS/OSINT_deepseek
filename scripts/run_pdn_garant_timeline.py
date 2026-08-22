@@ -33,12 +33,15 @@ def _load_bundles(path: Path) -> tuple[LegalSourceBundle, ...]:
     return tuple(LegalSourceBundle.from_dict(item) for item in payload["bundles"])
 
 
-def _candidate_input(input_dir: Path, document_id: str) -> Path | None:
-    for suffix in (".html", ".htm", ".txt"):
+def _candidate_inputs(input_dir: Path, document_id: str) -> tuple[Path, ...]:
+    # Prefer a rendered-text capture over browser-saved HTML, but inspect all
+    # available candidates so stale shell HTML cannot mask a valid .txt file.
+    candidates: list[Path] = []
+    for suffix in (".txt", ".html", ".htm"):
         candidate = input_dir / f"{document_id}{suffix}"
         if candidate.is_file():
-            return candidate
-    return None
+            candidates.append(candidate)
+    return tuple(candidates)
 
 
 def _mime_for(path: Path) -> str:
@@ -92,45 +95,68 @@ def main() -> int:
             })
             continue
 
-        source_path = _candidate_input(input_dir, bundle.document_id)
-        if source_path is None:
+        source_paths = _candidate_inputs(input_dir, bundle.document_id)
+        if not source_paths:
             records.append({
                 "record_type": "TIMELINE_CAPTURE",
                 "document_id": bundle.document_id,
                 "status": "INPUT_PENDING",
                 "source_id": provider.source_id,
                 "source_url": provider.url,
-                "expected_input": str(input_dir / f"{bundle.document_id}.html"),
+                "expected_input": str(input_dir / f"{bundle.document_id}.txt"),
             })
             continue
 
-        try:
-            source_bytes = source_path.read_bytes()
-            source_capture_sha256 = hashlib.sha256(source_bytes).hexdigest()
-            text = extract_visible_text(source_bytes, _mime_for(source_path))
-        except (DocumentCompilerError, ValueError) as exc:
-            records.append({
-                "record_type": "TIMELINE_CAPTURE",
-                "document_id": bundle.document_id,
-                "status": "PARSE_FAILED",
-                "source_id": provider.source_id,
-                "source_url": provider.url,
-                "reason": str(exc),
-            })
-            continue
+        selected_path: Path | None = None
+        source_bytes: bytes | None = None
+        source_capture_sha256: str | None = None
+        text: str | None = None
+        candidate_diagnostics: list[dict[str, object]] = []
+        extraction_failures = 0
 
-        missing_markers = _missing_identity_markers(text, provider.identity_markers)
-        if missing_markers:
+        for candidate in source_paths:
+            try:
+                candidate_bytes = candidate.read_bytes()
+                candidate_text = extract_visible_text(candidate_bytes, _mime_for(candidate))
+            except (DocumentCompilerError, ValueError) as exc:
+                extraction_failures += 1
+                candidate_diagnostics.append({
+                    "file": candidate.name,
+                    "status": "PARSE_FAILED",
+                    "reason": str(exc),
+                })
+                continue
+
+            missing_markers = _missing_identity_markers(candidate_text, provider.identity_markers)
+            if missing_markers:
+                candidate_diagnostics.append({
+                    "file": candidate.name,
+                    "status": "IDENTITY_FAILED",
+                    "missing_identity_markers": missing_markers,
+                })
+                continue
+
+            selected_path = candidate
+            source_bytes = candidate_bytes
+            source_capture_sha256 = hashlib.sha256(candidate_bytes).hexdigest()
+            text = candidate_text
+            break
+
+        if selected_path is None or source_bytes is None or source_capture_sha256 is None or text is None:
+            status = "PARSE_FAILED" if extraction_failures == len(source_paths) else "IDENTITY_FAILED"
             records.append({
                 "record_type": "TIMELINE_CAPTURE",
                 "document_id": bundle.document_id,
-                "status": "IDENTITY_FAILED",
+                "status": status,
                 "source_id": provider.source_id,
                 "source_url": provider.url,
-                "source_capture_sha256": source_capture_sha256,
-                "source_capture_bytes": len(source_bytes),
-                "missing_identity_markers": missing_markers,
-                "reason": "operator-saved capture does not contain configured document identity markers",
+                "candidate_files": [path.name for path in source_paths],
+                "candidate_diagnostics": candidate_diagnostics,
+                "reason": (
+                    "no local capture passed document identity markers"
+                    if status == "IDENTITY_FAILED"
+                    else "no local capture could be parsed as visible text"
+                ),
                 "semantic_text_mirrored": False,
             })
             continue
@@ -149,6 +175,7 @@ def main() -> int:
                 "status": "PARSE_FAILED",
                 "source_id": provider.source_id,
                 "source_url": provider.url,
+                "selected_input": selected_path.name,
                 "reason": str(exc),
             })
             continue
@@ -160,6 +187,7 @@ def main() -> int:
                 "status": "TIMELINE_EMPTY",
                 "source_id": provider.source_id,
                 "source_url": provider.url,
+                "selected_input": selected_path.name,
                 "source_capture_sha256": source_capture_sha256,
                 "source_capture_bytes": len(source_bytes),
                 "reason": "document identity passed but no amendment events were extracted",
@@ -171,6 +199,7 @@ def main() -> int:
         local_payload = capture.to_dict()
         local_payload["source_capture_sha256"] = source_capture_sha256
         local_payload["source_capture_bytes"] = len(source_bytes)
+        local_payload["selected_input"] = selected_path.name
         local_path.write_text(
             json.dumps(local_payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
             encoding="utf-8",
@@ -195,6 +224,7 @@ def main() -> int:
             "status": "TIMELINE_METADATA_READY",
             "source_id": provider.source_id,
             "source_url": provider.url,
+            "selected_input": selected_path.name,
             "source_capture_sha256": source_capture_sha256,
             "source_capture_bytes": len(source_bytes),
             "events": len(capture.events),
@@ -260,6 +290,7 @@ def main() -> int:
         "Every amendment event stays `OFFICIAL_EVIDENCE_PENDING` until an A0/A1 publication/effectiveness anchor is attached.",
         "Publication-relative rules explicitly request an A0/A1 official-publication date; no calendar date is inferred from GARANT alone.",
         "Every timeline capture must pass document identity markers before amendment parsing.",
+        "Multiple local capture formats may coexist; the runner chooses the first identity-valid capture, preferring rendered .txt over saved HTML.",
         "Each local GARANT capture is linked by SHA-256 only; no full GARANT text is exported or mirrored.",
     ]
     plan.write_text("\n".join(lines) + "\n", encoding="utf-8", newline="\n")

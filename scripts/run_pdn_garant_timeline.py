@@ -13,6 +13,11 @@ if str(REPO_ROOT) not in sys.path:
 
 from father_osint.document_compiler import DocumentCompilerError, extract_visible_text
 from father_osint.garant_timeline import official_evidence_requests, parse_garant_timeline_text
+from father_osint.legal_core import (
+    LegalCoreExtractionError,
+    extract_152_fz_core_text,
+    is_152_fz_primary_document,
+)
 from father_osint.legal_source_bundle import LegalSourceBundle
 from father_osint.odt_extract import OdtExtractionError, extract_odt_text
 
@@ -35,9 +40,6 @@ def _load_bundles(path: Path) -> tuple[LegalSourceBundle, ...]:
 
 
 def _candidate_inputs(input_dir: Path, document_id: str) -> tuple[Path, ...]:
-    # Prefer the application's own downloaded ODT over rendered clipboard text
-    # and browser shell HTML. Inspect all available candidates so stale local
-    # files cannot mask a newer identity-valid artifact.
     candidates: list[Path] = []
     for suffix in (".odt", ".txt", ".html", ".htm"):
         candidate = input_dir / f"{document_id}{suffix}"
@@ -119,8 +121,10 @@ def main() -> int:
         source_bytes: bytes | None = None
         source_capture_sha256: str | None = None
         text: str | None = None
+        selected_scope = "FULL_CAPTURE"
         candidate_diagnostics: list[dict[str, object]] = []
         extraction_failures = 0
+        scope_failures = 0
 
         for candidate in source_paths:
             try:
@@ -134,6 +138,26 @@ def main() -> int:
                     "reason": str(exc),
                 })
                 continue
+
+            if bundle.document_id == "DOC-RU-FZ-152-2006":
+                if not is_152_fz_primary_document(candidate_text):
+                    candidate_diagnostics.append({
+                        "file": candidate.name,
+                        "status": "IDENTITY_FAILED",
+                        "reason": "capture contains no primary 152-FZ header/title pair near document start",
+                    })
+                    continue
+                try:
+                    candidate_text = extract_152_fz_core_text(candidate_text)
+                except LegalCoreExtractionError as exc:
+                    scope_failures += 1
+                    candidate_diagnostics.append({
+                        "file": candidate.name,
+                        "status": "SCOPE_FAILED",
+                        "reason": str(exc),
+                    })
+                    continue
+                selected_scope = "PRIMARY_152_FZ_CORE_ONLY"
 
             missing_markers = _missing_identity_markers(candidate_text, provider.identity_markers)
             if missing_markers:
@@ -151,7 +175,12 @@ def main() -> int:
             break
 
         if selected_path is None or source_bytes is None or source_capture_sha256 is None or text is None:
-            status = "PARSE_FAILED" if extraction_failures == len(source_paths) else "IDENTITY_FAILED"
+            if scope_failures:
+                status = "SCOPE_FAILED"
+            elif extraction_failures == len(source_paths):
+                status = "PARSE_FAILED"
+            else:
+                status = "IDENTITY_FAILED"
             records.append({
                 "record_type": "TIMELINE_CAPTURE",
                 "document_id": bundle.document_id,
@@ -160,11 +189,11 @@ def main() -> int:
                 "source_url": provider.url,
                 "candidate_files": [path.name for path in source_paths],
                 "candidate_diagnostics": candidate_diagnostics,
-                "reason": (
-                    "no local capture passed document identity markers"
-                    if status == "IDENTITY_FAILED"
-                    else "no local capture could be parsed as visible text"
-                ),
+                "reason": {
+                    "IDENTITY_FAILED": "no local capture passed document identity markers",
+                    "PARSE_FAILED": "no local capture could be parsed as visible text",
+                    "SCOPE_FAILED": "no primary-document capture could be safely scoped for temporal parsing",
+                }[status],
                 "semantic_text_mirrored": False,
             })
             continue
@@ -193,6 +222,7 @@ def main() -> int:
         local_payload["source_capture_sha256"] = source_capture_sha256
         local_payload["source_capture_bytes"] = len(source_bytes)
         local_payload["selected_input"] = selected_path.name
+        local_payload["selected_scope"] = selected_scope
         local_path.write_text(
             json.dumps(local_payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
             encoding="utf-8",
@@ -207,14 +237,13 @@ def main() -> int:
                     "source_id": provider.source_id,
                     "source_url": provider.url,
                     "selected_input": selected_path.name,
+                    "selected_scope": selected_scope,
                     "source_capture_sha256": source_capture_sha256,
                     "source_capture_bytes": len(source_bytes),
                     "events": 0,
                     "amendment_date_hints": len(capture.amendment_date_hints),
                     "official_evidence_requests": 0,
-                    "reason": (
-                        "compact GARANT amendment-date list extracted; act identity/effective-rule evidence still pending"
-                    ),
+                    "reason": "compact GARANT amendment-date list extracted; act identity/effective-rule evidence still pending",
                     "semantic_text_mirrored": False,
                 })
                 continue
@@ -226,6 +255,7 @@ def main() -> int:
                 "source_id": provider.source_id,
                 "source_url": provider.url,
                 "selected_input": selected_path.name,
+                "selected_scope": selected_scope,
                 "source_capture_sha256": source_capture_sha256,
                 "source_capture_bytes": len(source_bytes),
                 "reason": "document identity passed but no amendment events or compact amendment-date hints were extracted",
@@ -253,6 +283,7 @@ def main() -> int:
             "source_id": provider.source_id,
             "source_url": provider.url,
             "selected_input": selected_path.name,
+            "selected_scope": selected_scope,
             "source_capture_sha256": source_capture_sha256,
             "source_capture_bytes": len(source_bytes),
             "events": len(capture.events),
@@ -270,6 +301,7 @@ def main() -> int:
         "timeline_hints_ready": sum(item.get("status") == "TIMELINE_HINTS_READY" for item in records),
         "timeline_empty": sum(item.get("status") == "TIMELINE_EMPTY" for item in records),
         "identity_failed": sum(item.get("status") == "IDENTITY_FAILED" for item in records),
+        "scope_failed": sum(item.get("status") == "SCOPE_FAILED" for item in records),
         "input_pending": sum(item.get("status") == "INPUT_PENDING" for item in records),
         "parse_failed": sum(item.get("status") == "PARSE_FAILED" for item in records),
         "amendment_date_hints": sum(int(item.get("amendment_date_hints", 0)) for item in records),
@@ -299,6 +331,7 @@ def main() -> int:
         f"- timeline hints ready: {summary['timeline_hints_ready']}",
         f"- timeline empty: {summary['timeline_empty']}",
         f"- identity failed: {summary['identity_failed']}",
+        f"- scope failed: {summary['scope_failed']}",
         f"- input pending: {summary['input_pending']}",
         f"- parse failed: {summary['parse_failed']}",
         f"- compact amendment-date hints: {summary['amendment_date_hints']}",
@@ -310,19 +343,20 @@ def main() -> int:
         "",
         "## Documents",
         "",
-        "| Document | Status | Timeline source | Events | Date hints | Evidence requests |",
-        "|---|---|---|---:|---:|---:|",
+        "| Document | Status | Scope | Timeline source | Events | Date hints | Evidence requests |",
+        "|---|---|---|---|---:|---:|---:|",
     ]
     for record in records:
         lines.append(
-            f"| `{record['document_id']}` | {record['status']} | {record.get('source_id', '—')} | "
-            f"{record.get('events', '—')} | {record.get('amendment_date_hints', '—')} | "
-            f"{record.get('official_evidence_requests', '—')} |"
+            f"| `{record['document_id']}` | {record['status']} | {record.get('selected_scope', '—')} | "
+            f"{record.get('source_id', '—')} | {record.get('events', '—')} | "
+            f"{record.get('amendment_date_hints', '—')} | {record.get('official_evidence_requests', '—')} |"
         )
     lines += [
         "",
         "Every detailed amendment event stays `OFFICIAL_EVIDENCE_PENDING` until an A0/A1 publication/effectiveness anchor is attached.",
         "A compact `С изменениями и дополнениями от:` list is stored only as `A2_NAVIGATION_HINT_ONLY`; dates alone do not identify an amending act.",
+        "152-FZ captures are temporally parsed only inside the primary law body, excluding surrounding GARANT material.",
         "Publication-relative rules explicitly request an A0/A1 official-publication date; no calendar date is inferred from GARANT alone.",
         "Every timeline capture must pass document identity markers before amendment parsing.",
         "Multiple local capture formats may coexist; the runner chooses the first identity-valid capture, preferring GARANT-downloaded ODT, then rendered .txt, then saved HTML.",
@@ -338,7 +372,12 @@ def main() -> int:
         "export_plan": str(plan),
     }, ensure_ascii=False, indent=2))
 
-    hard_failures = summary["parse_failed"] + summary["timeline_empty"] + summary["identity_failed"]
+    hard_failures = (
+        summary["parse_failed"]
+        + summary["timeline_empty"]
+        + summary["identity_failed"]
+        + summary["scope_failed"]
+    )
     return 2 if hard_failures else 0
 
 

@@ -1,0 +1,184 @@
+{
+  "schema_version": "1.0",
+  "registry_id": "PDN-RU-SOURCE-BUNDLES-001",
+  "purpose": "Multi-source reconciliation layer for PDn legal documents: official publication evidence + government copy + authoritative consolidated references.",
+  "policy": {
+    "publication_evidence": "A0/A1 evidence of official publication or official state placement",
+    "government_copy": "A1 state-hosted downloadable or inspectable copy used as acquisition candidate when suitable",
+    "consolidated_reference": "A2 authoritative legal system used for current-edition/version reconciliation; verification only, no blind mirroring",
+    "promotion_rule": "No single A2 source can replace A0/A1 publication evidence. Differences create VERSION_DIFFERENCE/SOURCE_CONFLICT candidates for review."
+  },
+  "bundles": [
+    {
+      "document_id": "DOC-RU-FZ-152-2006",
+      "representations": [
+        {
+          "source_id": "SRC-RU-RG-001",
+          "role": "PUBLICATION_EVIDENCE",
+          "trust_tier": "A0_OFFICIAL_PUBLICATION",
+          "url": "https://rg.ru/documents/2006/07/29/personaljnye-dannye-dok.html",
+          "mode": "REFERENCE_ONLY",
+          "authority": "official newspaper publication archive",
+          "redistribution_allowed": false,
+          "edition": "published 2006-07-29",
+          "notes": ["Use as publication evidence; automated GET may be access-controlled."]
+        },
+        {
+          "source_id": "SRC-RU-SFR-001",
+          "role": "GOVERNMENT_COPY",
+          "trust_tier": "A1_OFFICIAL_ORGAN",
+          "url": "https://sfr.gov.ru/order/individual_records~1565",
+          "mode": "OPERATOR_IMPORT",
+          "authority": "official Social Fund of Russia legislation page",
+          "redistribution_allowed": false,
+          "artifact_locator": "Скачать документ",
+          "notes": ["Landing page currently exposes a download action and recent update timestamp; exact downloaded artifact must be hashed and edition-checked before use."]
+        },
+        {
+          "source_id": "SRC-RU-GARANT-001",
+          "role": "CONSOLIDATED_REFERENCE",
+          "trust_tier": "A2_AUTHORITATIVE",
+          "url": "https://base.garant.ru/12148567/",
+          "mode": "VERIFY_ONLY",
+          "authority": "GARANT legal information system",
+          "redistribution_allowed": false,
+          "notes": ["Use for current-edition and amendment reconciliation, not as official publication evidence."]
+        },
+        {
+          "source_id": "SRC-RU-CONSULTANT-001",
+          "role": "CONSOLIDATED_REFERENCE",
+          "trust_tier": "A2_AUTHORITATIVE",
+          "url": "https://www.consultant.ru/document/cons_doc_LAW_61801/",
+          "mode": "VERIFY_ONLY",
+          "authority": "ConsultantPlus legal information system",
+          "redistribution_allowed": false,
+          "notes": ["Use for current-edition and amendment reconciliation, not as official publication evidence."]
+        }
+      ]
+    },
+    {
+      "document_id": "DOC-RU-PP-1119-2012",
+      "representations": [
+        {
+          "source_id": "SRC-RU-RG-001",
+          "role": "PUBLICATION_EVIDENCE",
+          "trust_tier": "A0_OFFICIAL_PUBLICATION",
+          "url": "https://rg.ru/documents/2012/11/07/pers-dannye-dok.html",
+          "mode": "REFERENCE_ONLY",
+          "authority": "official newspaper publication archive",
+          "redistribution_allowed": false
+        },
+        {
+          "source_id": "SRC-RU-GOV-001",
+          "role": "GOVERNMENT_COPY",
+          "trust_tier": "A1_OFFICIAL_ORGAN",
+          "url": "https://government.ru/docs/6339/",
+          "mode": "OPERATOR_IMPORT",
+          "authority": "official Government of Russia document page",
+          "redistribution_allowed": false,
+          "artifact_locator": "Документ / DOC / Постановление от 1 ноября 2012 г. №1119",
+          "notes": ["Official page exposes the decree and a current-edition document link; exact artifact identity must be recorded on import."]
+        },
+        {
+          "source_id": "SRC-RU-GARANT-001",
+          "role": "CONSOLIDATED_REFERENCE",
+          "trust_tier": "A2_AUTHORITATIVE",
+          "url": "https://base.garant.ru/70252506/",
+          "mode": "VERIFY_ONLY",
+          "authority": "GARANT legal information system",
+          "redistribution_allowed": false
+        },
+        {
+          "source_id": "SRC-RU-CONSULTANT-001",
+          "role": "CONSOLIDATED_REFERENCE",
+          "trust_tier": "A2_AUTHORITATIVE",
+          "url": "https://www.consultant.ru/document/cons_doc_LAW_137356/",
+          "mode": "VERIFY_ONLY",
+          "authority": "ConsultantPlus legal information system",
+          "redistribution_allowed": false
+        }
+      ]
+    },
+    {
+      "document_id": "DOC-RU-FSTEC-21-2013",
+      "representations": [
+        {
+          "source_id": "SRC-RU-RG-001",
+          "role": "PUBLICATION_EVIDENCE",
+          "trust_tier": "A0_OFFICIAL_PUBLICATION",
+          "url": "https://rg.ru/documents/2013/05/22/soderjanie-dok.html",
+          "mode": "REFERENCE_ONLY",
+          "authority": "official newspaper publication archive",
+          "redistribution_allowed": false,
+          "edition": "base publication; registered Minjust N 28375"
+        },
+        {
+          "source_id": "SRC-RU-CBS-MINZDRAV-001",
+          "role": "GOVERNMENT_COPY",
+          "trust_tier": "A1_OFFICIAL_ORGAN",
+          "url": "https://cbs.minzdrav.gov.ru/public/normative_docs",
+          "mode": "OPERATOR_IMPORT",
+          "authority": "state health-sector coordination portal",
+          "redistribution_allowed": false,
+          "artifact_locator": "Приказ ФСТЭК России от 18.02.2013 N 21 (ред. от 14.05.2020).docx",
+          "edition": "2020-05-14 consolidated copy",
+          "notes": ["Portal exposes the DOCX and a ZIP download action. Treat this as an A1 government-hosted copy, not as official publication evidence."]
+        },
+        {
+          "source_id": "SRC-RU-GARANT-001",
+          "role": "CONSOLIDATED_REFERENCE",
+          "trust_tier": "A2_AUTHORITATIVE",
+          "url": "https://base.garant.ru/70380924/",
+          "mode": "VERIFY_ONLY",
+          "authority": "GARANT legal information system",
+          "redistribution_allowed": false,
+          "edition": "includes amendments 49/2017 and 68/2020"
+        },
+        {
+          "source_id": "SRC-RU-CONSULTANT-001",
+          "role": "CONSOLIDATED_REFERENCE",
+          "trust_tier": "A2_AUTHORITATIVE",
+          "url": "https://www.consultant.ru/document/cons_doc_LAW_146520/",
+          "mode": "VERIFY_ONLY",
+          "authority": "ConsultantPlus legal information system",
+          "redistribution_allowed": false,
+          "edition": "red. 14.05.2020"
+        }
+      ]
+    },
+    {
+      "document_id": "DOC-RU-FSB-378-2014",
+      "representations": [
+        {
+          "source_id": "SRC-RU-RG-001",
+          "role": "PUBLICATION_EVIDENCE",
+          "trust_tier": "A0_OFFICIAL_PUBLICATION",
+          "url": "https://rg.ru/documents/2014/09/17/zashita-dok.html",
+          "mode": "REFERENCE_ONLY",
+          "authority": "official newspaper publication archive",
+          "redistribution_allowed": false,
+          "edition": "published 2014-09-17; registered Minjust N 33620"
+        },
+        {
+          "source_id": "SRC-RU-GARANT-001",
+          "role": "CONSOLIDATED_REFERENCE",
+          "trust_tier": "A2_AUTHORITATIVE",
+          "url": "https://base.garant.ru/70727118/",
+          "mode": "VERIFY_ONLY",
+          "authority": "GARANT legal information system",
+          "redistribution_allowed": false
+        },
+        {
+          "source_id": "SRC-RU-CONSULTANT-001",
+          "role": "CONSOLIDATED_REFERENCE",
+          "trust_tier": "A2_AUTHORITATIVE",
+          "url": "https://www.consultant.ru/document/cons_doc_LAW_167862/",
+          "mode": "VERIFY_ONLY",
+          "authority": "ConsultantPlus legal information system",
+          "redistribution_allowed": false,
+          "notes": ["Public non-commercial availability may be schedule-limited; do not treat access restriction as document absence."]
+        }
+      ]
+    }
+  ]
+}

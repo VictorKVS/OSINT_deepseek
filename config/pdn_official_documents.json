@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "registry_id": "PDN-RU-OFFICIAL-MVP-001",
   "purpose": "Official-source acquisition list for the first Russian personal-data Knowledge Factory corpus",
   "sources": {
@@ -45,13 +45,14 @@
       "material_profile": "LEGAL",
       "lifecycle": "EFFECTIVE",
       "source_id": "SRC-RU-PRAVO-001",
-      "source_state": "VERIFIED_ARTIFACT_LOCATOR",
+      "source_state": "OFFICIAL_LOCATOR_REQUIRES_LIVE_IDENTITY_CHECK",
       "source_url": "https://ips.pravo.gov.ru/api/ips/legislation/document?baseid=None&hash=98490812b3409e2a8d78a11ca9010f434ea3d9250a11dbbdb78690cd5551bdd6",
       "file_name": "152-fz-official.bin",
-      "version_date": "2025-09-01",
+      "version_date": null,
+      "required_text_markers": ["О персональных данных", "152-ФЗ"],
       "tags": ["personal_data", "pdn", "framework_law", "operator", "data_subject", "security", "incident_notification"],
       "kb_targets": ["PDN_KB", "SECURITY_KB"],
-      "notes": ["Exact hash and MIME are computed from live bytes.", "Consolidated-text locator must be monitored for later editions."]
+      "notes": ["Exact hash and MIME are computed from live bytes.", "The consolidated-text locator must pass content identity validation and must be monitored for later editions."]
     },
     {
       "document_id": "DOC-RU-PP-1119-2012",
@@ -67,13 +68,14 @@
       "material_profile": "LEGAL",
       "lifecycle": "EFFECTIVE",
       "source_id": "SRC-RU-PRAVO-001",
-      "source_state": "VERIFIED_ARTIFACT_LOCATOR",
+      "source_state": "OFFICIAL_LOCATOR_REQUIRES_LIVE_IDENTITY_CHECK",
       "source_url": "https://pravo.gov.ru/proxy/ips/?docbody=&nd=102160483",
       "file_name": "pp-1119-official.html",
       "version_date": null,
+      "required_text_markers": ["требований к защите персональных данных", "информационных системах персональных данных"],
       "tags": ["personal_data", "pdn", "ispdn", "protection_level", "threat_type", "security_requirements"],
       "kb_targets": ["PDN_KB", "SECURITY_KB"],
-      "notes": ["Official pravo.gov.ru text locator."]
+      "notes": ["Official pravo.gov.ru text locator; live identity validation is mandatory."]
     },
     {
       "document_id": "DOC-RU-FSTEC-21-2013",
@@ -89,13 +91,14 @@
       "material_profile": "LEGAL",
       "lifecycle": "EFFECTIVE",
       "source_id": "SRC-RU-FSTEC-001",
-      "source_state": "VERIFIED_OFFICIAL_PAGE",
+      "source_state": "OFFICIAL_LOCATOR_REQUIRES_LIVE_IDENTITY_CHECK",
       "source_url": "https://fstec.ru/dokumenty/vse-dokumenty/prikazy/prikaz-fstek-rossii-ot-18-fevralya-2013-g-n-21",
       "file_name": "fstec-21-official.html",
       "version_date": "2020-05-14",
+      "required_text_markers": ["персональных данных", "18 февраля 2013", "21"],
       "tags": ["personal_data", "pdn", "ispdn", "security_measures", "fstec", "controls"],
       "kb_targets": ["PDN_KB", "SECURITY_KB"],
-      "notes": ["The official FSTEC page is acquired first; if it exposes a distinct attached current artifact, a later source-resolution pass must register that artifact as a version rather than silently substituting it."]
+      "notes": ["The official FSTEC page is acquired first and must pass identity markers. If it exposes a distinct attached current artifact, that artifact must be registered as a later version rather than silently substituted."]
     },
     {
       "document_id": "DOC-RU-FSTEC-49-2017",
@@ -115,6 +118,7 @@
       "source_url": "https://publication.pravo.gov.ru/document/0001201704260010",
       "file_name": "fstec-49-publication.html",
       "version_date": "2017-03-23",
+      "required_text_markers": ["23.03.2017", "49", "персональных данных"],
       "tags": ["personal_data", "pdn", "fstec", "amendment", "order_21"],
       "kb_targets": ["PDN_KB", "SECURITY_KB"],
       "notes": ["Official publication number identified; enable only after resolving the exact downloadable publication artifact or validating page content as the intended artifact."]
@@ -137,6 +141,7 @@
       "source_url": "https://publication.pravo.gov.ru/document/0001202007100002",
       "file_name": "fstec-68-publication.html",
       "version_date": "2020-05-14",
+      "required_text_markers": ["14.05.2020", "68", "персональных данных"],
       "tags": ["personal_data", "pdn", "fstec", "amendment", "order_21"],
       "kb_targets": ["PDN_KB", "SECURITY_KB"],
       "notes": ["Official publication number identified; exact downloadable artifact must be resolved before enabling."]
@@ -159,6 +164,7 @@
       "source_url": null,
       "file_name": "fsb-378-official.bin",
       "version_date": null,
+      "required_text_markers": ["10 июля 2014", "378", "криптографической защиты информации"],
       "tags": ["personal_data", "pdn", "crypto", "skzi", "fsb", "security_measures"],
       "kb_targets": ["PDN_KB", "SECURITY_KB"],
       "notes": ["Do not use Consultant/Garant as the acquisition artifact; resolve the primary official publication/source first."]

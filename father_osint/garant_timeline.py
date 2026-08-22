@@ -45,10 +45,24 @@ _DATE_RE = re.compile(
     re.IGNORECASE,
 )
 
+_DAY_MONTH_RE = re.compile(
+    r"(?P<day>\d{1,2})\s+(?P<month>января|февраля|марта|апреля|мая|июня|июля|августа|сентября|октября|ноября|декабря)",
+    re.IGNORECASE,
+)
+
+_YEAR_GROUP_RE = re.compile(r"(?P<body>.*?)(?P<year>\d{4})\s*г\.?", re.IGNORECASE)
+
 _EFFECTIVE_INLINE_RE = re.compile(
     r"(?P<rule>Изменени[яе]\s+вступ\w*\s+в\s+сил\w*\s+.{0,500}?)"
     r"(?=(?:\s+См\.|\s+(?:Федеральный\s+закон|Приказ\s+)\b|$))",
     re.IGNORECASE,
+)
+
+_COMPACT_HISTORY_RE = re.compile(
+    r"С\s+изменениями\s+и\s+дополнениями\s+от:\s*"
+    r"(?P<history>.*?)"
+    r"(?=(?:\s+Принят\b|\s+Одобрен\b|\s+См\.\s|\s+Глава\s+\d|\s+Статья\s+\d|\s+Президент\s+Российской\s+Федерации\b|$))",
+    re.IGNORECASE | re.DOTALL,
 )
 
 
@@ -102,12 +116,32 @@ class GarantAmendmentEvent:
 
 
 @dataclass(frozen=True, slots=True)
+class GarantAmendmentDateHint:
+    amendment_date: str
+    source_id: str = "SRC-RU-GARANT-001"
+    evidence_state: str = "A2_NAVIGATION_HINT_ONLY"
+
+    @property
+    def hint_id(self) -> str:
+        return _stable_id("GTH", self.source_id, self.amendment_date)
+
+    def to_dict(self) -> dict[str, str]:
+        return {
+            "hint_id": self.hint_id,
+            "amendment_date": self.amendment_date,
+            "source_id": self.source_id,
+            "evidence_state": self.evidence_state,
+        }
+
+
+@dataclass(frozen=True, slots=True)
 class GarantTimelineCapture:
     document_id: str
     source_url: str
     observed_on: str
     events: tuple[GarantAmendmentEvent, ...]
     future_edition_signalled: bool
+    amendment_date_hints: tuple[GarantAmendmentDateHint, ...] = ()
     source_role: str = "VERSION_TIMELINE_PROVIDER"
     semantic_text_mirrored: bool = False
 
@@ -120,6 +154,7 @@ class GarantTimelineCapture:
             "semantic_text_mirrored": self.semantic_text_mirrored,
             "future_edition_signalled": self.future_edition_signalled,
             "events": [event.to_dict() for event in self.events],
+            "amendment_date_hints": [hint.to_dict() for hint in self.amendment_date_hints],
         }
 
 
@@ -195,6 +230,36 @@ def _recover_inline_events(text: str) -> list[GarantAmendmentEvent]:
     return _dedupe_events(events)
 
 
+def _extract_compact_amendment_date_hints(text: str) -> tuple[GarantAmendmentDateHint, ...]:
+    """Parse GARANT's compact `С изменениями и дополнениями от:` date list.
+
+    These are navigation hints only. A compact list does not identify the
+    amending act or prove an effective date, so no official-evidence request is
+    emitted from these hints alone.
+    """
+
+    flat = " ".join(text.replace("\xa0", " ").split())
+    match = _COMPACT_HISTORY_RE.search(flat)
+    if not match:
+        return ()
+
+    history = match.group("history")
+    hints: list[GarantAmendmentDateHint] = []
+    seen: set[str] = set()
+    cursor = 0
+    for year_match in _YEAR_GROUP_RE.finditer(history):
+        group_text = history[cursor:year_match.end()]
+        cursor = year_match.end()
+        year = year_match.group("year")
+        for date_match in _DAY_MONTH_RE.finditer(group_text):
+            value = _iso_date(date_match.group("day"), date_match.group("month"), year)
+            if value in seen:
+                continue
+            seen.add(value)
+            hints.append(GarantAmendmentDateHint(amendment_date=value))
+    return tuple(hints)
+
+
 def parse_garant_timeline_text(
     *,
     document_id: str,
@@ -206,7 +271,9 @@ def parse_garant_timeline_text(
 
     The parser intentionally captures only temporal/legal metadata: amending act
     identity, act date, effective-date expressions and future-edition signals.
-    It does not mirror the legal text or GARANT commentary.
+    If a downloaded working copy contains only GARANT's compact amendment-date
+    list, those dates are kept as A2 navigation hints and are not promoted to
+    verified amendment events.
     """
 
     if not document_id.strip() or not source_url.strip() or not observed_on.strip():
@@ -251,6 +318,8 @@ def parse_garant_timeline_text(
     if not deduped:
         deduped = _recover_inline_events(text)
 
+    amendment_date_hints = _extract_compact_amendment_date_hints(text)
+
     future_signal = any(
         "будущ" in line.casefold().replace("ё", "е") and "редакц" in line.casefold().replace("ё", "е")
         for line in lines
@@ -262,6 +331,7 @@ def parse_garant_timeline_text(
         observed_on=observed_on,
         events=tuple(deduped),
         future_edition_signalled=future_signal,
+        amendment_date_hints=amendment_date_hints,
     )
 
 
@@ -285,7 +355,11 @@ def official_evidence_requests(
     *,
     source_capture_sha256: str | None = None,
 ) -> tuple[dict[str, object], ...]:
-    """Convert timeline hints into traceable evidence requests without promoting A2 metadata to proof."""
+    """Convert detailed timeline events into traceable A0/A1 evidence requests.
+
+    Compact amendment-date hints are intentionally excluded because a date alone
+    does not establish the identity of the amending act.
+    """
 
     requests: list[dict[str, object]] = []
     for event in capture.events:

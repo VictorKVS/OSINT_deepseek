@@ -20,6 +20,7 @@ def test_official_source_pack_is_bounded_and_garant_hold():
             "A1_OFFICIAL_ORGAN",
         }
         assert item["publication_anchor"]["trust_tier"] == "A0_OFFICIAL_PUBLICATION"
+        assert item["primary_identity_markers"]
         assert item["identity_markers"]
 
 
@@ -28,9 +29,9 @@ def test_official_source_pack_one_click_helpers_exist():
     inventory = Path("RUN_PDN_OFFICIAL_SOURCE_PACK_INVENTORY.cmd").read_text(encoding="utf-8")
     script = Path("scripts/inventory_pdn_official_downloads.py").read_text(encoding="utf-8")
 
-    assert "government.ru/docs/6339" in opener
-    assert "voda.gov.ru" in opener
+    assert "start_pdn_official_source_pack_session.py" in opener
     assert "GARANT is HOLD" in opener
     assert "inventory_pdn_official_downloads.py" in inventory
-    assert "DOWNLOAD_CANDIDATE_ONLY" in script
-    assert "D3 requires source provenance" in script
+    assert "PRIMARY_AND_SECONDARY" in script
+    assert "D0_D3_VERIFIED_OPERATOR_CAPTURE" in script
+    assert "provenance_rule" in script

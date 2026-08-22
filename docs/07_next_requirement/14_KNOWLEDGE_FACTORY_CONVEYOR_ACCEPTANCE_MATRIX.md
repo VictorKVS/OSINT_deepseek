@@ -33,6 +33,15 @@
 | KF-FX-026 | run budget reached | deterministic bounded stop with explicit reason | all |
 | KF-FX-027 | registry/audit mismatch | run gate fails; mismatch surfaced and counted | all |
 | KF-FX-028 | frozen DEV v1 regression | canonical baseline runners/tests remain behaviorally unchanged | all |
+| KF-FX-029 | domain starts without competency questions | semantic D6+ gate blocks until scoped `CQ-*` requirements exist | D6+ method gate |
+| KF-FX-030 | reusable existing concept found | candidate maps/reuses stable object rather than creating duplicate identity | D6-D11 reuse |
+| KF-FX-031 | semantically similar but context-distinct concept | no unsafe merge; contextual mapping/distinct identity retained | D6-D12 |
+| KF-FX-032 | knowledge object shape violation | deterministic constraint failure; no D15 promotion | D10-D15 |
+| KF-FX-033 | competency question evaluation | answer state is traceable/limited/inconclusive/gap/NA with evidence | D14 |
+| KF-FX-034 | metric without denominator/gold/provenance | undefined or draft metric stays explicit; no fabricated zero/one/quality score | metrics |
+| KF-FX-035 | Champion vs Challenger extraction method | same corpus/gold-set; P/R/F1, provenance, CQ, cost/rework and regression compared | method evolution |
+| KF-FX-036 | PROV-style lineage traversal | KB object traces through activity/method to chunk, version and exact original | D13-D15 |
+| KF-FX-037 | required FAIR metadata/reuse check | stable ID, rich metadata, qualified refs and provenance are machine-readable | D13-D15 |
 
 ## Acceptance levels
 
@@ -40,10 +49,10 @@
 Must include `KF-FX-001`, `002`, `009`, `028`.
 
 ### PROFESSIONAL
-Adds `003-005`, `010-016`, `021-022`.
+Adds `003-005`, `010-016`, `021-022`, `029-033`, `036-037`.
 
 ### STRESS / RED TEAM
-Adds `006-008`, `017-020`, `023-027`.
+Adds `006-008`, `017-020`, `023-027`, `034-035`.
 
 ## Evidence bundle per fixture
 
@@ -64,6 +73,20 @@ status PASS / FAIL / REWORK
 
 Volatile timestamps and generated IDs must be injected/frozen or excluded from golden comparisons where appropriate.
 
+## Methodological evidence required for D6-D15
+
+In addition to functional correctness, the evidence bundle must identify:
+
+- `KnowledgeScope` / competency-question set version;
+- reused vocabulary/concept candidates checked before creation;
+- extraction/parser/method version;
+- shape/constraint version;
+- gold-set/review-policy version where P/R/F1 is reported;
+- provenance path to exact source artifact/version/locator;
+- conflict/applicability classification state;
+- metric formulas and raw counts;
+- reviewer/critic disposition.
+
 ## Gate rule
 
-A maturity gate is not complete because code exists. It is complete only when the required fixture set is reproducibly green and the telemetry/registry/audit counts reconcile.
+A maturity gate is not complete because code exists or the graph is large. It is complete only when the required fixture set is reproducibly green, competency questions are evaluated, mandatory constraints pass, provenance is complete, and telemetry/registry/audit counts reconcile.

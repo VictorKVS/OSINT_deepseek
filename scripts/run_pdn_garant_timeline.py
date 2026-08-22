@@ -51,6 +51,15 @@ def _empty_basis_counts() -> dict[str, int]:
     return {key: 0 for key in _BASIS_KEYS}
 
 
+def _normalized(value: str) -> str:
+    return " ".join(value.casefold().replace("ё", "е").split())
+
+
+def _missing_identity_markers(text: str, markers: tuple[str, ...]) -> list[str]:
+    normalized_text = _normalized(text)
+    return [marker for marker in markers if _normalized(marker) not in normalized_text]
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(
         description="Extract only amendment/version metadata from operator-saved GARANT pages"
@@ -99,12 +108,6 @@ def main() -> int:
             source_bytes = source_path.read_bytes()
             source_capture_sha256 = hashlib.sha256(source_bytes).hexdigest()
             text = extract_visible_text(source_bytes, _mime_for(source_path))
-            capture = parse_garant_timeline_text(
-                document_id=bundle.document_id,
-                source_url=provider.url,
-                observed_on=args.observed_on,
-                text=text,
-            )
         except (DocumentCompilerError, ValueError) as exc:
             records.append({
                 "record_type": "TIMELINE_CAPTURE",
@@ -116,14 +119,39 @@ def main() -> int:
             })
             continue
 
-        local_path = local_root / f"{bundle.document_id}.timeline.json"
-        local_payload = capture.to_dict()
-        local_payload["source_capture_sha256"] = source_capture_sha256
-        local_payload["source_capture_bytes"] = len(source_bytes)
-        local_path.write_text(
-            json.dumps(local_payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
-            encoding="utf-8",
-        )
+        missing_markers = _missing_identity_markers(text, provider.identity_markers)
+        if missing_markers:
+            records.append({
+                "record_type": "TIMELINE_CAPTURE",
+                "document_id": bundle.document_id,
+                "status": "IDENTITY_FAILED",
+                "source_id": provider.source_id,
+                "source_url": provider.url,
+                "source_capture_sha256": source_capture_sha256,
+                "source_capture_bytes": len(source_bytes),
+                "missing_identity_markers": missing_markers,
+                "reason": "operator-saved capture does not contain configured document identity markers",
+                "semantic_text_mirrored": False,
+            })
+            continue
+
+        try:
+            capture = parse_garant_timeline_text(
+                document_id=bundle.document_id,
+                source_url=provider.url,
+                observed_on=args.observed_on,
+                text=text,
+            )
+        except ValueError as exc:
+            records.append({
+                "record_type": "TIMELINE_CAPTURE",
+                "document_id": bundle.document_id,
+                "status": "PARSE_FAILED",
+                "source_id": provider.source_id,
+                "source_url": provider.url,
+                "reason": str(exc),
+            })
+            continue
 
         if not capture.events:
             records.append({
@@ -134,14 +162,19 @@ def main() -> int:
                 "source_url": provider.url,
                 "source_capture_sha256": source_capture_sha256,
                 "source_capture_bytes": len(source_bytes),
-                "events": 0,
-                "future_edition_signalled": capture.future_edition_signalled,
+                "reason": "document identity passed but no amendment events were extracted",
                 "semantic_text_mirrored": False,
-                "official_evidence_requests": 0,
-                "effective_date_basis_counts": _empty_basis_counts(),
-                "reason": "input exists but no amendment events were extracted; inspect saved-page layout/parser coverage",
             })
             continue
+
+        local_path = local_root / f"{bundle.document_id}.timeline.json"
+        local_payload = capture.to_dict()
+        local_payload["source_capture_sha256"] = source_capture_sha256
+        local_payload["source_capture_bytes"] = len(source_bytes)
+        local_path.write_text(
+            json.dumps(local_payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
 
         requests = list(
             official_evidence_requests(
@@ -176,6 +209,7 @@ def main() -> int:
         "bundles": len(bundles),
         "timeline_metadata_ready": sum(item.get("status") == "TIMELINE_METADATA_READY" for item in records),
         "timeline_empty": sum(item.get("status") == "TIMELINE_EMPTY" for item in records),
+        "identity_failed": sum(item.get("status") == "IDENTITY_FAILED" for item in records),
         "input_pending": sum(item.get("status") == "INPUT_PENDING" for item in records),
         "parse_failed": sum(item.get("status") == "PARSE_FAILED" for item in records),
         "official_evidence_requests": len(evidence_requests),
@@ -202,6 +236,7 @@ def main() -> int:
         f"- bundles: {summary['bundles']}",
         f"- timeline metadata ready: {summary['timeline_metadata_ready']}",
         f"- timeline empty: {summary['timeline_empty']}",
+        f"- identity failed: {summary['identity_failed']}",
         f"- input pending: {summary['input_pending']}",
         f"- parse failed: {summary['parse_failed']}",
         f"- official evidence requests: {summary['official_evidence_requests']}",
@@ -224,7 +259,7 @@ def main() -> int:
         "",
         "Every amendment event stays `OFFICIAL_EVIDENCE_PENDING` until an A0/A1 publication/effectiveness anchor is attached.",
         "Publication-relative rules explicitly request an A0/A1 official-publication date; no calendar date is inferred from GARANT alone.",
-        "`TIMELINE_EMPTY` is not accepted as ready metadata: it means a saved page exists but parser coverage must be checked.",
+        "Every timeline capture must pass document identity markers before amendment parsing.",
         "Each local GARANT capture is linked by SHA-256 only; no full GARANT text is exported or mirrored.",
     ]
     plan.write_text("\n".join(lines) + "\n", encoding="utf-8", newline="\n")
@@ -237,7 +272,7 @@ def main() -> int:
         "export_plan": str(plan),
     }, ensure_ascii=False, indent=2))
 
-    hard_failures = summary["parse_failed"] + summary["timeline_empty"]
+    hard_failures = summary["parse_failed"] + summary["timeline_empty"] + summary["identity_failed"]
     return 2 if hard_failures else 0
 
 

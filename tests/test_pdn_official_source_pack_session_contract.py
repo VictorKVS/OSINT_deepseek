@@ -38,3 +38,8 @@ def test_official_source_pack_registry_has_primary_identity_profiles_for_all_tar
     for item in payload["documents"]:
         assert len(item["primary_identity_markers"]) >= 3
         assert item["identity_markers"]
+
+    fz152 = next(item for item in payload["documents"] if item["document_id"] == "DOC-RU-FZ-152-2006")
+    assert "Дата подписания: 27.07.2006" in fz152["primary_identity_markers"]
+    assert "27 июля 2006" not in fz152["identity_markers"]
+    assert fz152["identity_markers"] == ["О персональных данных"]

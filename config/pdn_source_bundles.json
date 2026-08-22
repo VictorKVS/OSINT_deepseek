@@ -1,12 +1,13 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "registry_id": "PDN-RU-SOURCE-BUNDLES-001",
-  "purpose": "Multi-source reconciliation layer for PDn legal documents: official publication evidence + government copy + authoritative consolidated references.",
+  "purpose": "Multi-source reconciliation layer for PDn legal documents with GARANT as the preferred version-timeline navigator and A0/A1 sources as evidentiary anchors.",
   "policy": {
     "publication_evidence": "A0/A1 evidence of official publication or official state placement",
-    "government_copy": "A1 state-hosted downloadable or inspectable copy used as acquisition candidate when suitable",
-    "consolidated_reference": "A2 authoritative legal system used for current-edition/version reconciliation; verification only, no blind mirroring",
-    "promotion_rule": "No single A2 source can replace A0/A1 publication evidence. Differences create VERSION_DIFFERENCE/SOURCE_CONFLICT candidates for review."
+    "government_copy": "A1 state-hosted downloadable or inspectable copy used as an acquisition candidate when suitable",
+    "version_timeline_provider": "A2 authoritative legal system used to enumerate editions, amendment dates and historical/current versions. GARANT is preferred for temporal navigation; verification only, no blind mirroring.",
+    "consolidated_reference": "Independent A2 authoritative legal system used to cross-check the selected edition and amendment history; verification only, no blind mirroring.",
+    "promotion_rule": "A2 sources drive navigation and reconciliation but do not replace A0/A1 publication evidence. Differences create VERSION_DIFFERENCE/SOURCE_CONFLICT candidates for review."
   },
   "bundles": [
     {
@@ -32,17 +33,18 @@
           "authority": "official Social Fund of Russia legislation page",
           "redistribution_allowed": false,
           "artifact_locator": "Скачать документ",
-          "notes": ["Landing page currently exposes a download action and recent update timestamp; exact downloaded artifact must be hashed and edition-checked before use."]
+          "notes": ["Exact downloaded artifact must be hashed and edition-checked before use."]
         },
         {
           "source_id": "SRC-RU-GARANT-001",
-          "role": "CONSOLIDATED_REFERENCE",
+          "role": "VERSION_TIMELINE_PROVIDER",
           "trust_tier": "A2_AUTHORITATIVE",
           "url": "https://base.garant.ru/12148567/",
           "mode": "VERIFY_ONLY",
           "authority": "GARANT legal information system",
           "redistribution_allowed": false,
-          "notes": ["Use for current-edition and amendment reconciliation, not as official publication evidence."]
+          "timeline_priority": 1,
+          "notes": ["Preferred navigator for historical/current editions and amendment dates. Do not treat as official publication evidence."]
         },
         {
           "source_id": "SRC-RU-CONSULTANT-001",
@@ -52,7 +54,7 @@
           "mode": "VERIFY_ONLY",
           "authority": "ConsultantPlus legal information system",
           "redistribution_allowed": false,
-          "notes": ["Use for current-edition and amendment reconciliation, not as official publication evidence."]
+          "notes": ["Independent consolidated-text cross-check for the GARANT-selected edition."]
         }
       ]
     },
@@ -76,17 +78,18 @@
           "mode": "OPERATOR_IMPORT",
           "authority": "official Government of Russia document page",
           "redistribution_allowed": false,
-          "artifact_locator": "Документ / DOC / Постановление от 1 ноября 2012 г. №1119",
-          "notes": ["Official page exposes the decree and a current-edition document link; exact artifact identity must be recorded on import."]
+          "artifact_locator": "Документ / Постановление от 1 ноября 2012 г. №1119"
         },
         {
           "source_id": "SRC-RU-GARANT-001",
-          "role": "CONSOLIDATED_REFERENCE",
+          "role": "VERSION_TIMELINE_PROVIDER",
           "trust_tier": "A2_AUTHORITATIVE",
           "url": "https://base.garant.ru/70252506/",
           "mode": "VERIFY_ONLY",
           "authority": "GARANT legal information system",
-          "redistribution_allowed": false
+          "redistribution_allowed": false,
+          "timeline_priority": 1,
+          "notes": ["Preferred navigator for editions and amendment history."]
         },
         {
           "source_id": "SRC-RU-CONSULTANT-001",
@@ -121,18 +124,19 @@
           "authority": "state health-sector coordination portal",
           "redistribution_allowed": false,
           "artifact_locator": "Приказ ФСТЭК России от 18.02.2013 N 21 (ред. от 14.05.2020).docx",
-          "edition": "2020-05-14 consolidated copy",
-          "notes": ["Portal exposes the DOCX and a ZIP download action. Treat this as an A1 government-hosted copy, not as official publication evidence."]
+          "edition": "2020-05-14 consolidated copy"
         },
         {
           "source_id": "SRC-RU-GARANT-001",
-          "role": "CONSOLIDATED_REFERENCE",
+          "role": "VERSION_TIMELINE_PROVIDER",
           "trust_tier": "A2_AUTHORITATIVE",
           "url": "https://base.garant.ru/70380924/",
           "mode": "VERIFY_ONLY",
           "authority": "GARANT legal information system",
           "redistribution_allowed": false,
-          "edition": "includes amendments 49/2017 and 68/2020"
+          "timeline_priority": 1,
+          "edition": "timeline includes amendments 49/2017 and 68/2020",
+          "notes": ["Preferred source for reconstructing the edition timeline before official-evidence reconciliation."]
         },
         {
           "source_id": "SRC-RU-CONSULTANT-001",
@@ -161,12 +165,14 @@
         },
         {
           "source_id": "SRC-RU-GARANT-001",
-          "role": "CONSOLIDATED_REFERENCE",
+          "role": "VERSION_TIMELINE_PROVIDER",
           "trust_tier": "A2_AUTHORITATIVE",
           "url": "https://base.garant.ru/70727118/",
           "mode": "VERIFY_ONLY",
           "authority": "GARANT legal information system",
-          "redistribution_allowed": false
+          "redistribution_allowed": false,
+          "timeline_priority": 1,
+          "notes": ["Preferred navigator for temporal status and edition history."]
         },
         {
           "source_id": "SRC-RU-CONSULTANT-001",
@@ -176,7 +182,7 @@
           "mode": "VERIFY_ONLY",
           "authority": "ConsultantPlus legal information system",
           "redistribution_allowed": false,
-          "notes": ["Public non-commercial availability may be schedule-limited; do not treat access restriction as document absence."]
+          "notes": ["Use as independent cross-check; access restrictions do not imply document absence."]
         }
       ]
     }

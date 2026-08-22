@@ -1,9 +1,9 @@
 from __future__ import annotations
 
+import hashlib
 import re
 from dataclasses import asdict, dataclass
 from datetime import date
-from typing import Iterable
 
 
 _RU_MONTHS = {
@@ -34,6 +34,12 @@ _DATE_RE = re.compile(
 )
 
 
+def _stable_id(prefix: str, *parts: str) -> str:
+    canonical = "\x1f".join(" ".join(part.split()).casefold() for part in parts)
+    digest = hashlib.sha256(canonical.encode("utf-8")).hexdigest()[:20]
+    return f"{prefix}-{digest}"
+
+
 @dataclass(frozen=True, slots=True)
 class GarantAmendmentEvent:
     amending_act_title: str
@@ -44,8 +50,19 @@ class GarantAmendmentEvent:
     source_id: str = "SRC-RU-GARANT-001"
     evidence_state: str = "OFFICIAL_EVIDENCE_PENDING"
 
+    @property
+    def event_id(self) -> str:
+        return _stable_id(
+            "GTE",
+            self.source_id,
+            self.amending_act_title,
+            self.amending_act_date,
+            self.amending_act_number,
+        )
+
     def to_dict(self) -> dict[str, object]:
         payload = asdict(self)
+        payload["event_id"] = self.event_id
         payload["effective_dates"] = list(self.effective_dates)
         return payload
 
@@ -170,20 +187,35 @@ def parse_garant_timeline_text(
     )
 
 
-def official_evidence_requests(capture: GarantTimelineCapture) -> tuple[dict[str, object], ...]:
-    """Convert timeline hints into evidence requests without promoting A2 metadata to proof."""
+def official_evidence_requests(
+    capture: GarantTimelineCapture,
+    *,
+    source_capture_sha256: str | None = None,
+) -> tuple[dict[str, object], ...]:
+    """Convert timeline hints into traceable evidence requests without promoting A2 metadata to proof."""
 
     requests: list[dict[str, object]] = []
     for event in capture.events:
-        requests.append(
-            {
-                "document_id": capture.document_id,
-                "amending_act_number": event.amending_act_number,
-                "amending_act_date": event.amending_act_date,
-                "effective_dates": list(event.effective_dates),
-                "timeline_source_id": event.source_id,
-                "required_evidence_tier": "A0_OR_A1",
-                "status": "EVIDENCE_PENDING",
-            }
-        )
+        request_id = _stable_id("OER", capture.document_id, event.event_id)
+        request: dict[str, object] = {
+            "evidence_request_id": request_id,
+            "timeline_event_id": event.event_id,
+            "document_id": capture.document_id,
+            "amending_act_title": event.amending_act_title,
+            "amending_act_number": event.amending_act_number,
+            "amending_act_date": event.amending_act_date,
+            "effective_dates": list(event.effective_dates),
+            "effective_rule": event.effective_rule,
+            "timeline_source_id": event.source_id,
+            "timeline_source_url": capture.source_url,
+            "timeline_observed_on": capture.observed_on,
+            "required_evidence_tier": "A0_OR_A1",
+            "status": "EVIDENCE_PENDING",
+        }
+        if source_capture_sha256 is not None:
+            normalized_hash = source_capture_sha256.strip().lower()
+            if len(normalized_hash) != 64 or any(ch not in "0123456789abcdef" for ch in normalized_hash):
+                raise ValueError("source_capture_sha256 must be a 64-character hexadecimal digest")
+            request["timeline_source_capture_sha256"] = normalized_hash
+        requests.append(request)
     return tuple(requests)

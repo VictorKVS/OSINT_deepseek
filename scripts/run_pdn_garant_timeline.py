@@ -21,6 +21,12 @@ DEFAULT_INPUT = REPO_ROOT / "data" / "operator_import" / "garant_timeline"
 DEFAULT_LOCAL = REPO_ROOT / "data" / "knowledge_factory" / "pdn_timelines"
 DEFAULT_EXPORT = REPO_ROOT / "reports" / "pdn_timelines"
 
+_BASIS_KEYS = (
+    "EXPLICIT_CALENDAR_DATE",
+    "RELATIVE_TO_OFFICIAL_PUBLICATION",
+    "NON_CALENDAR_RULE",
+)
+
 
 def _load_bundles(path: Path) -> tuple[LegalSourceBundle, ...]:
     payload = json.loads(path.read_text(encoding="utf-8"))
@@ -39,6 +45,10 @@ def _mime_for(path: Path) -> str:
     if path.suffix.casefold() in {".html", ".htm"}:
         return "text/html"
     return "text/plain"
+
+
+def _empty_basis_counts() -> dict[str, int]:
+    return {key: 0 for key in _BASIS_KEYS}
 
 
 def main() -> int:
@@ -61,6 +71,7 @@ def main() -> int:
 
     records: list[dict[str, object]] = []
     evidence_requests: list[dict[str, object]] = []
+    basis_counts = _empty_basis_counts()
 
     for bundle in bundles:
         provider = bundle.preferred_timeline_provider()
@@ -121,6 +132,12 @@ def main() -> int:
             )
         )
         evidence_requests.extend(requests)
+
+        record_basis_counts = _empty_basis_counts()
+        for event in capture.events:
+            record_basis_counts[event.effective_date_basis] += 1
+            basis_counts[event.effective_date_basis] += 1
+
         records.append({
             "record_type": "TIMELINE_CAPTURE",
             "document_id": bundle.document_id,
@@ -133,6 +150,7 @@ def main() -> int:
             "future_edition_signalled": capture.future_edition_signalled,
             "semantic_text_mirrored": False,
             "official_evidence_requests": len(requests),
+            "effective_date_basis_counts": record_basis_counts,
         })
 
     summary = {
@@ -142,6 +160,7 @@ def main() -> int:
         "input_pending": sum(item.get("status") == "INPUT_PENDING" for item in records),
         "parse_failed": sum(item.get("status") == "PARSE_FAILED" for item in records),
         "official_evidence_requests": len(evidence_requests),
+        "effective_date_basis_counts": basis_counts,
         "semantic_text_mirrored": False,
         "timeline_policy": "GARANT_NAVIGATES_A0_A1_PROVES",
     }
@@ -166,6 +185,9 @@ def main() -> int:
         f"- input pending: {summary['input_pending']}",
         f"- parse failed: {summary['parse_failed']}",
         f"- official evidence requests: {summary['official_evidence_requests']}",
+        f"- explicit calendar-date rules: {basis_counts['EXPLICIT_CALENDAR_DATE']}",
+        f"- publication-relative rules: {basis_counts['RELATIVE_TO_OFFICIAL_PUBLICATION']}",
+        f"- other non-calendar rules: {basis_counts['NON_CALENDAR_RULE']}",
         "- semantic/full legal text mirrored from GARANT: **no**",
         "",
         "## Documents",
@@ -181,6 +203,7 @@ def main() -> int:
     lines += [
         "",
         "Every amendment event stays `OFFICIAL_EVIDENCE_PENDING` until an A0/A1 publication/effectiveness anchor is attached.",
+        "Publication-relative rules explicitly request an A0/A1 official-publication date; no calendar date is inferred from GARANT alone.",
         "Each local GARANT capture is linked by SHA-256 only; no full GARANT text is exported or mirrored.",
     ]
     plan.write_text("\n".join(lines) + "\n", encoding="utf-8", newline="\n")

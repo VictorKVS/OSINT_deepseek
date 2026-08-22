@@ -11,6 +11,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
+from father_osint.artifact_identity import MarkerValidatingFetcher
 from father_osint.knowledge_factory_store import KnowledgeFactoryStore
 from father_osint.pdn_batch import PdnOfficialBatchRunner, load_registry
 
@@ -18,6 +19,21 @@ from father_osint.pdn_batch import PdnOfficialBatchRunner, load_registry
 DEFAULT_REGISTRY = REPO_ROOT / "config" / "pdn_official_documents.json"
 DEFAULT_ROOT = REPO_ROOT / "data" / "knowledge_factory" / "pdn_official_batch"
 DEFAULT_EXPORT = REPO_ROOT / "reports" / "pdn_live"
+
+
+def build_marker_map(registry: dict) -> dict[str, tuple[str, ...]]:
+    marker_map: dict[str, tuple[str, ...]] = {}
+    for item in registry["documents"]:
+        if not item.get("enabled", False):
+            continue
+        url = item.get("source_url")
+        markers = tuple(item.get("required_text_markers", []))
+        if not url:
+            raise ValueError(f"enabled document {item['document_id']} has no source_url")
+        if not markers:
+            raise ValueError(f"enabled document {item['document_id']} has no required_text_markers")
+        marker_map[url] = markers
+    return marker_map
 
 
 def export_sanitized_review(store: KnowledgeFactoryStore, result, export_dir: Path) -> dict[str, str]:
@@ -81,9 +97,11 @@ def main() -> int:
     args = parser.parse_args()
 
     registry = load_registry(args.registry)
+    marker_map = build_marker_map(registry)
     store = KnowledgeFactoryStore(args.root)
     result = PdnOfficialBatchRunner(
         store,
+        fetcher=MarkerValidatingFetcher(marker_map),
         max_chunk_chars=args.max_chunk_chars,
     ).run(registry)
     exported = export_sanitized_review(store, result, Path(args.export_review))

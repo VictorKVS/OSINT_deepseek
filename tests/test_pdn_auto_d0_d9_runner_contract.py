@@ -9,9 +9,13 @@ def test_one_click_pdn_auto_runner_is_bounded_and_fail_closed():
     assert "scripts\\audit_pdn_d4_d5_structure.py" in cmd
     assert "scripts\\run_pdn_d6_d9.py" in cmd
     assert "scripts\\audit_pdn_d6_d9.py" in cmd
+    assert "scripts\\run_pdn_d10_d12.py" in cmd
+    assert "scripts\\audit_pdn_d10_d12.py" in cmd
+    assert "scripts\\run_pdn_d13_review_queue.py" in cmd
     assert cmd.count("--document-id") == 4
     assert "if errorlevel 1 goto :fail" in cmd
-    assert "No autonomous KB promotion" in cmd
+    assert "D14 remains NEEDS_REVIEW" in cmd
+    assert "D15 autonomous promotion is blocked" in cmd
     assert "exit /b 2" in cmd
 
 

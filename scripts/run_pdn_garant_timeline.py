@@ -125,6 +125,24 @@ def main() -> int:
             encoding="utf-8",
         )
 
+        if not capture.events:
+            records.append({
+                "record_type": "TIMELINE_CAPTURE",
+                "document_id": bundle.document_id,
+                "status": "TIMELINE_EMPTY",
+                "source_id": provider.source_id,
+                "source_url": provider.url,
+                "source_capture_sha256": source_capture_sha256,
+                "source_capture_bytes": len(source_bytes),
+                "events": 0,
+                "future_edition_signalled": capture.future_edition_signalled,
+                "semantic_text_mirrored": False,
+                "official_evidence_requests": 0,
+                "effective_date_basis_counts": _empty_basis_counts(),
+                "reason": "input exists but no amendment events were extracted; inspect saved-page layout/parser coverage",
+            })
+            continue
+
         requests = list(
             official_evidence_requests(
                 capture,
@@ -157,6 +175,7 @@ def main() -> int:
         "record_type": "TIMELINE_SUMMARY",
         "bundles": len(bundles),
         "timeline_metadata_ready": sum(item.get("status") == "TIMELINE_METADATA_READY" for item in records),
+        "timeline_empty": sum(item.get("status") == "TIMELINE_EMPTY" for item in records),
         "input_pending": sum(item.get("status") == "INPUT_PENDING" for item in records),
         "parse_failed": sum(item.get("status") == "PARSE_FAILED" for item in records),
         "official_evidence_requests": len(evidence_requests),
@@ -182,6 +201,7 @@ def main() -> int:
         "",
         f"- bundles: {summary['bundles']}",
         f"- timeline metadata ready: {summary['timeline_metadata_ready']}",
+        f"- timeline empty: {summary['timeline_empty']}",
         f"- input pending: {summary['input_pending']}",
         f"- parse failed: {summary['parse_failed']}",
         f"- official evidence requests: {summary['official_evidence_requests']}",
@@ -204,6 +224,7 @@ def main() -> int:
         "",
         "Every amendment event stays `OFFICIAL_EVIDENCE_PENDING` until an A0/A1 publication/effectiveness anchor is attached.",
         "Publication-relative rules explicitly request an A0/A1 official-publication date; no calendar date is inferred from GARANT alone.",
+        "`TIMELINE_EMPTY` is not accepted as ready metadata: it means a saved page exists but parser coverage must be checked.",
         "Each local GARANT capture is linked by SHA-256 only; no full GARANT text is exported or mirrored.",
     ]
     plan.write_text("\n".join(lines) + "\n", encoding="utf-8", newline="\n")
@@ -216,7 +237,8 @@ def main() -> int:
         "export_plan": str(plan),
     }, ensure_ascii=False, indent=2))
 
-    return 2 if summary["parse_failed"] else 0
+    hard_failures = summary["parse_failed"] + summary["timeline_empty"]
+    return 2 if hard_failures else 0
 
 
 if __name__ == "__main__":

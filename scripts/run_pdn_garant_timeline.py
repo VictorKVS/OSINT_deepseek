@@ -188,21 +188,6 @@ def main() -> int:
             })
             continue
 
-        if not capture.events:
-            records.append({
-                "record_type": "TIMELINE_CAPTURE",
-                "document_id": bundle.document_id,
-                "status": "TIMELINE_EMPTY",
-                "source_id": provider.source_id,
-                "source_url": provider.url,
-                "selected_input": selected_path.name,
-                "source_capture_sha256": source_capture_sha256,
-                "source_capture_bytes": len(source_bytes),
-                "reason": "document identity passed but no amendment events were extracted",
-                "semantic_text_mirrored": False,
-            })
-            continue
-
         local_path = local_root / f"{bundle.document_id}.timeline.json"
         local_payload = capture.to_dict()
         local_payload["source_capture_sha256"] = source_capture_sha256
@@ -212,6 +197,41 @@ def main() -> int:
             json.dumps(local_payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
             encoding="utf-8",
         )
+
+        if not capture.events:
+            if capture.amendment_date_hints:
+                records.append({
+                    "record_type": "TIMELINE_CAPTURE",
+                    "document_id": bundle.document_id,
+                    "status": "TIMELINE_HINTS_READY",
+                    "source_id": provider.source_id,
+                    "source_url": provider.url,
+                    "selected_input": selected_path.name,
+                    "source_capture_sha256": source_capture_sha256,
+                    "source_capture_bytes": len(source_bytes),
+                    "events": 0,
+                    "amendment_date_hints": len(capture.amendment_date_hints),
+                    "official_evidence_requests": 0,
+                    "reason": (
+                        "compact GARANT amendment-date list extracted; act identity/effective-rule evidence still pending"
+                    ),
+                    "semantic_text_mirrored": False,
+                })
+                continue
+
+            records.append({
+                "record_type": "TIMELINE_CAPTURE",
+                "document_id": bundle.document_id,
+                "status": "TIMELINE_EMPTY",
+                "source_id": provider.source_id,
+                "source_url": provider.url,
+                "selected_input": selected_path.name,
+                "source_capture_sha256": source_capture_sha256,
+                "source_capture_bytes": len(source_bytes),
+                "reason": "document identity passed but no amendment events or compact amendment-date hints were extracted",
+                "semantic_text_mirrored": False,
+            })
+            continue
 
         requests = list(
             official_evidence_requests(
@@ -236,6 +256,7 @@ def main() -> int:
             "source_capture_sha256": source_capture_sha256,
             "source_capture_bytes": len(source_bytes),
             "events": len(capture.events),
+            "amendment_date_hints": len(capture.amendment_date_hints),
             "future_edition_signalled": capture.future_edition_signalled,
             "semantic_text_mirrored": False,
             "official_evidence_requests": len(requests),
@@ -246,10 +267,12 @@ def main() -> int:
         "record_type": "TIMELINE_SUMMARY",
         "bundles": len(bundles),
         "timeline_metadata_ready": sum(item.get("status") == "TIMELINE_METADATA_READY" for item in records),
+        "timeline_hints_ready": sum(item.get("status") == "TIMELINE_HINTS_READY" for item in records),
         "timeline_empty": sum(item.get("status") == "TIMELINE_EMPTY" for item in records),
         "identity_failed": sum(item.get("status") == "IDENTITY_FAILED" for item in records),
         "input_pending": sum(item.get("status") == "INPUT_PENDING" for item in records),
         "parse_failed": sum(item.get("status") == "PARSE_FAILED" for item in records),
+        "amendment_date_hints": sum(int(item.get("amendment_date_hints", 0)) for item in records),
         "official_evidence_requests": len(evidence_requests),
         "effective_date_basis_counts": basis_counts,
         "semantic_text_mirrored": False,
@@ -273,10 +296,12 @@ def main() -> int:
         "",
         f"- bundles: {summary['bundles']}",
         f"- timeline metadata ready: {summary['timeline_metadata_ready']}",
+        f"- timeline hints ready: {summary['timeline_hints_ready']}",
         f"- timeline empty: {summary['timeline_empty']}",
         f"- identity failed: {summary['identity_failed']}",
         f"- input pending: {summary['input_pending']}",
         f"- parse failed: {summary['parse_failed']}",
+        f"- compact amendment-date hints: {summary['amendment_date_hints']}",
         f"- official evidence requests: {summary['official_evidence_requests']}",
         f"- explicit calendar-date rules: {basis_counts['EXPLICIT_CALENDAR_DATE']}",
         f"- publication-relative rules: {basis_counts['RELATIVE_TO_OFFICIAL_PUBLICATION']}",
@@ -285,17 +310,19 @@ def main() -> int:
         "",
         "## Documents",
         "",
-        "| Document | Status | Timeline source | Events | Evidence requests |",
-        "|---|---|---|---:|---:|",
+        "| Document | Status | Timeline source | Events | Date hints | Evidence requests |",
+        "|---|---|---|---:|---:|---:|",
     ]
     for record in records:
         lines.append(
             f"| `{record['document_id']}` | {record['status']} | {record.get('source_id', '—')} | "
-            f"{record.get('events', '—')} | {record.get('official_evidence_requests', '—')} |"
+            f"{record.get('events', '—')} | {record.get('amendment_date_hints', '—')} | "
+            f"{record.get('official_evidence_requests', '—')} |"
         )
     lines += [
         "",
-        "Every amendment event stays `OFFICIAL_EVIDENCE_PENDING` until an A0/A1 publication/effectiveness anchor is attached.",
+        "Every detailed amendment event stays `OFFICIAL_EVIDENCE_PENDING` until an A0/A1 publication/effectiveness anchor is attached.",
+        "A compact `С изменениями и дополнениями от:` list is stored only as `A2_NAVIGATION_HINT_ONLY`; dates alone do not identify an amending act.",
         "Publication-relative rules explicitly request an A0/A1 official-publication date; no calendar date is inferred from GARANT alone.",
         "Every timeline capture must pass document identity markers before amendment parsing.",
         "Multiple local capture formats may coexist; the runner chooses the first identity-valid capture, preferring GARANT-downloaded ODT, then rendered .txt, then saved HTML.",

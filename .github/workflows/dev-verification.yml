@@ -1,6 +1,6 @@
 name: Stage 06 DEV Verification
 
-on: [push, workflow_dispatch]
+on: [push, pull_request, workflow_dispatch]
 
 permissions:
   contents: read
@@ -18,7 +18,7 @@ jobs:
       - name: Install current DEV verification dependencies
         run: python -m pip install -r requirements-dev.txt
 
-      - name: Verify current DEV baseline
+      - name: Verify current DEV baseline and additive Knowledge Factory tests
         run: |
           python -c "import father_osint; print('father_osint import: OK')"
           python -m pytest --collect-only -q

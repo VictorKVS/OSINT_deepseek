@@ -83,6 +83,7 @@ def main() -> int:
             text=text,
         )
         hints = [item.amendment_date for item in capture.amendment_date_hints]
+        extracted_text_sha256 = hashlib.sha256(text.encode("utf-8")).hexdigest()
         destination = archive / f"{sha256}.odt"
         if not destination.exists():
             shutil.copyfile(path, destination)
@@ -94,7 +95,7 @@ def main() -> int:
             "source_url": SOURCE_URL,
             "capture_sha256": sha256,
             "capture_bytes": len(data),
-            "extracted_text_sha256": hashlib.sha256(text.encode("utf-8")).hexdigest(),
+            "extracted_text_sha256": extracted_text_sha256,
             "observed_on": observed_on,
             "amendment_hint_count": len(hints),
             "first_amendment_hint": hints[0] if hints else None,
@@ -111,8 +112,19 @@ def main() -> int:
         sha = str(record["capture_sha256"])
         record["source_filenames"] = sorted(set(aliases[sha]))
 
+    semantic_groups: defaultdict[str, list[str]] = defaultdict(list)
+    for record in records:
+        semantic_groups[str(record["extracted_text_sha256"])].append(str(record["capture_sha256"]))
+
+    for record in records:
+        group = semantic_groups[str(record["extracted_text_sha256"])]
+        record["semantic_group_size"] = len(group)
+        record["semantic_duplicate"] = len(group) > 1
+
     records.sort(key=lambda item: (str(item.get("latest_amendment_hint") or ""), str(item["capture_sha256"])))
-    duplicate_content = max(0, identity_valid - len(records))
+    duplicate_payloads = max(0, identity_valid - len(records))
+    unique_text_captures = len(semantic_groups)
+    semantic_duplicate_captures = max(0, len(records) - unique_text_captures)
 
     summary = {
         "record_type": "GARANT_EDITION_INVENTORY_SUMMARY",
@@ -120,10 +132,14 @@ def main() -> int:
         "scanned_odt": len(candidates),
         "identity_valid": identity_valid,
         "unique_captures": len(records),
-        "duplicate_content": duplicate_content,
+        "duplicate_content": duplicate_payloads,
+        "duplicate_payloads": duplicate_payloads,
+        "unique_text_captures": unique_text_captures,
+        "semantic_duplicate_captures": semantic_duplicate_captures,
         "identity_failed": identity_failed,
         "parse_failed": parse_failed,
         "semantic_text_mirrored": False,
+        "edition_identity_semantics": "capture_sha256 identifies exact downloaded bytes; extracted_text_sha256 identifies semantically identical ODT text",
         "edition_date_semantics": "latest_amendment_hint is navigation metadata, not a proven edition-effective date",
     }
 
@@ -141,23 +157,27 @@ def main() -> int:
         "",
         f"- scanned ODT: {summary['scanned_odt']}",
         f"- identity-valid ODT: {summary['identity_valid']}",
-        f"- unique captures by SHA-256: {summary['unique_captures']}",
-        f"- duplicate payloads: {summary['duplicate_content']}",
+        f"- unique exact captures by SHA-256: {summary['unique_captures']}",
+        f"- duplicate exact payloads: {summary['duplicate_payloads']}",
+        f"- unique extracted-text captures: {summary['unique_text_captures']}",
+        f"- byte-unique but text-identical captures: {summary['semantic_duplicate_captures']}",
         f"- identity failed: {summary['identity_failed']}",
         f"- parse failed: {summary['parse_failed']}",
         "- full GARANT semantic text mirrored to Git: **no**",
         "",
-        "| # | Capture SHA-256 | Bytes | Amendment hints | Latest hint | Detailed events |",
-        "|---:|---|---:|---:|---|---:|",
+        "| # | Capture SHA-256 | Text SHA-256 | Bytes | Semantic group | Amendment hints | Latest hint | Detailed events |",
+        "|---:|---|---|---:|---:|---:|---|---:|",
     ]
     for index, record in enumerate(records, start=1):
         lines.append(
-            f"| {index} | `{str(record['capture_sha256'])[:16]}…` | {record['capture_bytes']} | "
-            f"{record['amendment_hint_count']} | {record.get('latest_amendment_hint') or '—'} | "
-            f"{record['detailed_event_count']} |"
+            f"| {index} | `{str(record['capture_sha256'])[:16]}…` | `{str(record['extracted_text_sha256'])[:16]}…` | "
+            f"{record['capture_bytes']} | {record['semantic_group_size']} | {record['amendment_hint_count']} | "
+            f"{record.get('latest_amendment_hint') or '—'} | {record['detailed_event_count']} |"
         )
     lines += [
         "",
+        "`capture_sha256` proves exact downloaded bytes. Different ODT bytes may still contain identical extracted legal text.",
+        "`extracted_text_sha256` is therefore the semantic edition fingerprint used before version-diff work.",
         "`latest_amendment_hint` is an A2 navigation hint only. It is not promoted to an official edition-effective date.",
         "Exact ODT bytes are archived only under ignored local `data/knowledge_factory/`; Git receives metadata and hashes only.",
     ]

@@ -26,7 +26,17 @@ DEFAULT_EXPORT = REPO_ROOT / "reports" / "pdn_live"
 SUPPORTED_SUFFIXES = (".html", ".htm", ".txt", ".json")
 
 
+def _resolve_repo_path(value: str | Path) -> Path:
+    """Resolve CLI paths consistently on Windows/Linux before relative_to checks."""
+
+    path = Path(value)
+    if not path.is_absolute():
+        path = REPO_ROOT / path
+    return path.resolve()
+
+
 def discover_files(registry: dict, inbox: Path) -> tuple[dict[str, Path], list[dict[str, object]]]:
+    inbox = _resolve_repo_path(inbox)
     files_by_url: dict[str, Path] = {}
     inventory: list[dict[str, object]] = []
     for item in registry["documents"]:
@@ -57,7 +67,7 @@ def discover_files(registry: dict, inbox: Path) -> tuple[dict[str, Path], list[d
             })
             continue
 
-        path = existing[0]
+        path = existing[0].resolve()
         data = path.read_bytes()
         files_by_url[source_url] = path
         inventory.append({
@@ -100,8 +110,12 @@ def main() -> int:
     parser.add_argument("--max-chunk-chars", type=int, default=2400)
     args = parser.parse_args()
 
-    registry = load_registry(args.registry)
-    inbox = Path(args.inbox)
+    registry_path = _resolve_repo_path(args.registry)
+    inbox = _resolve_repo_path(args.inbox)
+    root = _resolve_repo_path(args.root)
+    export_review = _resolve_repo_path(args.export_review)
+
+    registry = load_registry(registry_path)
     inbox.mkdir(parents=True, exist_ok=True)
     files_by_url, inventory = discover_files(registry, inbox)
 
@@ -109,13 +123,13 @@ def main() -> int:
     local_fetcher = OperatorImportArtifactFetcher(files_by_url)
     validating_fetcher = MarkerValidatingFetcher(marker_map, inner=local_fetcher)
 
-    store = KnowledgeFactoryStore(args.root)
+    store = KnowledgeFactoryStore(root)
     result = PdnOfficialBatchRunner(
         store,
         fetcher=validating_fetcher,
         max_chunk_chars=args.max_chunk_chars,
     ).run(registry)
-    exported = export_sanitized_review(store, result, Path(args.export_review))
+    exported = export_sanitized_review(store, result, export_review)
     observation_log = append_operator_observations(store, inventory, result.results)
 
     payload = {

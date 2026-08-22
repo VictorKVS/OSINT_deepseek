@@ -2,7 +2,13 @@ from __future__ import annotations
 
 import hashlib
 import shutil
+import sys
 from pathlib import Path
+
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
 
 from father_osint.odt_extract import OdtExtractionError, extract_odt_text
 
@@ -22,9 +28,8 @@ def _identity_ok(text: str) -> bool:
 
 
 def main() -> int:
-    repo_root = Path(__file__).resolve().parents[1]
     downloads = Path.home() / "Downloads"
-    target_dir = repo_root / "data" / "operator_import" / "garant_timeline"
+    target_dir = REPO_ROOT / "data" / "operator_import" / "garant_timeline"
     target_dir.mkdir(parents=True, exist_ok=True)
     target = target_dir / TARGET_NAME
 

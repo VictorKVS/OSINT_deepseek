@@ -5,11 +5,14 @@ def test_official_source_pack_d4_d5_runner_uses_normal_operator_conveyor():
     cmd = Path("RUN_PDN_OFFICIAL_SOURCE_PACK_D4_D5.cmd").read_text(encoding="utf-8")
 
     assert "scripts\\run_pdn_operator_import.py" in cmd
+    assert "scripts\\normalize_pdn_d4_d5_article_points.py" in cmd
     assert "data\\operator_import\\pdn_official_source_pack" in cmd
     assert "data\\knowledge_factory\\pdn_official_batch" in cmd
     assert "reports\\pdn_live" in cmd
     assert "D4-D5" in cmd
     assert "normal conveyor" in cmd
+    assert "article" in cmd.casefold()
+    assert "point" in cmd.casefold()
 
 
 def test_operator_import_resolves_relative_cli_paths_before_repo_relative_inventory():
@@ -37,3 +40,16 @@ def test_d4_d5_quality_audit_is_fail_closed_and_metadata_only():
     assert "article_points_outside_articles" in script
     assert "semantic_extraction_performed" in script
     assert "scripts\\audit_pdn_d4_d5_structure.py" in cmd
+
+
+def test_article_point_normalizer_is_traceable_and_keeps_exact_source_untouched():
+    script = Path("scripts/normalize_pdn_d4_d5_article_points.py").read_text(encoding="utf-8")
+
+    assert "article-point-parent-v1" in script
+    assert "structure_sha256_before" in script
+    assert "structure_sha256_after" in script
+    assert "backup_structure" in script
+    assert "removed_pre_article_points" in script
+    assert "points_outside_articles_after" in script
+    assert "semantic_extraction_performed" in script
+    assert "extracted_text" in script

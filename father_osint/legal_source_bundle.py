@@ -35,6 +35,7 @@ class LegalSourceRepresentation:
     artifact_locator: str | None = None
     edition: str | None = None
     timeline_priority: int | None = None
+    identity_markers: tuple[str, ...] = ()
     notes: tuple[str, ...] = ()
 
     def __post_init__(self) -> None:
@@ -55,6 +56,10 @@ class LegalSourceRepresentation:
             raise ValueError("timeline/consolidated references must be A2_AUTHORITATIVE")
         if self.timeline_priority is not None and self.timeline_priority < 1:
             raise ValueError("timeline_priority must be >= 1")
+        if self.role == LegalSourceRole.VERSION_TIMELINE_PROVIDER and not self.identity_markers:
+            raise ValueError("timeline provider requires identity_markers")
+        if any(not marker.strip() for marker in self.identity_markers):
+            raise ValueError("identity_markers cannot contain blank values")
         if self.mode in {RepresentationMode.VERIFY_ONLY, RepresentationMode.REFERENCE_ONLY} and self.redistribution_allowed:
             raise ValueError("verify/reference-only sources cannot be marked redistributable")
 
@@ -71,6 +76,7 @@ class LegalSourceRepresentation:
             artifact_locator=data.get("artifact_locator"),
             edition=data.get("edition"),
             timeline_priority=data.get("timeline_priority"),
+            identity_markers=tuple(str(item) for item in data.get("identity_markers", [])),
             notes=tuple(data.get("notes", [])),
         )
 

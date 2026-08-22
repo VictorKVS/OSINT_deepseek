@@ -14,24 +14,19 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from father_osint.garant_timeline import parse_garant_timeline_text
+from father_osint.legal_core import (
+    LegalCoreExtractionError,
+    extract_152_fz_core_text,
+    is_152_fz_primary_document,
+)
 from father_osint.odt_extract import OdtExtractionError, extract_odt_text
 
 
 DOCUMENT_ID = "DOC-RU-FZ-152-2006"
 SOURCE_URL = "https://base.garant.ru/12148567/"
-MARKERS = ("152-ФЗ", "О персональных данных")
 DEFAULT_DOWNLOADS = Path.home() / "Downloads"
 DEFAULT_ARCHIVE = REPO_ROOT / "data" / "knowledge_factory" / "garant_editions" / DOCUMENT_ID
 DEFAULT_REPORT = REPO_ROOT / "reports" / "pdn_timelines"
-
-
-def _norm(value: str) -> str:
-    return " ".join(value.casefold().replace("ё", "е").split())
-
-
-def _identity_ok(text: str) -> bool:
-    normalized = _norm(text)
-    return all(_norm(marker) in normalized for marker in MARKERS)
 
 
 def _observed_on(path: Path) -> str:
@@ -53,9 +48,12 @@ def main() -> int:
 
     parse_failed = 0
     identity_failed = 0
+    scope_failed = 0
     identity_valid = 0
     by_sha: dict[str, dict[str, object]] = {}
     aliases: defaultdict[str, list[str]] = defaultdict(list)
+    full_text_shas: set[str] = set()
+    core_text_shas: set[str] = set()
 
     for path in candidates:
         try:
@@ -65,14 +63,24 @@ def main() -> int:
             parse_failed += 1
             continue
 
-        if not _identity_ok(text):
+        if not is_152_fz_primary_document(text):
             identity_failed += 1
             continue
 
         identity_valid += 1
-        sha256 = hashlib.sha256(data).hexdigest()
-        aliases[sha256].append(path.name)
-        if sha256 in by_sha:
+        try:
+            core_text = extract_152_fz_core_text(text)
+        except LegalCoreExtractionError:
+            scope_failed += 1
+            continue
+
+        capture_sha256 = hashlib.sha256(data).hexdigest()
+        full_text_sha256 = hashlib.sha256(text.encode("utf-8")).hexdigest()
+        core_text_sha256 = hashlib.sha256(core_text.encode("utf-8")).hexdigest()
+        full_text_shas.add(full_text_sha256)
+        core_text_shas.add(core_text_sha256)
+        aliases[capture_sha256].append(path.name)
+        if capture_sha256 in by_sha:
             continue
 
         observed_on = _observed_on(path)
@@ -80,29 +88,30 @@ def main() -> int:
             document_id=DOCUMENT_ID,
             source_url=SOURCE_URL,
             observed_on=observed_on,
-            text=text,
+            text=core_text,
         )
         hints = [item.amendment_date for item in capture.amendment_date_hints]
-        extracted_text_sha256 = hashlib.sha256(text.encode("utf-8")).hexdigest()
-        destination = archive / f"{sha256}.odt"
+        destination = archive / f"{capture_sha256}.odt"
         if not destination.exists():
             shutil.copyfile(path, destination)
 
-        by_sha[sha256] = {
+        by_sha[capture_sha256] = {
             "record_type": "GARANT_EDITION_CAPTURE",
             "document_id": DOCUMENT_ID,
             "source_id": "SRC-RU-GARANT-001",
             "source_url": SOURCE_URL,
-            "capture_sha256": sha256,
+            "capture_sha256": capture_sha256,
             "capture_bytes": len(data),
-            "extracted_text_sha256": extracted_text_sha256,
+            "extracted_text_sha256": full_text_sha256,
+            "core_text_sha256": core_text_sha256,
             "observed_on": observed_on,
             "amendment_hint_count": len(hints),
             "first_amendment_hint": hints[0] if hints else None,
             "latest_amendment_hint": hints[-1] if hints else None,
             "detailed_event_count": len(capture.events),
             "future_edition_signalled": capture.future_edition_signalled,
-            "identity_markers": "PASS",
+            "identity_markers": "PASS_PRIMARY_DOCUMENT",
+            "scope": "PRIMARY_152_FZ_CORE_ONLY",
             "evidence_state": "A2_WORKING_COPY_ONLY",
             "semantic_text_mirrored": False,
         }
@@ -112,19 +121,12 @@ def main() -> int:
         sha = str(record["capture_sha256"])
         record["source_filenames"] = sorted(set(aliases[sha]))
 
-    semantic_groups: defaultdict[str, list[str]] = defaultdict(list)
-    for record in records:
-        semantic_groups[str(record["extracted_text_sha256"])].append(str(record["capture_sha256"]))
-
-    for record in records:
-        group = semantic_groups[str(record["extracted_text_sha256"])]
-        record["semantic_group_size"] = len(group)
-        record["semantic_duplicate"] = len(group) > 1
-
     records.sort(key=lambda item: (str(item.get("latest_amendment_hint") or ""), str(item["capture_sha256"])))
-    duplicate_payloads = max(0, identity_valid - len(records))
-    unique_text_captures = len(semantic_groups)
-    semantic_duplicate_captures = max(0, len(records) - unique_text_captures)
+    duplicate_payloads = max(0, identity_valid - scope_failed - len(records))
+    unique_full_text = len(full_text_shas)
+    unique_core_text = len(core_text_shas)
+    semantic_duplicate_captures = max(0, len(records) - unique_full_text)
+    core_semantic_duplicate_captures = max(0, len(records) - unique_core_text)
 
     summary = {
         "record_type": "GARANT_EDITION_INVENTORY_SUMMARY",
@@ -134,13 +136,16 @@ def main() -> int:
         "unique_captures": len(records),
         "duplicate_content": duplicate_payloads,
         "duplicate_payloads": duplicate_payloads,
-        "unique_text_captures": unique_text_captures,
+        "unique_text_captures": unique_full_text,
         "semantic_duplicate_captures": semantic_duplicate_captures,
+        "unique_core_editions": unique_core_text,
+        "core_semantic_duplicate_captures": core_semantic_duplicate_captures,
         "identity_failed": identity_failed,
+        "scope_failed": scope_failed,
         "parse_failed": parse_failed,
         "semantic_text_mirrored": False,
-        "edition_identity_semantics": "capture_sha256 identifies exact downloaded bytes; extracted_text_sha256 identifies semantically identical ODT text",
-        "edition_date_semantics": "latest_amendment_hint is navigation metadata, not a proven edition-effective date",
+        "edition_identity_semantics": "capture_sha256 identifies exact downloaded bytes; extracted_text_sha256 identifies full extracted ODT text; core_text_sha256 identifies only the primary 152-FZ legal body",
+        "edition_date_semantics": "latest_amendment_hint is navigation metadata from the scoped primary law body, not a proven edition-effective date",
     }
 
     jsonl = report_dir / "garant_152_edition_inventory.jsonl"
@@ -156,34 +161,38 @@ def main() -> int:
         "Working-copy policy: **GARANT navigates; A0/A1 proves.**",
         "",
         f"- scanned ODT: {summary['scanned_odt']}",
-        f"- identity-valid ODT: {summary['identity_valid']}",
-        f"- unique exact captures by SHA-256: {summary['unique_captures']}",
-        f"- duplicate exact payloads: {summary['duplicate_payloads']}",
-        f"- unique extracted-text captures: {summary['unique_text_captures']}",
-        f"- byte-unique but text-identical captures: {summary['semantic_duplicate_captures']}",
+        f"- primary-document identity valid: {summary['identity_valid']}",
+        f"- exact unique captures by SHA-256: {summary['unique_captures']}",
+        f"- unique full extracted texts: {summary['unique_text_captures']}",
+        f"- unique scoped legal-core editions: {summary['unique_core_editions']}",
+        f"- exact duplicate payloads: {summary['duplicate_payloads']}",
+        f"- full-text semantic duplicates: {summary['semantic_duplicate_captures']}",
+        f"- core semantic duplicates: {summary['core_semantic_duplicate_captures']}",
         f"- identity failed: {summary['identity_failed']}",
+        f"- scope failed: {summary['scope_failed']}",
         f"- parse failed: {summary['parse_failed']}",
         "- full GARANT semantic text mirrored to Git: **no**",
         "",
-        "| # | Capture SHA-256 | Text SHA-256 | Bytes | Semantic group | Amendment hints | Latest hint | Detailed events |",
-        "|---:|---|---|---:|---:|---:|---|---:|",
+        "| # | Capture SHA-256 | Bytes | Core SHA-256 | Amendment hints | Latest hint | Detailed events |",
+        "|---:|---|---:|---|---:|---|---:|",
     ]
     for index, record in enumerate(records, start=1):
         lines.append(
-            f"| {index} | `{str(record['capture_sha256'])[:16]}…` | `{str(record['extracted_text_sha256'])[:16]}…` | "
-            f"{record['capture_bytes']} | {record['semantic_group_size']} | {record['amendment_hint_count']} | "
+            f"| {index} | `{str(record['capture_sha256'])[:16]}…` | {record['capture_bytes']} | "
+            f"`{str(record['core_text_sha256'])[:16]}…` | {record['amendment_hint_count']} | "
             f"{record.get('latest_amendment_hint') or '—'} | {record['detailed_event_count']} |"
         )
     lines += [
         "",
-        "`capture_sha256` proves exact downloaded bytes. Different ODT bytes may still contain identical extracted legal text.",
-        "`extracted_text_sha256` is therefore the semantic edition fingerprint used before version-diff work.",
         "`latest_amendment_hint` is an A2 navigation hint only. It is not promoted to an official edition-effective date.",
+        "`core_text_sha256` is calculated only over the primary 152-FZ legal body; surrounding GARANT material is excluded from semantic edition identity.",
         "Exact ODT bytes are archived only under ignored local `data/knowledge_factory/`; Git receives metadata and hashes only.",
     ]
     md.write_text("\n".join(lines) + "\n", encoding="utf-8", newline="\n")
 
     print(json.dumps({"summary": summary, "inventory_jsonl": str(jsonl), "inventory_md": str(md), "archive": str(archive)}, ensure_ascii=False, indent=2))
+    if scope_failed:
+        print("PARTIAL: some primary-document ODT captures failed legal-core scoping and were not promoted to edition inventory.")
     return 0 if records else 2
 
 

@@ -16,7 +16,11 @@ if not defined PYTHON_EXE set "PYTHON_EXE=python"
 %PYTHON_EXE% scripts\run_pdn_operator_import.py ^
   --inbox "data\operator_import\pdn_official_source_pack" ^
   --root "data\knowledge_factory\pdn_official_batch" ^
-  --export-review "reports\pdn_live"
+  --export-review "reports\pdn_live" ^
+  --document-id "DOC-RU-FZ-152-2006" ^
+  --document-id "DOC-RU-PP-1119-2012" ^
+  --document-id "DOC-RU-FSTEC-21-2013" ^
+  --document-id "DOC-RU-FSB-378-2014"
 set "RC=%ERRORLEVEL%"
 
 echo.

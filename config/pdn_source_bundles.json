@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.1",
+  "schema_version": "1.2",
   "registry_id": "PDN-RU-SOURCE-BUNDLES-001",
   "purpose": "Multi-source reconciliation layer for PDn legal documents with GARANT as the preferred version-timeline navigator and A0/A1 sources as evidentiary anchors.",
   "policy": {
@@ -7,7 +7,8 @@
     "government_copy": "A1 state-hosted downloadable or inspectable copy used as an acquisition candidate when suitable",
     "version_timeline_provider": "A2 authoritative legal system used to enumerate editions, amendment dates and historical/current versions. GARANT is preferred for temporal navigation; verification only, no blind mirroring.",
     "consolidated_reference": "Independent A2 authoritative legal system used to cross-check the selected edition and amendment history; verification only, no blind mirroring.",
-    "promotion_rule": "A2 sources drive navigation and reconciliation but do not replace A0/A1 publication evidence. Differences create VERSION_DIFFERENCE/SOURCE_CONFLICT candidates for review."
+    "promotion_rule": "A2 sources drive navigation and reconciliation but do not replace A0/A1 publication evidence. Differences create VERSION_DIFFERENCE/SOURCE_CONFLICT candidates for review.",
+    "capture_identity_rule": "Every operator-saved timeline capture must contain configured document identity markers before temporal parsing. A shell/login/access page fails closed as IDENTITY_FAILED."
   },
   "bundles": [
     {
@@ -44,6 +45,7 @@
           "authority": "GARANT legal information system",
           "redistribution_allowed": false,
           "timeline_priority": 1,
+          "identity_markers": ["152-ФЗ", "О персональных данных"],
           "notes": ["Preferred navigator for historical/current editions and amendment dates. Do not treat as official publication evidence."]
         },
         {
@@ -89,6 +91,7 @@
           "authority": "GARANT legal information system",
           "redistribution_allowed": false,
           "timeline_priority": 1,
+          "identity_markers": ["1119", "персональных данных"],
           "notes": ["Preferred navigator for editions and amendment history."]
         },
         {
@@ -135,6 +138,7 @@
           "authority": "GARANT legal information system",
           "redistribution_allowed": false,
           "timeline_priority": 1,
+          "identity_markers": ["18 февраля 2013", "21", "персональных данных"],
           "edition": "timeline includes amendments 49/2017 and 68/2020",
           "notes": ["Preferred source for reconstructing the edition timeline before official-evidence reconciliation."]
         },
@@ -172,6 +176,7 @@
           "authority": "GARANT legal information system",
           "redistribution_allowed": false,
           "timeline_priority": 1,
+          "identity_markers": ["10 июля 2014", "378", "криптографической защиты информации"],
           "notes": ["Preferred navigator for temporal status and edition history."]
         },
         {

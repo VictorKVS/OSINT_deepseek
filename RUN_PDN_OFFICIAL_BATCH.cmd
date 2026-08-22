@@ -24,9 +24,14 @@ if errorlevel 1 (
 set "RC=%ERRORLEVEL%"
 
 echo.
-echo Review package:
+echo LOCAL full review package ^(ignored by Git^):
 echo data\knowledge_factory\pdn_official_batch\review\REVIEW.md
 echo data\knowledge_factory\pdn_official_batch\review\batch_review_manifest.json
+echo.
+echo SANITIZED review package for GitHub / ChatGPT review:
+echo reports\pdn_live\REVIEW.md
+echo reports\pdn_live\batch_review_manifest.jsonl
+echo reports\pdn_live\README.md
 echo.
 if "%RC%"=="0" (
   echo PASS: all enabled official entries completed without hard failures.

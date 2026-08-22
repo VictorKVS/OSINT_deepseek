@@ -22,12 +22,19 @@ if not defined PYTHON_EXE set "PYTHON_EXE=python"
   --document-id "DOC-RU-FSTEC-21-2013" ^
   --document-id "DOC-RU-FSB-378-2014"
 set "RC=%ERRORLEVEL%"
+if not "%RC%"=="0" goto :done
 
 echo.
+echo Normalizing federal-law article -^> point hierarchy before quality promotion...
+%PYTHON_EXE% scripts\normalize_pdn_d4_d5_article_points.py
+set "RC=%ERRORLEVEL%"
+
+:done
+echo.
 if "%RC%"=="0" (
-  echo PASS: verified official source pack reached D4-D5 through the normal conveyor.
+  echo PASS: verified official source pack reached normalized D4-D5 through the normal conveyor.
 ) else (
-  echo PARTIAL/FAIL: inspect acquisition or compiler status before D6.
+  echo PARTIAL/FAIL: inspect acquisition, compiler, or structure-normalization status before D6.
 )
 
 pause

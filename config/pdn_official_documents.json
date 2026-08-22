@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.2",
+  "schema_version": "1.3",
   "registry_id": "PDN-RU-OFFICIAL-MVP-001",
   "purpose": "Official-source acquisition list for the first Russian personal-data Knowledge Factory corpus",
   "sources": {
@@ -17,47 +17,24 @@
       "authority_scope": ["official_publication", "consolidated_legal_texts"],
       "verification_evidence": ["official_state_legal_information_portal"]
     },
-    "SRC-RU-KREMLIN-001": {
-      "name": "Президент России — официальный сайт",
-      "domain": "kremlin.ru",
-      "organization": "Президент Российской Федерации",
-      "source_class": "OFFICIAL",
-      "status": "VERIFIED",
-      "trust_basis": "Официальный сайт Президента Российской Федерации публикует подписанные федеральные законы и их текстовые представления.",
-      "verified_by": "FATHER source-registry review",
-      "verified_at": "2026-08-22T00:00:00+00:00",
-      "trust_tier": "A1_OFFICIAL_ORGAN",
-      "domains": ["kremlin.ru"],
-      "authority_scope": ["federal_laws", "signed_acts"],
-      "verification_evidence": ["official_presidential_act_bank"]
-    },
-    "SRC-RU-GOV-001": {
-      "name": "Правительство России — официальный сайт",
-      "domain": "government.ru",
-      "organization": "Правительство Российской Федерации",
-      "source_class": "OFFICIAL",
-      "status": "VERIFIED",
-      "trust_basis": "Официальный сайт Правительства Российской Федерации публикует постановления и распоряжения Правительства и их документы.",
-      "verified_by": "FATHER source-registry review",
-      "verified_at": "2026-08-22T00:00:00+00:00",
-      "trust_tier": "A1_OFFICIAL_ORGAN",
-      "domains": ["government.ru"],
-      "authority_scope": ["government_decrees", "government_orders"],
-      "verification_evidence": ["official_government_document_page"]
-    },
     "SRC-RU-RG-001": {
       "name": "Российская газета — архив официальной публикации",
       "domain": "rg.ru",
       "organization": "ФГБУ «Редакция «Российской газеты»",
       "source_class": "OFFICIAL",
       "status": "VERIFIED",
-      "trust_basis": "Архив выпуска «Российской газеты», в котором приказ ФСТЭК России № 21 был официально опубликован 22.05.2013; страница содержит полный опубликованный текст, дату публикации и регистрационный номер Минюста.",
+      "trust_basis": "Архив официальных публикаций «Российской газеты» содержит опубликованные тексты нормативных правовых актов с датами подписания/публикации и, для зарегистрированных ведомственных актов, регистрационными данными Минюста.",
       "verified_by": "FATHER source-registry review",
       "verified_at": "2026-08-22T00:00:00+00:00",
       "trust_tier": "A0_OFFICIAL_PUBLICATION",
       "domains": ["rg.ru"],
       "authority_scope": ["official_newspaper_publication_archive"],
-      "verification_evidence": ["rg_issue_107_6083_2013_05_22"]
+      "verification_evidence": [
+        "rg_fz152_2006_publication",
+        "rg_pp1119_2012_publication",
+        "rg_fstec21_2013_publication",
+        "rg_fsb378_2014_publication"
+      ]
     },
     "SRC-RU-FSTEC-001": {
       "name": "ФСТЭК России — официальный сайт",
@@ -88,15 +65,19 @@
       "language": "ru",
       "material_profile": "LEGAL",
       "lifecycle": "EFFECTIVE",
-      "source_id": "SRC-RU-KREMLIN-001",
-      "source_state": "VERIFIED_OFFICIAL_ALTERNATE_CHANNEL",
-      "source_url": "https://www.kremlin.ru/acts/bank/24154/print",
-      "file_name": "152-fz-kremlin-official.html",
-      "version_date": null,
-      "required_text_markers": ["О персональных данных", "27 июля 2006", "152-ФЗ"],
+      "source_id": "SRC-RU-RG-001",
+      "source_state": "VERIFIED_OFFICIAL_PUBLICATION_ARCHIVE",
+      "source_url": "https://rg.ru/documents/2006/07/29/personaljnye-dannye-dok.html",
+      "file_name": "152-fz-rg-official-publication.html",
+      "version_date": "2006-07-27",
+      "official_publication_date": "2006-07-29",
+      "required_text_markers": ["Федеральный закон о персональных данных", "Статья 3. Основные понятия", "27.07.2006"],
       "tags": ["personal_data", "pdn", "framework_law", "operator", "data_subject", "security", "incident_notification"],
       "kb_targets": ["PDN_KB", "SECURITY_KB"],
-      "notes": ["Exact hash and MIME are computed from live bytes.", "Primary pravo.gov.ru acquisition remains preferred for publication/currentness reconciliation when reachable; this official Presidential act-bank route is used for the MVP acquisition path."]
+      "notes": [
+        "This artifact is the official-newspaper publication snapshot, not a current consolidated edition.",
+        "Current applicability must later be reconstructed and reconciled through amendment/version relations and the primary legal-information portal when reachable."
+      ]
     },
     {
       "document_id": "DOC-RU-PP-1119-2012",
@@ -111,15 +92,18 @@
       "language": "ru",
       "material_profile": "LEGAL",
       "lifecycle": "EFFECTIVE",
-      "source_id": "SRC-RU-GOV-001",
-      "source_state": "VERIFIED_OFFICIAL_ALTERNATE_CHANNEL",
-      "source_url": "https://government.ru/docs/6339/",
-      "file_name": "pp-1119-government-official.html",
-      "version_date": null,
-      "required_text_markers": ["требований к защите персональных данных", "1 ноября 2012", "1119"],
+      "source_id": "SRC-RU-RG-001",
+      "source_state": "VERIFIED_OFFICIAL_PUBLICATION_ARCHIVE",
+      "source_url": "https://rg.ru/documents/2012/11/07/pers-dannye-dok.html",
+      "file_name": "pp-1119-rg-official-publication.html",
+      "version_date": "2012-11-01",
+      "official_publication_date": "2012-11-07",
+      "required_text_markers": ["N 1119", "требований к защите персональных данных", "Дата подписания: 01.11.2012"],
       "tags": ["personal_data", "pdn", "ispdn", "protection_level", "threat_type", "security_requirements"],
       "kb_targets": ["PDN_KB", "SECURITY_KB"],
-      "notes": ["Official Government document page; primary pravo.gov.ru publication locator remains a separate provenance reference to reconcile later."]
+      "notes": [
+        "Official-newspaper publication snapshot; later lifecycle/currentness reconciliation remains a separate legal-review task."
+      ]
     },
     {
       "document_id": "DOC-RU-FSTEC-21-2013",
@@ -136,14 +120,17 @@
       "lifecycle": "EFFECTIVE",
       "source_id": "SRC-RU-RG-001",
       "source_state": "VERIFIED_OFFICIAL_PUBLICATION_ARCHIVE",
-      "source_url": "https://rg.ru/2013/05/22/soderjanie-dok.html",
+      "source_url": "https://rg.ru/documents/2013/05/22/soderjanie-dok.html",
       "file_name": "fstec-21-rg-official-publication.html",
       "version_date": "2013-02-18",
       "official_publication_date": "2013-05-22",
-      "required_text_markers": ["персональных данных", "18 февраля 2013", "Регистрационный N 28375"],
+      "required_text_markers": ["N 21", "персональных данных", "Регистрационный N 28375"],
       "tags": ["personal_data", "pdn", "ispdn", "security_measures", "fstec", "controls"],
       "kb_targets": ["PDN_KB", "SECURITY_KB"],
-      "notes": ["This acquisition is the officially published base text in Российская газета №107(6083), 22.05.2013.", "Amendments №49 (2017) and №68 (2020) remain separate version/delta objects and must not be silently folded into the base publication before relation/review stages."]
+      "notes": [
+        "This acquisition is the officially published base text in Российская газета №107(6083), 22.05.2013.",
+        "Amendments №49 (2017) and №68 (2020) remain separate version/delta objects and must not be silently folded into the base publication before relation/review stages."
+      ]
     },
     {
       "document_id": "DOC-RU-FSTEC-49-2017",
@@ -194,7 +181,7 @@
     {
       "document_id": "DOC-RU-FSB-378-2014",
       "priority": "P0-CRYPTO",
-      "enabled": false,
+      "enabled": true,
       "title": "Приказ ФСБ России от 10.07.2014 № 378 — меры защиты ПДн с использованием СКЗИ",
       "document_type": "fsb_order",
       "number": "378",
@@ -204,15 +191,19 @@
       "language": "ru",
       "material_profile": "LEGAL",
       "lifecycle": "EFFECTIVE",
-      "source_id": "SRC-RU-PRAVO-001",
-      "source_state": "SOURCE_PENDING",
-      "source_url": null,
-      "file_name": "fsb-378-official.bin",
-      "version_date": null,
-      "required_text_markers": ["10 июля 2014", "378", "криптографической защиты информации"],
+      "source_id": "SRC-RU-RG-001",
+      "source_state": "VERIFIED_OFFICIAL_PUBLICATION_ARCHIVE",
+      "source_url": "https://rg.ru/documents/2014/09/17/zashita-dok.html",
+      "file_name": "fsb-378-rg-official-publication.html",
+      "version_date": "2014-07-10",
+      "official_publication_date": "2014-09-17",
+      "required_text_markers": ["N 378", "криптографической защиты информации", "Регистрационный N 33620"],
       "tags": ["personal_data", "pdn", "crypto", "skzi", "fsb", "security_measures"],
       "kb_targets": ["PDN_KB", "SECURITY_KB"],
-      "notes": ["Do not use Consultant/Garant as the acquisition artifact; resolve the primary official publication/source first."]
+      "notes": [
+        "Official-newspaper publication snapshot. Do not substitute Consultant/Garant as the acquisition artifact.",
+        "Current lifecycle/applicability remains subject to later legal-version reconciliation."
+      ]
     }
   ]
 }

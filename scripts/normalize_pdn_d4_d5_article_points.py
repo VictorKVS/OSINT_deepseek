@@ -60,14 +60,13 @@ def normalize_article_point_hierarchy(
     federal law, a numbered point after an ARTICLE and before the next
     ARTICLE/CHAPTER/SECTION belongs to that article. Numeric nodes occurring
     before the first article are treated as surrounding-page noise and are
-    excluded from D4/D5 projection while the exact acquired HTML and extracted
-    text remain unchanged.
+    excluded from D4/D5 projection while exact acquired HTML and extracted_text
+    remain unchanged.
     """
 
     current_article: dict[str, object] | None = None
     point_occurrences: Counter[tuple[str, str]] = Counter()
     old_to_new_node_id: dict[str, str] = {}
-    old_to_new_locator: dict[str, str] = {}
     removed_node_ids: set[str] = set()
     normalized_nodes: list[dict[str, object]] = []
     reparented_points = 0
@@ -114,7 +113,6 @@ def normalize_article_point_hierarchy(
         content = f"{title}\n{text}".strip()
         new_node_id = _stable_id("STR", document_id, version_id, new_locator, content)
         old_to_new_node_id[old_node_id] = new_node_id
-        old_to_new_locator[str(node.get("locator", ""))] = new_locator
 
         if node.get("parent_node_id") != current_article["node_id"] or node.get("locator") != new_locator:
             reparented_points += 1
@@ -201,20 +199,23 @@ def main() -> int:
     structure_rel = target.get("structure_path")
     chunks_rel = target.get("chunks_path")
     manifest_rel = target.get("manifest_path")
+    extracted_text_rel = target.get("extracted_text_path")
     version_id = target.get("version_id")
-    if not structure_rel or not chunks_rel or not manifest_rel or not version_id:
+    if not structure_rel or not chunks_rel or not manifest_rel or not extracted_text_rel or not version_id:
         print("NORMALIZATION_INPUT_INCOMPLETE")
         return 2
 
     structure_path = STORE_ROOT / str(structure_rel)
     chunks_path = STORE_ROOT / str(chunks_rel)
     manifest_path = STORE_ROOT / str(manifest_rel)
-    if not structure_path.is_file() or not chunks_path.is_file() or not manifest_path.is_file():
+    extracted_text_path = STORE_ROOT / str(extracted_text_rel)
+    if not all(path.is_file() for path in (structure_path, chunks_path, manifest_path, extracted_text_path)):
         print("NORMALIZATION_INPUT_FILES_MISSING")
         return 2
 
     before_structure = structure_path.read_bytes()
     before_chunks = chunks_path.read_bytes()
+    extracted_text_before = extracted_text_path.read_bytes()
     nodes = _read_jsonl(structure_path)
     chunks = _read_jsonl(chunks_path)
 
@@ -250,6 +251,11 @@ def main() -> int:
 
     after_structure = structure_path.read_bytes()
     after_chunks = chunks_path.read_bytes()
+    extracted_text_after = extracted_text_path.read_bytes()
+    if extracted_text_after != extracted_text_before:
+        print("NORMALIZATION_FAILED: extracted_text changed unexpectedly")
+        return 2
+
     result = {
         "record_type": "D4_D5_STRUCTURE_NORMALIZATION",
         "document_id": TARGET_DOCUMENT_ID,
@@ -259,6 +265,9 @@ def main() -> int:
         "structure_sha256_after": _sha256_bytes(after_structure),
         "chunks_sha256_before": _sha256_bytes(before_chunks),
         "chunks_sha256_after": _sha256_bytes(after_chunks),
+        "extracted_text_sha256_before": _sha256_bytes(extracted_text_before),
+        "extracted_text_sha256_after": _sha256_bytes(extracted_text_after),
+        "extracted_text_unchanged": True,
         "structure_nodes_before": len(nodes),
         "structure_nodes_after": len(normalized_nodes),
         "chunks_before": len(chunks),

@@ -75,7 +75,7 @@ def test_robust_transport_reports_both_failures_without_weakening_policy():
         )
 
 
-def test_curl_transport_keeps_tls_verification_enabled(monkeypatch):
+def test_curl_transport_keeps_tls_verification_and_public_redirect_cookie_engine(monkeypatch):
     observed = {}
 
     def fake_run(command, *, capture_output, text, timeout, check):
@@ -104,8 +104,11 @@ def test_curl_transport_keeps_tls_verification_enabled(monkeypatch):
     command = observed["command"]
     assert "--fail" in command
     assert "--location" in command
+    assert "--cookie" in command
+    assert "--cookie-jar" in command
     assert "--insecure" not in command
     assert "-k" not in command
+    assert "--user-agent" not in command
     assert result.data == b"official exact bytes"
     assert result.final_url == "https://official.example/final"
     assert result.mime_type == "text/html; charset=utf-8"

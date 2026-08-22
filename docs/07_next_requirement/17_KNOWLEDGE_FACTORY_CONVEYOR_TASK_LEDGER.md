@@ -7,14 +7,14 @@
 | Task | Lane | State | Exit evidence |
 |---|---|---|---|
 | KF-P0-001 Reconcile M1 contracts | E | IN_PROGRESS | common schemas/IDs/stages frozen |
-| KF-P0-002 SourcePolicy registry | A | IN_PROGRESS | machine-readable approved source registry; current seed still requires live verification |
-| KF-P0-003 Exact acquisition service | A | DONE / CI VERIFIED | `father_osint/acquisition.py`; exact bytes + MIME + size + SHA-256 + bounded/policy failures; PR #11 CI run `32573038699` |
+| KF-P0-002 SourcePolicy registry | A | IN_PROGRESS | machine-readable approved source registry; 152-FZ official source profile added; live acquisition still required |
+| KF-P0-003 Exact acquisition service | A | DONE / CI VERIFIED | `father_osint/acquisition.py`; exact bytes + MIME + size + SHA-256 + bounded/policy failures |
 | KF-P0-004 Artifact/version store | A/E | DONE / CI VERIFIED | content-addressed originals, append-only acquisition events, repeated-byte reuse and new-version preservation tests green |
-| KF-P0-005 D0-D3 BASIC fixtures | A/E | IN_PROGRESS | exact legal-like artifact + stage ordering + frozen regression green; BOOK-profile acquisition fixture still missing |
-| KF-P0-006 D0-D3 PROFESSIONAL fixtures | A/E | IN_PROGRESS | unchanged reuse and changed-version tests green; independent-source same-payload acquisition fixture still to add |
+| KF-P0-005 D0-D3 BASIC fixtures | A/E | IN_PROGRESS | exact LEGAL path green; BOOK-profile acquisition fixture still missing |
+| KF-P0-006 D0-D3 PROFESSIONAL fixtures | A/E | IN_PROGRESS | unchanged reuse and changed-version tests green; independent-source same-payload fixture still to add |
 | KF-P0-007 D0-D3 STRESS fixtures | A/E | IN_PROGRESS | unverified/off-policy/redirect/fetch-failure/RBAC/corrupt-blob tests green; malformed-response fixture still to add |
-| KF-P0-008 Structure parser contract | B | TODO | stable structure schema + parser version |
-| KF-P0-009 Chunk compiler | B | TODO | traceable stable chunks |
+| KF-P0-008 Structure parser contract | B | DONE / CI VERIFIED | `father_osint/document_compiler.py`; deterministic DOCUMENT/CHAPTER/SECTION/ARTICLE structure; parser version `legal-preliminary-v1`; run 32575073589 |
+| KF-P0-009 Chunk compiler | B | DONE / CI VERIFIED | stable D5 chunks carry document/version/structure locator + exact artifact SHA-256; semantic extraction remains blocked |
 | KF-P0-010 Knowledge object schemas | C | TODO | typed D6-D9 objects |
 | KF-P0-011 Extraction implementation | C | TODO | concepts/definitions/atomic rules/entities with provenance |
 | KF-P0-012 Relation taxonomy/engine | D | TODO | D10-D11 typed relations |
@@ -26,55 +26,40 @@
 | KF-P0-018 Change monitoring/invalidation | A/D/E | TODO | changed version causes bounded downstream impact |
 | KF-P0-019 Reuse regression | C/D/E | TODO | unchanged objects reused, not recomputed |
 | KF-P0-020 Second-profile reuse proof | all | TODO | same conveyor works without bespoke architecture |
-| KF-P0-021 Evidence-based Knowledge Engineering method | B/C/D/E | DONE / CONTRACT | Ontology 101 + Competency Questions + METHONTOLOGY + NeOn + PROV-O + SKOS + SHACL principles + FAIR + OQuaRE mapped to D0-D15 in `docs/03_architecture/12_EVIDENCE_BASED_KNOWLEDGE_ENGINEERING_METHOD.md` |
-| KF-P0-022 Multidimensional quality metrics | C/D/E | DONE / CI VERIFIED | `father_osint/knowledge_quality.py`; P/R/F1, provenance/locator coverage, CQ metrics, constraints, reuse/rework and metric provenance; PR #11 run `32573607002`: 152 passed, 2 skipped |
-| KF-P0-023 KnowledgeScope + Competency Question executable model | C/D | TODO | stable `scope_id`, `CQ-*`, answer states and pre-D6 gate |
-| KF-P0-024 Shape/constraint validation layer | C/D/E | TODO | machine-verifiable object/relation shapes; mandatory D15 conformance |
+| KF-P0-021 Evidence-based Knowledge Engineering method | B/C/D/E | DONE / CONTRACT | Ontology 101 + Competency Questions + METHONTOLOGY + NeOn + PROV-O + SKOS + SHACL principles + FAIR + OQuaRE mapped to D0-D15 |
+| KF-P0-022 Multidimensional quality metrics | C/D/E | DONE / CI VERIFIED | P/R/F1, provenance/locator coverage, CQ metrics, constraints, reuse/rework and metric provenance |
+| KF-P0-023 KnowledgeScope + Competency Question executable model | C/D | IMPLEMENTED / CI PENDING | `father_osint/knowledge_method.py`; stable `KS-*`, `CQ-*`, answer states and pre-D6 gate |
+| KF-P0-024 Shape/constraint validation layer | C/D/E | IMPLEMENTED / CI PENDING | `father_osint/knowledge_constraints.py`; machine-verifiable common KB-ready shape |
 | KF-P0-025 Gold/evaluation corpus + annotation policy | C/D/E | TODO | versioned gold sets for extraction/conflict/CQ method evaluation |
+| KF-P0-026 PDn 152-FZ live D0-D5 MVP | A/B/E | READY FOR LIVE RUN | `RUN_PDN_152FZ_MVP.cmd` downloads configured official `ips.pravo.gov.ru` artifact, computes SHA-256 and emits manifest/structure/chunks; live machine evidence required |
 
 ## Current verification evidence — 2026-08-22
 
-Latest PR #11 DEV verification evidence including the Knowledge Engineering metrics increment:
+Latest green PR #11 DEV verification for the PDn D0-D5 increment:
 
 ```text
-GitHub Actions run: 32573607002
-job: verify / 97032600010
+GitHub Actions run: 32575073589
+job: verify / 97036091693
 Python: 3.12.14
-collected: 152 tests
-result: 152 passed, 2 skipped
+collected: 158 tests
+result: 158 passed, 2 skipped
 run_dev_osint.py: PASS
 run_dev_pipeline.py: PASS
-previous CodeQL run: 32573038727 / PASS
-current CodeQL run for this increment: 32573606956 / running at last observation
 ```
 
-D0-D3 acquisition coverage remains green:
+New `tests/test_document_compiler_pdn_mvp.py` proves a deterministic vertical with synthetic official-like bytes:
 
-- exact byte preservation and computed SHA-256;
-- MIME and byte-length metadata;
-- content-addressed original storage;
-- append-only acquisition/audit observations;
-- repeated unchanged artifact/version reuse without losing a new acquisition observation;
-- changed bytes creating a new version while retaining old original bytes;
-- unverified source block;
-- off-policy host block before network call;
-- redirect/final host outside policy rejection;
-- explicit fetch failure;
-- RBAC acquisition block;
-- corruption detection before reusing an existing content-addressed blob.
+- verified official source/policy → acquisition → D3;
+- exact original SHA-256 remains lineage anchor;
+- legal HTML visible-text extraction;
+- chapter/article structure detection;
+- stable structure/chunk IDs for same version/parser;
+- D5 chunks carry article/structure/version/artifact lineage;
+- tampered original blocks D4;
+- unauthorized role blocks pipeline advancement;
+- preliminary splitting never silently advances D6/D8 semantic states.
 
-The Knowledge Engineering increment adds verified metric semantics:
-
-- established methodology anchors rather than ad-hoc graph construction;
-- competency questions as domain acceptance requirements;
-- mandatory reuse/alignment check before new concept creation;
-- PROV-style lineage semantics;
-- SHACL-style constraint validation contract;
-- FAIR-oriented stable IDs/metadata/provenance/reuse requirements;
-- separate accuracy/completeness/consistency/freshness/trust/interoperability dimensions;
-- executable metric primitives in `father_osint/knowledge_quality.py`;
-- tests forbidding fabricated undefined ratios and opaque composite truth/quality scores;
-- explicit metric provenance and raw confusion/coverage counts.
+The configured live anchor is Federal Law No. 152-FZ on the official `pravo.gov.ru` integrated legal-information bank. The exact artifact hash/MIME are intentionally not hard-coded and must be produced by the live run.
 
 ## Rule for updating the ledger
 
@@ -84,12 +69,18 @@ Methods obey the same rule: a method becomes GOLDEN only after same-corpus Champ
 
 ## Current bottleneck
 
-Complete D0-D3 acceptance as a mixed-profile corpus rather than skipping upstream evidence gates:
+**Run KF-P0-026 on the workstation and capture the actual 152-FZ D0-D5 evidence.**
 
-1. BOOK-profile exact acquisition fixture;
-2. independent-source same-payload acquisition fixture;
-3. malformed/mismatched response fixture;
-4. machine-readable acceptance runner/reconciliation report;
-5. live-verification path for at least one approved SourcePolicy entry without weakening the exact-bytes/hash gate.
+Expected success status:
 
-In parallel, only contract/test-design work that cannot invalidate D0-D3 may prepare KF-P0-023/024/025. D6 semantic extraction cannot become the critical implementation lane before the mixed-profile D0-D3 gate is green.
+```text
+PASS_D0_D5_PRELIMINARY
+```
+
+Expected output root:
+
+```text
+data/knowledge_factory/pdn_mvp/
+```
+
+After the live PASS, start the first controlled D6-D8 PDn semantic pass on the produced 152-FZ chunks: terms/concepts, explicit definitions, actors and atomic requirements with exact article/chunk provenance.

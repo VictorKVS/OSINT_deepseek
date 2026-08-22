@@ -26,10 +26,15 @@
 | KF-P0-018 Change monitoring/invalidation | A/D/E | TODO | changed version causes bounded downstream impact |
 | KF-P0-019 Reuse regression | C/D/E | TODO | unchanged objects reused, not recomputed |
 | KF-P0-020 Second-profile reuse proof | all | TODO | same conveyor works without bespoke architecture |
+| KF-P0-021 Evidence-based Knowledge Engineering method | B/C/D/E | DONE / CONTRACT | Ontology 101 + Competency Questions + METHONTOLOGY + NeOn + PROV-O + SKOS + SHACL principles + FAIR + OQuaRE mapped to D0-D15 in `docs/03_architecture/12_EVIDENCE_BASED_KNOWLEDGE_ENGINEERING_METHOD.md` |
+| KF-P0-022 Multidimensional quality metrics | C/D/E | IMPLEMENTED / CI PENDING | P/R/F1, provenance/locator coverage, CQ metrics, constraints, reuse/rework with metric provenance; no composite truth score |
+| KF-P0-023 KnowledgeScope + Competency Question executable model | C/D | TODO | stable `scope_id`, `CQ-*`, answer states and pre-D6 gate |
+| KF-P0-024 Shape/constraint validation layer | C/D/E | TODO | machine-verifiable object/relation shapes; mandatory D15 conformance |
+| KF-P0-025 Gold/evaluation corpus + annotation policy | C/D/E | TODO | versioned gold sets for extraction/conflict/CQ method evaluation |
 
 ## Current verification evidence — 2026-08-22
 
-PR #11 DEV verification evidence:
+PR #11 DEV verification evidence before the Knowledge Engineering metrics increment:
 
 ```text
 GitHub Actions run: 32573038699
@@ -39,9 +44,10 @@ collected: 144 tests
 result: 144 passed, 2 skipped
 run_dev_osint.py: PASS
 run_dev_pipeline.py: PASS
+CodeQL run: 32573038727 / PASS
 ```
 
-New D0-D3 acquisition coverage included in the green run:
+New D0-D3 acquisition coverage included in that green run:
 
 - exact byte preservation and computed SHA-256;
 - MIME and byte-length metadata;
@@ -56,15 +62,29 @@ New D0-D3 acquisition coverage included in the green run:
 - RBAC acquisition block;
 - corruption detection before reusing an existing content-addressed blob.
 
-This evidence closes the implementation core of KF-P0-003 and KF-P0-004, but does **not** yet close BASIC/PROFESSIONAL/STRESS as complete suites because their remaining named fixtures are still explicit above.
+The Knowledge Engineering increment additionally adds:
+
+- established methodology anchors rather than ad-hoc graph construction;
+- competency questions as domain acceptance requirements;
+- mandatory reuse/alignment check before new concept creation;
+- PROV-style lineage semantics;
+- SHACL-style constraint validation contract;
+- FAIR-oriented stable IDs/metadata/provenance/reuse requirements;
+- separate accuracy/completeness/consistency/freshness/trust/interoperability dimensions;
+- executable metric primitives in `father_osint/knowledge_quality.py`;
+- tests forbidding fabricated undefined ratios and opaque composite truth/quality scores.
+
+KF-P0-022 stays `CI PENDING` until the PR workflow containing `tests/test_knowledge_quality_metrics.py` is green.
 
 ## Rule for updating the ledger
 
 A task changes state only with a concrete evidence reference: commit, test, runner output, registry snapshot, artifact manifest or reviewed decision. “Started”, “almost done” and percentage estimates do not count as evidence.
 
+Methods obey the same rule: a method becomes GOLDEN only after same-corpus Champion/Challenger evidence, not because it is popular or academically cited.
+
 ## Current bottleneck
 
-Complete D0-D3 acceptance as a mixed-profile corpus rather than adding downstream features:
+Complete D0-D3 acceptance as a mixed-profile corpus rather than skipping upstream evidence gates:
 
 1. BOOK-profile exact acquisition fixture;
 2. independent-source same-payload acquisition fixture;
@@ -72,4 +92,4 @@ Complete D0-D3 acceptance as a mixed-profile corpus rather than adding downstrea
 4. machine-readable acceptance runner/reconciliation report;
 5. live-verification path for at least one approved SourcePolicy entry without weakening the exact-bytes/hash gate.
 
-Only after this set is green may Lane B become the critical-path implementation lane.
+In parallel, only contract/test-design work that cannot invalidate D0-D3 may prepare KF-P0-023/024/025. D6 semantic extraction cannot become the critical implementation lane before the mixed-profile D0-D3 gate is green.

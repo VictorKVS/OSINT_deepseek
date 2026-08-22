@@ -25,6 +25,7 @@ def test_bundle_requires_official_publication_evidence():
                     mode=RepresentationMode.VERIFY_ONLY,
                     authority="GARANT",
                     timeline_priority=1,
+                    identity_markers=("DOC-1",),
                 ),
             ),
         )
@@ -39,6 +40,19 @@ def test_a2_consolidated_reference_cannot_pose_as_publication():
             url="https://www.consultant.ru/document/example",
             mode=RepresentationMode.VERIFY_ONLY,
             authority="ConsultantPlus",
+        )
+
+
+def test_timeline_provider_requires_identity_markers():
+    with pytest.raises(ValueError, match="timeline provider requires identity_markers"):
+        LegalSourceRepresentation(
+            source_id="GARANT",
+            role=LegalSourceRole.VERSION_TIMELINE_PROVIDER,
+            trust_tier=TrustTier.A2_AUTHORITATIVE,
+            url="https://base.garant.ru/example",
+            mode=RepresentationMode.VERIFY_ONLY,
+            authority="GARANT",
+            timeline_priority=1,
         )
 
 
@@ -59,6 +73,7 @@ def test_timeline_provider_is_a2_and_sorted_by_priority():
         mode=RepresentationMode.VERIFY_ONLY,
         authority="ConsultantPlus",
         timeline_priority=2,
+        identity_markers=("DOC-1",),
     )
     garant = LegalSourceRepresentation(
         source_id="GARANT",
@@ -68,6 +83,7 @@ def test_timeline_provider_is_a2_and_sorted_by_priority():
         mode=RepresentationMode.VERIFY_ONLY,
         authority="GARANT",
         timeline_priority=1,
+        identity_markers=("DOC-1",),
     )
     bundle = LegalSourceBundle(document_id="DOC-1", representations=(official, consultant, garant))
 
@@ -95,6 +111,7 @@ def test_acquisition_candidates_exclude_verify_only_a2():
                 mode=RepresentationMode.VERIFY_ONLY,
                 authority="GARANT",
                 timeline_priority=1,
+                identity_markers=("DOC-1",),
             ),
         ),
     )
@@ -115,6 +132,7 @@ def test_pdn_bundle_registry_is_parseable_and_keeps_a2_verify_only():
         assert providers
         assert providers[0].source_id == "SRC-RU-GARANT-001"
         assert providers[0].timeline_priority == 1
+        assert providers[0].identity_markers
         for item in providers + bundle.by_role(LegalSourceRole.CONSOLIDATED_REFERENCE):
             assert item.trust_tier == TrustTier.A2_AUTHORITATIVE
             assert item.mode == RepresentationMode.VERIFY_ONLY

@@ -97,8 +97,6 @@ class EntityMentionCandidate:
         return payload
 
 
-# This lexicon is intentionally small, explicit and deterministic. It identifies
-# mentions only; it does not assert that a mention is a verified KB entity.
 _CONTROLLED_MENTIONS: tuple[tuple[str, str, str], ...] = (
     ("персональные данные", "personal_data", "LEGAL_OBJECT"),
     ("субъект персональных данных", "personal_data_subject", "ACTOR"),
@@ -145,6 +143,9 @@ def _norm(value: str) -> str:
 
 def _canonical_key(value: str) -> str:
     normalized = _norm(value)
+    for surface, canonical_key, _ in _CONTROLLED_MENTIONS:
+        if _norm(surface) == normalized:
+            return canonical_key
     digest = hashlib.sha256(normalized.encode("utf-8")).hexdigest()[:16]
     return f"term:{digest}"
 
@@ -175,8 +176,6 @@ def _explicit_definition(chunk_text: str) -> tuple[str, str] | None:
     body = _body_text(chunk_text)
     if not body:
         return None
-    # Definitions in Russian legal acts are often one numbered point with a
-    # `term - definition` or `term — definition` lexical form.
     match = _DEFINITION_RE.match(body)
     if not match:
         return None
@@ -206,12 +205,6 @@ def extract_candidates(chunk: dict[str, object]) -> tuple[
     list[RequirementCandidate],
     list[EntityMentionCandidate],
 ]:
-    """Extract reviewable candidates from one evidence-preserving chunk.
-
-    This function is deterministic and intentionally conservative. It produces
-    candidates with exact lineage; it never promotes them to verified facts.
-    """
-
     text = str(chunk.get("text", ""))
     if not text.strip():
         return [], [], [], []
@@ -226,26 +219,22 @@ def extract_candidates(chunk: dict[str, object]) -> tuple[
     if explicit:
         term, definition = explicit
         canonical_key = _canonical_key(term)
-        terms.append(
-            TermCandidate(
-                term_id=_stable_id("TERM", lineage.chunk_id, canonical_key, "explicit-definition"),
-                canonical_key=canonical_key,
-                term=term,
-                term_kind="EXPLICITLY_DEFINED_TERM",
-                extraction_basis="EXPLICIT_LEXICAL_DEFINITION",
-                lineage=lineage,
-            )
-        )
-        definitions.append(
-            DefinitionCandidate(
-                definition_id=_stable_id("DEF", lineage.chunk_id, canonical_key, definition),
-                canonical_key=canonical_key,
-                term=term,
-                definition=definition,
-                extraction_basis="EXPLICIT_LEXICAL_DEFINITION",
-                lineage=lineage,
-            )
-        )
+        terms.append(TermCandidate(
+            term_id=_stable_id("TERM", lineage.chunk_id, canonical_key, "explicit-definition"),
+            canonical_key=canonical_key,
+            term=term,
+            term_kind="EXPLICITLY_DEFINED_TERM",
+            extraction_basis="EXPLICIT_LEXICAL_DEFINITION",
+            lineage=lineage,
+        ))
+        definitions.append(DefinitionCandidate(
+            definition_id=_stable_id("DEF", lineage.chunk_id, canonical_key, definition),
+            canonical_key=canonical_key,
+            term=term,
+            definition=definition,
+            extraction_basis="EXPLICIT_LEXICAL_DEFINITION",
+            lineage=lineage,
+        ))
 
     normalized_text = _norm(text)
     seen_mentions: set[str] = set()
@@ -253,28 +242,23 @@ def extract_candidates(chunk: dict[str, object]) -> tuple[
         if _norm(surface) not in normalized_text or canonical_key in seen_mentions:
             continue
         seen_mentions.add(canonical_key)
-        term_kind = "CONTROLLED_DOMAIN_TERM"
         if not any(item.canonical_key == canonical_key for item in terms):
-            terms.append(
-                TermCandidate(
-                    term_id=_stable_id("TERM", lineage.chunk_id, canonical_key, "controlled-mention"),
-                    canonical_key=canonical_key,
-                    term=surface,
-                    term_kind=term_kind,
-                    extraction_basis="CONTROLLED_LEXICON_MENTION",
-                    lineage=lineage,
-                )
-            )
-        entities.append(
-            EntityMentionCandidate(
-                entity_mention_id=_stable_id("ENT", lineage.chunk_id, canonical_key),
+            terms.append(TermCandidate(
+                term_id=_stable_id("TERM", lineage.chunk_id, canonical_key, "controlled-mention"),
                 canonical_key=canonical_key,
-                entity=surface,
-                entity_kind=entity_kind,
+                term=surface,
+                term_kind="CONTROLLED_DOMAIN_TERM",
                 extraction_basis="CONTROLLED_LEXICON_MENTION",
                 lineage=lineage,
-            )
-        )
+            ))
+        entities.append(EntityMentionCandidate(
+            entity_mention_id=_stable_id("ENT", lineage.chunk_id, canonical_key),
+            canonical_key=canonical_key,
+            entity=surface,
+            entity_kind=entity_kind,
+            extraction_basis="CONTROLLED_LEXICON_MENTION",
+            lineage=lineage,
+        ))
 
     seen_requirements: set[str] = set()
     for sentence in _sentences(text):
@@ -286,16 +270,14 @@ def extract_candidates(chunk: dict[str, object]) -> tuple[
             if key in seen_requirements:
                 break
             seen_requirements.add(key)
-            requirements.append(
-                RequirementCandidate(
-                    requirement_id=_stable_id("REQ", lineage.chunk_id, key),
-                    modality=modality,
-                    trigger=trigger,
-                    statement=sentence,
-                    extraction_basis="EXPLICIT_NORMATIVE_TRIGGER",
-                    lineage=lineage,
-                )
-            )
+            requirements.append(RequirementCandidate(
+                requirement_id=_stable_id("REQ", lineage.chunk_id, key),
+                modality=modality,
+                trigger=trigger,
+                statement=sentence,
+                extraction_basis="EXPLICIT_NORMATIVE_TRIGGER",
+                lineage=lineage,
+            ))
             break
 
     return terms, definitions, requirements, entities

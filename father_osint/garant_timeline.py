@@ -40,6 +40,17 @@ def _stable_id(prefix: str, *parts: str) -> str:
     return f"{prefix}-{digest}"
 
 
+def _effective_date_basis(effective_rule: str, effective_dates: tuple[str, ...]) -> str:
+    """Classify what A0/A1 evidence is needed without inferring a legal date."""
+
+    if effective_dates:
+        return "EXPLICIT_CALENDAR_DATE"
+    normalized = effective_rule.casefold().replace("ё", "е")
+    if "официального опубликован" in normalized:
+        return "RELATIVE_TO_OFFICIAL_PUBLICATION"
+    return "NON_CALENDAR_RULE"
+
+
 @dataclass(frozen=True, slots=True)
 class GarantAmendmentEvent:
     amending_act_title: str
@@ -60,10 +71,15 @@ class GarantAmendmentEvent:
             self.amending_act_number,
         )
 
+    @property
+    def effective_date_basis(self) -> str:
+        return _effective_date_basis(self.effective_rule, self.effective_dates)
+
     def to_dict(self) -> dict[str, object]:
         payload = asdict(self)
         payload["event_id"] = self.event_id
         payload["effective_dates"] = list(self.effective_dates)
+        payload["effective_date_basis"] = self.effective_date_basis
         return payload
 
 
@@ -187,6 +203,21 @@ def parse_garant_timeline_text(
     )
 
 
+def _required_official_evidence(event: GarantAmendmentEvent) -> list[str]:
+    requirements = [
+        "AMENDING_ACT_IDENTITY",
+        "AMENDING_ACT_OFFICIAL_TEXT",
+        "EFFECTIVE_RULE",
+    ]
+    if event.effective_date_basis == "EXPLICIT_CALENDAR_DATE":
+        requirements.append("EXPLICIT_EFFECTIVE_DATE")
+    elif event.effective_date_basis == "RELATIVE_TO_OFFICIAL_PUBLICATION":
+        requirements.append("OFFICIAL_PUBLICATION_DATE")
+    else:
+        requirements.append("EFFECTIVE_DATE_RESOLUTION")
+    return requirements
+
+
 def official_evidence_requests(
     capture: GarantTimelineCapture,
     *,
@@ -206,6 +237,9 @@ def official_evidence_requests(
             "amending_act_date": event.amending_act_date,
             "effective_dates": list(event.effective_dates),
             "effective_rule": event.effective_rule,
+            "effective_date_basis": event.effective_date_basis,
+            "required_official_evidence": _required_official_evidence(event),
+            "locator_strategy": "SEARCH_A0_A1_BY_ACT_IDENTITY",
             "timeline_source_id": event.source_id,
             "timeline_source_url": capture.source_url,
             "timeline_observed_on": capture.observed_on,

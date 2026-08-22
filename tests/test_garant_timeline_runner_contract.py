@@ -7,6 +7,8 @@ def test_garant_timeline_runner_is_local_metadata_only_contract():
     assert "data\" / \"operator_import\" / \"garant_timeline" in script
     assert "semantic_text_mirrored" in script
     assert "official_evidence_requests" in script
+    assert "effective_date_basis_counts" in script
+    assert "RELATIVE_TO_OFFICIAL_PUBLICATION" in script
     assert "GARANT_NAVIGATES_A0_A1_PROVES" in script
     assert "source_capture_sha256" in script
     assert "hashlib.sha256" in script

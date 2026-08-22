@@ -11,6 +11,9 @@ def test_garant_timeline_runner_is_local_metadata_only_contract():
     assert "RELATIVE_TO_OFFICIAL_PUBLICATION" in script
     assert "GARANT_NAVIGATES_A0_A1_PROVES" in script
     assert "source_capture_sha256" in script
+    assert "identity_failed" in script
+    assert "IDENTITY_FAILED" in script
+    assert "missing_identity_markers" in script
     assert "hashlib.sha256" in script
     assert "requests.get" not in script
     assert "urllib" not in script

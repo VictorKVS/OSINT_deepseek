@@ -27,27 +27,28 @@
 | KF-P0-019 Reuse regression | C/D/E | TODO | unchanged objects reused, not recomputed |
 | KF-P0-020 Second-profile reuse proof | all | TODO | same conveyor works without bespoke architecture |
 | KF-P0-021 Evidence-based Knowledge Engineering method | B/C/D/E | DONE / CONTRACT | Ontology 101 + Competency Questions + METHONTOLOGY + NeOn + PROV-O + SKOS + SHACL principles + FAIR + OQuaRE mapped to D0-D15 in `docs/03_architecture/12_EVIDENCE_BASED_KNOWLEDGE_ENGINEERING_METHOD.md` |
-| KF-P0-022 Multidimensional quality metrics | C/D/E | IMPLEMENTED / CI PENDING | P/R/F1, provenance/locator coverage, CQ metrics, constraints, reuse/rework with metric provenance; no composite truth score |
+| KF-P0-022 Multidimensional quality metrics | C/D/E | DONE / CI VERIFIED | `father_osint/knowledge_quality.py`; P/R/F1, provenance/locator coverage, CQ metrics, constraints, reuse/rework and metric provenance; PR #11 run `32573607002`: 152 passed, 2 skipped |
 | KF-P0-023 KnowledgeScope + Competency Question executable model | C/D | TODO | stable `scope_id`, `CQ-*`, answer states and pre-D6 gate |
 | KF-P0-024 Shape/constraint validation layer | C/D/E | TODO | machine-verifiable object/relation shapes; mandatory D15 conformance |
 | KF-P0-025 Gold/evaluation corpus + annotation policy | C/D/E | TODO | versioned gold sets for extraction/conflict/CQ method evaluation |
 
 ## Current verification evidence — 2026-08-22
 
-PR #11 DEV verification evidence before the Knowledge Engineering metrics increment:
+Latest PR #11 DEV verification evidence including the Knowledge Engineering metrics increment:
 
 ```text
-GitHub Actions run: 32573038699
-job: verify / 97031244083
+GitHub Actions run: 32573607002
+job: verify / 97032600010
 Python: 3.12.14
-collected: 144 tests
-result: 144 passed, 2 skipped
+collected: 152 tests
+result: 152 passed, 2 skipped
 run_dev_osint.py: PASS
 run_dev_pipeline.py: PASS
-CodeQL run: 32573038727 / PASS
+previous CodeQL run: 32573038727 / PASS
+current CodeQL run for this increment: 32573606956 / running at last observation
 ```
 
-New D0-D3 acquisition coverage included in that green run:
+D0-D3 acquisition coverage remains green:
 
 - exact byte preservation and computed SHA-256;
 - MIME and byte-length metadata;
@@ -62,7 +63,7 @@ New D0-D3 acquisition coverage included in that green run:
 - RBAC acquisition block;
 - corruption detection before reusing an existing content-addressed blob.
 
-The Knowledge Engineering increment additionally adds:
+The Knowledge Engineering increment adds verified metric semantics:
 
 - established methodology anchors rather than ad-hoc graph construction;
 - competency questions as domain acceptance requirements;
@@ -72,9 +73,8 @@ The Knowledge Engineering increment additionally adds:
 - FAIR-oriented stable IDs/metadata/provenance/reuse requirements;
 - separate accuracy/completeness/consistency/freshness/trust/interoperability dimensions;
 - executable metric primitives in `father_osint/knowledge_quality.py`;
-- tests forbidding fabricated undefined ratios and opaque composite truth/quality scores.
-
-KF-P0-022 stays `CI PENDING` until the PR workflow containing `tests/test_knowledge_quality_metrics.py` is green.
+- tests forbidding fabricated undefined ratios and opaque composite truth/quality scores;
+- explicit metric provenance and raw confusion/coverage counts.
 
 ## Rule for updating the ledger
 

@@ -8,6 +8,7 @@ from father_osint.external_assets import ExternalAssetPolicyError, authorize_ext
 def test_external_asset_registry_loads_unique_fail_closed_roles():
     assets = load_external_assets()
     assert "publication-pravo-official-api" in assets
+    assert "rg-official-announcement-feed" in assets
     assert "rg-official-doc-index" in assets
     assert "ruslawod-corpus" in assets
     assert "ansvar-russian-law-mcp-code" in assets
@@ -43,11 +44,18 @@ def test_ruslawod_is_candidate_only_and_never_direct_promotion():
 
 
 def test_official_discovery_adapters_are_proof_source_wrappers_but_never_direct_promotion():
-    for asset_id in ("publication-pravo-official-api", "rg-official-doc-index"):
+    for asset_id in (
+        "publication-pravo-official-api",
+        "rg-official-announcement-feed",
+        "rg-official-doc-index",
+    ):
         asset = authorize_external_asset(asset_id, "proof_acquisition")
         assert asset.role == "PROOF_SOURCE"
-        assert asset.status == "PENDING_RUNTIME_ACCEPTANCE"
         with pytest.raises(ExternalAssetPolicyError):
             authorize_external_asset(asset_id, "candidate_import")
         with pytest.raises(ExternalAssetPolicyError):
             authorize_external_asset(asset_id, "canonical_promotion")
+
+    assert load_external_assets()["publication-pravo-official-api"].status == "PENDING_RUNTIME_ACCEPTANCE"
+    assert load_external_assets()["rg-official-announcement-feed"].status == "PENDING_RUNTIME_ACCEPTANCE"
+    assert load_external_assets()["rg-official-doc-index"].status == "RUNTIME_401_ON_WORKSTATION"

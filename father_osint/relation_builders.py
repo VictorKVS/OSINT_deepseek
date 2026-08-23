@@ -2,7 +2,11 @@ from __future__ import annotations
 
 import hashlib
 from collections import defaultdict
-from typing import Mapping, Sequence
+from typing import Iterable, Mapping, Sequence
+
+
+CROSS_TERM_RELATION = "SHARED_TERM_ACROSS_DOCUMENTS"
+CROSS_ENTITY_RELATION = "SHARED_ENTITY_ACROSS_DOCUMENTS"
 
 
 def _stable_id(prefix: str, *parts: str) -> str:
@@ -12,6 +16,61 @@ def _stable_id(prefix: str, *parts: str) -> str:
 
 def _norm(value: str) -> str:
     return " ".join(value.casefold().replace("ё", "е").split())
+
+
+def _canonical_keys(rows: Sequence[Mapping[str, object]]) -> set[str]:
+    keys: set[str] = set()
+    for row in rows:
+        value = str(row.get("canonical_key") or "")
+        if not value:
+            raise ValueError("canonical_key missing")
+        keys.add(value)
+    return keys
+
+
+def cross_relation_signature(row: Mapping[str, object]) -> tuple[str, str]:
+    relation_type = str(row.get("relation_type") or "")
+    canonical_key = str(row.get("canonical_key") or "")
+    if relation_type not in {CROSS_TERM_RELATION, CROSS_ENTITY_RELATION} or not canonical_key:
+        raise ValueError("invalid D11 relation signature")
+    return relation_type, canonical_key
+
+
+def collect_cross_relation_signatures(
+    all_terms: Sequence[Mapping[str, object]],
+    all_entities: Sequence[Mapping[str, object]],
+) -> set[tuple[str, str]]:
+    return {
+        *((CROSS_TERM_RELATION, key) for key in _canonical_keys(all_terms)),
+        *((CROSS_ENTITY_RELATION, key) for key in _canonical_keys(all_entities)),
+    }
+
+
+def changed_document_cross_relation_signatures(
+    *,
+    old_terms: Sequence[Mapping[str, object]],
+    old_entities: Sequence[Mapping[str, object]],
+    new_terms: Sequence[Mapping[str, object]],
+    new_entities: Sequence[Mapping[str, object]],
+) -> set[tuple[str, str]]:
+    """Return only D11 signatures whose document-membership can change.
+
+    D11 relation payload depends on the set of supporting document IDs for a
+    canonical key, not on mention counts. When exactly one document changes,
+    a signature needs rebuilding only when that document gains or loses the
+    corresponding canonical key. Keys that remain present in both versions do
+    not alter D11 membership and their existing relation payload is reusable.
+    """
+
+    affected: set[tuple[str, str]] = set()
+    old_term_keys = _canonical_keys(old_terms)
+    new_term_keys = _canonical_keys(new_terms)
+    old_entity_keys = _canonical_keys(old_entities)
+    new_entity_keys = _canonical_keys(new_entities)
+
+    affected.update((CROSS_TERM_RELATION, key) for key in old_term_keys ^ new_term_keys)
+    affected.update((CROSS_ENTITY_RELATION, key) for key in old_entity_keys ^ new_entity_keys)
+    return affected
 
 
 def build_internal_relations_for_document(
@@ -67,34 +126,64 @@ def build_internal_relations_for_document(
     return internal
 
 
+def build_cross_relations_for_signatures(
+    all_terms: Sequence[Mapping[str, object]],
+    all_entities: Sequence[Mapping[str, object]],
+    signatures: Iterable[tuple[str, str]],
+) -> list[dict[str, object]]:
+    """Build D11 rows only for requested relation-type/canonical-key signatures.
+
+    The function still scans the supplied support rows. A later indexed serving
+    implementation may replace that scan, but relation construction and stable
+    IDs remain identical to the full deterministic D11 algorithm.
+    """
+
+    requested = {(str(relation_type), str(canonical_key)) for relation_type, canonical_key in signatures}
+    invalid_types = {
+        relation_type
+        for relation_type, _ in requested
+        if relation_type not in {CROSS_TERM_RELATION, CROSS_ENTITY_RELATION}
+    }
+    if invalid_types:
+        raise ValueError("unsupported D11 relation types: " + ", ".join(sorted(invalid_types)))
+
+    groups: dict[tuple[str, str], set[str]] = defaultdict(set)
+    for relation_type, rows in (
+        (CROSS_TERM_RELATION, all_terms),
+        (CROSS_ENTITY_RELATION, all_entities),
+    ):
+        for row in rows:
+            canonical_key = str(row.get("canonical_key") or "")
+            signature = (relation_type, canonical_key)
+            if signature not in requested:
+                continue
+            lineage = row.get("lineage")
+            if not isinstance(lineage, Mapping):
+                raise ValueError("cross-relation lineage missing")
+            groups[signature].add(str(lineage["document_id"]))
+
+    cross: list[dict[str, object]] = []
+    for relation_type, canonical_key in sorted(requested):
+        docs = sorted(groups.get((relation_type, canonical_key), set()))
+        if len(docs) < 2:
+            continue
+        cross.append({
+            "relation_id": _stable_id("REL11", relation_type, canonical_key, *docs),
+            "relation_type": relation_type,
+            "canonical_key": canonical_key,
+            "document_ids": docs,
+            "review_state": "CANDIDATE_NEEDS_REVIEW",
+            "promotion_state": "NOT_PROMOTED",
+        })
+    return cross
+
+
 def build_cross_relations(
     all_terms: Sequence[Mapping[str, object]],
     all_entities: Sequence[Mapping[str, object]],
 ) -> list[dict[str, object]]:
-    cross: list[dict[str, object]] = []
-    for relation_type, rows in (
-        ("SHARED_TERM_ACROSS_DOCUMENTS", all_terms),
-        ("SHARED_ENTITY_ACROSS_DOCUMENTS", all_entities),
-    ):
-        groups: dict[str, set[str]] = defaultdict(set)
-        for row in rows:
-            lineage = row.get("lineage")
-            if not isinstance(lineage, Mapping):
-                raise ValueError("cross-relation lineage missing")
-            groups[str(row["canonical_key"])].add(str(lineage["document_id"]))
-        for canonical_key, document_ids in groups.items():
-            if len(document_ids) < 2:
-                continue
-            docs = sorted(document_ids)
-            cross.append({
-                "relation_id": _stable_id("REL11", relation_type, canonical_key, *docs),
-                "relation_type": relation_type,
-                "canonical_key": canonical_key,
-                "document_ids": docs,
-                "review_state": "CANDIDATE_NEEDS_REVIEW",
-                "promotion_state": "NOT_PROMOTED",
-            })
-    return cross
+    signatures = collect_cross_relation_signatures(all_terms, all_entities)
+    return build_cross_relations_for_signatures(all_terms, all_entities, signatures)
 
 
 def build_conflict_candidates(

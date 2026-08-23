@@ -12,15 +12,25 @@ class FreshnessWatchTarget:
     document_id: str
     query_text: str
     query_basis: str
+    secondary_markers: tuple[str, ...] = ()
 
     @classmethod
     def from_mapping(cls, row: Mapping[str, object]) -> "FreshnessWatchTarget":
         document_id = str(row.get("document_id") or "").strip()
         query_text = str(row.get("query_text") or "").strip()
         query_basis = str(row.get("query_basis") or "").strip()
+        raw_markers = row.get("secondary_markers") or []
+        if not isinstance(raw_markers, list):
+            raise ValueError("secondary_markers must be a list when present")
+        secondary_markers = tuple(str(value).strip() for value in raw_markers if str(value).strip())
         if not document_id or not query_text or not query_basis:
             raise ValueError("freshness watch target requires document_id, query_text and query_basis")
-        return cls(document_id=document_id, query_text=query_text, query_basis=query_basis)
+        return cls(
+            document_id=document_id,
+            query_text=query_text,
+            query_basis=query_basis,
+            secondary_markers=secondary_markers,
+        )
 
 
 @dataclass(frozen=True, slots=True)

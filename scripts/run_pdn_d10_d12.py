@@ -1,9 +1,7 @@
 from __future__ import annotations
 
-import hashlib
 import json
 import sys
-from collections import defaultdict
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -12,6 +10,7 @@ if str(REPO_ROOT) not in sys.path:
 
 from father_osint.knowledge_factory import AuditEvent, DocumentRecord, DocumentVersion, PipelineStage, Role, StageState
 from father_osint.knowledge_factory_store import KnowledgeFactoryStore
+from father_osint.relation_builders import build_relation_sets
 
 STORE_ROOT = REPO_ROOT / "data" / "knowledge_factory" / "pdn_official_batch"
 QUALITY = REPO_ROOT / "reports" / "pdn_live" / "D6_D9_QUALITY.json"
@@ -23,15 +22,6 @@ TARGETS = (
     "DOC-RU-FSTEC-21-2013",
     "DOC-RU-FSB-378-2014",
 )
-
-
-def _stable_id(prefix: str, *parts: str) -> str:
-    canonical = "\x1f".join(" ".join(str(part).split()).casefold() for part in parts)
-    return f"{prefix}-{hashlib.sha256(canonical.encode('utf-8')).hexdigest()[:24]}"
-
-
-def _norm(value: str) -> str:
-    return " ".join(value.casefold().replace("ё", "е").split())
 
 
 def _read_jsonl(path: Path) -> list[dict[str, object]]:
@@ -83,108 +73,17 @@ def main() -> int:
         return 2
 
     per_doc: dict[str, dict[str, list[dict[str, object]]]] = {}
-    all_terms: list[dict[str, object]] = []
-    all_definitions: list[dict[str, object]] = []
-    all_requirements: list[dict[str, object]] = []
-    all_entities: list[dict[str, object]] = []
     for document_id in TARGETS:
         version_id = str(by_id[document_id]["version_id"])
         base = STORE_ROOT / "knowledge" / document_id / version_id
-        payload = {
+        per_doc[document_id] = {
             "terms": _read_jsonl(base / "terms.jsonl"),
             "definitions": _read_jsonl(base / "definitions.jsonl"),
             "requirements": _read_jsonl(base / "requirements.jsonl"),
             "entities": _read_jsonl(base / "entities.jsonl"),
         }
-        per_doc[document_id] = payload
-        all_terms.extend(payload["terms"])
-        all_definitions.extend(payload["definitions"])
-        all_requirements.extend(payload["requirements"])
-        all_entities.extend(payload["entities"])
 
-    internal: list[dict[str, object]] = []
-    for document_id, payload in per_doc.items():
-        entities_by_chunk: dict[str, list[dict[str, object]]] = defaultdict(list)
-        for entity in payload["entities"]:
-            entities_by_chunk[str(entity["lineage"]["chunk_id"])].append(entity)
-        for definition in payload["definitions"]:
-            internal.append({
-                "relation_id": _stable_id("REL10", document_id, definition["definition_id"], "defines"),
-                "relation_type": "TERM_DEFINED_BY",
-                "document_id": document_id,
-                "from_canonical_key": definition["canonical_key"],
-                "to_definition_id": definition["definition_id"],
-                "evidence_chunk_id": definition["lineage"]["chunk_id"],
-                "review_state": "CANDIDATE_NEEDS_REVIEW",
-                "promotion_state": "NOT_PROMOTED",
-            })
-        for requirement in payload["requirements"]:
-            chunk_id = str(requirement["lineage"]["chunk_id"])
-            for entity in entities_by_chunk.get(chunk_id, []):
-                internal.append({
-                    "relation_id": _stable_id("REL10", requirement["requirement_id"], entity["entity_mention_id"]),
-                    "relation_type": "REQUIREMENT_MENTIONS_ENTITY",
-                    "document_id": document_id,
-                    "from_requirement_id": requirement["requirement_id"],
-                    "to_entity_mention_id": entity["entity_mention_id"],
-                    "canonical_key": entity["canonical_key"],
-                    "evidence_chunk_id": chunk_id,
-                    "review_state": "CANDIDATE_NEEDS_REVIEW",
-                    "promotion_state": "NOT_PROMOTED",
-                })
-
-    cross: list[dict[str, object]] = []
-    for relation_type, rows in (("SHARED_TERM_ACROSS_DOCUMENTS", all_terms), ("SHARED_ENTITY_ACROSS_DOCUMENTS", all_entities)):
-        groups: dict[str, set[str]] = defaultdict(set)
-        for row in rows:
-            groups[str(row["canonical_key"])].add(str(row["lineage"]["document_id"]))
-        for canonical_key, document_ids in groups.items():
-            if len(document_ids) < 2:
-                continue
-            docs = sorted(document_ids)
-            cross.append({
-                "relation_id": _stable_id("REL11", relation_type, canonical_key, *docs),
-                "relation_type": relation_type,
-                "canonical_key": canonical_key,
-                "document_ids": docs,
-                "review_state": "CANDIDATE_NEEDS_REVIEW",
-                "promotion_state": "NOT_PROMOTED",
-            })
-
-    conflicts: list[dict[str, object]] = []
-    definition_groups: dict[str, list[dict[str, object]]] = defaultdict(list)
-    for definition in all_definitions:
-        definition_groups[str(definition["canonical_key"])].append(definition)
-    for canonical_key, rows in definition_groups.items():
-        normalized = {_norm(str(row["definition"])) for row in rows}
-        documents = sorted({str(row["lineage"]["document_id"]) for row in rows})
-        if len(normalized) > 1 and len(documents) > 1:
-            conflicts.append({
-                "candidate_id": _stable_id("CON12", "definition-variance", canonical_key, *documents),
-                "candidate_type": "DEFINITION_VARIANCE_CANDIDATE",
-                "canonical_key": canonical_key,
-                "document_ids": documents,
-                "definition_ids": sorted(str(row["definition_id"]) for row in rows),
-                "confirmed_conflict": False,
-                "review_state": "CANDIDATE_NEEDS_REVIEW",
-                "promotion_state": "NOT_PROMOTED",
-            })
-
-    requirement_groups: dict[str, list[dict[str, object]]] = defaultdict(list)
-    for requirement in all_requirements:
-        requirement_groups[_norm(str(requirement["statement"]))].append(requirement)
-    for statement_key, rows in requirement_groups.items():
-        documents = sorted({str(row["lineage"]["document_id"]) for row in rows})
-        if len(documents) > 1:
-            conflicts.append({
-                "candidate_id": _stable_id("CON12", "requirement-overlap", statement_key, *documents),
-                "candidate_type": "REQUIREMENT_OVERLAP_CANDIDATE",
-                "document_ids": documents,
-                "requirement_ids": sorted(str(row["requirement_id"]) for row in rows),
-                "confirmed_conflict": False,
-                "review_state": "CANDIDATE_NEEDS_REVIEW",
-                "promotion_state": "NOT_PROMOTED",
-            })
+    internal, cross, conflicts = build_relation_sets(per_doc)
 
     output_dir = STORE_ROOT / "relations"
     internal_path = output_dir / "internal.jsonl"

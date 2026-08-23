@@ -1,10 +1,11 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "watchlist_id": "PDN-FRESHNESS-WATCHLIST-001",
   "source_key": "publication-pravo-official-api",
   "source_role": "DISCOVERY_ONLY",
-  "policy": "Remote discovery may surface candidate publication events. It never proves currentness, never promotes D2/D3, and never replaces verified local A0 serving evidence. Remote failure degrades freshness monitoring only.",
-  "default_lookback_days": 7,
+  "policy": "Remote discovery may surface candidate publication events. It never proves currentness, never promotes D2/D3, and never replaces verified local A0 serving evidence. Remote failure degrades freshness monitoring only. Successful complete observations advance a checkpoint; degraded runs never advance it.",
+  "bootstrap_lookback_days": 90,
+  "checkpoint_overlap_days": 3,
   "targets": [
     {
       "document_id": "DOC-RU-FZ-152-2006",

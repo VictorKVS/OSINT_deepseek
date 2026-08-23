@@ -34,6 +34,16 @@ def _doc_ids(value: object) -> set[str]:
     return {str(item) for item in value if str(item)}
 
 
+def _edge_canonical_key(edge: Mapping[str, object]) -> str:
+    metadata = edge.get("metadata")
+    if isinstance(metadata, Mapping):
+        value = metadata.get("canonical_key")
+        if value:
+            return str(value)
+    value = edge.get("canonical_key")
+    return str(value) if value else ""
+
+
 def build_object_delta_plan(
     changed_document_ids: Iterable[str],
     *,
@@ -51,6 +61,12 @@ def build_object_delta_plan(
     when an unaffected document still supports them; only their changed support
     edge is rechecked. Cross-document relations/conflict candidates touching a
     changed document are re-evaluated, while unrelated objects remain reusable.
+
+    A D11 relation identity includes its whole supporting document set. If that
+    set changes, even a D13 pair edge between two otherwise unchanged documents
+    can receive a new edge ID. Therefore every graph edge derived from an
+    affected D11 relation (same relation type + canonical key) is rechecked, not
+    only pair edges whose endpoints directly include the changed document.
     """
 
     changed = {str(item) for item in changed_document_ids if str(item)}
@@ -102,11 +118,16 @@ def build_object_delta_plan(
             rebuild_nodes.add(node_id)
 
     cross_relation_ids: set[str] = set()
+    affected_cross_signatures: set[tuple[str, str]] = set()
     for relation in cross_relations:
         if changed & _doc_ids(relation.get("document_ids")):
             relation_id = str(relation.get("relation_id") or "")
             if relation_id:
                 cross_relation_ids.add(relation_id)
+            relation_type = str(relation.get("relation_type") or "")
+            canonical_key = str(relation.get("canonical_key") or "")
+            if relation_type and canonical_key:
+                affected_cross_signatures.add((relation_type, canonical_key))
 
     conflict_ids: set[str] = set()
     conflict_nodes: set[str] = set()
@@ -117,8 +138,10 @@ def build_object_delta_plan(
                 conflict_ids.add(candidate_id)
                 conflict_nodes.add(f"CON:{candidate_id}")
 
-    # Any D13 edge touching an affected conflict node or a changed document in
-    # cross-document relation space must be rechecked.
+    # Any D13 edge touching an affected conflict node must be rechecked. For
+    # D11 shared-term/entity relations, invalidate all pair edges derived from
+    # the affected relation signature because relation identity includes the
+    # complete document set, not merely each pair's endpoints.
     for edge in edges:
         edge_id = str(edge.get("edge_id") or "")
         relation_type = str(edge.get("relation_type") or "")
@@ -128,7 +151,8 @@ def build_object_delta_plan(
             if edge_id:
                 recheck_edges.add(edge_id)
         if relation_type in {"SHARED_TERM_ACROSS_DOCUMENTS", "SHARED_ENTITY_ACROSS_DOCUMENTS"}:
-            if left in changed_doc_nodes or right in changed_doc_nodes:
+            signature = (relation_type, _edge_canonical_key(edge))
+            if signature in affected_cross_signatures:
                 if edge_id:
                     recheck_edges.add(edge_id)
 

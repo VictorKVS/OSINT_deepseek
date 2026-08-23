@@ -34,6 +34,66 @@ def test_object_delta_preserves_shared_nodes_with_unaffected_support():
     assert "e2" in plan.reusable_edge_ids
 
 
+def test_changed_cross_relation_rechecks_all_pair_edges_from_relation_signature():
+    nodes = [
+        {"node_id": "DOC:A"},
+        {"node_id": "DOC:B"},
+        {"node_id": "DOC:C"},
+    ]
+    edges = [
+        {
+            "edge_id": "ab",
+            "relation_type": "SHARED_TERM_ACROSS_DOCUMENTS",
+            "from_node": "DOC:A",
+            "to_node": "DOC:B",
+            "metadata": {"canonical_key": "personal_data"},
+        },
+        {
+            "edge_id": "bc",
+            "relation_type": "SHARED_TERM_ACROSS_DOCUMENTS",
+            "from_node": "DOC:B",
+            "to_node": "DOC:C",
+            "metadata": {"canonical_key": "personal_data"},
+        },
+        {
+            "edge_id": "other",
+            "relation_type": "SHARED_TERM_ACROSS_DOCUMENTS",
+            "from_node": "DOC:B",
+            "to_node": "DOC:C",
+            "metadata": {"canonical_key": "other_term"},
+        },
+    ]
+    cross = [
+        {
+            "relation_id": "REL11:old",
+            "relation_type": "SHARED_TERM_ACROSS_DOCUMENTS",
+            "canonical_key": "personal_data",
+            "document_ids": ["A", "B", "C"],
+        },
+        {
+            "relation_id": "REL11:other",
+            "relation_type": "SHARED_TERM_ACROSS_DOCUMENTS",
+            "canonical_key": "other_term",
+            "document_ids": ["B", "C"],
+        },
+    ]
+
+    plan = build_object_delta_plan(
+        ["A"],
+        graph_nodes=nodes,
+        graph_edges=edges,
+        internal_relations=[],
+        cross_relations=cross,
+        conflict_candidates=[],
+    )
+
+    # Even B-C must be rechecked: if A drops out, the D11 relation ID changes
+    # because it includes the whole supporting document set.
+    assert "ab" in plan.recheck_edge_ids
+    assert "bc" in plan.recheck_edge_ids
+    assert "other" in plan.reusable_edge_ids
+
+
 def test_shared_node_without_other_support_is_rebuilt_not_blindly_retained():
     plan = build_object_delta_plan(
         ["A"],

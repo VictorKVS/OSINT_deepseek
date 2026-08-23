@@ -16,6 +16,11 @@ def test_pravo_publication_probe_is_metadata_only_and_fail_closed():
     assert '"File/Pdf"' in module
     assert '"File/Zip"' in module
     assert "metadata candidates only" in module
+    assert "ResilientJsonTransport" in module
+    assert "CurlJsonTransport" in module
+    assert "primary_timeout_cap_seconds" in module
+    assert "curl_https" in module
+    assert "downgraded transport" in module
 
     assert 'TARGET_NUMBER = "152-ФЗ"' in script
     assert 'TARGET_DATE = "2006-07-27"' in script
@@ -26,4 +31,6 @@ def test_pravo_publication_probe_is_metadata_only_and_fail_closed():
     assert '"legal_truth_promoted": False' in script
     assert "EXACT_IDENTITY_HITS=" in script
     assert "NEXT_ACTION=" in script
+    assert "TRANSPORT=" in script
+    assert "TRANSPORT_FAILURES=" in script
     assert "scripts\\probe_pravo_publication_152.py" in cmd

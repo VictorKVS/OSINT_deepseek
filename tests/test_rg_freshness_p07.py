@@ -3,18 +3,16 @@ from father_osint.rg_freshness import scan_rg_document_index_html
 
 
 def test_rg_index_surfaces_265_fz_for_152_without_confusing_unrelated_152_number():
-    html = b"""
+    html = """
     <html><body>
       <a href="/documents/2026/08/03/fz265-dok.html">
-        Federalnyi zakon N 265-FZ O vnesenii izmenenii v statyu 12 Federalnogo zakona O personalnyh dannyh
+        Федеральный закон N 265-ФЗ О внесении изменений в статью 12 Федерального закона "О персональных данных"
       </a>
       <a href="/documents/2026/05/29/dorogi-dok.html">
-        Federalnyi zakon N 152-FZ O vnesenii izmeneniia v zakon ob avtomobilnyh dorogah
+        Федеральный закон N 152-ФЗ О внесении изменения в закон об автомобильных дорогах
       </a>
     </body></html>
-    """.replace(b"Federalnyi zakon", "Федеральный закон".encode("utf-8")) \
-       .replace(b"O vnesenii izmenenii v statyu 12 Federalnogo zakona O personalnyh dannyh", "О внесении изменений в статью 12 Федерального закона \"О персональных данных\"".encode("utf-8")) \
-       .replace(b"O vnesenii izmeneniia v zakon ob avtomobilnyh dorogah", "О внесении изменения в закон об автомобильных дорогах".encode("utf-8"))
+    """.encode("utf-8")
 
     target = FreshnessWatchTarget(
         "DOC-RU-FZ-152-2006",
@@ -37,7 +35,7 @@ def test_rg_index_surfaces_265_fz_for_152_without_confusing_unrelated_152_number
 def test_rg_index_never_accepts_off_policy_document_link():
     html = """
     <html><body>
-      <a href="https://example.com/documents/2026/08/03/fake.html">Федерального закона \"О персональных данных\"</a>
+      <a href="https://example.com/documents/2026/08/03/fake.html">Федерального закона "О персональных данных"</a>
     </body></html>
     """.encode("utf-8")
     target = FreshnessWatchTarget(
@@ -53,7 +51,7 @@ def test_rg_index_never_accepts_off_policy_document_link():
 
 def test_rg_secondary_route_is_candidate_only_and_cannot_advance_checkpoint():
     html = """
-    <a href="/documents/2026/08/03/fz265-dok.html">Федерального закона \"О персональных данных\"</a>
+    <a href="/documents/2026/08/03/fz265-dok.html">Федерального закона "О персональных данных"</a>
     """.encode("utf-8")
     result = scan_rg_document_index_html(
         html,

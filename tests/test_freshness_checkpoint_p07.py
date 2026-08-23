@@ -60,16 +60,18 @@ def test_checkpoint_persists_atomically_and_is_scoped_to_watchlist_and_source(tm
     assert load_freshness_checkpoint(path, watchlist_id="WATCH", source_key="OTHER") is None
 
 
-def test_freshness_runner_never_advances_checkpoint_on_degraded_observation_contract():
+def test_freshness_runner_advances_only_primary_complete_window_not_degraded_or_secondary_only():
     script = Path("scripts/run_pdn_freshness_discovery.py").read_text(encoding="utf-8")
     watchlist = Path("config/pdn_freshness_watchlist.json").read_text(encoding="utf-8")
 
     assert "load_freshness_checkpoint" in script
     assert "resolve_freshness_window" in script
     assert "write_freshness_checkpoint" in script
-    assert "if observation_complete:" in script
+    assert "if primary_complete:" in script
+    assert '"secondary_route_can_advance": False' in script
     assert "degraded_run_did_not_advance" in script
     assert "WINDOW_MODE=" in script
     assert "CHECKPOINT_ADVANCED=" in script
     assert '"bootstrap_lookback_days": 90' in watchlist
     assert '"checkpoint_overlap_days": 3' in watchlist
+    assert '"secondary_source_key": "rg-official-doc-index"' in watchlist

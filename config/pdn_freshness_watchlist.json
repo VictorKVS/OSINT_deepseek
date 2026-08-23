@@ -1,0 +1,30 @@
+{
+  "schema_version": "1.0",
+  "watchlist_id": "PDN-FRESHNESS-WATCHLIST-001",
+  "source_key": "publication-pravo-official-api",
+  "source_role": "DISCOVERY_ONLY",
+  "policy": "Remote discovery may surface candidate publication events. It never proves currentness, never promotes D2/D3, and never replaces verified local A0 serving evidence. Remote failure degrades freshness monitoring only.",
+  "default_lookback_days": 7,
+  "targets": [
+    {
+      "document_id": "DOC-RU-FZ-152-2006",
+      "query_text": "152-ФЗ",
+      "query_basis": "REFERENCE_TO_TARGET_ACT_NUMBER"
+    },
+    {
+      "document_id": "DOC-RU-PP-1119-2012",
+      "query_text": "Постановление Правительства Российской Федерации № 1119",
+      "query_basis": "REFERENCE_TO_TARGET_ACT_IDENTITY"
+    },
+    {
+      "document_id": "DOC-RU-FSTEC-21-2013",
+      "query_text": "приказ ФСТЭК России № 21",
+      "query_basis": "REFERENCE_TO_TARGET_ACT_IDENTITY"
+    },
+    {
+      "document_id": "DOC-RU-FSB-378-2014",
+      "query_text": "приказ ФСБ России № 378",
+      "query_basis": "REFERENCE_TO_TARGET_ACT_IDENTITY"
+    }
+  ]
+}

@@ -4,6 +4,7 @@ import json
 import urllib.parse
 import urllib.request
 from dataclasses import dataclass
+from datetime import date
 from typing import Any, Protocol
 
 
@@ -99,7 +100,18 @@ def _normalize_number(value: str) -> str:
 
 
 def _normalize_date(value: str) -> str:
-    return value.strip().replace(".", "-")
+    raw = value.strip()
+    if not raw:
+        return ""
+    for fmt in ("%Y-%m-%d", "%d.%m.%Y", "%Y-%m-%dT%H:%M:%S", "%Y-%m-%dT%H:%M:%SZ"):
+        try:
+            if fmt == "%Y-%m-%d":
+                return date.fromisoformat(raw).isoformat()
+            import datetime as _dt
+            return _dt.datetime.strptime(raw, fmt).date().isoformat()
+        except ValueError:
+            continue
+    return raw.casefold()
 
 
 class PravoPublicationClient:

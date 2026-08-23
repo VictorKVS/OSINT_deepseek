@@ -1,15 +1,14 @@
 from __future__ import annotations
 
-import hashlib
 import json
 import sys
-from collections import defaultdict
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
+from father_osint.graph_builders import build_graph_rows
 from father_osint.knowledge_factory import AuditEvent, DocumentRecord, DocumentVersion, PipelineStage, Role, StageState
 from father_osint.knowledge_factory_store import KnowledgeFactoryStore
 
@@ -28,21 +27,16 @@ TARGETS = (
 )
 
 
-def _stable_id(prefix: str, *parts: str) -> str:
-    canonical = "\x1f".join(" ".join(str(part).split()).casefold() for part in parts)
-    return f"{prefix}-{hashlib.sha256(canonical.encode('utf-8')).hexdigest()[:24]}"
-
-
 def _read_jsonl(path: Path) -> list[dict[str, object]]:
     with path.open("r", encoding="utf-8") as handle:
         return [json.loads(line) for line in handle if line.strip()]
 
 
-def _write_jsonl(path: Path, rows: list[dict[str, object]]) -> None:
+def _write_jsonl(path: Path, rows) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8", newline="\n") as handle:
         for row in rows:
-            handle.write(json.dumps(row, ensure_ascii=False, sort_keys=True) + "\n")
+            handle.write(json.dumps(dict(row), ensure_ascii=False, sort_keys=True) + "\n")
 
 
 def _document(payload: dict[str, object]) -> DocumentRecord:
@@ -63,6 +57,21 @@ def _document(payload: dict[str, object]) -> DocumentRecord:
     )
 
 
+def _load_per_doc(d6: dict[str, object]) -> dict[str, dict[str, list[dict[str, object]]]]:
+    by_id = {str(item.get("document_id")): item for item in d6.get("documents", [])}
+    if any(document_id not in by_id for document_id in TARGETS):
+        raise ValueError("D13_INPUT_INCOMPLETE")
+    result: dict[str, dict[str, list[dict[str, object]]]] = {}
+    for document_id in TARGETS:
+        version_id = str(by_id[document_id]["version_id"])
+        base = STORE_ROOT / "knowledge" / document_id / version_id
+        result[document_id] = {
+            name: _read_jsonl(base / f"{name}.jsonl")
+            for name in ("terms", "definitions", "requirements", "entities")
+        }
+    return result
+
+
 def main() -> int:
     if not D10_QUALITY.is_file():
         print("D10_D12_QUALITY_MISSING")
@@ -76,114 +85,34 @@ def main() -> int:
         return 2
 
     d6 = json.loads(D6_SUMMARY.read_text(encoding="utf-8"))
-    by_id = {str(item.get("document_id")): item for item in d6.get("documents", [])}
-    if any(document_id not in by_id for document_id in TARGETS):
-        print("D13_INPUT_INCOMPLETE")
+    try:
+        per_doc = _load_per_doc(d6)
+        internal = _read_jsonl(REL_ROOT / "internal.jsonl")
+        cross = _read_jsonl(REL_ROOT / "cross_document.jsonl")
+        conflicts = _read_jsonl(REL_ROOT / "conflicts_overlaps.jsonl")
+        graph = build_graph_rows(
+            per_doc,
+            internal,
+            cross,
+            conflicts,
+            document_order=TARGETS,
+        )
+    except (KeyError, ValueError) as exc:
+        print(f"D13_GRAPH_ENDPOINT_FAILURE: {exc}")
         return 2
 
-    nodes: dict[str, dict[str, object]] = {}
-    edges: dict[str, dict[str, object]] = {}
-
-    def add_node(node_id: str, node_type: str, **metadata: object) -> None:
-        nodes.setdefault(node_id, {
-            "node_id": node_id,
-            "node_type": node_type,
-            "metadata": metadata,
-            "review_state": "CANDIDATE_NEEDS_REVIEW",
-            "promotion_state": "NOT_PROMOTED",
-        })
-
-    def add_edge(edge_id: str, relation_type: str, from_node: str, to_node: str, **metadata: object) -> None:
-        edges.setdefault(edge_id, {
-            "edge_id": edge_id,
-            "relation_type": relation_type,
-            "from_node": from_node,
-            "to_node": to_node,
-            "metadata": metadata,
-            "review_state": "CANDIDATE_NEEDS_REVIEW",
-            "promotion_state": "NOT_PROMOTED",
-        })
-
-    definition_to_node: dict[str, str] = {}
-    requirement_to_node: dict[str, str] = {}
-    entity_mention_to_node: dict[str, str] = {}
-
-    for document_id in TARGETS:
-        doc_node = f"DOC:{document_id}"
-        add_node(doc_node, "DOCUMENT", document_id=document_id)
-        version_id = str(by_id[document_id]["version_id"])
-        base = STORE_ROOT / "knowledge" / document_id / version_id
-        terms = _read_jsonl(base / "terms.jsonl")
-        definitions = _read_jsonl(base / "definitions.jsonl")
-        requirements = _read_jsonl(base / "requirements.jsonl")
-        entities = _read_jsonl(base / "entities.jsonl")
-
-        for term in terms:
-            term_node = f"TERM:{term['canonical_key']}"
-            add_node(term_node, "TERM", canonical_key=term["canonical_key"], term=term["term"])
-            add_edge(_stable_id("E13", doc_node, term_node, "mentions-term"), "DOCUMENT_MENTIONS_TERM", doc_node, term_node)
-        for definition in definitions:
-            def_node = f"DEF:{definition['definition_id']}"
-            definition_to_node[str(definition["definition_id"])] = def_node
-            add_node(def_node, "DEFINITION_CANDIDATE", definition_id=definition["definition_id"], canonical_key=definition["canonical_key"])
-            add_edge(_stable_id("E13", doc_node, def_node, "contains-definition"), "DOCUMENT_CONTAINS_DEFINITION", doc_node, def_node)
-        for requirement in requirements:
-            req_node = f"REQ:{requirement['requirement_id']}"
-            requirement_to_node[str(requirement["requirement_id"])] = req_node
-            add_node(req_node, "REQUIREMENT_CANDIDATE", requirement_id=requirement["requirement_id"], modality=requirement["modality"])
-            add_edge(_stable_id("E13", doc_node, req_node, "contains-requirement"), "DOCUMENT_CONTAINS_REQUIREMENT", doc_node, req_node)
-        for entity in entities:
-            ent_node = f"ENT:{entity['canonical_key']}"
-            entity_mention_to_node[str(entity["entity_mention_id"])] = ent_node
-            add_node(ent_node, "ENTITY_CANDIDATE", canonical_key=entity["canonical_key"], entity=entity["entity"], entity_kind=entity["entity_kind"])
-            add_edge(_stable_id("E13", doc_node, ent_node, "mentions-entity"), "DOCUMENT_MENTIONS_ENTITY", doc_node, ent_node)
-
-    internal = _read_jsonl(REL_ROOT / "internal.jsonl")
-    cross = _read_jsonl(REL_ROOT / "cross_document.jsonl")
-    conflicts = _read_jsonl(REL_ROOT / "conflicts_overlaps.jsonl")
-    for relation in internal:
-        if relation["relation_type"] == "TERM_DEFINED_BY":
-            from_node = f"TERM:{relation['from_canonical_key']}"
-            to_node = definition_to_node[str(relation["to_definition_id"])]
-        else:
-            from_node = requirement_to_node[str(relation["from_requirement_id"])]
-            to_node = entity_mention_to_node[str(relation["to_entity_mention_id"])]
-        add_edge(str(relation["relation_id"]), str(relation["relation_type"]), from_node, to_node, evidence_chunk_id=relation.get("evidence_chunk_id"))
-
-    for relation in cross:
-        docs = [f"DOC:{value}" for value in relation.get("document_ids", [])]
-        for left_index, left in enumerate(docs):
-            for right in docs[left_index + 1:]:
-                edge_id = _stable_id("E13", relation["relation_id"], left, right)
-                add_edge(edge_id, str(relation["relation_type"]), left, right, canonical_key=relation.get("canonical_key"))
-
-    conflict_queue: list[dict[str, object]] = []
-    for candidate in conflicts:
-        conflict_node = f"CON:{candidate['candidate_id']}"
-        add_node(conflict_node, "CONFLICT_OR_OVERLAP_CANDIDATE", candidate_id=candidate["candidate_id"], candidate_type=candidate["candidate_type"], confirmed_conflict=False)
-        for document_id in candidate.get("document_ids", []):
-            doc_node = f"DOC:{document_id}"
-            add_edge(_stable_id("E13", conflict_node, doc_node), "CANDIDATE_INVOLVES_DOCUMENT", conflict_node, doc_node)
-        conflict_queue.append(candidate)
-
-    missing_endpoints = [
-        edge_id for edge_id, edge in edges.items()
-        if edge["from_node"] not in nodes or edge["to_node"] not in nodes
-    ]
-    if missing_endpoints:
-        print("D13_GRAPH_ENDPOINT_FAILURE: " + ", ".join(missing_endpoints[:10]))
-        return 2
-
+    nodes = list(graph.nodes)
+    edges = list(graph.edges)
     nodes_path = GRAPH_ROOT / "nodes.jsonl"
     edges_path = GRAPH_ROOT / "edges.jsonl"
-    _write_jsonl(nodes_path, list(nodes.values()))
-    _write_jsonl(edges_path, list(edges.values()))
+    _write_jsonl(nodes_path, nodes)
+    _write_jsonl(edges_path, edges)
     manifest = {
         "schema_version": "1.0",
         "graph_nodes": len(nodes),
         "graph_edges": len(edges),
         "missing_endpoints": 0,
-        "conflict_overlap_candidates_for_review": len(conflict_queue),
+        "conflict_overlap_candidates_for_review": len(conflicts),
         "review_required": True,
         "autonomous_kb_promotion": False,
     }
@@ -218,14 +147,14 @@ def main() -> int:
         "",
         f"- graph nodes: {len(nodes)}",
         f"- graph edges: {len(edges)}",
-        f"- conflict/overlap candidates: {len(conflict_queue)}",
+        f"- conflict/overlap candidates: {len(conflicts)}",
         "- D14 state: **NEEDS_REVIEW**",
         "- D15 autonomous promotion: **blocked**",
         "",
         "| Candidate | Type | Documents | Confirmed conflict |",
         "|---|---|---|---|",
     ]
-    for candidate in conflict_queue:
+    for candidate in conflicts:
         docs = ", ".join(str(value) for value in candidate.get("document_ids", []))
         lines.append(f"| `{candidate['candidate_id']}` | {candidate['candidate_type']} | {docs or '—'} | no |")
     REVIEW_QUEUE.write_text("\n".join(lines) + "\n", encoding="utf-8", newline="\n")

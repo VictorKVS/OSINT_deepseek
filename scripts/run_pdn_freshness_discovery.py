@@ -22,7 +22,7 @@ from father_osint.freshness_discovery import (
     load_watchlist,
 )
 from father_osint.proof_resolution import resolve_pack_from_files
-from father_osint.rg_freshness import RgDocumentIndexDiscovery
+from father_osint.rg_freshness import RgAnnouncementFeedDiscovery
 from father_osint.source_health import load_source_health, write_source_health
 
 
@@ -32,11 +32,11 @@ LOCAL_DIR = REPO_ROOT / "data" / "operator_import" / "pdn_official_source_pack"
 WATCHLIST = REPO_ROOT / "config" / "pdn_freshness_watchlist.json"
 REPORT = REPO_ROOT / "reports" / "pdn_live" / "P0_7_FRESHNESS_DISCOVERY.json"
 PRIMARY_HEALTH = REPO_ROOT / ".runtime" / "source_health" / "publication-pravo-official-api.json"
-SECONDARY_HEALTH = REPO_ROOT / ".runtime" / "source_health" / "rg-official-doc-index.json"
+SECONDARY_HEALTH = REPO_ROOT / ".runtime" / "source_health" / "rg-official-announcement-feed.json"
 SNAPSHOTS = REPO_ROOT / ".runtime" / "freshness" / "pdn_reference_discovery_snapshots.jsonl"
 CHECKPOINT = REPO_ROOT / ".runtime" / "freshness" / "pdn_freshness_checkpoint.json"
 PRIMARY_SOURCE_KEY = "publication-pravo-official-api"
-SECONDARY_SOURCE_KEY = "rg-official-doc-index"
+SECONDARY_SOURCE_KEY = "rg-official-announcement-feed"
 COOLDOWN_SECONDS = 30 * 60
 FIRST_REQUEST_TIMEOUT_SECONDS = 12.0
 FOLLOWUP_REQUEST_TIMEOUT_SECONDS = 8.0
@@ -140,7 +140,7 @@ def _primary_discovery(targets, window):
     }
 
 
-def _secondary_rg_discovery(targets):
+def _secondary_rg_discovery(targets, window):
     attempted = True
     network_used = False
     source_error: str | None = None
@@ -156,8 +156,10 @@ def _secondary_rg_discovery(targets):
     else:
         try:
             network_used = True
-            scan_result = RgDocumentIndexDiscovery().scan(
+            scan_result = RgAnnouncementFeedDiscovery().scan(
                 targets=targets,
+                publish_date_from=window.publish_date_from,
+                publish_date_to=window.publish_date_to,
                 timeout_seconds=SECONDARY_REQUEST_TIMEOUT_SECONDS,
             )
             scan = scan_result.to_dict()
@@ -182,6 +184,7 @@ def _secondary_rg_discovery(targets):
     return {
         "source_key": SECONDARY_SOURCE_KEY,
         "role": "SECONDARY_CANDIDATE_ONLY_DISCOVERY",
+        "route_kind": "RG_DOCUMENTED_XML_ANNOUNCEMENT_FEED",
         "attempted": attempted,
         "scan_complete": scan is not None,
         "scan": scan,
@@ -263,13 +266,14 @@ def main() -> int:
     primary_observations = list(primary["observations"])
     primary_complete = bool(primary["observation_complete"])
 
-    # The RG route is intentionally independent and candidate-only. We run it
-    # whenever the primary complete-window route is degraded. It can surface an
-    # amendment candidate, but it cannot certify a 90-day backfill window and
-    # therefore cannot advance the primary freshness checkpoint by itself.
-    secondary = _secondary_rg_discovery(targets) if not primary_complete else {
+    # The RG feed route is intentionally independent and candidate-only. We run
+    # it whenever the primary complete-window route is degraded. The documented
+    # XML feed can surface current announcements, but it is not a complete 90-day
+    # historical archive and therefore can never advance the primary checkpoint.
+    secondary = _secondary_rg_discovery(targets, window) if not primary_complete else {
         "source_key": SECONDARY_SOURCE_KEY,
         "role": "SECONDARY_CANDIDATE_ONLY_DISCOVERY",
+        "route_kind": "RG_DOCUMENTED_XML_ANNOUNCEMENT_FEED",
         "attempted": False,
         "scan_complete": False,
         "scan": None,
@@ -424,6 +428,7 @@ def main() -> int:
     print(f"PRIMARY_CIRCUIT_OPEN_AT_START={str(bool(primary['circuit_open_at_start'])).lower()}")
     print(f"PRIMARY_NETWORK_USED={str(bool(primary['network_used'])).lower()}")
     print(f"SECONDARY_RG_ATTEMPTED={str(bool(secondary.get('attempted'))).lower()}")
+    print(f"SECONDARY_RG_ROUTE_KIND={secondary.get('route_kind')}")
     print(f"SECONDARY_RG_CIRCUIT_OPEN_AT_START={str(bool(secondary.get('circuit_open_at_start'))).lower()}")
     print(f"SECONDARY_RG_SCAN_COMPLETE={str(bool(secondary.get('scan_complete'))).lower()}")
     print(f"SECONDARY_RG_NETWORK_USED={str(bool(secondary.get('network_used'))).lower()}")

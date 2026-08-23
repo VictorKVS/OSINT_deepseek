@@ -33,6 +33,7 @@ def test_active_p0_runners_capture_full_local_transcripts_without_git_tracking()
         "RUN_PDN_CHANGE_MONITOR.cmd": "PDN_CHANGE_MONITOR",
         "RUN_PDN_OBJECT_DELTA_PLAN.cmd": "PDN_OBJECT_DELTA_PLAN",
         "RUN_PDN_DELTA_SHADOW_EXECUTION.cmd": "PDN_DELTA_SHADOW_EXECUTION",
+        "RUN_PDN_DIFFERENTIAL_REBUILD.cmd": "PDN_DIFFERENTIAL_REBUILD",
     }
     for path, run_id in runners.items():
         text = Path(path).read_text(encoding="utf-8")

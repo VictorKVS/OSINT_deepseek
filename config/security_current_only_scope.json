@@ -1,0 +1,102 @@
+{
+  "schema_version": "1.0",
+  "scope_id": "SECURITY-CURRENT-ONLY-001",
+  "mode": "CURRENT_ONLY",
+  "policy": "Collect and maintain only currently effective security regulation, already-published future-effective changes, and current official methodological/operational materials. Historical reconstruction is deferred until a concrete incident, dispute, audit or investigation date requires it.",
+  "material_types": [
+    "LAW",
+    "PRESIDENTIAL_ACT",
+    "GOVERNMENT_ACT",
+    "REGULATOR_ORDER",
+    "REGULATOR_REQUIREMENTS",
+    "METHODOLOGICAL_DOCUMENT",
+    "OFFICIAL_RECOMMENDATION",
+    "OFFICIAL_CLARIFICATION",
+    "OFFICIAL_REGISTRY",
+    "THREAT_OR_VULNERABILITY_DATASET",
+    "MACHINE_READABLE_FEED"
+  ],
+  "domains": [
+    {
+      "domain_id": "PDN",
+      "title": "Персональные данные",
+      "priority": "P0",
+      "authorities": ["Правительство РФ", "Роскомнадзор", "ФСТЭК России", "ФСБ России"],
+      "include": ["152-ФЗ и связанные акты", "требования к защите ИСПДн", "организационные и технические меры", "СКЗИ", "уведомления и инциденты", "обезличивание", "официальные рекомендации и разъяснения"]
+    },
+    {
+      "domain_id": "KII",
+      "title": "Критическая информационная инфраструктура",
+      "priority": "P0",
+      "authorities": ["Правительство РФ", "ФСТЭК России", "ФСБ России"],
+      "include": ["187-ФЗ", "категорирование", "создание систем безопасности значимых объектов", "требования к защите", "ГосСОПКА и реагирование", "методические материалы"]
+    },
+    {
+      "domain_id": "GIS_REGULATED_IS",
+      "title": "Государственные и иные регулируемые информационные системы",
+      "priority": "P0",
+      "authorities": ["ФСТЭК России", "Правительство РФ", "Минцифры России"],
+      "include": ["актуальные требования к защите ГИС и иных регулируемых ИС", "аттестация и контроль", "облачная и инфраструктурная безопасность при наличии применимости"]
+    },
+    {
+      "domain_id": "CRYPTO",
+      "title": "Криптографическая защита информации",
+      "priority": "P0",
+      "authorities": ["ФСБ России", "Правительство РФ"],
+      "include": ["приказы", "требования к СКЗИ", "методические рекомендации", "организационные требования"]
+    },
+    {
+      "domain_id": "THREAT_MODEL",
+      "title": "Моделирование угроз и меры защиты",
+      "priority": "P1",
+      "authorities": ["ФСТЭК России"],
+      "include": ["методики моделирования угроз", "банки угроз", "типовые угрозы", "меры защиты", "рекомендации по архитектуре и конфигурации"]
+    },
+    {
+      "domain_id": "VULNERABILITY",
+      "title": "Уязвимости и защищенность",
+      "priority": "P1",
+      "authorities": ["ФСТЭК России"],
+      "include": ["БДУ ФСТЭК", "БДУ АСУ ТП", "угрозы", "уязвимости конфигурации", "типовые уязвимости web-приложений", "рекомендации по устранению"]
+    },
+    {
+      "domain_id": "INCIDENT_RESPONSE",
+      "title": "Инциденты, реагирование и отчетность",
+      "priority": "P1",
+      "authorities": ["ФСБ России", "Роскомнадзор", "ФСТЭК России", "Правительство РФ"],
+      "include": ["сроки уведомления", "порядок расследования", "обмен сведениями", "компьютерные инциденты", "публичные материалы ГосСОПКА"]
+    },
+    {
+      "domain_id": "INFO_TELECOM",
+      "title": "Информация, ИТ, связь и интернет-регулирование",
+      "priority": "P2",
+      "authorities": ["Роскомнадзор", "Минцифры России", "Правительство РФ"],
+      "include": ["149-ФЗ и связанные требования безопасности", "реестры и обязательства операторов", "ограничение доступа и взаимодействие", "только применимые к ИБ материалы"]
+    },
+    {
+      "domain_id": "HEALTHCARE_SECURITY",
+      "title": "Отраслевая ИБ в здравоохранении",
+      "priority": "P1",
+      "authorities": ["Минздрав России", "Минцифры России", "Роскомнадзор", "Роспотребнадзор"],
+      "include": ["медицинские информационные системы", "медицинская тайна и ПДн", "отраслевые требования к ИС и данным", "Роспотребнадзор только при фактической применимости санитарных/эпидемиологических и отраслевых цифровых требований"]
+    }
+  ],
+  "source_policy": {
+    "primary": ["pravo.gov.ru", "official regulator sites", "government.ru"],
+    "secondary": ["documented official feeds", "official registries", "official methodological portals"],
+    "reference_only": ["commercial legal-reference systems for navigation/status cross-check only"],
+    "promotion_rule": "No document or requirement is promoted to CURRENT solely from discovery metadata; exact source/document verification is required."
+  },
+  "pipeline": [
+    "DISCOVER",
+    "VERIFY_SOURCE",
+    "ACQUIRE_EXACT_DOCUMENT",
+    "COMPUTE_SHA256",
+    "CLASSIFY_LEGAL_STATUS",
+    "PARSE_STRUCTURE",
+    "EXTRACT_REQUIREMENTS",
+    "BUILD_RELATIONS",
+    "KB_REVIEW",
+    "TRACK_FORWARD"
+  ]
+}

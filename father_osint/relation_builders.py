@@ -7,6 +7,8 @@ from typing import Iterable, Mapping, Sequence
 
 CROSS_TERM_RELATION = "SHARED_TERM_ACROSS_DOCUMENTS"
 CROSS_ENTITY_RELATION = "SHARED_ENTITY_ACROSS_DOCUMENTS"
+DEFINITION_VARIANCE_CANDIDATE = "DEFINITION_VARIANCE_CANDIDATE"
+REQUIREMENT_OVERLAP_CANDIDATE = "REQUIREMENT_OVERLAP_CANDIDATE"
 
 
 def _stable_id(prefix: str, *parts: str) -> str:
@@ -26,6 +28,13 @@ def _canonical_keys(rows: Sequence[Mapping[str, object]]) -> set[str]:
             raise ValueError("canonical_key missing")
         keys.add(value)
     return keys
+
+
+def normalized_requirement_statement(row: Mapping[str, object]) -> str:
+    statement = str(row.get("statement") or "")
+    if not statement:
+        raise ValueError("requirement statement missing")
+    return _norm(statement)
 
 
 def cross_relation_signature(row: Mapping[str, object]) -> tuple[str, str]:
@@ -71,6 +80,60 @@ def changed_document_cross_relation_signatures(
     affected.update((CROSS_TERM_RELATION, key) for key in old_term_keys ^ new_term_keys)
     affected.update((CROSS_ENTITY_RELATION, key) for key in old_entity_keys ^ new_entity_keys)
     return affected
+
+
+def changed_document_conflict_signatures(
+    *,
+    old_definitions: Sequence[Mapping[str, object]],
+    old_requirements: Sequence[Mapping[str, object]],
+    new_definitions: Sequence[Mapping[str, object]],
+    new_requirements: Sequence[Mapping[str, object]],
+) -> set[tuple[str, str]]:
+    """Return D12 signatures that may change when exactly one document changes.
+
+    D12 payload is content-sensitive, not only membership-sensitive. A changed
+    document can keep the same definition canonical key or normalized
+    requirement statement while changing the candidate's supporting object IDs
+    or normalized definition set. Therefore the affected set is the UNION of
+    old and new signatures for that document, not a symmetric difference.
+    """
+
+    affected: set[tuple[str, str]] = set()
+    affected.update(
+        (DEFINITION_VARIANCE_CANDIDATE, key)
+        for key in (_canonical_keys(old_definitions) | _canonical_keys(new_definitions))
+    )
+    affected.update(
+        (REQUIREMENT_OVERLAP_CANDIDATE, normalized_requirement_statement(row))
+        for row in [*old_requirements, *new_requirements]
+    )
+    return affected
+
+
+def conflict_candidate_signature(
+    row: Mapping[str, object],
+    *,
+    requirement_statement_by_id: Mapping[str, str],
+) -> tuple[str, str]:
+    candidate_type = str(row.get("candidate_type") or "")
+    if candidate_type == DEFINITION_VARIANCE_CANDIDATE:
+        canonical_key = str(row.get("canonical_key") or "")
+        if not canonical_key:
+            raise ValueError("definition candidate canonical_key missing")
+        return candidate_type, canonical_key
+    if candidate_type == REQUIREMENT_OVERLAP_CANDIDATE:
+        requirement_ids = row.get("requirement_ids")
+        if not isinstance(requirement_ids, Sequence) or isinstance(requirement_ids, (str, bytes)) or not requirement_ids:
+            raise ValueError("requirement-overlap candidate requirement_ids missing")
+        keys = {
+            requirement_statement_by_id.get(str(requirement_id), "")
+            for requirement_id in requirement_ids
+        }
+        keys.discard("")
+        if len(keys) != 1:
+            raise ValueError("cannot recover one normalized statement for requirement-overlap candidate")
+        return candidate_type, next(iter(keys))
+    raise ValueError(f"unsupported D12 candidate type: {candidate_type}")
 
 
 def build_internal_relations_for_document(
@@ -131,12 +194,7 @@ def build_cross_relations_for_signatures(
     all_entities: Sequence[Mapping[str, object]],
     signatures: Iterable[tuple[str, str]],
 ) -> list[dict[str, object]]:
-    """Build D11 rows only for requested relation-type/canonical-key signatures.
-
-    The function still scans the supplied support rows. A later indexed serving
-    implementation may replace that scan, but relation construction and stable
-    IDs remain identical to the full deterministic D11 algorithm.
-    """
+    """Build D11 rows only for requested relation-type/canonical-key signatures."""
 
     requested = {(str(relation_type), str(canonical_key)) for relation_type, canonical_key in signatures}
     invalid_types = {
@@ -186,16 +244,34 @@ def build_cross_relations(
     return build_cross_relations_for_signatures(all_terms, all_entities, signatures)
 
 
-def build_conflict_candidates(
+def build_conflict_candidates_for_signatures(
     all_definitions: Sequence[Mapping[str, object]],
     all_requirements: Sequence[Mapping[str, object]],
+    signatures: Iterable[tuple[str, str]],
 ) -> list[dict[str, object]]:
+    """Build D12 candidates only for requested content-sensitive signatures."""
+
+    requested = {(str(candidate_type), str(key)) for candidate_type, key in signatures}
+    invalid_types = {
+        candidate_type
+        for candidate_type, _ in requested
+        if candidate_type not in {DEFINITION_VARIANCE_CANDIDATE, REQUIREMENT_OVERLAP_CANDIDATE}
+    }
+    if invalid_types:
+        raise ValueError("unsupported D12 candidate types: " + ", ".join(sorted(invalid_types)))
+
     conflicts: list[dict[str, object]] = []
 
     definition_groups: dict[str, list[Mapping[str, object]]] = defaultdict(list)
+    requested_definition_keys = {
+        key for candidate_type, key in requested if candidate_type == DEFINITION_VARIANCE_CANDIDATE
+    }
     for definition in all_definitions:
-        definition_groups[str(definition["canonical_key"])].append(definition)
-    for canonical_key, rows in definition_groups.items():
+        canonical_key = str(definition.get("canonical_key") or "")
+        if canonical_key in requested_definition_keys:
+            definition_groups[canonical_key].append(definition)
+    for canonical_key in sorted(requested_definition_keys):
+        rows = definition_groups.get(canonical_key, [])
         normalized = {_norm(str(row["definition"])) for row in rows}
         documents: set[str] = set()
         for row in rows:
@@ -207,7 +283,7 @@ def build_conflict_candidates(
         if len(normalized) > 1 and len(docs) > 1:
             conflicts.append({
                 "candidate_id": _stable_id("CON12", "definition-variance", canonical_key, *docs),
-                "candidate_type": "DEFINITION_VARIANCE_CANDIDATE",
+                "candidate_type": DEFINITION_VARIANCE_CANDIDATE,
                 "canonical_key": canonical_key,
                 "document_ids": docs,
                 "definition_ids": sorted(str(row["definition_id"]) for row in rows),
@@ -217,9 +293,15 @@ def build_conflict_candidates(
             })
 
     requirement_groups: dict[str, list[Mapping[str, object]]] = defaultdict(list)
+    requested_statement_keys = {
+        key for candidate_type, key in requested if candidate_type == REQUIREMENT_OVERLAP_CANDIDATE
+    }
     for requirement in all_requirements:
-        requirement_groups[_norm(str(requirement["statement"]))].append(requirement)
-    for statement_key, rows in requirement_groups.items():
+        statement_key = normalized_requirement_statement(requirement)
+        if statement_key in requested_statement_keys:
+            requirement_groups[statement_key].append(requirement)
+    for statement_key in sorted(requested_statement_keys):
+        rows = requirement_groups.get(statement_key, [])
         documents: set[str] = set()
         for row in rows:
             lineage = row.get("lineage")
@@ -230,7 +312,7 @@ def build_conflict_candidates(
         if len(docs) > 1:
             conflicts.append({
                 "candidate_id": _stable_id("CON12", "requirement-overlap", statement_key, *docs),
-                "candidate_type": "REQUIREMENT_OVERLAP_CANDIDATE",
+                "candidate_type": REQUIREMENT_OVERLAP_CANDIDATE,
                 "document_ids": docs,
                 "requirement_ids": sorted(str(row["requirement_id"]) for row in rows),
                 "confirmed_conflict": False,
@@ -238,6 +320,22 @@ def build_conflict_candidates(
                 "promotion_state": "NOT_PROMOTED",
             })
     return conflicts
+
+
+def build_conflict_candidates(
+    all_definitions: Sequence[Mapping[str, object]],
+    all_requirements: Sequence[Mapping[str, object]],
+) -> list[dict[str, object]]:
+    signatures: set[tuple[str, str]] = set()
+    signatures.update(
+        (DEFINITION_VARIANCE_CANDIDATE, key)
+        for key in _canonical_keys(all_definitions)
+    )
+    signatures.update(
+        (REQUIREMENT_OVERLAP_CANDIDATE, normalized_requirement_statement(row))
+        for row in all_requirements
+    )
+    return build_conflict_candidates_for_signatures(all_definitions, all_requirements, signatures)
 
 
 def build_relation_sets(

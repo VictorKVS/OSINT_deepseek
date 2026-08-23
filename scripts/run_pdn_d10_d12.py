@@ -23,6 +23,20 @@ TARGETS = (
     "DOC-RU-FSB-378-2014",
 )
 
+# Keep the D10/D11/D12 relation vocabulary explicit at the runner boundary.
+# Builders may be refactored, but the review/export contract must remain visible
+# and regression-protected here.
+RELATION_TYPE_CONTRACT = (
+    "TERM_DEFINED_BY",
+    "REQUIREMENT_MENTIONS_ENTITY",
+    "SHARED_TERM_ACROSS_DOCUMENTS",
+    "SHARED_ENTITY_ACROSS_DOCUMENTS",
+)
+CONFLICT_CANDIDATE_TYPE_CONTRACT = (
+    "DEFINITION_VARIANCE_CANDIDATE",
+    "REQUIREMENT_OVERLAP_CANDIDATE",
+)
+
 
 def _read_jsonl(path: Path) -> list[dict[str, object]]:
     with path.open("r", encoding="utf-8") as handle:
@@ -95,6 +109,8 @@ def main() -> int:
 
     manifest = {
         "schema_version": "1.0",
+        "relation_type_contract": list(RELATION_TYPE_CONTRACT),
+        "conflict_candidate_type_contract": list(CONFLICT_CANDIDATE_TYPE_CONTRACT),
         "internal_relations": len(internal),
         "cross_document_relations": len(cross),
         "conflict_overlap_candidates": len(conflicts),

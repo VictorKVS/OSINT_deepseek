@@ -33,4 +33,10 @@ def test_pravo_publication_probe_is_metadata_only_and_fail_closed():
     assert "NEXT_ACTION=" in script
     assert "TRANSPORT=" in script
     assert "TRANSPORT_FAILURES=" in script
+    assert "load_source_health" in script
+    assert "write_source_health" in script
+    assert "COOLDOWN_SECONDS = 30 * 60" in script
+    assert "CIRCUIT_OPEN=" in script
+    assert "NETWORK_SKIPPED=" in script
+    assert "timeout_seconds=12.0" in script
     assert "scripts\\probe_pravo_publication_152.py" in cmd

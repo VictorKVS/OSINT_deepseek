@@ -3,6 +3,7 @@ from pathlib import Path
 
 def test_prebuilt_russian_law_db_benchmark_is_reuse_first_and_fail_closed():
     script = Path("scripts/benchmark_152_prebuilt_mcp_db.py").read_text(encoding="utf-8")
+    gate = Path("scripts/gate_152_prebuilt_db_source_identity.py").read_text(encoding="utf-8")
     cmd = Path("RUN_BENCHMARK_152_PREBUILT_DB.cmd").read_text(encoding="utf-8")
 
     assert 'PACKAGE_SPEC = "@ansvar/russian-law-mcp@0.1.0"' in script
@@ -32,3 +33,14 @@ def test_prebuilt_russian_law_db_benchmark_is_reuse_first_and_fail_closed():
     assert path_bootstrap in script
     assert script.index(root_bootstrap) < script.index(sibling_import)
     assert script.index(path_bootstrap) < script.index(sibling_import)
+
+    # Metadata identity is insufficient: donor source locator must resolve to
+    # the same official document identity as the FATHER golden fixture.
+    assert 'EXPECTED_PRAVO_ND = "102108261"' in gate
+    assert 'KNOWN_149_PRAVO_ND = "102108264"' in gate
+    assert "identity_collision" in gate
+    assert "foreign_149_signature" in gate
+    assert "REUSE_INFRASTRUCTURE_CODE_ONLY__QUARANTINE_PREBUILT_CONTENT" in gate
+    assert '"legal_truth_promoted": False' in gate
+    assert "scripts\\gate_152_prebuilt_db_source_identity.py" in cmd
+    assert "BLOCKED: donor metadata/content source identity collision detected." in cmd

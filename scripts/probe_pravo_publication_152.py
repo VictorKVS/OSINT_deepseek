@@ -11,9 +11,13 @@ if str(REPO_ROOT) not in sys.path:
 
 from father_osint.external_assets import authorize_external_asset
 from father_osint.pravo_publication import PravoPublicationClient
+from father_osint.source_health import load_source_health, write_source_health
 
 
 REPORT = REPO_ROOT / "reports" / "pdn_live" / "PROBE_PRAVO_PUBLICATION_152.json"
+HEALTH = REPO_ROOT / ".runtime" / "source_health" / "publication-pravo-official-api.json"
+SOURCE_KEY = "publication-pravo-official-api"
+COOLDOWN_SECONDS = 30 * 60
 TARGET_NUMBER = "152-ФЗ"
 TARGET_DATE = "2006-07-27"
 TARGET_TITLE_MARKER = "персональных данных"
@@ -29,27 +33,71 @@ def _transport_state(client: PravoPublicationClient) -> dict[str, object]:
 
 def main() -> int:
     started = time.perf_counter()
-    asset = authorize_external_asset("publication-pravo-official-api", "proof_acquisition")
-    client = PravoPublicationClient()
+    asset = authorize_external_asset(SOURCE_KEY, "proof_acquisition")
 
-    search_started = time.perf_counter()
-    try:
-        hits, search_meta = client.search_documents(
-            number=TARGET_NUMBER,
-            page_size=30,
-            page=1,
-            timeout_seconds=30.0,
-        )
-    except Exception as exc:
-        transport_state = _transport_state(client)
+    health = load_source_health(HEALTH, source_key=SOURCE_KEY)
+    if health and health.circuit_open():
+        remaining = health.remaining_seconds()
         result = {
             "record_type": "PRAVO_PUBLICATION_152_RUNTIME_PROBE",
             "api_reachable": False,
             "target_number": TARGET_NUMBER,
             "target_date": TARGET_DATE,
             "external_asset_status": asset.status,
-            "error": f"{type(exc).__name__}: {exc}",
+            "error": health.error,
+            "transport": None,
+            "transport_failures": [],
+            "circuit_open": True,
+            "network_skipped": True,
+            "retry_after_seconds": remaining,
+            "metadata_only": True,
+            "d2_d3_promoted": False,
+            "legal_truth_promoted": False,
+            "total_seconds": time.perf_counter() - started,
+        }
+        REPORT.parent.mkdir(parents=True, exist_ok=True)
+        REPORT.write_text(json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+        print("API_REACHABLE=false")
+        print("TRANSPORT=none")
+        print("TRANSPORT_FAILURES=0")
+        print("CIRCUIT_OPEN=true")
+        print("NETWORK_SKIPPED=true")
+        print(f"RETRY_AFTER_SECONDS={remaining:.1f}")
+        print("D2_D3_PROMOTED=false")
+        print("LEGAL_TRUTH_PROMOTED=false")
+        return 3
+
+    client = PravoPublicationClient()
+    search_started = time.perf_counter()
+    try:
+        hits, search_meta = client.search_documents(
+            number=TARGET_NUMBER,
+            page_size=30,
+            page=1,
+            timeout_seconds=12.0,
+        )
+    except Exception as exc:
+        transport_state = _transport_state(client)
+        error_text = f"{type(exc).__name__}: {exc}"
+        state = write_source_health(
+            HEALTH,
+            source_key=SOURCE_KEY,
+            status="FAILED",
+            cooldown_seconds=COOLDOWN_SECONDS,
+            error=error_text,
+        )
+        result = {
+            "record_type": "PRAVO_PUBLICATION_152_RUNTIME_PROBE",
+            "api_reachable": False,
+            "target_number": TARGET_NUMBER,
+            "target_date": TARGET_DATE,
+            "external_asset_status": asset.status,
+            "error": error_text,
             **transport_state,
+            "circuit_open": True,
+            "network_skipped": False,
+            "retry_after_seconds": state.remaining_seconds(),
             "metadata_only": True,
             "d2_d3_promoted": False,
             "legal_truth_promoted": False,
@@ -61,10 +109,20 @@ def main() -> int:
         print("API_REACHABLE=false")
         print(f"TRANSPORT={transport_state['transport'] or 'none'}")
         print(f"TRANSPORT_FAILURES={len(transport_state['transport_failures'])}")
+        print("CIRCUIT_OPEN=true")
+        print("NETWORK_SKIPPED=false")
+        print(f"RETRY_AFTER_SECONDS={state.remaining_seconds():.1f}")
         print("D2_D3_PROMOTED=false")
         print("LEGAL_TRUTH_PROMOTED=false")
         return 2
 
+    write_source_health(
+        HEALTH,
+        source_key=SOURCE_KEY,
+        status="OK",
+        cooldown_seconds=0,
+        error=None,
+    )
     search_seconds = time.perf_counter() - search_started
     exact = client.exact_identity_hits(hits, number=TARGET_NUMBER, document_date=TARGET_DATE)
     exact_with_title = [
@@ -77,7 +135,7 @@ def main() -> int:
     for hit in exact_with_title[:3]:
         detail_started = time.perf_counter()
         try:
-            detail = client.get_document(hit.eo_number, timeout_seconds=30.0)
+            detail = client.get_document(hit.eo_number, timeout_seconds=12.0)
             details.append({
                 "eo_number": hit.eo_number,
                 "detail": detail,
@@ -129,6 +187,8 @@ def main() -> int:
         "exact_identity_hits": len(exact_with_title),
         "details": details,
         "detail_errors": detail_errors,
+        "circuit_open": False,
+        "network_skipped": False,
         "metadata_only": True,
         "d2_d3_promoted": False,
         "legal_truth_promoted": False,
@@ -146,6 +206,8 @@ def main() -> int:
     print("API_REACHABLE=true")
     print(f"TRANSPORT={search_meta.get('transport') or 'unknown'}")
     print(f"TRANSPORT_FAILURES={len(search_meta.get('transport_failures_before_success') or [])}")
+    print("CIRCUIT_OPEN=false")
+    print("NETWORK_SKIPPED=false")
     print(f"HITS_TOTAL={len(hits)}")
     print(f"EXACT_IDENTITY_HITS={len(exact_with_title)}")
     print(f"FILE_CANDIDATE_FOUND={str(file_candidate_found).lower()}")

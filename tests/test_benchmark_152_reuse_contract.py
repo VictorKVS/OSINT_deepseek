@@ -3,6 +3,7 @@ from pathlib import Path
 
 def test_152_reuse_benchmark_is_single_document_and_measures_download_compare_time():
     script = Path("scripts/benchmark_152_reuse.py").read_text(encoding="utf-8")
+    warm = Path("scripts/benchmark_152_warm_cache.py").read_text(encoding="utf-8")
     cmd = Path("RUN_BENCHMARK_152_REUSE.cmd").read_text(encoding="utf-8")
 
     assert 'TARGET_ID = "DOC-RU-FZ-152-2006"' in script
@@ -27,3 +28,11 @@ def test_152_reuse_benchmark_is_single_document_and_measures_download_compare_ti
     assert "BOOTSTRAP_CORPUS_NOT_A0_PROOF" in script
     assert "legal_truth_promoted" in script
     assert "scripts\\benchmark_152_reuse.py" in cmd
+
+    assert "REUSE_FIRST_BENCHMARK_152_FZ_WARM_CACHE" in warm
+    assert "local_verified_bootstrap_cache" in warm
+    assert '"network_used": False' in warm
+    assert "CACHE_LOAD_SECONDS=" in warm
+    assert "scripts\\benchmark_152_warm_cache.py" in cmd
+    assert "if exist \".runtime\\benchmarks\\152_fz\\ruslawod_candidate.json\" goto :warm" in cmd
+    assert "Skipping network/provider retries" in cmd

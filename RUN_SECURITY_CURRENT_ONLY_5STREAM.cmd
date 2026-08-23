@@ -9,15 +9,15 @@ if exist ".venv\Scripts\python.exe" (
 )
 
 echo ============================================================
-echo FATHER Security CURRENT_ONLY - 5 stream acquisition
+echo FATHER Security CURRENT_ONLY - 5 stream acquisition v2
 echo ============================================================
 echo Python: %PY%
 echo.
 
-%PY% scripts\run_security_current_only_5stream.py
+%PY% scripts\run_security_current_only_5stream_v2.py
 set "RC=%ERRORLEVEL%"
 
 echo.
-echo Report: reports\security_current_only\LATEST_5STREAM_RUN.json
+echo Report: reports\security_current_only\LATEST_5STREAM_RUN_V2.json
 echo Exit code: %RC%
 exit /b %RC%

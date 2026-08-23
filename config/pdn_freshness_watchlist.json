@@ -1,31 +1,50 @@
 {
-  "schema_version": "1.1",
+  "schema_version": "1.2",
   "watchlist_id": "PDN-FRESHNESS-WATCHLIST-001",
   "source_key": "publication-pravo-official-api",
+  "secondary_source_key": "rg-official-doc-index",
   "source_role": "DISCOVERY_ONLY",
-  "policy": "Remote discovery may surface candidate publication events. It never proves currentness, never promotes D2/D3, and never replaces verified local A0 serving evidence. Remote failure degrades freshness monitoring only. Successful complete observations advance a checkpoint; degraded runs never advance it.",
+  "policy": "Remote discovery may surface candidate publication events. It never proves currentness, never promotes D2/D3, and never replaces verified local A0 serving evidence. Remote failure degrades freshness monitoring only. Successful complete primary observations advance a checkpoint; degraded runs and secondary-only observations never advance it.",
   "bootstrap_lookback_days": 90,
   "checkpoint_overlap_days": 3,
   "targets": [
     {
       "document_id": "DOC-RU-FZ-152-2006",
       "query_text": "152-ФЗ",
-      "query_basis": "REFERENCE_TO_TARGET_ACT_NUMBER"
+      "query_basis": "REFERENCE_TO_TARGET_ACT_NUMBER",
+      "secondary_markers": [
+        "Федерального закона \"О персональных данных\"",
+        "Федеральный закон \"О персональных данных\""
+      ]
     },
     {
       "document_id": "DOC-RU-PP-1119-2012",
       "query_text": "Постановление Правительства Российской Федерации № 1119",
-      "query_basis": "REFERENCE_TO_TARGET_ACT_IDENTITY"
+      "query_basis": "REFERENCE_TO_TARGET_ACT_IDENTITY",
+      "secondary_markers": [
+        "Постановления Правительства Российской Федерации N 1119",
+        "Постановления Правительства Российской Федерации № 1119",
+        "требований к защите персональных данных"
+      ]
     },
     {
       "document_id": "DOC-RU-FSTEC-21-2013",
       "query_text": "приказ ФСТЭК России № 21",
-      "query_basis": "REFERENCE_TO_TARGET_ACT_IDENTITY"
+      "query_basis": "REFERENCE_TO_TARGET_ACT_IDENTITY",
+      "secondary_markers": [
+        "приказ ФСТЭК России N 21",
+        "приказ ФСТЭК России № 21"
+      ]
     },
     {
       "document_id": "DOC-RU-FSB-378-2014",
       "query_text": "приказ ФСБ России № 378",
-      "query_basis": "REFERENCE_TO_TARGET_ACT_IDENTITY"
+      "query_basis": "REFERENCE_TO_TARGET_ACT_IDENTITY",
+      "secondary_markers": [
+        "приказ ФСБ России N 378",
+        "приказ ФСБ России № 378",
+        "криптографической защиты информации"
+      ]
     }
   ]
 }

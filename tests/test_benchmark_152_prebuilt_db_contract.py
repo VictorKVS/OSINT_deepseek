@@ -21,3 +21,14 @@ def test_prebuilt_russian_law_db_benchmark_is_reuse_first_and_fail_closed():
     assert "DB_QUERY_SECONDS=" in script
     assert "COMPARE_SECONDS=" in script
     assert "scripts\\benchmark_152_prebuilt_mcp_db.py" in cmd
+
+    # Direct execution uses scripts/ as sys.path[0], so the repo root must be
+    # inserted before importing the sibling scripts namespace package.
+    root_bootstrap = 'REPO_ROOT = Path(__file__).resolve().parents[1]'
+    path_bootstrap = 'sys.path.insert(0, str(REPO_ROOT))'
+    sibling_import = 'from scripts.benchmark_152_reuse import'
+    assert "import sys" in script
+    assert root_bootstrap in script
+    assert path_bootstrap in script
+    assert script.index(root_bootstrap) < script.index(sibling_import)
+    assert script.index(path_bootstrap) < script.index(sibling_import)

@@ -15,15 +15,15 @@ def test_active_p0_runners_capture_full_local_transcripts_without_git_tracking()
     assert "LATEST_LOG=" in helper
 
     # Windows PowerShell 5.1 regression contract: do not reopen the transcript
-    # with Add-Content for every native-process output line. Keep one writer open,
-    # mirror to the console with Write-Host, and close before Copy-Item.
+    # on every native-process output line. Keep one writer open, mirror to the
+    # console, and close before Copy-Item.
     assert "System.IO.StreamWriter" in helper
     assert "System.Text.UTF8Encoding" in helper
     assert "$writer.AutoFlush = $true" in helper
     assert "$writer.WriteLine($Text)" in helper
     assert "Write-Host $Text" in helper
     assert "$writer.Dispose()" in helper
-    assert "Add-Content" not in helper
+    assert "Add-Content -LiteralPath" not in helper
     assert "Copy only after the writer is closed" in helper
 
     assert "reports/pdn_live/run_logs/" in gitignore

@@ -5,13 +5,17 @@ import json
 import shutil
 import sqlite3
 import subprocess
+import sys
 import tarfile
 import time
 from pathlib import Path
 
+REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
 from scripts.benchmark_152_reuse import TARGET_ID, TARGET_NUMBER, TARGET_TITLE_MARKER, _compare, _father_reference
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
 RUNTIME = REPO_ROOT / ".runtime" / "external_kb" / "russian-law-mcp"
 PACK_DIR = RUNTIME / "pack"
 DB_PATH = RUNTIME / "database.db"

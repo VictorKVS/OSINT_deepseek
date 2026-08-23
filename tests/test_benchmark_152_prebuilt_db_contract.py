@@ -9,7 +9,7 @@ def test_prebuilt_russian_law_db_benchmark_is_reuse_first_and_fail_closed():
     assert 'PACKAGE_SPEC = "@ansvar/russian-law-mcp@0.1.0"' in script
     assert 'PACKAGE_DB_MEMBER = "package/data/database.db"' in script
     assert "npm" in script.lower()
-    assert "npm\", \"pack\"" in script
+    assert '[npm, "pack"' in script
     assert "sqlite3.connect" in script
     assert "PRAGMA quick_check" in script
     assert "SELECT COUNT(*) FROM laws" in script

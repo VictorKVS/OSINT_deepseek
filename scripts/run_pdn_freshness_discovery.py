@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 import sys
 import time
-from datetime import date, datetime, timedelta, timezone
+from datetime import date, datetime, timezone
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -11,6 +11,11 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from father_osint.external_assets import authorize_external_asset
+from father_osint.freshness_checkpoint import (
+    load_freshness_checkpoint,
+    resolve_freshness_window,
+    write_freshness_checkpoint,
+)
 from father_osint.freshness_discovery import (
     PravoReferenceDiscovery,
     degraded_observation,
@@ -27,6 +32,7 @@ WATCHLIST = REPO_ROOT / "config" / "pdn_freshness_watchlist.json"
 REPORT = REPO_ROOT / "reports" / "pdn_live" / "P0_7_FRESHNESS_DISCOVERY.json"
 HEALTH = REPO_ROOT / ".runtime" / "source_health" / "publication-pravo-official-api.json"
 SNAPSHOTS = REPO_ROOT / ".runtime" / "freshness" / "pdn_reference_discovery_snapshots.jsonl"
+CHECKPOINT = REPO_ROOT / ".runtime" / "freshness" / "pdn_freshness_checkpoint.json"
 SOURCE_KEY = "publication-pravo-official-api"
 COOLDOWN_SECONDS = 30 * 60
 FIRST_REQUEST_TIMEOUT_SECONDS = 12.0
@@ -88,12 +94,24 @@ def main() -> int:
     asset = authorize_external_asset(SOURCE_KEY, "proof_acquisition")
     watch_payload = json.loads(WATCHLIST.read_text(encoding="utf-8"))
     targets = load_watchlist(watch_payload)
-    lookback_days = int(watch_payload.get("default_lookback_days", 7))
-    if lookback_days < 1 or lookback_days > 90:
-        raise ValueError("default_lookback_days must be between 1 and 90")
+    watchlist_id = str(watch_payload.get("watchlist_id") or "").strip()
+    if not watchlist_id:
+        raise ValueError("watchlist_id is required")
 
-    window_to = date.today()
-    window_from = window_to - timedelta(days=lookback_days)
+    bootstrap_lookback_days = int(watch_payload.get("bootstrap_lookback_days", 90))
+    checkpoint_overlap_days = int(watch_payload.get("checkpoint_overlap_days", 3))
+    checkpoint_before = load_freshness_checkpoint(
+        CHECKPOINT,
+        watchlist_id=watchlist_id,
+        source_key=SOURCE_KEY,
+    )
+    window = resolve_freshness_window(
+        today=date.today(),
+        bootstrap_lookback_days=bootstrap_lookback_days,
+        checkpoint_overlap_days=checkpoint_overlap_days,
+        checkpoint=checkpoint_before,
+    )
+
     observations = []
     network_used = False
     source_error: str | None = None
@@ -121,8 +139,8 @@ def main() -> int:
                 network_used = True
                 observation = discovery.search_recent_reference(
                     target,
-                    publish_date_from=window_from.isoformat(),
-                    publish_date_to=window_to.isoformat(),
+                    publish_date_from=window.publish_date_from,
+                    publish_date_to=window.publish_date_to,
                     timeout_seconds=timeout,
                     page_size=30,
                 )
@@ -182,24 +200,44 @@ def main() -> int:
         and row.get("exact_bytes_acquired") is False
         for row in observations
     )
+
+    observed_at = datetime.now(timezone.utc).isoformat()
+    checkpoint_advanced = False
+    checkpoint_after = checkpoint_before
+    if observation_complete:
+        checkpoint_after = write_freshness_checkpoint(
+            CHECKPOINT,
+            watchlist_id=watchlist_id,
+            source_key=SOURCE_KEY,
+            publish_date_to=window.publish_date_to,
+            observed_at=observed_at,
+        )
+        checkpoint_advanced = True
+
+    checkpoint_safety_pass = observation_complete or not checkpoint_advanced
     operational_contract_pass = (
         serving_proof_available
         and len(observations) == len(targets)
         and no_false_current_claim
         and no_promotion
+        and checkpoint_safety_pass
     )
 
     result = {
         "record_type": "P0_7_FRESHNESS_DISCOVERY",
-        "observed_at": datetime.now(timezone.utc).isoformat(),
-        "watchlist_id": watch_payload.get("watchlist_id"),
+        "observed_at": observed_at,
+        "watchlist_id": watchlist_id,
         "external_asset_status": asset.status,
         "source_key": SOURCE_KEY,
         "source_role": watch_payload.get("source_role"),
-        "window": {
-            "publish_date_from": window_from.isoformat(),
-            "publish_date_to": window_to.isoformat(),
-            "lookback_days": lookback_days,
+        "window": window.to_dict(),
+        "checkpoint": {
+            "path": CHECKPOINT.relative_to(REPO_ROOT).as_posix(),
+            "present_before": checkpoint_before is not None,
+            "state_before": checkpoint_before.to_dict() if checkpoint_before else None,
+            "advanced": checkpoint_advanced,
+            "state_after": checkpoint_after.to_dict() if checkpoint_after else None,
+            "degraded_run_did_not_advance": degraded and not checkpoint_advanced,
         },
         "local_serving_proof": {
             "documents_total": local_proof.get("documents_total"),
@@ -238,6 +276,12 @@ def main() -> int:
     print(f"LOCAL_PROOFS_AVAILABLE={local_proof.get('proof_available')}")
     print(f"SERVING_CONTINUES={str(serving_proof_available).lower()}")
     print("REMOTE_REQUIRED_FOR_SERVING=false")
+    print(f"WINDOW_MODE={window.mode}")
+    print(f"WINDOW_PUBLISH_DATE_FROM={window.publish_date_from}")
+    print(f"WINDOW_PUBLISH_DATE_TO={window.publish_date_to}")
+    print(f"CHECKPOINT_PRESENT_BEFORE={str(checkpoint_before is not None).lower()}")
+    print(f"CHECKPOINT_ADVANCED={str(checkpoint_advanced).lower()}")
+    print(f"DEGRADED_RUN_DID_NOT_ADVANCE_CHECKPOINT={str(degraded and not checkpoint_advanced).lower()}")
     print(f"FRESHNESS_OBSERVATION_COMPLETE={str(observation_complete).lower()}")
     print(f"FRESHNESS_MONITORING_DEGRADED={str(degraded).lower()}")
     print("FRESHNESS_CURRENT_CLAIM_ALLOWED=false")

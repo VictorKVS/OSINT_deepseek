@@ -31,6 +31,15 @@ $archiveLog = Join-Path $logDir ("{0}-{1}.txt" -f $safeRunId, $stamp)
 $latestRunLog = Join-Path $logDir "LATEST_RUN.txt"
 $latestNamedLog = Join-Path $logDir ("LATEST_{0}.txt" -f $safeRunId)
 
+function Get-RepoRelativePath {
+    param([Parameter(Mandatory = $true)][string]$Path)
+    $prefix = $repoRoot.TrimEnd('\') + '\'
+    if ($Path.StartsWith($prefix, [System.StringComparison]::OrdinalIgnoreCase)) {
+        return $Path.Substring($prefix.Length)
+    }
+    return $Path
+}
+
 Set-Content -LiteralPath $archiveLog -Value "" -Encoding UTF8
 
 function Write-RunLine {
@@ -53,7 +62,7 @@ Write-RunLine ("RUN_ID={0}" -f $RunId)
 Write-RunLine ("STARTED_LOCAL={0}" -f (Get-Date -Format "yyyy-MM-ddTHH:mm:ssK"))
 Write-RunLine ("GIT_HEAD={0}" -f $gitHead)
 Write-RunLine ("PYTHON_EXE={0}" -f $PythonExe)
-Write-RunLine ("LOG_ARCHIVE={0}" -f ([IO.Path]::GetRelativePath($repoRoot, $archiveLog)))
+Write-RunLine ("LOG_ARCHIVE={0}" -f (Get-RepoRelativePath -Path $archiveLog))
 Write-RunLine ""
 
 $overallRc = 0
@@ -92,8 +101,8 @@ Copy-Item -LiteralPath $archiveLog -Destination $latestNamedLog -Force
 Copy-Item -LiteralPath $archiveLog -Destination $latestRunLog -Force
 
 Write-Output ""
-Write-Output ("FULL_LOG={0}" -f ([IO.Path]::GetRelativePath($repoRoot, $archiveLog)))
-Write-Output ("LATEST_LOG={0}" -f ([IO.Path]::GetRelativePath($repoRoot, $latestRunLog)))
-Write-Output "Upload LATEST_RUN.txt here instead of copying the console output."
+Write-Output ("FULL_LOG={0}" -f (Get-RepoRelativePath -Path $archiveLog))
+Write-Output ("LATEST_LOG={0}" -f (Get-RepoRelativePath -Path $latestRunLog))
+Write-Output "Upload reports\pdn_live\run_logs\LATEST_RUN.txt here instead of copying the console output."
 
 exit $overallRc

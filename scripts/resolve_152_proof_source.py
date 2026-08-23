@@ -10,6 +10,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
+from father_osint.document_compiler import DocumentCompilerError, extract_visible_text
 from father_osint.source_health import load_source_health
 
 TARGET_ID = "DOC-RU-FZ-152-2006"
@@ -29,14 +30,34 @@ def _sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
-def _decode(path: Path) -> str:
-    raw = path.read_bytes()
-    for encoding in ("utf-8-sig", "utf-8", "cp1251"):
-        try:
-            return raw.decode(encoding)
-        except UnicodeDecodeError:
-            continue
-    return raw.decode("utf-8", errors="replace")
+def _norm(value: str) -> str:
+    return " ".join(value.casefold().replace("ё", "е").split())
+
+
+def _marker_results(visible_text: str, markers: list[str]) -> dict[str, bool]:
+    normalized = _norm(visible_text)
+    return {marker: _norm(marker) in normalized for marker in markers}
+
+
+def _identity_result(data: bytes, source_doc: dict[str, object]) -> tuple[bool, dict[str, bool], dict[str, bool], str | None]:
+    """Re-run the same visible-text identity semantics used by the accepted D0-D3 inventory.
+
+    The preserved operator capture is HTML. Raw-byte substring checks are invalid
+    because tags/entities can split visible phrases. Identity must be evaluated
+    over extracted visible text with whitespace/case/ё normalization, exactly as
+    the original source-pack inventory did before accepting the capture.
+    """
+    try:
+        visible_text = extract_visible_text(data, "text/html")
+    except (DocumentCompilerError, UnicodeError, ValueError) as exc:
+        return False, {}, {}, f"VISIBLE_TEXT_EXTRACTION_FAILED: {exc}"
+
+    primary = [str(value) for value in source_doc.get("primary_identity_markers", [])]
+    secondary = [str(value) for value in source_doc.get("identity_markers", [])]
+    primary_results = _marker_results(visible_text, primary)
+    secondary_results = _marker_results(visible_text, secondary)
+    identity_pass = bool(primary_results) and all(primary_results.values()) and all(secondary_results.values())
+    return identity_pass, primary_results, secondary_results, None
 
 
 def main() -> int:
@@ -70,16 +91,11 @@ def main() -> int:
         print("TARGET_MISSING_FROM_SOURCE_PACK")
         return 2
 
+    data = LOCAL_A0_CAPTURE.read_bytes()
     expected_sha = str(target.get("artifact_sha256") or "")
-    actual_sha = _sha256(LOCAL_A0_CAPTURE)
+    actual_sha = hashlib.sha256(data).hexdigest()
     sha_match = bool(expected_sha) and expected_sha == actual_sha
-    text = _decode(LOCAL_A0_CAPTURE).casefold().replace("ё", "е")
-    markers = [str(value) for value in source_doc.get("primary_identity_markers", [])]
-    marker_results = {
-        marker: marker.casefold().replace("ё", "е") in text
-        for marker in markers
-    }
-    identity_pass = bool(marker_results) and all(marker_results.values())
+    identity_pass, primary_results, secondary_results, identity_error = _identity_result(data, source_doc)
     proof_available = sha_match and identity_pass
 
     health = load_source_health(HEALTH, source_key=SOURCE_KEY)
@@ -93,11 +109,14 @@ def main() -> int:
         "resolution": "LOCAL_A0_VERIFIED_CACHE" if proof_available else "BLOCKED_LOCAL_A0_VERIFICATION_FAILED",
         "local_a0": {
             "path": LOCAL_A0_CAPTURE.relative_to(REPO_ROOT).as_posix(),
-            "bytes": LOCAL_A0_CAPTURE.stat().st_size,
+            "bytes": len(data),
             "sha256": actual_sha,
             "expected_sha256": expected_sha,
             "sha256_match": sha_match,
-            "identity_markers": marker_results,
+            "identity_method": "EXTRACT_VISIBLE_TEXT__PRIMARY_AND_SECONDARY__NORMALIZED",
+            "primary_identity_markers": primary_results,
+            "secondary_identity_markers": secondary_results,
+            "identity_error": identity_error,
             "identity_pass": identity_pass,
             "publication_anchor": source_doc.get("publication_anchor"),
         },

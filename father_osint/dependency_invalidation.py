@@ -34,16 +34,6 @@ def _doc_ids(value: object) -> set[str]:
     return {str(item) for item in value if str(item)}
 
 
-def _edge_canonical_key(edge: Mapping[str, object]) -> str:
-    metadata = edge.get("metadata")
-    if isinstance(metadata, Mapping):
-        value = metadata.get("canonical_key")
-        if value:
-            return str(value)
-    value = edge.get("canonical_key")
-    return str(value) if value else ""
-
-
 def build_object_delta_plan(
     changed_document_ids: Iterable[str],
     *,
@@ -59,19 +49,25 @@ def build_object_delta_plan(
     requirement nodes supported by a changed document must be rebuilt because
     their IDs/contents are version-derived. Shared TERM/ENTITY nodes are kept
     when an unaffected document still supports them; only their changed support
-    edge is rechecked. Cross-document relations/conflict candidates touching a
-    changed document are re-evaluated, while unrelated objects remain reusable.
+    edge is rechecked. Cross-document relations/conflict candidates are treated
+    separately from document-local objects.
 
-    A D11 relation identity includes its whole supporting document set. If that
-    set changes, even a D13 pair edge between two otherwise unchanged documents
-    can receive a new edge ID. Therefore every graph edge derived from an
-    affected D11 relation (same relation type + canonical key) is rechecked, not
-    only pair edges whose endpoints directly include the changed document.
+    Important D11 safety rule: before the changed document has completed its
+    new D6-D9 extraction, the planner cannot know which *new* canonical terms or
+    entities it may begin to support. A previously unrelated D11 relation can
+    therefore expand to include the changed document, changing that relation's
+    stable ID and every D13 pair edge derived from it. The pre-rebuild plan must
+    consequently invalidate the whole existing D11 graph-edge layer whenever a
+    document changed. This is deliberately conservative and fail-closed. A later
+    post-D6 refinement may narrow the D11 scope using the actual old/new
+    canonical-key delta, but pre-D6 reuse must never guess that an existing D11
+    relation is unaffected.
     """
 
     changed = {str(item) for item in changed_document_ids if str(item)}
     nodes = [dict(row) for row in graph_nodes]
     edges = [dict(row) for row in graph_edges]
+    cross_rows = [dict(row) for row in cross_relations]
     node_ids = {str(row.get("node_id")) for row in nodes if row.get("node_id")}
     edge_ids = {str(row.get("edge_id")) for row in edges if row.get("edge_id")}
     changed_doc_nodes = {f"DOC:{document_id}" for document_id in changed}
@@ -117,17 +113,24 @@ def build_object_delta_plan(
             retain_recheck_nodes.remove(node_id)
             rebuild_nodes.add(node_id)
 
+    # Pre-D6 conservative D11 invalidation. Existing relations not currently
+    # containing the changed document may still be affected when the new version
+    # adds a canonical key. Therefore all current D11 relation identities and all
+    # D13 edges derived from D11 are rechecked whenever there is a change.
     cross_relation_ids: set[str] = set()
-    affected_cross_signatures: set[tuple[str, str]] = set()
-    for relation in cross_relations:
-        if changed & _doc_ids(relation.get("document_ids")):
+    if changed:
+        for relation in cross_rows:
             relation_id = str(relation.get("relation_id") or "")
             if relation_id:
                 cross_relation_ids.add(relation_id)
-            relation_type = str(relation.get("relation_type") or "")
-            canonical_key = str(relation.get("canonical_key") or "")
-            if relation_type and canonical_key:
-                affected_cross_signatures.add((relation_type, canonical_key))
+        for edge in edges:
+            if str(edge.get("relation_type") or "") in {
+                "SHARED_TERM_ACROSS_DOCUMENTS",
+                "SHARED_ENTITY_ACROSS_DOCUMENTS",
+            }:
+                edge_id = str(edge.get("edge_id") or "")
+                if edge_id:
+                    recheck_edges.add(edge_id)
 
     conflict_ids: set[str] = set()
     conflict_nodes: set[str] = set()
@@ -138,23 +141,14 @@ def build_object_delta_plan(
                 conflict_ids.add(candidate_id)
                 conflict_nodes.add(f"CON:{candidate_id}")
 
-    # Any D13 edge touching an affected conflict node must be rechecked. For
-    # D11 shared-term/entity relations, invalidate all pair edges derived from
-    # the affected relation signature because relation identity includes the
-    # complete document set, not merely each pair's endpoints.
+    # Any D13 edge touching an affected conflict node must be rechecked.
     for edge in edges:
         edge_id = str(edge.get("edge_id") or "")
-        relation_type = str(edge.get("relation_type") or "")
         left = str(edge.get("from_node") or "")
         right = str(edge.get("to_node") or "")
         if left in conflict_nodes or right in conflict_nodes:
             if edge_id:
                 recheck_edges.add(edge_id)
-        if relation_type in {"SHARED_TERM_ACROSS_DOCUMENTS", "SHARED_ENTITY_ACROSS_DOCUMENTS"}:
-            signature = (relation_type, _edge_canonical_key(edge))
-            if signature in affected_cross_signatures:
-                if edge_id:
-                    recheck_edges.add(edge_id)
 
     # Conflict nodes themselves remain stable candidate identities but need a
     # fresh decision/evidence calculation, so retain them with recheck semantics.

@@ -39,6 +39,7 @@ def test_active_p0_runners_capture_full_local_transcripts_without_git_tracking()
         "RUN_PDN_DUAL_PATH_D11_REBUILD.cmd": "PDN_DUAL_PATH_D11_REBUILD",
         "RUN_PDN_DUAL_PATH_D12_REBUILD.cmd": "PDN_DUAL_PATH_D12_REBUILD",
         "RUN_PDN_DUAL_PATH_D13_REBUILD.cmd": "PDN_DUAL_PATH_D13_REBUILD",
+        "RUN_PDN_FRESHNESS_DISCOVERY.cmd": "PDN_FRESHNESS_DISCOVERY",
     }
     for path, run_id in runners.items():
         text = Path(path).read_text(encoding="utf-8")

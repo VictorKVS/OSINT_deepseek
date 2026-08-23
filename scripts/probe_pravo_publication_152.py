@@ -10,13 +10,21 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from father_osint.external_assets import authorize_external_asset
-from father_osint.pravo_publication import PravoPublicationClient, PravoPublicationError
+from father_osint.pravo_publication import PravoPublicationClient
 
 
 REPORT = REPO_ROOT / "reports" / "pdn_live" / "PROBE_PRAVO_PUBLICATION_152.json"
 TARGET_NUMBER = "152-ФЗ"
 TARGET_DATE = "2006-07-27"
 TARGET_TITLE_MARKER = "персональных данных"
+
+
+def _transport_state(client: PravoPublicationClient) -> dict[str, object]:
+    transport = client.transport
+    return {
+        "transport": getattr(transport, "last_transport", None),
+        "transport_failures": list(getattr(transport, "last_failures", []) or []),
+    }
 
 
 def main() -> int:
@@ -33,6 +41,7 @@ def main() -> int:
             timeout_seconds=30.0,
         )
     except Exception as exc:
+        transport_state = _transport_state(client)
         result = {
             "record_type": "PRAVO_PUBLICATION_152_RUNTIME_PROBE",
             "api_reachable": False,
@@ -40,6 +49,7 @@ def main() -> int:
             "target_date": TARGET_DATE,
             "external_asset_status": asset.status,
             "error": f"{type(exc).__name__}: {exc}",
+            **transport_state,
             "metadata_only": True,
             "d2_d3_promoted": False,
             "legal_truth_promoted": False,
@@ -49,7 +59,10 @@ def main() -> int:
         REPORT.write_text(json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
         print(json.dumps(result, ensure_ascii=False, indent=2))
         print("API_REACHABLE=false")
+        print(f"TRANSPORT={transport_state['transport'] or 'none'}")
+        print(f"TRANSPORT_FAILURES={len(transport_state['transport_failures'])}")
         print("D2_D3_PROMOTED=false")
+        print("LEGAL_TRUTH_PROMOTED=false")
         return 2
 
     search_seconds = time.perf_counter() - search_started
@@ -77,6 +90,7 @@ def main() -> int:
             detail_errors.append({
                 "eo_number": hit.eo_number,
                 "error": f"{type(exc).__name__}: {exc}",
+                **_transport_state(client),
             })
         detail_seconds += time.perf_counter() - detail_started
 
@@ -130,6 +144,8 @@ def main() -> int:
     print(json.dumps(result, ensure_ascii=False, indent=2))
     print()
     print("API_REACHABLE=true")
+    print(f"TRANSPORT={search_meta.get('transport') or 'unknown'}")
+    print(f"TRANSPORT_FAILURES={len(search_meta.get('transport_failures_before_success') or [])}")
     print(f"HITS_TOTAL={len(hits)}")
     print(f"EXACT_IDENTITY_HITS={len(exact_with_title)}")
     print(f"FILE_CANDIDATE_FOUND={str(file_candidate_found).lower()}")

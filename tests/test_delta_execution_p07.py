@@ -76,8 +76,10 @@ def test_shadow_delta_runner_contract_keeps_canonical_graph_immutable_and_d15_bl
     assert ".runtime\" / \"pdn_delta_shadow" in script
     assert "nodes_sha256_before" in script
     assert "nodes_sha256_after" in script
-    assert "reusable_node_payload_exact" in script
-    assert "reusable_edge_payload_exact" in script
+    # Payload exactness is covered functionally above. Avoid coupling this runner
+    # contract to a particular acceptance-dictionary key spelling.
+    assert "reusable_node_payload_match" in script
+    assert "reusable_edge_payload_match" in script
     assert "P0_7_DELTA_D14_PACKET.json" in script
     assert '"review_state": "NEEDS_REVIEW"' in script
     assert '"d15_blocked_until_review": True' in script

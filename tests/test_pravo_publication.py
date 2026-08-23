@@ -2,7 +2,11 @@ from urllib.parse import parse_qs, urlparse
 
 import pytest
 
-from father_osint.pravo_publication import PravoPublicationClient, PravoPublicationError
+from father_osint.pravo_publication import (
+    PravoPublicationClient,
+    PravoPublicationError,
+    ResilientJsonTransport,
+)
 
 
 class FakeTransport:
@@ -18,6 +22,18 @@ class FakeTransport:
         if isinstance(payload, Exception):
             raise payload
         return payload
+
+
+class NamedTransport(FakeTransport):
+    def __init__(self, name, payloads):
+        super().__init__(payloads)
+        self.last_transport = name
+        self.last_failures = []
+        self.timeouts = []
+
+    def get_json(self, url: str, *, timeout_seconds: float, max_bytes: int):
+        self.timeouts.append(timeout_seconds)
+        return super().get_json(url, timeout_seconds=timeout_seconds, max_bytes=max_bytes)
 
 
 def test_search_uses_exact_number_and_metadata_only_contract():
@@ -99,3 +115,33 @@ def test_bad_api_shape_fails_closed():
     client = PravoPublicationClient(transport=FakeTransport([{"items": "not-a-list"}]))
     with pytest.raises(PravoPublicationError):
         client.search_documents(number="152-ФЗ")
+
+
+def test_resilient_transport_caps_urllib_then_uses_https_fallback():
+    primary = NamedTransport("urllib_https", [PravoPublicationError("WinError 10060")])
+    fallback = NamedTransport("curl_https", [{"items": []}])
+    transport = ResilientJsonTransport(
+        primary=primary,
+        fallback=fallback,
+        primary_timeout_cap_seconds=8.0,
+    )
+    client = PravoPublicationClient(transport=transport)
+
+    hits, meta = client.search_documents(number="152-ФЗ", timeout_seconds=30.0)
+
+    assert hits == []
+    assert primary.timeouts == [8.0]
+    assert fallback.timeouts == [22.0]
+    assert meta["transport"] == "curl_https"
+    assert len(meta["transport_failures_before_success"]) == 1
+    assert "WinError 10060" in meta["transport_failures_before_success"][0]
+
+
+def test_resilient_transport_fails_closed_when_both_https_transports_fail():
+    primary = NamedTransport("urllib_https", [PravoPublicationError("primary down")])
+    fallback = NamedTransport("curl_https", [PravoPublicationError("fallback down")])
+    transport = ResilientJsonTransport(primary=primary, fallback=fallback)
+    client = PravoPublicationClient(transport=transport)
+
+    with pytest.raises(PravoPublicationError, match="transports failed"):
+        client.search_documents(number="152-ФЗ", timeout_seconds=10.0)

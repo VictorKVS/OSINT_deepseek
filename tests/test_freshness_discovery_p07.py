@@ -21,14 +21,21 @@ class FakeTransport:
         return self.payload
 
 
-def test_watchlist_requires_unique_bounded_targets():
+def test_watchlist_requires_unique_bounded_targets_and_optional_secondary_markers():
     targets = load_watchlist({
         "targets": [
-            {"document_id": "A", "query_text": "152-ФЗ", "query_basis": "ACT_NUMBER"},
+            {
+                "document_id": "A",
+                "query_text": "152-ФЗ",
+                "query_basis": "ACT_NUMBER",
+                "secondary_markers": ["О персональных данных"],
+            },
             {"document_id": "B", "query_text": "1119", "query_basis": "ACT_NUMBER"},
         ]
     })
     assert [item.document_id for item in targets] == ["A", "B"]
+    assert targets[0].secondary_markers == ("О персональных данных",)
+    assert targets[1].secondary_markers == ()
 
 
 def test_recent_reference_search_is_metadata_only_and_never_claims_currentness():
@@ -95,7 +102,7 @@ def test_degraded_remote_source_never_breaks_serving_semantics_or_promotes_truth
     assert observation.legal_truth_promoted is False
 
 
-def test_freshness_runner_contract_is_fail_safe_and_logged():
+def test_freshness_runner_contract_is_fail_safe_checkpointed_multisource_and_logged():
     script = open("scripts/run_pdn_freshness_discovery.py", encoding="utf-8").read()
     cmd = open("RUN_PDN_FRESHNESS_DISCOVERY.cmd", encoding="utf-8").read()
 
@@ -108,5 +115,9 @@ def test_freshness_runner_contract_is_fail_safe_and_logged():
     assert "legal_truth_promoted" in script
     assert "load_source_health" in script
     assert "write_source_health" in script
+    assert "write_freshness_checkpoint" in script
+    assert "RgDocumentIndexDiscovery" in script
+    assert "SECONDARY_RG_SCAN_COMPLETE" in script
+    assert "SECONDARY_RG_CHECKPOINT_COVERAGE_COMPLETE=false" in script
     assert "PDN_FRESHNESS_DISCOVERY" in cmd
     assert "run_logged_python_sequence.ps1" in cmd

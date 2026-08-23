@@ -34,7 +34,7 @@ def test_object_delta_preserves_shared_nodes_with_unaffected_support():
     assert "e2" in plan.reusable_edge_ids
 
 
-def test_changed_cross_relation_rechecks_all_pair_edges_from_relation_signature():
+def test_pre_d6_change_rechecks_entire_existing_d11_edge_layer():
     nodes = [
         {"node_id": "DOC:A"},
         {"node_id": "DOC:B"},
@@ -87,11 +87,11 @@ def test_changed_cross_relation_rechecks_all_pair_edges_from_relation_signature(
         conflict_candidates=[],
     )
 
-    # Even B-C must be rechecked: if A drops out, the D11 relation ID changes
-    # because it includes the whole supporting document set.
-    assert "ab" in plan.recheck_edge_ids
-    assert "bc" in plan.recheck_edge_ids
-    assert "other" in plan.reusable_edge_ids
+    # Before new D6-D9 results exist, A may newly support `other_term`, so even
+    # a D11 relation that did not previously contain A cannot be proven reusable.
+    assert set(plan.cross_relation_ids) == {"REL11:old", "REL11:other"}
+    assert {"ab", "bc", "other"}.issubset(set(plan.recheck_edge_ids))
+    assert "other" not in plan.reusable_edge_ids
 
 
 def test_shared_node_without_other_support_is_rebuilt_not_blindly_retained():

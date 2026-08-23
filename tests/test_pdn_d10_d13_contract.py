@@ -3,15 +3,17 @@ from pathlib import Path
 
 def test_d10_d12_runner_is_quality_gated_and_candidate_only():
     script = Path("scripts/run_pdn_d10_d12.py").read_text(encoding="utf-8")
+    builders = Path("father_osint/relation_builders.py").read_text(encoding="utf-8")
 
     assert "promotion_to_d10_allowed" in script
     assert "D10_BLOCKED_BY_D6_D9_QUALITY_GATE" in script
-    assert "TERM_DEFINED_BY" in script
-    assert "REQUIREMENT_MENTIONS_ENTITY" in script
-    assert "SHARED_TERM_ACROSS_DOCUMENTS" in script
-    assert "DEFINITION_VARIANCE_CANDIDATE" in script
-    assert "REQUIREMENT_OVERLAP_CANDIDATE" in script
-    assert '"confirmed_conflict": False' in script
+    assert "build_relation_sets" in script
+    assert "TERM_DEFINED_BY" in builders
+    assert "REQUIREMENT_MENTIONS_ENTITY" in builders
+    assert "SHARED_TERM_ACROSS_DOCUMENTS" in builders
+    assert "DEFINITION_VARIANCE_CANDIDATE" in builders
+    assert "REQUIREMENT_OVERLAP_CANDIDATE" in builders
+    assert '"confirmed_conflict": False' in builders
     assert "PipelineStage.D10_INTERNAL_RELATIONS" in script
     assert "PipelineStage.D12_CONFLICTS_OVERLAPS" in script
     assert "autonomous_kb_promotion" in script

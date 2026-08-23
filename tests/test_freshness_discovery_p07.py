@@ -116,7 +116,9 @@ def test_freshness_runner_contract_is_fail_safe_checkpointed_multisource_and_log
     assert "load_source_health" in script
     assert "write_source_health" in script
     assert "write_freshness_checkpoint" in script
-    assert "RgDocumentIndexDiscovery" in script
+    assert "RgAnnouncementFeedDiscovery" in script
+    assert "RG_DOCUMENTED_XML_ANNOUNCEMENT_FEED" in script
+    assert "SECONDARY_RG_ROUTE_KIND" in script
     assert "SECONDARY_RG_SCAN_COMPLETE" in script
     assert "SECONDARY_RG_CHECKPOINT_COVERAGE_COMPLETE=false" in script
     assert "PDN_FRESHNESS_DISCOVERY" in cmd

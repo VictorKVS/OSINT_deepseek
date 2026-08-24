@@ -1,9 +1,17 @@
 {
-  "schema_version": "1.2",
+  "schema_version": "1.3",
   "policy_id": "FATHER-LIBRARY-ORDER-001",
   "status": "ACTIVE",
   "scope": "ALL_ROLE_KNOWLEDGE_BASE_LIBRARY_ORDERS",
   "max_parallel_streams": 5,
+  "classification_standard": "config/father_scope_priority_standard.json",
+  "priority_execution": {
+    "default_importance_order": ["NECESSARY", "DESIRABLE", "INTERESTING_LATER"],
+    "auto_execute": ["NECESSARY"],
+    "queue_after_core": ["DESIRABLE"],
+    "hold_by_default": ["INTERESTING_LATER"],
+    "rule": "Target maturity controls depth; importance controls execution order. Unresolved NECESSARY items at or below target maturity block completion."
+  },
   "global_document_registry": {
     "policy": "config/global_document_registry_policy.json",
     "sources": "config/global_document_registry_sources.json",

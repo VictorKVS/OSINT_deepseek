@@ -1,0 +1,179 @@
+{
+  "schema_version": "1.0",
+  "matrix_id": "FATHER-AREA-PRIORITY-MATRIX-001",
+  "classification_standard": "config/father_scope_priority_standard.json",
+  "rule": "Every area is decomposed by maturity MIN/MEDIUM/MAX and importance NECESSARY/DESIRABLE/INTERESTING_LATER. Empty cells are allowed only with an explicit NOT_APPLICABLE or GAP reason.",
+  "areas": [
+    {
+      "area_id": "GLOBAL_DOCUMENT_REGISTRY",
+      "title": "Единый реестр документов",
+      "MIN": {
+        "NECESSARY": ["unique document identity", "version/status fields", "source provenance", "role/domain applicability bindings", "dedup/reuse before download"],
+        "DESIRABLE": ["operator filters and human-readable registry view"],
+        "INTERESTING_LATER": ["automatic ontology enrichment of document families"]
+      },
+      "MEDIUM": {
+        "NECESSARY": ["conflict detection between source registries", "replacement/amendment relations", "exact-text availability state", "cross-role reuse metrics"],
+        "DESIRABLE": ["bulk reconciliation tools", "graph visualization of document relations"],
+        "INTERESTING_LATER": ["external catalog federation"]
+      },
+      "MAX": {
+        "NECESSARY": ["freshness monitoring for critical documents", "point-in-time version reconstruction for concrete cases"],
+        "DESIRABLE": ["automated impact analysis across roles/projects", "advanced change-diff analytics"],
+        "INTERESTING_LATER": ["regulatory digital twin simulation"]
+      }
+    },
+    {
+      "area_id": "RU_REGULATORY_LAYER",
+      "title": "Российская нормативная база",
+      "MIN": {
+        "NECESSARY": ["applicable laws/regulator acts/national standards identified", "currentness checked", "superseded documents separated", "mandatory/voluntary/conditional applicability separated"],
+        "DESIRABLE": ["official explanatory material and methodical guidance"],
+        "INTERESTING_LATER": ["historical versions without a concrete case"]
+      },
+      "MEDIUM": {
+        "NECESSARY": ["exact official text for critical applicable documents", "amendment chains", "role/task applicability mapping", "sector overlays where project context requires them"],
+        "DESIRABLE": ["cross-reference map between legal requirements and standards"],
+        "INTERESTING_LATER": ["non-applicable sector collections"]
+      },
+      "MAX": {
+        "NECESSARY": ["continuous currentness monitoring for critical scope", "future-effective change tracking"],
+        "DESIRABLE": ["impact forecast and migration checklist per change"],
+        "INTERESTING_LATER": ["full historical legal graph for all periods"]
+      }
+    },
+    {
+      "area_id": "SECURITY_KNOWLEDGE_BASE",
+      "title": "Информационная безопасность",
+      "MIN": {
+        "NECESSARY": ["149-FZ/152-FZ/187-FZ applicability core", "critical government/regulator requirements", "PDN/KII/GIS baseline", "threat modeling", "secure architecture", "incident and vulnerability basics"],
+        "DESIRABLE": ["core OWASP and secure-development practice layer"],
+        "INTERESTING_LATER": ["rare sector and research threat models outside current projects"]
+      },
+      "MEDIUM": {
+        "NECESSARY": ["secure SDLC", "AppSec/DevSecOps", "IAM", "logging/SIEM", "crypto applicability", "supply-chain security", "cross-control traceability"],
+        "DESIRABLE": ["reference architectures", "control implementation examples", "attack/defense case studies"],
+        "INTERESTING_LATER": ["specialized offensive research not needed for defensive scope"]
+      },
+      "MAX": {
+        "NECESSARY": ["change monitoring", "regression fixtures", "control effectiveness evidence", "golden security decisions"],
+        "DESIRABLE": ["advanced attack graph simulation", "automated control-gap analytics"],
+        "INTERESTING_LATER": ["experimental autonomous red-team research"]
+      }
+    },
+    {
+      "area_id": "ROLE_LIBRARIES",
+      "title": "Библиотеки и компетенции ролей",
+      "MIN": {
+        "NECESSARY": ["topic inventory", "Russian regulatory baseline where applicable", "authoritative source seed per core topic", "at least one usable artifact or explicit GAP", "traceability"],
+        "DESIRABLE": ["one strong book/course/reference implementation per core cluster"],
+        "INTERESTING_LATER": ["large peripheral reading lists"]
+      },
+      "MEDIUM": {
+        "NECESSARY": ["multiple source classes", "templates/checklists", "competency questions", "conflicts/counter-evidence", "practice examples"],
+        "DESIRABLE": ["case studies and alternative schools of practice"],
+        "INTERESTING_LATER": ["rare specialty branches outside role demand"]
+      },
+      "MAX": {
+        "NECESSARY": ["benchmark/evaluation corpus", "change monitoring", "golden decisions", "measured reuse/regression"],
+        "DESIRABLE": ["expert research corpus", "advanced simulations"],
+        "INTERESTING_LATER": ["academic breadth without product/role trigger"]
+      }
+    },
+    {
+      "area_id": "ACQUISITION_AND_DOWNLOAD",
+      "title": "Поиск и скачивание источников",
+      "MIN": {
+        "NECESSARY": ["source policy", "reuse-before-download", "queue", "progress", "destination routing", "SHA-256", "provenance", "failure visibility"],
+        "DESIRABLE": ["bulk selection up to bounded parallelism", "operator-friendly filters"],
+        "INTERESTING_LATER": ["extra niche collectors"]
+      },
+      "MEDIUM": {
+        "NECESSARY": ["multi-source acquisition", "source quality classification", "retry/circuit breaker", "exact-version recognition", "duplicate payload reuse"],
+        "DESIRABLE": ["automatic gap-driven follow-up search"],
+        "INTERESTING_LATER": ["broad unattended discovery sweeps"]
+      },
+      "MAX": {
+        "NECESSARY": ["freshness-triggered reacquisition", "measured throughput/rework/reuse", "capacity and bottleneck telemetry"],
+        "DESIRABLE": ["adaptive query planning"],
+        "INTERESTING_LATER": ["autonomous long-horizon collection campaigns"]
+      }
+    },
+    {
+      "area_id": "DOCUMENT_COMPILER_AND_KNOWLEDGE_EXTRACTION",
+      "title": "Разбор документов и извлечение знаний",
+      "MIN": {
+        "NECESSARY": ["immutable original", "structure/chunks", "definitions/requirements/entities", "lineage to source span", "no auto-promotion"],
+        "DESIRABLE": ["more file-format adapters"],
+        "INTERESTING_LATER": ["rare legacy format support"]
+      },
+      "MEDIUM": {
+        "NECESSARY": ["relations", "applicability", "conflict candidates", "cross-document concepts", "quality gates"],
+        "DESIRABLE": ["semantic normalization and richer ontology"],
+        "INTERESTING_LATER": ["experimental extraction models"]
+      },
+      "MAX": {
+        "NECESSARY": ["selective rebuild", "differential regression", "change impact", "measured extraction quality"],
+        "DESIRABLE": ["advanced multimodal extraction"],
+        "INTERESTING_LATER": ["fully autonomous semantic promotion"]
+      }
+    },
+    {
+      "area_id": "ANALYST_AND_REVIEW",
+      "title": "Аналитик, критик и review",
+      "MIN": {
+        "NECESSARY": ["facts/claims/interpretations separated", "evidence cited", "uncertainty explicit", "human review gate", "counter-evidence can be requested"],
+        "DESIRABLE": ["standard report templates"],
+        "INTERESTING_LATER": ["extra analyst personas"]
+      },
+      "MEDIUM": {
+        "NECESSARY": ["structured analytic techniques", "conflict handling", "alternative hypotheses", "decision lineage", "review queues"],
+        "DESIRABLE": ["domain-specific critique playbooks"],
+        "INTERESTING_LATER": ["large multi-agent debate panels"]
+      },
+      "MAX": {
+        "NECESSARY": ["challengeable golden decisions", "A/B evaluation of analytical methods", "measured error/rework", "versioned theory updates"],
+        "DESIRABLE": ["advanced scenario simulation"],
+        "INTERESTING_LATER": ["autonomous theory generation without concrete research demand"]
+      }
+    },
+    {
+      "area_id": "CONTROL_CENTER_UI",
+      "title": "OSINT / FATHER Control Center",
+      "MIN": {
+        "NECESSARY": ["top brand mark", "local-safe launch", "search", "downloads/progress", "jobs", "traceability", "library orders", "clear status badges"],
+        "DESIRABLE": ["dark/light modes", "better filters", "responsive polish"],
+        "INTERESTING_LATER": ["decorative motion and non-functional visual effects"]
+      },
+      "MEDIUM": {
+        "NECESSARY": ["global registry view", "pipeline stage view", "role/KB coverage", "conflict/GAP views", "operator actions with audit trail"],
+        "DESIRABLE": ["graph/table switch", "saved workspaces", "advanced dashboards"],
+        "INTERESTING_LATER": ["collaborative social features"]
+      },
+      "MAX": {
+        "NECESSARY": ["full investigation graph", "time/version navigation", "impact tracing", "production telemetry"],
+        "DESIRABLE": ["high-end presentation/showcase polish"],
+        "INTERESTING_LATER": ["immersive/3D investigation UI"]
+      }
+    },
+    {
+      "area_id": "TRACEABILITY_AND_METRICS",
+      "title": "Трассировка и производственные метрики",
+      "MIN": {
+        "NECESSARY": ["trace/task/command ids", "actor/executor", "state transitions", "input/output/evidence refs", "errors", "real counters only"],
+        "DESIRABLE": ["operator-readable trace timeline"],
+        "INTERESTING_LATER": ["decorative trace visualizations"]
+      },
+      "MEDIUM": {
+        "NECESSARY": ["reuse/rework metrics", "per-stage throughput", "bottleneck visibility", "cross-command correlation"],
+        "DESIRABLE": ["comparative dashboards"],
+        "INTERESTING_LATER": ["predictive scheduling without enough telemetry"]
+      },
+      "MAX": {
+        "NECESSARY": ["measured 1-stream baseline where speedup is claimed", "capacity trends", "quality/throughput coupling", "evidence-backed ETA only when sufficient"],
+        "DESIRABLE": ["adaptive workload allocation"],
+        "INTERESTING_LATER": ["fully autonomous resource orchestration"]
+      }
+    }
+  ]
+}

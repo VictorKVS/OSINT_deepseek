@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>FATHER OSINT Control Center</title>
   <link rel="stylesheet" href="/styles.css" />
+  <style>
+    .download-role{border:1px solid #1d3447;border-radius:10px;padding:12px;background:#0b1822;margin-bottom:10px}.download-role-head{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:9px}.download-role-head small,.download-row small{color:var(--muted)}.download-row{display:grid;grid-template-columns:minmax(180px,1.6fr) 90px minmax(180px,1fr) 100px;gap:10px;align-items:center;padding:8px 0;border-top:1px solid #182b3b}.download-row:first-of-type{border-top:0}.progress-track{height:7px;border-radius:99px;background:#172b3d;overflow:hidden}.progress-fill{height:100%;background:linear-gradient(90deg,var(--cyan),var(--green));border-radius:99px}.download-status{font-size:10px;letter-spacing:.08em}.download-history{max-height:360px;overflow:auto}.download-summary{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}.download-summary .chip{display:inline-block}.mono{font-family:Consolas,monospace;font-size:10px}@media(max-width:900px){.download-row{grid-template-columns:1fr}.download-row>*{min-width:0}}
+  </style>
 </head>
 <body>
   <div class="ambient a1"></div><div class="ambient a2"></div>
@@ -14,6 +17,7 @@
       <nav>
         <button class="nav active" data-view="overview">◈ <span>Обзор</span></button>
         <button class="nav" data-view="search">⌕ <span>Поиск</span></button>
+        <button class="nav" data-view="downloads">⇩ <span>Скачивания</span></button>
         <button class="nav" data-view="sources">◉ <span>Источники</span></button>
         <button class="nav" data-view="knowledge">◇ <span>Базы знаний</span></button>
         <button class="nav" data-view="jobs">▤ <span>Очередь задач</span></button>
@@ -52,6 +56,14 @@
           <div class="legend"><span><i class="lg-source"></i> источник</span><span><i class="lg-evidence"></i> доказательство</span><span><i class="lg-kb"></i> знание</span></div>
         </section>
       </div>
+
+      <section class="panel jobs-panel" id="downloadsPanel">
+        <div class="panel-head"><div><span class="eyebrow">STAGE 1 · ACQUISITION</span><h2>Список скачивания и прогресс</h2></div><span class="live"><i></i> BYTE-LEVEL</span></div>
+        <div id="downloadSummary" class="download-summary"></div>
+        <div id="downloadsLive"></div>
+        <div class="panel-head" style="margin-top:18px"><div><span class="eyebrow">COMPLETED / REUSED</span><h2>Последние загруженные материалы</h2></div><span class="muted">SHA-256 + local path + source</span></div>
+        <div id="downloadsHistory" class="download-history"></div>
+      </section>
 
       <div class="grid-bottom">
         <section class="panel results-panel">

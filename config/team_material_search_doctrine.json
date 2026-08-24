@@ -1,0 +1,158 @@
+{
+  "schema_version": "1.0",
+  "doctrine_id": "FATHER-MATERIAL-SEARCH-DOCTRINE-001",
+  "goal": "Build traceable role knowledge packages topic-by-topic, not a bulk document archive.",
+  "unit_of_search": "ROLE_TOPIC",
+  "topic_package": {
+    "required_dimensions": [
+      "AUTHORITATIVE_BASIS",
+      "CORE_CONCEPT",
+      "PRACTICAL_METHOD_OR_IMPLEMENTATION",
+      "VALIDATION_OR_TEST",
+      "FAILURE_MODE_OR_ANTIPATTERN"
+    ],
+    "optional_dimensions": [
+      "CHECKLIST_OR_TEMPLATE",
+      "CASE_STUDY",
+      "COMPARISON_OR_TRADEOFF",
+      "VERSION_OR_CHANGE_HISTORY",
+      "BENCHMARK_OR_METRIC"
+    ]
+  },
+  "source_order": [
+    {
+      "tier": "S0",
+      "name": "AUTHORITATIVE",
+      "examples": ["law/regulator", "standards body", "official language/framework/database docs", "official protocol/specification", "primary model card/paper"],
+      "purpose": "Anchor definitions, requirements, semantics and current version facts."
+    },
+    {
+      "tier": "S1",
+      "name": "PRIMARY_TECHNICAL",
+      "examples": ["official project docs", "maintainer repository", "reference implementation", "vendor architecture guide"],
+      "purpose": "Implementation semantics and operational guidance."
+    },
+    {
+      "tier": "S2",
+      "name": "CURATED_EDUCATIONAL",
+      "examples": ["book", "course", "author material", "conference tutorial"],
+      "purpose": "Explanations, mental models, structured teaching and examples."
+    },
+    {
+      "tier": "S3",
+      "name": "PRACTICE_EVIDENCE",
+      "examples": ["case study", "postmortem", "benchmark", "test suite", "production example"],
+      "purpose": "Validation, limitations, failures and real-world tradeoffs."
+    },
+    {
+      "tier": "S4",
+      "name": "COMMUNITY_DISCOVERY",
+      "examples": ["Telegram", "forum", "community repository", "discussion"],
+      "purpose": "Discovery and candidate acquisition only; never authoritative by itself."
+    }
+  ],
+  "passes": [
+    {
+      "pass_id": "P1_ANCHOR",
+      "goal": "Find authoritative basis and canonical terminology.",
+      "query_families": ["CANONICAL_TERM", "OFFICIAL_DOC", "STANDARD_OR_SPEC", "CURRENT_VERSION"],
+      "channels": ["official web", "standards/project sites", "primary repositories"],
+      "telegram_allowed": false
+    },
+    {
+      "pass_id": "P2_METHOD",
+      "goal": "Find implementation/method, examples, templates and tests.",
+      "query_families": ["HOW_TO", "REFERENCE_IMPLEMENTATION", "CHECKLIST_TEMPLATE", "TEST_VALIDATION", "EXAMPLE"],
+      "channels": ["official docs", "repositories", "books/courses", "technical sites"],
+      "telegram_allowed": true
+    },
+    {
+      "pass_id": "P3_CHALLENGE",
+      "goal": "Find failure modes, anti-patterns, limitations and tradeoffs.",
+      "query_families": ["ANTIPATTERN", "FAILURE_MODE", "LIMITATION", "TRADEOFF", "POSTMORTEM", "COUNTEREXAMPLE"],
+      "channels": ["postmortems", "issue trackers", "books", "conference material", "Telegram/community"],
+      "telegram_allowed": true
+    },
+    {
+      "pass_id": "P4_GAP_ONLY",
+      "goal": "Search only unresolved topic dimensions; no broad role-wide search.",
+      "query_families": ["GAP_SPECIFIC"],
+      "channels": ["best channel for the unresolved dimension"],
+      "telegram_allowed": true
+    }
+  ],
+  "query_templates": {
+    "CANONICAL_TERM": ["{topic}", "{topic} definition", "{topic} terminology"],
+    "OFFICIAL_DOC": ["{topic} official documentation", "{topic} specification", "{topic} standard"],
+    "CURRENT_VERSION": ["{topic} current version", "{topic} release notes", "{topic} changelog"],
+    "HOW_TO": ["{topic} implementation guide", "{topic} best practices", "{topic} architecture guide"],
+    "REFERENCE_IMPLEMENTATION": ["{topic} reference implementation", "{topic} example repository"],
+    "CHECKLIST_TEMPLATE": ["{topic} checklist", "{topic} template"],
+    "TEST_VALIDATION": ["{topic} testing", "{topic} validation", "{topic} acceptance criteria"],
+    "ANTIPATTERN": ["{topic} anti-patterns", "{topic} common mistakes"],
+    "FAILURE_MODE": ["{topic} failure modes", "{topic} incident", "{topic} postmortem"],
+    "TRADEOFF": ["{topic} tradeoffs", "{topic} comparison", "{topic} limitations"]
+  },
+  "role_specific_rules": {
+    "LEGAL_COMPLIANCE": {
+      "authoritative_required": true,
+      "community_can_satisfy_authoritative_basis": false,
+      "extra_dimensions": ["APPLICABILITY", "EFFECTIVE_DATE", "AMENDMENT_CHAIN", "OFFICIAL_INTERPRETATION"]
+    },
+    "SECURITY_ENGINEER": {
+      "authoritative_required_for_regulatory_claims": true,
+      "extra_dimensions": ["THREAT_MODEL", "CONTROL_MAPPING", "ATTACK_OR_FAILURE_EVIDENCE"]
+    },
+    "ML_LLM_ENGINEER": {
+      "extra_dimensions": ["PAPER_OR_MODEL_CARD", "EVALUATION_DATASET", "BENCHMARK", "SERVING_LIMITATION"]
+    },
+    "PROGRAMMER": {
+      "extra_dimensions": ["API_OR_LANGUAGE_SEMANTICS", "REFERENCE_CODE", "TEST_FIXTURE", "PERFORMANCE_OR_CONCURRENCY_LIMIT"]
+    },
+    "SYSTEM_ANALYST": {
+      "extra_dimensions": ["MODEL_OR_NOTATION", "TEMPLATE", "TRACEABILITY_EXAMPLE", "ACCEPTANCE_CRITERIA"]
+    }
+  },
+  "stop_rules": {
+    "no_unbounded_role_scraping": true,
+    "after_first_pass_search_only_gaps": true,
+    "repeat_same_query_without_new_evidence": false,
+    "max_gap_passes_per_topic": 2,
+    "explicit_gap_is_valid_outcome": true,
+    "telegram_alone_never_closes_overall_min": true
+  },
+  "min_gate": {
+    "per_topic": [
+      "authoritative basis exists or explicit AUTHORITATIVE_GAP",
+      "at least one practical/method artifact or explicit PRACTICE_GAP",
+      "at least one validation/test/failure artifact or explicit VALIDATION_GAP",
+      "provenance and SHA-256 preserved for downloaded artifacts"
+    ],
+    "role_level": [
+      "all P0 topics assessed",
+      "all unresolved dimensions represented as explicit gaps",
+      "no community source promoted as authoritative truth",
+      "no direct KB auto-promotion"
+    ]
+  },
+  "metrics": [
+    "topics_total",
+    "topics_with_authoritative_basis",
+    "topics_with_practice",
+    "topics_with_validation_or_failure",
+    "topics_complete_for_min",
+    "explicit_gaps_total",
+    "queries_total",
+    "search_hits_total",
+    "media_candidates_total",
+    "downloaded_total",
+    "payload_reused_total",
+    "useful_candidate_ratio",
+    "errors_total",
+    "bytes_downloaded",
+    "elapsed_seconds",
+    "throughput_files_per_second",
+    "throughput_megabytes_per_second",
+    "speedup_vs_1_stream_pct"
+  ]
+}

@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>FATHER OSINT Control Center</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <div class="ambient a1"></div><div class="ambient a2"></div>
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="brand"><div class="sigil">F</div><div><strong>FATHER</strong><span>OSINT CONTROL CENTER</span></div></div>
+      <nav>
+        <button class="nav active" data-view="overview">◈ <span>Обзор</span></button>
+        <button class="nav" data-view="search">⌕ <span>Поиск</span></button>
+        <button class="nav" data-view="sources">◉ <span>Источники</span></button>
+        <button class="nav" data-view="knowledge">◇ <span>Базы знаний</span></button>
+        <button class="nav" data-view="jobs">▤ <span>Очередь задач</span></button>
+      </nav>
+      <div class="sidebar-foot"><span class="dot online"></span><span id="networkState">NETWORK CHECK</span><small>local operator console</small></div>
+    </aside>
+
+    <main>
+      <header>
+        <div><div class="eyebrow">INVESTIGATION WORKSPACE</div><h1>OSINT Intelligence Console</h1></div>
+        <div class="header-actions"><button class="ghost" id="refreshBtn">↻ Обновить</button><button class="primary" id="remainingBtn">Запустить P0-потоки</button></div>
+      </header>
+
+      <section class="search-hero">
+        <div class="search-box"><span>⌕</span><input id="queryInput" placeholder="Что ищем? Например: async Python cancellation failure" /><button id="searchBtn">Искать в Telegram</button></div>
+        <div class="chips"><span class="chip on">Telegram</span><span class="chip">Web — next</span><span class="chip">GitHub — next</span><span class="chip">Local KB</span></div>
+      </section>
+
+      <section class="metrics" id="metricCards"></section>
+
+      <div class="grid-main">
+        <section class="panel streams-panel">
+          <div class="panel-head"><div><span class="eyebrow">OPERATIONS</span><h2>5 рабочих потоков</h2></div><span class="live"><i></i> LIVE</span></div>
+          <div id="streams" class="streams"></div>
+        </section>
+
+        <section class="panel evidence-panel">
+          <div class="panel-head"><div><span class="eyebrow">EVIDENCE MAP</span><h2>Карта поиска</h2></div><span class="muted">source → evidence → KB</span></div>
+          <div class="evidence-map">
+            <div class="node source">TELEGRAM<small>discovery</small></div><div class="line l1"></div>
+            <div class="node evidence">EVIDENCE<small>provenance + SHA</small></div><div class="line l2"></div>
+            <div class="node analyst">ANALYST<small>review / challenge</small></div><div class="line l3"></div>
+            <div class="node kb">KNOWLEDGE BASE<small>human promotion</small></div>
+          </div>
+          <div class="legend"><span><i class="lg-source"></i> источник</span><span><i class="lg-evidence"></i> доказательство</span><span><i class="lg-kb"></i> знание</span></div>
+        </section>
+      </div>
+
+      <div class="grid-bottom">
+        <section class="panel results-panel">
+          <div class="panel-head"><div><span class="eyebrow">LATEST FINDINGS</span><h2>Результаты поиска</h2></div><span id="resultCount" class="badge">0</span></div>
+          <div id="searchState" class="empty">Введите запрос сверху — поиск откроется в отдельном операторском процессе, а результаты появятся здесь.</div>
+          <div id="results" class="results"></div>
+        </section>
+        <section class="panel bibliography-panel">
+          <div class="panel-head"><div><span class="eyebrow">PROGRAMMER CORPUS</span><h2>Библиография</h2></div><button class="tiny" id="probeBtn">Probe 20</button></div>
+          <div id="biblioGauge" class="gauge"><div class="gauge-value">—</div><div class="gauge-label">Telegram availability</div></div>
+          <div id="biblioStats" class="mini-stats"></div>
+          <button class="wide ghost" id="planBtn">Построить следующий план</button>
+        </section>
+      </div>
+
+      <section class="panel jobs-panel">
+        <div class="panel-head"><div><span class="eyebrow">EXECUTION LOG</span><h2>Последние задачи</h2></div><span class="muted">allowlisted local actions only</span></div>
+        <div id="jobs" class="jobs"></div>
+      </section>
+    </main>
+  </div>
+  <div id="toast" class="toast"></div>
+  <script src="/app.js"></script>
+</body>
+</html>

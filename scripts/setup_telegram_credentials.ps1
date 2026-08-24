@@ -22,22 +22,31 @@ if ((Test-Path -LiteralPath $StorePath -PathType Leaf) -and -not $Force) {
 Write-Host '============================================================'
 Write-Host 'FATHER Telegram local credential setup (Windows DPAPI)'
 Write-Host '============================================================'
-Write-Host 'Values are entered locally and are never printed.'
+Write-Host 'API ID is read as a local numeric identifier; API HASH input stays hidden.'
+Write-Host 'Values are never printed after entry and no plaintext credential file is created.'
 Write-Host 'The encrypted payload can only be decrypted by this Windows user context.'
+Write-Host 'do not paste them into chat.'
 Write-Host ''
 
-$apiIdSecure = Read-Host 'Telegram API ID' -AsSecureString
-$apiHashSecure = Read-Host 'Telegram API HASH' -AsSecureString
-
-$apiIdPlain = Convert-SecureStringToPlainText -Secure $apiIdSecure
-$apiHashPlain = Convert-SecureStringToPlainText -Secure $apiHashSecure
-
-if ([string]::IsNullOrWhiteSpace($apiIdPlain) -or $apiIdPlain -notmatch '^\d+$') {
-    throw 'Telegram API ID must be a non-empty integer.'
+# Read API ID as ordinary local console text. Using -AsSecureString for a numeric
+# identifier proved unreliable on Windows PowerShell in the live operator path.
+# It is validated immediately, converted to SecureString for DPAPI persistence,
+# and the plaintext variable is cleared after storage.
+$apiIdPlain = (Read-Host 'Telegram API ID').Trim()
+$parsedApiId = 0L
+if ([string]::IsNullOrWhiteSpace($apiIdPlain) -or -not [long]::TryParse($apiIdPlain, [ref]$parsedApiId) -or $parsedApiId -le 0) {
+    throw 'Telegram API ID must be a non-empty positive integer.'
 }
+
+$apiHashSecure = Read-Host 'Telegram API HASH' -AsSecureString
+$apiHashPlain = Convert-SecureStringToPlainText -Secure $apiHashSecure
 if ([string]::IsNullOrWhiteSpace($apiHashPlain)) {
     throw 'Telegram API HASH must not be empty.'
 }
+
+# Convert the already validated numeric identifier to SecureString only for
+# DPAPI-backed persistence. No plaintext file is ever written.
+$apiIdSecure = ConvertTo-SecureString $apiIdPlain -AsPlainText -Force
 
 New-Item -ItemType Directory -Force -Path $StoreDir | Out-Null
 
@@ -63,6 +72,7 @@ try {
 # Remove plaintext variables from this PowerShell scope as soon as validation/storage completes.
 $apiIdPlain = $null
 $apiHashPlain = $null
+$parsedApiId = 0L
 
 Write-Host ''
 Write-Host 'Telegram credentials saved locally with Windows DPAPI.'

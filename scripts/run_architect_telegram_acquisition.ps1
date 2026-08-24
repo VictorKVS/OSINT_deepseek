@@ -9,6 +9,7 @@ Set-Location $RepoRoot
 $DpapiStorePath = Join-Path $RepoRoot '.runtime\telegram\credentials.dpapi.json'
 $SetupScript = Join-Path $RepoRoot 'scripts\setup_telegram_credentials.ps1'
 $NetworkPreflightScript = Join-Path $RepoRoot 'scripts\test_telegram_network_path.ps1'
+$TelethonAuthScript = Join-Path $RepoRoot 'scripts\authorize_telethon_session.py'
 
 function Resolve-Python {
     $venv = Join-Path $RepoRoot '.venv\Scripts\python.exe'
@@ -212,5 +213,23 @@ if ($networkRc -ne 0) {
 }
 
 $env:PYTHONPATH = "$RepoRoot;$($env:PYTHONPATH)"
+
+if (-not (Test-Path -LiteralPath $TelethonAuthScript -PathType Leaf)) {
+    Write-Host 'Telethon session authorization helper is missing; acquisition will not start with an unaudited session.'
+    exit 5
+}
+
+Write-Host ''
+Write-Host '[AUTH] Checking local Telethon session...'
+& $pythonExe $TelethonAuthScript
+$authRc = $LASTEXITCODE
+if ($authRc -ne 0) {
+    Write-Host ''
+    Write-Host 'Telethon session authorization did not complete; acquisition was not started.'
+    exit $authRc
+}
+
+Write-Host ''
+Write-Host '[ACQUIRE] Telethon session is authorized. Starting Architect acquisition.'
 & $pythonExe (Join-Path $RepoRoot 'scripts\run_architect_telegram_acquisition.py') @RunnerArgs
 exit $LASTEXITCODE

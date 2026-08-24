@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import threading
 import time
 from pathlib import Path
@@ -11,21 +12,35 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_ROOT = REPO_ROOT / "reports" / "osint_control_center" / "downloads"
 
 
-class DownloadProgressRegistry:
-    """Per-role live acquisition state for the OSINT Control Center.
+def _safe_registry_key(value: str) -> str:
+    cleaned = re.sub(r"[^A-Za-z0-9_.-]+", "_", value.strip())
+    return cleaned[:120] or "download"
 
-    Each acquisition process writes its own JSON file, so parallel roles do not
-    contend on one registry. Writes are atomic (temporary file + replace).
+
+class DownloadProgressRegistry:
+    """Live Stage-1 acquisition state for the OSINT Control Center.
+
+    A registry may represent a whole role acquisition or one user-selected
+    download. Each process writes an independent atomic JSON file so parallel
+    downloads never contend on one file.
     """
 
-    def __init__(self, role_id: str, *, root: Path | None = None) -> None:
+    def __init__(
+        self,
+        role_id: str,
+        *,
+        root: Path | None = None,
+        registry_key: str | None = None,
+        context: dict[str, Any] | None = None,
+    ) -> None:
         self.role_id = role_id.upper().strip()
         self.root = root or DEFAULT_ROOT
-        self.path = self.root / f"{self.role_id}.json"
+        key = _safe_registry_key(registry_key or self.role_id)
+        self.path = self.root / f"{key}.json"
         self._lock = threading.Lock()
         self._last_flush = 0.0
         self.payload: dict[str, Any] = {
-            "schema_version": "1.0",
+            "schema_version": "1.1",
             "record_type": "ACQUISITION_DOWNLOAD_PROGRESS",
             "stage": "STAGE_1_ACQUISITION",
             "role_id": self.role_id,
@@ -43,6 +58,7 @@ class DownloadProgressRegistry:
             "bytes_received_total": 0,
             "bytes_expected_total": 0,
             "overall_progress_pct": 0.0,
+            "context": dict(context or {}),
             "items": {},
         }
 
@@ -91,9 +107,18 @@ class DownloadProgressRegistry:
         row.setdefault("error", None)
         self.payload["items"][item_id] = row
 
-    def update(self, item_id: str, *, status: str | None = None, bytes_received: int | None = None,
-               total_bytes: int | None = None, sha256: str | None = None, local_path: str | None = None,
-               error: str | None = None, force: bool = False) -> None:
+    def update(
+        self,
+        item_id: str,
+        *,
+        status: str | None = None,
+        bytes_received: int | None = None,
+        total_bytes: int | None = None,
+        sha256: str | None = None,
+        local_path: str | None = None,
+        error: str | None = None,
+        force: bool = False,
+    ) -> None:
         now = time.time()
         with self._lock:
             row = self.payload["items"].get(str(item_id))
@@ -111,7 +136,15 @@ class DownloadProgressRegistry:
                 row["total_bytes"] = max(0, int(total_bytes))
             total = int(row.get("total_bytes") or 0)
             received = int(row.get("bytes_received") or 0)
-            row["progress_pct"] = round(min(100.0, (received / total * 100.0) if total else (100.0 if row.get("status") in {"DOWNLOADED", "REUSED"} else 0.0)), 2)
+            row["progress_pct"] = round(
+                min(
+                    100.0,
+                    (received / total * 100.0)
+                    if total
+                    else (100.0 if row.get("status") in {"DOWNLOADED", "REUSED"} else 0.0),
+                ),
+                2,
+            )
             started = row.get("started_at_epoch")
             if started and now > started and received:
                 row["speed_bytes_per_second"] = round(received / (now - float(started)), 2)

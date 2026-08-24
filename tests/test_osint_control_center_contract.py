@@ -60,3 +60,16 @@ def test_control_center_waits_for_health_before_opening_browser():
     assert "http://127.0.0.1:8765/api/overview" in text
     assert "Test-NetConnection 127.0.0.1 -Port 8765" in text
     assert "server did not become healthy" in text
+    assert "osint_web\\server.py" in text
+
+
+def test_control_center_suppresses_only_expected_client_disconnect_tracebacks():
+    text = Path("osint_web/server.py").read_text(encoding="utf-8")
+    launcher = Path("scripts/run_osint_control_center.ps1").read_text(encoding="utf-8")
+    assert "QuietThreadingHTTPServer" in text
+    assert "BrokenPipeError" in text
+    assert "ConnectionResetError" in text
+    assert "ConnectionAbortedError" in text
+    assert "10053" in text and "10054" in text
+    assert "super().handle_error" in text
+    assert "osint_web\\server.py" in launcher

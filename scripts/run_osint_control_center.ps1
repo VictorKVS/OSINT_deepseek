@@ -4,7 +4,7 @@ Set-Location $RepoRoot
 $Store = Join-Path $RepoRoot '.runtime\telegram\credentials.dpapi.json'
 $Python = Join-Path $RepoRoot '.venv\Scripts\python.exe'
 if (-not (Test-Path $Python)) { $Python = (Get-Command python).Source }
-$App = Join-Path $RepoRoot 'osint_web\app.py'
+$App = Join-Path $RepoRoot 'osint_web\server.py'
 $Url = 'http://127.0.0.1:8765/'
 $HealthUrl = 'http://127.0.0.1:8765/api/overview'
 
@@ -38,7 +38,7 @@ $env:PYTHONPATH = "$RepoRoot;$($env:PYTHONPATH)"
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
 if (-not (Test-Path -LiteralPath $App -PathType Leaf)) {
-    throw "OSINT Control Center app is missing: $App"
+    throw "OSINT Control Center server entrypoint is missing: $App"
 }
 
 Write-Host '[WEB] Starting local server...'
@@ -64,7 +64,8 @@ if (-not $ready) {
     Write-Host '[WEB] FAILED: local server did not become healthy on 127.0.0.1:8765.'
     Write-Host 'Diagnostic commands:'
     Write-Host '  Test-NetConnection 127.0.0.1 -Port 8765'
-    Write-Host '  .\.venv\Scripts\python.exe .\osint_web\app.py'
+    Write-Host '  .\.venv\Scripts\python.exe .\osint_web\server.py'
+    Write-Host '  .\.venv\Scripts\python.exe .\osint_web\app.py   # raw debug entrypoint'
     exit 7
 }
 

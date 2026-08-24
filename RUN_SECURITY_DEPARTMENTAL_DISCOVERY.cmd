@@ -8,10 +8,13 @@ if exist ".venv\Scripts\python.exe" (
   set "PY=python"
 )
 
+set "PYTHONPATH=%CD%;%PYTHONPATH%"
+
 echo ============================================================
 echo FATHER Security CURRENT_ONLY - departmental orders discovery
 echo ============================================================
 echo Python: %PY%
+echo Repo root on PYTHONPATH: %CD%
 echo.
 
 %PY% scripts\discover_security_departmental_orders.py

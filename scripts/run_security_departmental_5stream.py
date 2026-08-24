@@ -26,6 +26,39 @@ def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
+def _persist_departmental_meta(result: dict[str, object]) -> None:
+    document_id = str(result.get("document_id") or "").strip()
+    if not document_id:
+        return
+    stem = bulk.base._safe_name(document_id)
+    target_dir = bulk.WORKING_META_DIR if str(result.get("status") or "").startswith("WORKING_COPY_") else bulk.base.META_DIR
+    target_dir.mkdir(parents=True, exist_ok=True)
+    (target_dir / f"{stem}.json").write_text(
+        json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+
+
+def _process_departmental(doc: dict[str, object]) -> dict[str, object]:
+    result = bulk._process(doc)
+    result["queue_legal_status"] = doc.get("legal_status")
+    result["currentness_verified"] = False
+    result["kb_promotion_allowed"] = False
+
+    # Exact official bytes prove provenance/identity, but this departmental
+    # queue intentionally begins in VERIFY_CURRENTNESS. Do not turn source
+    # acquisition into a claim that the act is currently operative.
+    if result.get("status") in {"NORMALIZED", "ACQUIRED_RAW"}:
+        result["exact_official_evidence_acquired"] = True
+        result["legal_truth_eligible"] = False
+        result["promotion_block_reason"] = "CURRENTNESS_AND_AMENDMENT_CHAIN_NOT_VERIFIED"
+    else:
+        result["exact_official_evidence_acquired"] = False
+
+    _persist_departmental_meta(result)
+    return result
+
+
 def main() -> int:
     started = time.perf_counter()
     payload = json.loads(QUEUE_FILE.read_text(encoding="utf-8"))
@@ -33,7 +66,7 @@ def main() -> int:
 
     results: list[dict[str, object]] = []
     with ThreadPoolExecutor(max_workers=WORKERS, thread_name_prefix="security-dept") as executor:
-        futures = {executor.submit(bulk._process, doc): doc for doc in documents}
+        futures = {executor.submit(_process_departmental, doc): doc for doc in documents}
         for future in as_completed(futures):
             result = future.result()
             results.append(result)
@@ -50,7 +83,7 @@ def main() -> int:
 
     summary = {
         "record_type": "SECURITY_DEPARTMENTAL_5STREAM_RUN",
-        "schema_version": "1.0",
+        "schema_version": "1.1",
         "observed_at": _utc_now(),
         "workers": WORKERS,
         "queue": QUEUE_FILE.relative_to(REPO_ROOT).as_posix(),
@@ -66,7 +99,7 @@ def main() -> int:
         "throughput_operational_docs_per_second": operational / total_seconds if total_seconds > 0 else 0.0,
         "speedup_vs_1_stream_pct": None,
         "speedup_note": "No 1-stream baseline is claimed until measured on the same queue and workstation.",
-        "legal_truth_policy": "Every queue item begins VERIFY_CURRENTNESS. Only proof-grade exact official acquisition is legal-truth eligible; A2 working copies remain blocked from KB promotion.",
+        "legal_truth_policy": "Every queue item begins VERIFY_CURRENTNESS. Exact official bytes prove provenance/identity only; CURRENT and KB promotion remain blocked until currentness plus amendment/replacement chain verification. A2 working copies are never legal truth.",
         "total_seconds": total_seconds,
         "results": results,
     }

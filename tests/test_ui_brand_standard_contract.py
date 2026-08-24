@@ -16,10 +16,14 @@ def test_global_brand_standard_requires_top_mark_on_all_sites():
 
 def test_osint_control_center_implements_required_brand_mark():
     html = Path("osint_web/static/index.html").read_text(encoding="utf-8")
-    assert 'data-brand-mark="required"' in html
-    assert 'class="sigil"' in html
+    svg = Path("osint_web/static/brand-mark.svg").read_text(encoding="utf-8")
+    assert html.count('data-brand-mark="required"') >= 2
+    assert 'src="/brand-mark.svg"' in html
+    assert 'rel="icon"' in html and 'href="/brand-mark.svg"' in html
+    assert 'class="top-brand"' in html
     assert 'href="/"' in html
-    assert 'aria-label="FATHER OSINT Control Center' in html
+    assert 'aria-label="FATHER' in html
+    assert "<svg" in svg and ">FATHER<" in svg
 
 
 def test_brand_rule_is_documented_as_showcase_acceptance_gate():

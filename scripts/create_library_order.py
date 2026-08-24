@@ -11,6 +11,7 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[1]
 ROLE_REGISTRY = ROOT / "config" / "team_role_material_registry.json"
 POLICY_PATH = ROOT / "config" / "library_order_policy.json"
+RU_BASELINE_PATH = ROOT / "config" / "role_ru_regulatory_baseline.json"
 ORDER_ROOT = ROOT / "reports" / "library_orders"
 
 
@@ -29,6 +30,31 @@ def resolve_role(role_id: str) -> dict[str, Any]:
         if str(role.get("role_id", "")).upper() == normalized:
             return role
     raise RuntimeError(f"unknown role {role_id!r}")
+
+
+def resolve_ru_baseline(role_id: str) -> dict[str, Any]:
+    baseline = load_json(RU_BASELINE_PATH)
+    role = (baseline.get("roles") or {}).get(normalize_role(role_id))
+    if not isinstance(role, dict):
+        return {
+            "state": "RESEARCH_REQUIRED",
+            "required_clusters": [],
+            "documents": [],
+            "known_superseded": [],
+            "next_research": ["build Russian regulatory and national-standards baseline for this role"],
+        }
+    active_documents = [row for row in role.get("documents", []) if row.get("status") == "ACTIVE"]
+    unverified = [row.get("designation") for row in active_documents if row.get("verification_state") != "OFFICIAL_METADATA_VERIFIED"]
+    state = "READY_FOR_APPLICABILITY_REVIEW" if active_documents and not unverified else "RESEARCH_REQUIRED"
+    return {
+        "state": state,
+        "baseline_state": role.get("baseline_state"),
+        "required_clusters": role.get("required_clusters", []),
+        "documents": active_documents,
+        "known_superseded": role.get("known_superseded", []),
+        "next_research": role.get("next_research", []),
+        "unverified_designations": unverified,
+    }
 
 
 def trace_context() -> dict[str, Any]:
@@ -61,6 +87,7 @@ def build_order(*, role: dict[str, Any], maturity: str, mode: str, sources: list
         raise RuntimeError(f"unsupported execution mode {mode!r}")
 
     role_id = str(role["role_id"]).upper()
+    ru_baseline = resolve_ru_baseline(role_id)
     stamp = time.strftime("%Y%m%d-%H%M%S")
     order_id = f"LIB-{role_id}-{stamp}-{uuid.uuid4().hex[:6].upper()}"
     topics = [
@@ -73,13 +100,22 @@ def build_order(*, role: dict[str, Any], maturity: str, mode: str, sources: list
         for idx, topic in enumerate(role.get("topics", []), start=1)
     ]
     source_state = {
+        "RU_OFFICIAL_REGULATORY": "READY_FOR_APPLICABILITY_REVIEW" if ru_baseline["state"] == "READY_FOR_APPLICABILITY_REVIEW" else "RESEARCH_REQUIRED",
         "OFFICIAL_WEB": "CONNECTOR_PENDING",
         "GITHUB": "CONNECTOR_PENDING",
         "TELEGRAM": "READY" if "TELEGRAM" in sources else "NOT_REQUESTED",
         "LOCAL_LIBRARY": "MANUAL_OR_USER_AUTHORIZED_IMPORT_PENDING",
     }
+    gaps: list[dict[str, Any]] = []
+    if ru_baseline["state"] != "READY_FOR_APPLICABILITY_REVIEW":
+        gaps.append({
+            "type": "RU_REGULATORY_BASELINE_GAP",
+            "role_id": role_id,
+            "blocking_for_maturity_claim": True,
+        })
+
     return {
-        "schema_version": "1.0",
+        "schema_version": "1.1",
         "record_type": "FATHER_LIBRARY_ORDER",
         "order_id": order_id,
         "created_at_epoch": time.time(),
@@ -93,12 +129,19 @@ def build_order(*, role: dict[str, Any], maturity: str, mode: str, sources: list
         "execution_mode": mode,
         "requested_sources": sources,
         "source_states": {key: value for key, value in source_state.items() if key in sources},
+        "regulatory_first_policy": policy.get("regulatory_first_policy", {}),
+        "ru_regulatory_baseline": ru_baseline,
         "copyright_policy": policy.get("copyright_policy", {}),
         "topics": topics,
         "topics_total": len(topics),
         "state": "ORDER_CREATED",
-        "current_stage": "STAGE_1_ACQUISITION",
+        "current_stage": "STAGE_0_RU_REGULATORY_BASELINE",
         "stages": {
+            "STAGE_0_RU_REGULATORY_BASELINE": {
+                "state": ru_baseline["state"],
+                "evidence_refs": [row.get("official_source") for row in ru_baseline.get("documents", []) if row.get("official_source")],
+                "documents_total": len(ru_baseline.get("documents", [])),
+            },
             "STAGE_1_ACQUISITION": {"state": "READY", "evidence_refs": []},
             "STAGE_1_COVERAGE": {"state": "PENDING", "evidence_refs": []},
             "STAGE_2_DOCUMENT_COMPILER": {"state": "PENDING", "evidence_refs": []},
@@ -109,6 +152,7 @@ def build_order(*, role: dict[str, Any], maturity: str, mode: str, sources: list
             "KB_READY": {"state": "BLOCKED_UNTIL_HUMAN_REVIEW", "evidence_refs": []},
         },
         "metrics": {
+            "ru_regulatory_documents_total": len(ru_baseline.get("documents", [])),
             "search_hits_total": 0,
             "downloaded_total": 0,
             "reused_total": 0,
@@ -119,8 +163,8 @@ def build_order(*, role: dict[str, Any], maturity: str, mode: str, sources: list
             "speedup_vs_1_stream_pct": None,
             "eta_seconds": None,
         },
-        "gaps": [],
-        "next_actions": ["RUN_STAGE_1_ACQUISITION"],
+        "gaps": gaps,
+        "next_actions": ["REVIEW_RU_REGULATORY_APPLICABILITY", "RUN_STAGE_1_ACQUISITION"],
         "kb_auto_promotion": False,
         "trace": trace_context(),
     }
@@ -154,6 +198,8 @@ def main() -> int:
         "role_id": order["role_id"],
         "knowledge_base_id": order["knowledge_base_id"],
         "maturity_target": order["maturity_target"],
+        "ru_regulatory_state": order["ru_regulatory_baseline"]["state"],
+        "ru_regulatory_documents_total": order["metrics"]["ru_regulatory_documents_total"],
         "topics_total": order["topics_total"],
         "requested_sources": order["requested_sources"],
         "current_stage": order["current_stage"],

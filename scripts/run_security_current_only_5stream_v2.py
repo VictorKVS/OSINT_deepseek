@@ -24,39 +24,17 @@ WORKING_NORMALIZED_DIR = OUT_ROOT / "working_normalized"
 WORKING_META_DIR = OUT_ROOT / "working_metadata"
 WORKERS = 5
 
-# Reuse-first route map. These are authoritative/publication routes discovered
-# after the first workstation run showed missing URLs and publication.pravo
-# timeouts. The original registry URL is always tried first when it is official.
 OFFICIAL_ROUTE_OVERRIDES: dict[str, list[str]] = {
-    "DOC-RU-PP-687-2008": [
-        "https://government.ru/docs/all/65436/",
-    ],
-    "DOC-RU-RKN-178-2022": [
-        "https://publication.pravo.gov.ru/document/0001202211290004",
-    ],
-    "DOC-RU-RKN-179-2022": [
-        "https://publication.pravo.gov.ru/document/0001202211290008",
-    ],
-    "DOC-RU-RKN-180-2022": [
-        "https://publication.pravo.gov.ru/document/0001202212150022",
-    ],
-    "DOC-RU-RKN-187-2022": [
-        "https://publication.pravo.gov.ru/document/0001202212280052",
-    ],
-    "DOC-RU-FSTEC-137-2026": [
-        "https://publication.pravo.gov.ru/document/0001202608110006",
-    ],
-    "DOC-RU-FZ-149-2006": [
-        "https://government.ru/docs/all/98199/",
-    ],
-    "DOC-RU-FZ-323-2011": [
-        "https://government.ru/docs/all/100186/",
-    ],
+    "DOC-RU-PP-687-2008": ["https://government.ru/docs/all/65436/"],
+    "DOC-RU-RKN-178-2022": ["https://publication.pravo.gov.ru/document/0001202211290004"],
+    "DOC-RU-RKN-179-2022": ["https://publication.pravo.gov.ru/document/0001202211290008"],
+    "DOC-RU-RKN-180-2022": ["https://publication.pravo.gov.ru/document/0001202212150022"],
+    "DOC-RU-RKN-187-2022": ["https://publication.pravo.gov.ru/document/0001202212280052"],
+    "DOC-RU-FSTEC-137-2026": ["https://publication.pravo.gov.ru/document/0001202608110006"],
+    "DOC-RU-FZ-149-2006": ["https://government.ru/docs/all/98199/"],
+    "DOC-RU-FZ-323-2011": ["https://government.ru/docs/all/100186/"],
 }
 
-# Reference copies are allowed only as an operational working layer. They can
-# be normalized and used to continue document-pipeline engineering, but they
-# can NEVER be treated as A0/A1 legal truth or promote legal status.
 WORKING_REFERENCE_HOSTS = {
     "minjust.consultant.ru",
     "www.consultant.ru",
@@ -65,6 +43,14 @@ WORKING_REFERENCE_HOSTS = {
     "www.garant.ru",
     "garant.ru",
 }
+
+REFERENCE_CONTENT_BLOCK_MARKERS = (
+    "документ в некоммерческой версии консультантплюс доступен по расписанию",
+    "этот документ в некоммерческой версии консультантплюс доступен по расписанию",
+    "тексты документов всегда доступны в коммерческой версии консультантплюс",
+    "вы можете заказать документ на e-mail",
+    "откройте документ в системе консультантплюс",
+)
 
 
 def _utc_now() -> str:
@@ -101,6 +87,28 @@ def _official_routes(doc: dict[str, object]) -> list[str]:
     return _dedupe(routes)
 
 
+def _reference_content_quality(normalized: str | None) -> tuple[bool, str]:
+    if normalized is None or not normalized.strip():
+        return False, "NO_NORMALIZED_TEXT"
+    text = normalized.strip()
+    folded = text.casefold().replace("ё", "е")
+    if any(marker in folded for marker in REFERENCE_CONTENT_BLOCK_MARKERS):
+        return False, "REFERENCE_ACCESS_WINDOW_BLOCKED"
+    if len(text) < 600:
+        return False, "REFERENCE_TEXT_TOO_SHORT"
+    legal_anchor = any(
+        marker in folded
+        for marker in ("приказ", "постановление", "федеральный закон", "распоряжение")
+    )
+    operative_anchor = any(
+        marker in folded
+        for marker in ("приказываю", "постановляет", "утвердить", "определить", "в соответствии", "настоящ")
+    )
+    if not (legal_anchor and operative_anchor):
+        return False, "REFERENCE_LEGAL_BODY_NOT_CONFIRMED"
+    return True, "PASS"
+
+
 def _save_working_copy(
     doc: dict[str, object],
     *,
@@ -128,12 +136,20 @@ def _save_working_copy(
         normalized_path = WORKING_NORMALIZED_DIR / f"{stem}__{digest}.txt"
         normalized_path.write_text(normalized.strip() + "\n", encoding="utf-8")
 
+    content_quality_pass, content_quality_reason = _reference_content_quality(normalized)
+    if normalized_path and content_quality_pass:
+        status = "WORKING_COPY_NORMALIZED"
+    elif normalized_path:
+        status = "WORKING_COPY_CONTENT_BLOCKED"
+    else:
+        status = "WORKING_COPY_RAW"
+
     result: dict[str, object] = {
         "document_id": document_id,
         "title": doc.get("title"),
         "started_at": _utc_now(),
         "legal_status": doc.get("legal_status"),
-        "status": "WORKING_COPY_NORMALIZED" if normalized_path else "WORKING_COPY_RAW",
+        "status": status,
         "trust_tier": "A2_REFERENCE_WORKING_COPY",
         "legal_truth_eligible": False,
         "kb_promotion_allowed": False,
@@ -145,6 +161,9 @@ def _save_working_copy(
         "raw_path": raw_path.relative_to(REPO_ROOT).as_posix(),
         "normalized_path": normalized_path.relative_to(REPO_ROOT).as_posix() if normalized_path else None,
         "normalization": normalization,
+        "content_quality_pass": content_quality_pass,
+        "content_quality_reason": content_quality_reason,
+        "operationally_available": bool(normalized_path and content_quality_pass),
         "official_attempts": official_attempts,
         "seconds": time.perf_counter() - started,
     }
@@ -200,6 +219,9 @@ def _process(doc: dict[str, object]) -> dict[str, object]:
                 "raw_path": raw_path.relative_to(REPO_ROOT).as_posix(),
                 "normalized_path": normalized_path.relative_to(REPO_ROOT).as_posix() if normalized_path else None,
                 "normalization": normalization,
+                "content_quality_pass": True,
+                "content_quality_reason": "OFFICIAL_EXACT_BYTES",
+                "operationally_available": True,
                 "official_attempts": official_attempts,
                 "seconds": time.perf_counter() - started,
             }
@@ -222,8 +244,6 @@ def _process(doc: dict[str, object]) -> dict[str, object]:
     reference_url = str(doc.get("status_reference_url") or "").strip()
     if reference_url and _working_reference_allowed(reference_url):
         try:
-            # Reference fetch deliberately bypasses the official allowlist but
-            # remains clearly segregated from proof-grade originals.
             data, mime, final_url = base._fetch_urllib(reference_url)
             if not _working_reference_allowed(final_url):
                 raise RuntimeError(f"working reference redirected off allowlist: {final_url}")
@@ -300,10 +320,11 @@ def main() -> int:
     total_seconds = time.perf_counter() - started
     official_acquired = sum(row.get("status") in {"NORMALIZED", "ACQUIRED_RAW"} for row in results)
     official_normalized = sum(row.get("status") == "NORMALIZED" for row in results)
-    working_acquired = sum(row.get("status") in {"WORKING_COPY_NORMALIZED", "WORKING_COPY_RAW"} for row in results)
+    working_acquired = sum(row.get("status") in {"WORKING_COPY_NORMALIZED", "WORKING_COPY_RAW", "WORKING_COPY_CONTENT_BLOCKED"} for row in results)
     working_normalized = sum(row.get("status") == "WORKING_COPY_NORMALIZED" for row in results)
+    working_content_blocked = sum(row.get("status") == "WORKING_COPY_CONTENT_BLOCKED" for row in results)
     unresolved = sum(row.get("status") == "UNRESOLVED" for row in results)
-    completed_operationally = official_acquired + working_acquired
+    completed_operationally = official_acquired + working_normalized
 
     summary = {
         "record_type": "SECURITY_CURRENT_ONLY_5STREAM_RUN_V2",
@@ -316,6 +337,7 @@ def main() -> int:
         "official_normalized_total": official_normalized,
         "working_copy_acquired_total": working_acquired,
         "working_copy_normalized_total": working_normalized,
+        "working_copy_content_blocked_total": working_content_blocked,
         "operationally_available_total": completed_operationally,
         "unresolved_total": unresolved,
         "official_coverage_ratio": official_acquired / len(queue) if queue else 1.0,
@@ -323,7 +345,7 @@ def main() -> int:
         "throughput_operational_docs_per_second": completed_operationally / total_seconds if total_seconds > 0 else 0.0,
         "speedup_vs_1_stream_pct": None,
         "speedup_note": "No 1-stream baseline is claimed until measured on the same queue and workstation.",
-        "legal_truth_policy": "Only NORMALIZED/ACQUIRED_RAW from official routes are legal-truth eligible. Working copies are A2 references and cannot promote legal truth.",
+        "legal_truth_policy": "Only NORMALIZED/ACQUIRED_RAW from official routes are legal-truth eligible. A2 references must also pass content-quality gating before they are operationally usable.",
         "total_seconds": total_seconds,
         "results": results,
     }
@@ -331,7 +353,7 @@ def main() -> int:
     report_path = REPORT_DIR / "LATEST_5STREAM_RUN_V2.json"
     report_path.write_text(json.dumps(summary, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     print(json.dumps(summary, ensure_ascii=False, indent=2))
-    return 0 if unresolved == 0 else 1
+    return 0 if unresolved == 0 and working_content_blocked == 0 else 1
 
 
 if __name__ == "__main__":

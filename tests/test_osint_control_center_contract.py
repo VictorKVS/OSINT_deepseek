@@ -8,6 +8,7 @@ def test_control_center_binds_localhost_and_uses_action_allowlist():
     assert "ALLOWED_ACTIONS" in text
     assert '"ROLE_ACQUISITION"' in text
     assert '"TELEGRAM_QUERY_PROBE"' in text
+    assert '"TELEGRAM_DOWNLOAD"' in text
     assert "shell=True" not in text
     assert "CREATE_NEW_CONSOLE" in text
 
@@ -20,14 +21,24 @@ def test_generic_search_is_probe_only_and_never_downloads():
     assert "join_channel" not in text.casefold()
 
 
-def test_showcase_ui_exposes_search_metrics_streams_and_evidence_map():
+def test_showcase_ui_exposes_routed_search_downloads_metrics_streams_and_evidence_map():
     html = Path("osint_web/static/index.html").read_text(encoding="utf-8")
     js = Path("osint_web/static/app.js").read_text(encoding="utf-8")
-    for token in ("OSINT Intelligence Console", "5 рабочих потоков", "Карта поиска", "Результаты поиска", "Библиография"):
+    for token in (
+        "OSINT Intelligence Console",
+        "Куда ищем и куда складываем",
+        "Что найдено в Telegram",
+        "Общий список скачивания и прогресс",
+        "5 рабочих потоков",
+        "Карта прохождения",
+        "Библиография",
+    ):
         assert token in html
     assert "TELEGRAM_QUERY_PROBE" in js
+    assert "TELEGRAM_DOWNLOAD" in js
     assert "REMAINING_P0_WINDOWS" in js
     assert "bibliography_availability_ratio" in js
+    assert "roleSelect" in js and "topicSelect" in js
 
 
 def test_parallel_p0_windows_use_isolated_telethon_session_files():

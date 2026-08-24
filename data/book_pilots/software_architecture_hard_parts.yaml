@@ -1,0 +1,68 @@
+schema_version: "father-osint.book-pilot.v0.1"
+pilot_id: BOOK-PILOT-ARCH-001
+status: AWAITING_SOURCE_BYTES
+
+book:
+  title: "Software Architecture: The Hard Parts"
+  authors:
+    - Neal Ford
+    - Mark Richards
+    - Pramod Sadalage
+    - Zhamak Dehghani
+  source_language: en
+  target_language: ru
+  source_type: user_library_copy
+  source_locator: null
+  source_sha256: null
+  rights_basis: USER_LIBRARY_COPY
+
+pipeline:
+  - stage: B0_SOURCE_REGISTERED
+    status: DONE
+  - stage: B1_ORIGINAL_BYTES_VERIFIED
+    status: PENDING
+    gate: "source bytes + SHA-256"
+  - stage: B2_TEXT_EXTRACTED
+    status: PENDING
+    gate: "machine-readable text preserving source order and provenance"
+  - stage: B3_TRANSLATION_ALIGNED_EN_RU
+    status: PENDING
+    gate: "every translation unit has original text, Russian translation and method"
+  - stage: B4_SEMANTIC_STRUCTURE
+    status: PENDING
+    gate: "chapters/sections/paragraphs/lists with stable IDs"
+  - stage: B5_KNOWLEDGE_CANDIDATES
+    status: PENDING
+    gate: "analyst output remains NEEDS_REVIEW"
+  - stage: B6_CROSS_SOURCE_REVIEW
+    status: PENDING
+    gate: "claims compared with other books, docs and evidence"
+  - stage: B7_KB_PUBLISHED
+    status: PENDING
+    gate: "expert-reviewed knowledge objects only"
+
+knowledge_targets:
+  - CONCEPT_CANDIDATE
+  - DEFINITION_CANDIDATE
+  - PRINCIPLE_CANDIDATE
+  - PATTERN_CANDIDATE
+  - TRADEOFF_CANDIDATE
+  - DECISION_CRITERION_CANDIDATE
+  - FAILURE_MODE_CANDIDATE
+  - EXAMPLE_CANDIDATE
+  - CLAIM_CANDIDATE
+  - TERM_CANDIDATE
+  - RELATION_CANDIDATE
+
+rules:
+  preserve_original: true
+  preserve_translation_alignment: true
+  preserve_source_hashes: true
+  translation_is_not_evidence_replacement: true
+  no_automatic_truth_promotion: true
+  no_automatic_architecture_recommendation: true
+  source_text_required_for_disputed_claims: true
+
+notes:
+  - "The public repository must not become a substitute for the user's lawful/private library copy."
+  - "Until B1 is complete, no book text or derived knowledge is declared processed."

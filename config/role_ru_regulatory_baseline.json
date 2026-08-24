@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "baseline_id": "FATHER-RU-ROLE-REGULATORY-001",
   "status": "ACTIVE",
   "scope": "ALL_ROLE_LIBRARY_ORDERS",
@@ -26,7 +26,7 @@
   "roles": {
     "PROGRAMMER": {
       "knowledge_base_id": "PROGRAMMING_KB",
-      "baseline_state": "SEEDED_VERIFIED_OFFICIAL_METADATA",
+      "baseline_state": "EXPANDED_CORE_VERIFIED_OFFICIAL_METADATA_NOT_EXHAUSTIVE",
       "required_clusters": [
         "SOFTWARE_LIFECYCLE",
         "PROGRAM_DOCUMENTATION",
@@ -62,6 +62,97 @@
           "verification_state": "OFFICIAL_METADATA_VERIFIED"
         },
         {
+          "document_id": "RU-PROG-GOST-19.105-78",
+          "designation": "ГОСТ 19.105-78",
+          "title": "Единая система программной документации. Общие требования к программным документам",
+          "cluster": "PROGRAM_DOCUMENTATION",
+          "status": "ACTIVE",
+          "effective_from": "1980-01-01",
+          "replaces": [],
+          "applicability": "GENERAL_PROGRAM_DOCUMENT_REQUIREMENTS",
+          "legal_force_class": "NATIONAL_STANDARD_CHECK_APPLICABILITY",
+          "official_source": "https://protect.gost.ru/gost/details/500f8c05-0b04-40fc-a049-4212eae807c3",
+          "verification_state": "OFFICIAL_METADATA_VERIFIED"
+        },
+        {
+          "document_id": "RU-PROG-GOST-19.201-78",
+          "designation": "ГОСТ 19.201-78",
+          "title": "Единая система программной документации. Техническое задание. Требования к содержанию и оформлению",
+          "cluster": "PROGRAM_DOCUMENTATION",
+          "status": "ACTIVE",
+          "effective_from": "1980-01-01",
+          "replaces": [],
+          "applicability": "SOFTWARE_TECHNICAL_ASSIGNMENT_DOCUMENT",
+          "legal_force_class": "NATIONAL_STANDARD_CHECK_APPLICABILITY",
+          "official_source": "https://protect.gost.ru/gost/details/b64061cf-6bb2-4c75-aee9-18bb5e26e554",
+          "verification_state": "OFFICIAL_METADATA_VERIFIED"
+        },
+        {
+          "document_id": "RU-PROG-GOST-19.202-78",
+          "designation": "ГОСТ 19.202-78",
+          "title": "Единая система программной документации. Спецификация. Требования к содержанию и оформлению",
+          "cluster": "PROGRAM_DOCUMENTATION",
+          "status": "ACTIVE",
+          "effective_from": "1980-01-01",
+          "replaces": [],
+          "applicability": "SOFTWARE_SPECIFICATION_DOCUMENT",
+          "legal_force_class": "NATIONAL_STANDARD_CHECK_APPLICABILITY",
+          "official_source": "https://protect.gost.ru/gost/details/39373bf1-70a6-45f5-921e-790a58325275",
+          "verification_state": "OFFICIAL_METADATA_VERIFIED"
+        },
+        {
+          "document_id": "RU-PROG-GOST-19.301-79",
+          "designation": "ГОСТ 19.301-79",
+          "title": "Единая система программной документации. Программа и методика испытаний. Требования к содержанию и оформлению",
+          "cluster": "PROGRAM_DOCUMENTATION",
+          "status": "ACTIVE",
+          "effective_from": "1981-01-01",
+          "replaces": [],
+          "applicability": "SOFTWARE_TEST_PROGRAM_AND_METHOD_DOCUMENT",
+          "legal_force_class": "NATIONAL_STANDARD_CHECK_APPLICABILITY",
+          "official_source": "https://protect.gost.ru/gost/details/b25e0645-091a-425b-8558-3e0c3ce37315",
+          "verification_state": "OFFICIAL_METADATA_VERIFIED"
+        },
+        {
+          "document_id": "RU-PROG-GOST-19.401-78",
+          "designation": "ГОСТ 19.401-78",
+          "title": "Единая система программной документации. Текст программы. Требования к содержанию и оформлению",
+          "cluster": "PROGRAM_DOCUMENTATION",
+          "status": "ACTIVE",
+          "effective_from": "1980-01-01",
+          "replaces": [],
+          "applicability": "PROGRAM_TEXT_DOCUMENT",
+          "legal_force_class": "NATIONAL_STANDARD_CHECK_APPLICABILITY",
+          "official_source": "https://protect.gost.ru/gost/details/e71e0951-ee1a-441f-b0c0-be3f3681c2f0",
+          "verification_state": "OFFICIAL_METADATA_VERIFIED"
+        },
+        {
+          "document_id": "RU-PROG-GOST-19.503-79",
+          "designation": "ГОСТ 19.503-79",
+          "title": "Единая система программной документации. Руководство системного программиста. Требования к содержанию и оформлению",
+          "cluster": "PROGRAM_DOCUMENTATION",
+          "status": "ACTIVE",
+          "effective_from": "1980-01-01",
+          "replaces": [],
+          "applicability": "SYSTEM_PROGRAMMER_GUIDE_DOCUMENT",
+          "legal_force_class": "NATIONAL_STANDARD_CHECK_APPLICABILITY",
+          "official_source": "https://protect.gost.ru/gost/details/b0ff52a4-63aa-4c95-8278-941ab7721188",
+          "verification_state": "OFFICIAL_METADATA_VERIFIED"
+        },
+        {
+          "document_id": "RU-PROG-GOST-19.504-79",
+          "designation": "ГОСТ 19.504-79",
+          "title": "Единая система программной документации. Руководство программиста. Требования к содержанию и оформлению",
+          "cluster": "PROGRAM_DOCUMENTATION",
+          "status": "ACTIVE",
+          "effective_from": "1980-01-01",
+          "replaces": [],
+          "applicability": "PROGRAMMER_GUIDE_DOCUMENT",
+          "legal_force_class": "NATIONAL_STANDARD_CHECK_APPLICABILITY",
+          "official_source": "https://protect.gost.ru/gost/details/2055b69f-9230-4995-b737-c550e84d617b",
+          "verification_state": "OFFICIAL_METADATA_VERIFIED"
+        },
+        {
           "document_id": "RU-PROG-GOST-R-ISOIEC-12207-2010",
           "designation": "ГОСТ Р ИСО/МЭК 12207-2010",
           "title": "Информационная технология. Системная и программная инженерия. Процессы жизненного цикла программных средств",
@@ -72,6 +163,19 @@
           "applicability": "SOFTWARE_LIFECYCLE_BASELINE",
           "legal_force_class": "NATIONAL_STANDARD_CHECK_APPLICABILITY",
           "official_source": "https://protect.gost.ru/gost/details/350d1d97-8905-4368-8a8c-7ce7c041bb09",
+          "verification_state": "OFFICIAL_METADATA_VERIFIED"
+        },
+        {
+          "document_id": "RU-PROG-GOST-R-56923-2016",
+          "designation": "ГОСТ Р 56923-2016",
+          "title": "Информационные технологии. Системная и программная инженерия. Управление жизненным циклом. Часть 3. Руководство по применению ИСО/МЭК 12207",
+          "cluster": "SOFTWARE_LIFECYCLE",
+          "status": "ACTIVE",
+          "effective_from": "2017-06-01",
+          "replaces": [],
+          "applicability": "SOFTWARE_LIFECYCLE_APPLICATION_GUIDANCE",
+          "legal_force_class": "NATIONAL_STANDARD_GUIDANCE_CHECK_APPLICABILITY",
+          "official_source": "https://protect.gost.ru/gost/details/1a1385e0-117d-43e2-8f07-9b6827204aa1",
           "verification_state": "OFFICIAL_METADATA_VERIFIED"
         },
         {
@@ -121,16 +225,22 @@
           "superseded_by": "ГОСТ 19.101-2024"
         },
         {
+          "designation": "ГОСТ Р ИСО/МЭК 12207-99",
+          "status": "SUPERSEDED",
+          "superseded_by": "ГОСТ Р ИСО/МЭК 12207-2010"
+        },
+        {
           "designation": "ГОСТ Р 56939-2016",
           "status": "SUPERSEDED",
           "superseded_by": "ГОСТ Р 56939-2024"
         }
       ],
       "next_research": [
-        "expand active ESPD standards relevant to specifications, program text, descriptions and test methods",
+        "enumerate the full current ESPD family from the Rosstandart catalog and classify each item as CORE, CONDITIONAL, HISTORICAL or NOT_APPLICABLE",
         "map GOST 34-series applicability for software delivered as part of automated systems",
-        "map FSTEC orders and methodologies that make secure-development requirements mandatory in regulated contexts",
-        "map sector-specific requirements for GIS, KII, personal data and financial systems",
+        "map current FSTEC orders and methodologies that make secure-development requirements mandatory in regulated contexts",
+        "map sector-specific requirements for GIS, KII, personal data, financial, healthcare and state information systems",
+        "add contract/procurement triggers that can make otherwise voluntary standards binding in a project",
         "after RU baseline, attach ISO/IEC/IEEE, OWASP, NIST SSDF and vendor/project practices as GLOBAL_LAYER"
       ]
     }

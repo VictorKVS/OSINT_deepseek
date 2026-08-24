@@ -1,12 +1,20 @@
 {
-  "schema_version": "1.1",
+  "schema_version": "1.2",
   "policy_id": "FATHER-LIBRARY-ORDER-001",
   "status": "ACTIVE",
   "scope": "ALL_ROLE_KNOWLEDGE_BASE_LIBRARY_ORDERS",
   "max_parallel_streams": 5,
+  "global_document_registry": {
+    "policy": "config/global_document_registry_policy.json",
+    "sources": "config/global_document_registry_sources.json",
+    "runtime_registry": "reports/global_document_registry/GLOBAL_DOCUMENT_REGISTRY.json",
+    "runtime_bindings": "reports/global_document_registry/APPLICABILITY_BINDINGS.json",
+    "rule": "Library orders reference shared canonical document_id values; role-specific copies are forbidden."
+  },
   "regulatory_first_policy": {
     "mode": "RU_REGULATORY_AND_NATIONAL_STANDARDS_FIRST",
     "baseline_registry": "config/role_ru_regulatory_baseline.json",
+    "baseline_registry_role": "IMPORT_SOURCE_AND_BINDING_SEED_ONLY",
     "required_before_global_maturity_claim": true,
     "official_status_verification_required": true,
     "superseded_documents_do_not_close_current_gate": true,
@@ -48,6 +56,7 @@
   },
   "pipeline": [
     "ORDER_CREATED",
+    "STAGE_0_GLOBAL_DOCUMENT_REGISTRY_RESOLUTION",
     "STAGE_0_RU_REGULATORY_BASELINE",
     "STAGE_1_ACQUISITION",
     "STAGE_1_COVERAGE",

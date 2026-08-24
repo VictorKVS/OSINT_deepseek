@@ -12,14 +12,16 @@ import uuid
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
-from urllib.parse import parse_qs, urlparse
+from urllib.parse import urlparse
 
 ROOT = Path(__file__).resolve().parents[1]
 STATIC = Path(__file__).resolve().parent / "static"
 REPORTS = ROOT / "reports"
 JOBS_PATH = REPORTS / "osint_control_center" / "jobs.json"
+TRACE_PATH = REPORTS / "osint_control_center" / "trace_events.jsonl"
 ROLE_REGISTRY = ROOT / "config" / "team_role_material_registry.json"
 SAFE_ROLE = re.compile(r"^[A-Z0-9_]{2,64}$")
+TRACE_LOCK = threading.Lock()
 
 ALLOWED_ACTIONS = {
     "PROGRAMMER_BIBLIOGRAPHY_PROBE": [str(ROOT / "RUN_PROGRAMMER_BIBLIOGRAPHY_PROBE.cmd")],
@@ -40,6 +42,30 @@ def write_json(path: Path, payload) -> None:
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
+def append_trace(event: dict) -> None:
+    TRACE_PATH.parent.mkdir(parents=True, exist_ok=True)
+    with TRACE_LOCK:
+        with TRACE_PATH.open("a", encoding="utf-8") as fh:
+            fh.write(json.dumps(event, ensure_ascii=False, sort_keys=True) + "\n")
+
+
+def load_traces(limit: int = 200) -> list[dict]:
+    if not TRACE_PATH.exists():
+        return []
+    rows: list[dict] = []
+    try:
+        for line in TRACE_PATH.read_text(encoding="utf-8").splitlines()[-limit:]:
+            try:
+                row = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            if isinstance(row, dict):
+                rows.append(row)
+    except OSError:
+        return []
+    return rows
+
+
 def load_jobs() -> list[dict]:
     payload = read_json(JOBS_PATH, {"jobs": []}) or {"jobs": []}
     return list(payload.get("jobs", []))[-100:]
@@ -58,6 +84,39 @@ def update_job(job_id: str, **changes) -> None:
             job.update(changes)
             break
     write_json(JOBS_PATH, {"jobs": jobs[-100:]})
+
+
+def trace_event(job: dict, *, status: str, state_before: str, state_after: str, **extra) -> dict:
+    event = {
+        "trace_id": job["trace_id"],
+        "correlation_id": job["correlation_id"],
+        "project_id": job["project_id"],
+        "task_id": job["task_id"],
+        "command_id": job["command_id"],
+        "parent_command_id": job.get("parent_command_id"),
+        "actor_role": job.get("actor_role", "OSINT_UI"),
+        "initiator": job.get("initiator", "OSINT_UI"),
+        "executor": job.get("executor", job.get("kind")),
+        "trigger": job.get("trigger", "USER_ACTION"),
+        "command_name": job.get("kind"),
+        "input_refs": job.get("input_refs", []),
+        "state_before": state_before,
+        "started_at": job.get("started_at_epoch"),
+        "finished_at": job.get("finished_at_epoch"),
+        "status": status,
+        "output_refs": job.get("output_refs", []),
+        "state_after": state_after,
+        "evidence_refs": job.get("evidence_refs", []),
+        "error_ref": job.get("error"),
+        "retry_of": job.get("retry_of"),
+        "rework_reason": job.get("rework_reason"),
+        "human_approval_ref": job.get("human_approval_ref"),
+        "next_command_ids": job.get("next_command_ids", []),
+        "event_at_epoch": time.time(),
+        **extra,
+    }
+    append_trace(event)
+    return event
 
 
 def role_ids() -> set[str]:
@@ -97,6 +156,7 @@ def overview() -> dict:
         "streams": registry.get("streams", []),
         "role_reports": roles,
         "jobs": load_jobs(),
+        "trace_events": load_traces(50),
         "metrics": {
             "search_hits_total": total_hits,
             "downloaded_total": downloaded,
@@ -108,19 +168,51 @@ def overview() -> dict:
 
 
 def spawn_job(kind: str, command: list[str], meta: dict | None = None) -> dict:
-    job_id = uuid.uuid4().hex[:10]
-    job = {"id": job_id, "kind": kind, "state": "STARTING", "created_at_epoch": time.time(), **(meta or {})}
+    uid = uuid.uuid4().hex[:10]
+    meta = dict(meta or {})
+    job = {
+        "id": uid,
+        "trace_id": f"TRACE-{uuid.uuid4().hex[:12]}",
+        "correlation_id": str(meta.pop("correlation_id", f"CORR-{uuid.uuid4().hex[:12]}")),
+        "project_id": "FATHER-OSINT",
+        "task_id": str(meta.pop("task_id", f"TASK-{uuid.uuid4().hex[:10]}")),
+        "command_id": str(meta.pop("command_id", f"CMD-{uuid.uuid4().hex[:10]}")),
+        "parent_command_id": meta.pop("parent_command_id", None),
+        "actor_role": str(meta.pop("actor_role", "OSINT_UI")),
+        "initiator": str(meta.pop("initiator", "OSINT_UI")),
+        "executor": str(meta.pop("executor", kind)),
+        "trigger": str(meta.pop("trigger", "USER_ACTION")),
+        "kind": kind,
+        "state": "QUEUED",
+        "created_at_epoch": time.time(),
+        "input_refs": meta.pop("input_refs", []),
+        "output_refs": [],
+        "evidence_refs": [],
+        **meta,
+    }
     add_job(job)
+    trace_event(job, status="QUEUED", state_before="PLANNED", state_after="QUEUED")
 
     def worker():
         try:
             flags = getattr(subprocess, "CREATE_NEW_CONSOLE", 0)
             proc = subprocess.Popen(command, cwd=str(ROOT), creationflags=flags)
-            update_job(job_id, state="RUNNING", pid=proc.pid, started_at_epoch=time.time())
+            started = time.time()
+            update_job(job["id"], state="RUNNING", pid=proc.pid, started_at_epoch=started)
+            running = {**job, "state": "RUNNING", "pid": proc.pid, "started_at_epoch": started}
+            trace_event(running, status="RUNNING", state_before="QUEUED", state_after="RUNNING", pid=proc.pid)
             rc = proc.wait()
-            update_job(job_id, state="PASS" if rc == 0 else "FAILED", exit_code=rc, finished_at_epoch=time.time())
+            finished = time.time()
+            final_state = "PASS" if rc == 0 else "FAILED"
+            update_job(job["id"], state=final_state, exit_code=rc, finished_at_epoch=finished)
+            final = {**running, "state": final_state, "exit_code": rc, "finished_at_epoch": finished}
+            trace_event(final, status=final_state, state_before="RUNNING", state_after=final_state, exit_code=rc)
         except Exception as exc:
-            update_job(job_id, state="FAILED", error=f"{type(exc).__name__}: {exc}", finished_at_epoch=time.time())
+            finished = time.time()
+            error = f"{type(exc).__name__}: {exc}"
+            update_job(job["id"], state="FAILED", error=error, finished_at_epoch=finished)
+            failed = {**job, "state": "FAILED", "error": error, "finished_at_epoch": finished}
+            trace_event(failed, status="FAILED", state_before="RUNNING", state_after="FAILED")
 
     threading.Thread(target=worker, daemon=True).start()
     return job
@@ -128,20 +220,28 @@ def spawn_job(kind: str, command: list[str], meta: dict | None = None) -> dict:
 
 def action_command(payload: dict) -> tuple[str, list[str], dict]:
     action = str(payload.get("action", "")).upper().strip()
+    common = {
+        "correlation_id": payload.get("correlation_id") or None,
+        "parent_command_id": payload.get("parent_command_id") or None,
+        "initiator": "OSINT_UI",
+        "actor_role": "OSINT_UI",
+        "trigger": "USER_ACTION",
+    }
+    common = {k: v for k, v in common.items() if v is not None}
     if action == "ROLE_ACQUISITION":
         role = str(payload.get("role", "")).upper().strip().replace("-", "_")
         if not SAFE_ROLE.fullmatch(role) or role not in role_ids() or role == "ARCHITECT":
             raise ValueError("unknown or unsupported role")
-        return action, [str(ROOT / "RUN_TEAM_ROLE_ACQUISITION.cmd"), role], {"role": role}
+        return action, [str(ROOT / "RUN_TEAM_ROLE_ACQUISITION.cmd"), role], {**common, "role": role, "executor": "ROLE_ACQUISITION_WORKER", "input_refs": [f"role:{role}"]}
     if action == "TELEGRAM_QUERY_PROBE":
         query = " ".join(str(payload.get("query", "")).split()).strip()
         if not query or len(query) > 240:
             raise ValueError("query must contain 1..240 characters")
         py = ROOT / ".venv" / "Scripts" / "python.exe"
         python_exe = str(py if py.exists() else Path(sys.executable))
-        return action, [python_exe, str(ROOT / "scripts" / "probe_osint_query.py"), "--query", query], {"query": query}
+        return action, [python_exe, str(ROOT / "scripts" / "probe_osint_query.py"), "--query", query], {**common, "query": query, "executor": "TELEGRAM_COLLECTOR", "input_refs": [f"query:{query}"]}
     if action in ALLOWED_ACTIONS:
-        return action, ALLOWED_ACTIONS[action], {}
+        return action, ALLOWED_ACTIONS[action], {**common, "executor": action}
     raise ValueError("action is not allowed")
 
 
@@ -166,6 +266,8 @@ class Handler(BaseHTTPRequestHandler):
             return self.send_json(overview())
         if parsed.path == "/api/jobs":
             return self.send_json({"jobs": load_jobs()})
+        if parsed.path == "/api/traces":
+            return self.send_json({"trace_events": load_traces(500)})
         if parsed.path == "/api/search-results":
             root = REPORTS / "osint_control_center" / "searches"
             rows = []

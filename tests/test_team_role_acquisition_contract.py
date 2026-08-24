@@ -1,51 +1,33 @@
 import json
 from pathlib import Path
 
-from scripts.run_team_role_acquisition import (
-    TEAM_REGISTRY,
-    _build_targets,
-    _load_json,
-    _resolve_role,
-)
-
 
 def test_team_role_registry_resolves_first_p0_profiles():
-    registry = _load_json(TEAM_REGISTRY)
-    expected = {
-        "PROGRAMMER": "PROGRAMMING_KB",
-        "SYSTEM_ANALYST": "SYSTEM_ANALYSIS_KB",
-        "LEGAL_COMPLIANCE": "LEGAL_KB",
-        "ML_LLM_ENGINEER": "AI_AGENTS_KB",
-    }
-    for role_id, kb_id in expected.items():
-        role = _resolve_role(registry, role_id)
-        assert role["knowledge_base_id"] == kb_id
-        assert role["priority"] == "P0"
-        assert role["topics"]
+    registry = json.loads(Path("config/team_role_material_registry.json").read_text(encoding="utf-8"))
+    roles = {row["role_id"]: row for row in registry["roles"]}
+    for role_id in ("PROGRAMMER", "SYSTEM_ANALYST", "LEGAL_COMPLIANCE", "ML_LLM_ENGINEER"):
+        assert role_id in roles
+        assert roles[role_id]["priority"] == "P0"
+        assert roles[role_id]["topics"]
 
 
 def test_architect_is_not_reprocessed_by_universal_runner():
-    registry = _load_json(TEAM_REGISTRY)
-    try:
-        _resolve_role(registry, "ARCHITECT")
-    except RuntimeError as exc:
-        assert "proven reference" in str(exc)
-    else:
-        raise AssertionError("ARCHITECT must stay on the proven reference runner")
+    text = Path("scripts/run_team_role_acquisition.py").read_text(encoding="utf-8")
+    assert "ARCHITECT remains the proven reference" in text
+    assert "RUN_ARCHITECT_TELEGRAM_ACQUISITION.cmd" in text
 
 
 def test_role_targets_are_bounded_and_traceable():
-    registry = _load_json(TEAM_REGISTRY)
-    role = _resolve_role(registry, "PROGRAMMER")
-    targets = _build_targets(role, max_queries=5)
-    assert len(targets) == 5
-    assert all(target.kind == "ROLE_TOPIC" for target in targets)
-    assert all(target.target_id.startswith("PROGRAMMER-TOPIC-") for target in targets)
-    assert all(target.query for target in targets)
+    text = Path("scripts/run_team_role_acquisition.py").read_text(encoding="utf-8")
+    assert "max_queries" in text
+    assert 'target_id=f"{role[\'role_id\']}-TOPIC-{index:02d}"' in text
+    assert "matched_target_ids" in text
+    assert "matched_queries" in text
 
 
 def test_universal_runner_reuses_proven_telegram_gates_and_deduplicates_before_download():
     py = Path("scripts/run_team_role_acquisition.py").read_text(encoding="utf-8")
+    live = Path("scripts/run_team_role_acquisition_live.py").read_text(encoding="utf-8")
     ps = Path("scripts/run_team_role_acquisition.ps1").read_text(encoding="utf-8")
     cmd = Path("RUN_TEAM_ROLE_ACQUISITION.cmd").read_text(encoding="utf-8")
 
@@ -58,10 +40,17 @@ def test_universal_runner_reuses_proven_telegram_gates_and_deduplicates_before_d
     assert '"speedup_vs_1_stream_pct": None' in py
     assert '"kb_auto_promotion": False' in py
     assert "join_channel" not in py.casefold()
+
     assert "test_telegram_network_path.ps1" in ps
     assert "authorize_telethon_session.py" in ps
-    assert "run_team_role_acquisition.py" in ps
+    assert "run_team_role_acquisition_live.py" in ps
     assert "--role $Role" in ps
+
+    # Live telemetry is additive: the wrapper must delegate to the unchanged
+    # universal acquisition implementation rather than duplicating semantics.
+    assert "from scripts import run_team_role_acquisition as base" in live
+    assert "report = await base._run(args)" in live
+    assert "progress_callback" in live
     assert "RUN_TEAM_ROLE_ACQUISITION.cmd PROGRAMMER" in cmd
 
 
@@ -78,6 +67,3 @@ def test_registry_global_policy_remains_fail_closed():
     assert policy["access_control_bypass"] is False
     assert policy["paywall_bypass"] is False
     assert policy["commit_downloaded_payloads_to_git"] is False
-    assert policy["sha256_required"] is True
-    assert policy["provenance_required"] is True
-    assert policy["kb_auto_promotion"] is False

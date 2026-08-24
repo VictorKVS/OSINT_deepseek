@@ -8,6 +8,7 @@ $RepoRoot = Split-Path -Parent $PSScriptRoot
 Set-Location $RepoRoot
 $DpapiStorePath = Join-Path $RepoRoot '.runtime\telegram\credentials.dpapi.json'
 $SetupScript = Join-Path $RepoRoot 'scripts\setup_telegram_credentials.ps1'
+$NetworkPreflightScript = Join-Path $RepoRoot 'scripts\test_telegram_network_path.ps1'
 
 function Resolve-Python {
     $venv = Join-Path $RepoRoot '.venv\Scripts\python.exe'
@@ -195,6 +196,20 @@ Write-Host "TELEGRAM_API_HASH: SET [$($apiHash.Source)]"
 Write-Host 'Secret values are not printed or persisted by this bootstrap.'
 Write-Host 'When local setup is used, only DPAPI-encrypted ciphertext is stored under .runtime.'
 Write-Host ''
+
+if (-not (Test-Path -LiteralPath $NetworkPreflightScript -PathType Leaf)) {
+    Write-Host 'Telegram network preflight script is missing; acquisition will not start blindly.'
+    exit 4
+}
+
+& powershell.exe -NoProfile -ExecutionPolicy Bypass -File $NetworkPreflightScript
+$networkRc = $LASTEXITCODE
+if ($networkRc -ne 0) {
+    Write-Host ''
+    Write-Host 'Telegram acquisition stopped before Telethon connection retries because the network path is not proven reachable.'
+    Write-Host 'Review reports\architect_telegram\LATEST_TELEGRAM_NETWORK_DIAGNOSTIC.json.'
+    exit $networkRc
+}
 
 $env:PYTHONPATH = "$RepoRoot;$($env:PYTHONPATH)"
 & $pythonExe (Join-Path $RepoRoot 'scripts\run_architect_telegram_acquisition.py') @RunnerArgs

@@ -8,7 +8,10 @@ def test_departmental_acquisition_runner_reuses_v2_contract():
     assert "WORKERS = 5" in text
     assert "bulk._process" in text
     assert '"speedup_vs_1_stream_pct": None' in text
-    assert "Only proof-grade exact official acquisition is legal-truth eligible" in text
+    assert 'result["currentness_verified"] = False' in text
+    assert 'result["legal_truth_eligible"] = False' in text
+    assert "CURRENTNESS_AND_AMENDMENT_CHAIN_NOT_VERIFIED" in text
+    assert "Exact official bytes prove provenance/identity only" in text
 
 
 def test_departmental_acquisition_source_map_keeps_a2_separate():

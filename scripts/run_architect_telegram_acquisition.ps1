@@ -6,6 +6,8 @@ param(
 $ErrorActionPreference = 'Stop'
 $RepoRoot = Split-Path -Parent $PSScriptRoot
 Set-Location $RepoRoot
+$DpapiStorePath = Join-Path $RepoRoot '.runtime\telegram\credentials.dpapi.json'
+$SetupScript = Join-Path $RepoRoot 'scripts\setup_telegram_credentials.ps1'
 
 function Resolve-Python {
     $venv = Join-Path $RepoRoot '.venv\Scripts\python.exe'
@@ -58,8 +60,37 @@ function Read-DotEnvValue {
     return $null
 }
 
+function Convert-DpapiCipherToPlainText {
+    param([Parameter(Mandatory = $true)][string] $CipherText)
+    $secure = ConvertTo-SecureString $CipherText
+    $credential = [PSCredential]::new('local', $secure)
+    return $credential.GetNetworkCredential().Password
+}
+
+function Read-DpapiCredentials {
+    if (-not (Test-Path -LiteralPath $DpapiStorePath -PathType Leaf)) { return $null }
+    try {
+        $payload = Get-Content -LiteralPath $DpapiStorePath -Raw -ErrorAction Stop | ConvertFrom-Json
+        if ($payload.storage -ne 'WINDOWS_DPAPI_CURRENT_USER') { return $null }
+        $apiId = Convert-DpapiCipherToPlainText -CipherText ([string]$payload.api_id_dpapi)
+        $apiHash = Convert-DpapiCipherToPlainText -CipherText ([string]$payload.api_hash_dpapi)
+        if ([string]::IsNullOrWhiteSpace($apiId) -or [string]::IsNullOrWhiteSpace($apiHash)) { return $null }
+        return [pscustomobject]@{
+            ApiId = $apiId
+            ApiHash = $apiHash
+            Source = 'WINDOWS_DPAPI_CURRENT_USER'
+        }
+    } catch {
+        Write-Host 'DPAPI credential store exists but could not be decrypted in this Windows user context.'
+        return $null
+    }
+}
+
 function Resolve-SecretValue {
-    param([Parameter(Mandatory = $true)][string] $Name)
+    param(
+        [Parameter(Mandatory = $true)][string] $Name,
+        [object] $DpapiCredentials
+    )
 
     $scoped = Get-ScopedEnvironmentValue -Name $Name
     if ($scoped) { return $scoped }
@@ -71,8 +102,6 @@ function Resolve-SecretValue {
         (Join-Path $RepoRoot '.runtime\telegram.env')
     )
 
-    # Known local TDLib workspace convention; files are read locally only and
-    # values are never written to Git or printed.
     if ($env:FATHER_TDLIB_RUNTIME) {
         try {
             $runtimeParent = Split-Path -Parent ([IO.Path]::GetFullPath($env:FATHER_TDLIB_RUNTIME))
@@ -92,44 +121,77 @@ function Resolve-SecretValue {
             return [pscustomobject]@{ Value = $value; Source = "DOTENV:$path" }
         }
     }
+
+    if ($DpapiCredentials) {
+        if ($Name -eq 'TELEGRAM_API_ID') {
+            return [pscustomobject]@{ Value = $DpapiCredentials.ApiId; Source = $DpapiCredentials.Source }
+        }
+        if ($Name -eq 'TELEGRAM_API_HASH') {
+            return [pscustomobject]@{ Value = $DpapiCredentials.ApiHash; Source = $DpapiCredentials.Source }
+        }
+    }
     return $null
 }
 
-$pythonExe = Resolve-Python
-$apiId = Resolve-SecretValue -Name 'TELEGRAM_API_ID'
-$apiHash = Resolve-SecretValue -Name 'TELEGRAM_API_HASH'
-$sessionOverride = Get-ScopedEnvironmentValue -Name 'TELEGRAM_SESSION_PATH'
+function Resolve-AllCredentials {
+    $dpapi = Read-DpapiCredentials
+    return [pscustomobject]@{
+        ApiId = Resolve-SecretValue -Name 'TELEGRAM_API_ID' -DpapiCredentials $dpapi
+        ApiHash = Resolve-SecretValue -Name 'TELEGRAM_API_HASH' -DpapiCredentials $dpapi
+        Session = Get-ScopedEnvironmentValue -Name 'TELEGRAM_SESSION_PATH'
+    }
+}
 
-if ($apiId) {
-    [Environment]::SetEnvironmentVariable('TELEGRAM_API_ID', $apiId.Value, 'Process')
+$pythonExe = Resolve-Python
+$credentials = Resolve-AllCredentials
+
+if (-not $credentials.ApiId -or -not $credentials.ApiHash) {
+    Write-Host '============================================================'
+    Write-Host 'FATHER Architect - Telegram credential bootstrap'
+    Write-Host '============================================================'
+    Write-Host "Python: $pythonExe"
+    Write-Host 'TELEGRAM_API_ID: MISSING'
+    Write-Host 'TELEGRAM_API_HASH: MISSING'
+    Write-Host 'No saved credentials were found. Starting one-time local DPAPI setup.'
+    Write-Host 'Values will be entered only in this PowerShell window and will not be printed.'
+    Write-Host ''
+
+    if (-not (Test-Path -LiteralPath $SetupScript -PathType Leaf)) {
+        Write-Host 'Credential setup script is missing.'
+        exit 3
+    }
+
+    & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $SetupScript
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host 'Credential setup did not complete; Telegram acquisition was not started.'
+        exit 3
+    }
+    $credentials = Resolve-AllCredentials
 }
-if ($apiHash) {
-    [Environment]::SetEnvironmentVariable('TELEGRAM_API_HASH', $apiHash.Value, 'Process')
+
+$apiId = $credentials.ApiId
+$apiHash = $credentials.ApiHash
+$sessionOverride = $credentials.Session
+
+if (-not $apiId -or -not $apiHash) {
+    Write-Host 'Credential bootstrap failed safely after local setup.'
+    exit 3
 }
+
+[Environment]::SetEnvironmentVariable('TELEGRAM_API_ID', $apiId.Value, 'Process')
+[Environment]::SetEnvironmentVariable('TELEGRAM_API_HASH', $apiHash.Value, 'Process')
 if ($sessionOverride) {
     [Environment]::SetEnvironmentVariable('TELEGRAM_SESSION_PATH', $sessionOverride.Value, 'Process')
 }
-
-$apiIdStatus = if ($apiId) { 'SET' } else { 'MISSING' }
-$apiHashStatus = if ($apiHash) { 'SET' } else { 'MISSING' }
-$apiIdSource = if ($apiId) { $apiId.Source } else { 'NONE' }
-$apiHashSource = if ($apiHash) { $apiHash.Source } else { 'NONE' }
 
 Write-Host '============================================================'
 Write-Host 'FATHER Architect - Telegram credential bootstrap'
 Write-Host '============================================================'
 Write-Host "Python: $pythonExe"
-Write-Host "TELEGRAM_API_ID: $apiIdStatus [$apiIdSource]"
-Write-Host "TELEGRAM_API_HASH: $apiHashStatus [$apiHashSource]"
-Write-Host 'Secret values are not printed or persisted by this bootstrap.'
+Write-Host "TELEGRAM_API_ID: SET [$($apiId.Source)]"
+Write-Host "TELEGRAM_API_HASH: SET [$($apiHash.Source)]"
+Write-Host 'Secret values are not printed. DPAPI storage, when used, stays local under .runtime.'
 Write-Host ''
-
-if (-not $apiId -or -not $apiHash) {
-    Write-Host 'Credential bootstrap failed safely.'
-    Write-Host 'Checked: Process/User/Machine environment and local gitignored .env candidates.'
-    Write-Host 'If the credentials only exist in another old PowerShell process, set them locally in this shell or save them to the repo .env file; do not paste them into chat.'
-    exit 3
-}
 
 $env:PYTHONPATH = "$RepoRoot;$($env:PYTHONPATH)"
 & $pythonExe (Join-Path $RepoRoot 'scripts\run_architect_telegram_acquisition.py') @RunnerArgs

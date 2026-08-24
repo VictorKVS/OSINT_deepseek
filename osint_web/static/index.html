@@ -9,11 +9,13 @@
   <style>
     .brand-mark-img{width:38px;height:38px;display:block;filter:drop-shadow(0 0 18px #49d8ff55)}
     .top-brand{display:flex;align-items:center;gap:12px;text-decoration:none;color:inherit}.top-brand .brand-mark-img{width:48px;height:48px}.top-brand-copy strong{display:block;font-size:13px;letter-spacing:.18em}.top-brand-copy span{display:block;color:var(--muted);font-size:10px;letter-spacing:.13em}.header-left{display:flex;align-items:center;gap:20px}
-    .search-context{display:grid;grid-template-columns:minmax(190px,.8fr) minmax(280px,1.4fr) minmax(260px,1fr);gap:10px;margin-bottom:10px}.context-field{display:grid;gap:5px}.context-field label{font-size:10px;color:var(--muted);letter-spacing:.11em}.context-field select{width:100%;border:1px solid #2d4b63;background:#0c1823;color:var(--text);border-radius:9px;padding:10px 11px;outline:0}.destination-box{border:1px solid #20384c;background:#09151f;border-radius:9px;padding:9px 11px;display:flex;flex-direction:column;justify-content:center;min-width:0}.destination-box span{font-size:9px;letter-spacing:.1em;color:var(--cyan)}.destination-box code{font:11px/1.4 Consolas,monospace;color:#b9cbd9;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .search-context,.library-order-form{display:grid;grid-template-columns:minmax(190px,.8fr) minmax(220px,.8fr) minmax(220px,.8fr) auto;gap:10px;margin-bottom:10px}.context-field{display:grid;gap:5px}.context-field label{font-size:10px;color:var(--muted);letter-spacing:.11em}.context-field select{width:100%;border:1px solid #2d4b63;background:#0c1823;color:var(--text);border-radius:9px;padding:10px 11px;outline:0}.destination-box{border:1px solid #20384c;background:#09151f;border-radius:9px;padding:9px 11px;display:flex;flex-direction:column;justify-content:center;min-width:0}.destination-box span{font-size:9px;letter-spacing:.1em;color:var(--cyan)}.destination-box code{font:11px/1.4 Consolas,monospace;color:#b9cbd9;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .library-order-grid{display:grid;gap:10px}.library-order-card{border:1px solid #1d3447;border-radius:11px;padding:13px;background:#0b1822}.library-order-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.library-order-head small,.library-stage small{color:var(--muted)}.library-stage-row{display:grid;grid-template-columns:repeat(8,minmax(90px,1fr));gap:6px;margin-top:10px}.library-stage{border:1px solid #20384c;border-radius:8px;padding:7px;background:#0a1620;min-width:0}.library-stage b{display:block;font-size:9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.library-regulatory{margin-top:9px;padding:9px;border-left:3px solid var(--cyan);background:#0b1b27;border-radius:7px}.library-regulatory b{display:block}.library-regulatory small{display:block;color:var(--muted)}
     .download-role{border:1px solid #1d3447;border-radius:10px;padding:12px;background:#0b1822;margin-bottom:10px}.download-role-head{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:9px}.download-role-head small,.download-row small{color:var(--muted)}.download-row{display:grid;grid-template-columns:minmax(180px,1.6fr) 105px minmax(180px,1fr) 120px;gap:10px;align-items:center;padding:8px 0;border-top:1px solid #182b3b}.download-row:first-of-type{border-top:0}.progress-track{height:7px;border-radius:99px;background:#172b3d;overflow:hidden}.progress-fill{height:100%;background:linear-gradient(90deg,var(--cyan),var(--green));border-radius:99px}.download-status{font-size:10px;letter-spacing:.08em}.download-history{max-height:420px;overflow:auto}.download-summary{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}.download-summary .chip{display:inline-block}.mono{font-family:Consolas,monospace;font-size:10px}
     .results-stage{margin-top:14px}.results-toolbar{display:flex;gap:9px;align-items:center}.result{position:relative}.result-select{display:flex;align-items:flex-start;gap:10px}.result-select input{margin-top:3px}.result-body{min-width:0;flex:1}.result-actions{display:flex;gap:7px;align-items:center;margin-top:8px}.result-actions button{padding:6px 9px}.result-route{font-size:10px;color:var(--cyan)}.disabled{opacity:.45;pointer-events:none}
-    .stage-ribbon{display:flex;gap:5px;flex-wrap:wrap;margin:8px 0 16px}.stage-ribbon span{font-size:10px;padding:5px 8px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}.stage-ribbon span.active{color:var(--green);border-color:#65e6a655;background:#65e6a611}
-    @media(max-width:1000px){.top-brand-copy{display:none}.search-context{grid-template-columns:1fr}.download-row{grid-template-columns:1fr}.download-row>*{min-width:0}}
+    .stage-ribbon{display:flex;gap:5px;flex-wrap:wrap;margin:8px 0 16px}.stage-ribbon span{font-size:10px;padding:5px 8px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}.stage-ribbon span.active{color:var(--green);border-color:#65e6a655;background:#65e6a611}.stage-ribbon span.reg{color:var(--cyan);border-color:#49d8ff55;background:#49d8ff0d}
+    @media(max-width:1100px){.library-stage-row{grid-template-columns:repeat(4,1fr)}}
+    @media(max-width:1000px){.top-brand-copy{display:none}.search-context,.library-order-form{grid-template-columns:1fr}.download-row{grid-template-columns:1fr}.download-row>*{min-width:0}.library-stage-row{grid-template-columns:repeat(2,1fr)}}
   </style>
 </head>
 <body>
@@ -23,6 +25,7 @@
       <a class="brand" href="/" aria-label="FATHER OSINT Control Center — на главную" data-brand-mark="required" style="text-decoration:none;color:inherit"><img class="brand-mark-img" src="/brand-mark.svg" alt="" /><div><strong>FATHER</strong><span>OSINT CONTROL CENTER</span></div></a>
       <nav>
         <button class="nav active" data-view="overview">◈ <span>Обзор</span></button>
+        <button class="nav" data-view="library">▦ <span>Библиотеки ролей</span></button>
         <button class="nav" data-view="search">⌕ <span>Поиск</span></button>
         <button class="nav" data-view="downloads">⇩ <span>Скачивания</span></button>
         <button class="nav" data-view="sources">◉ <span>Источники</span></button>
@@ -42,7 +45,19 @@
         <div class="header-actions"><button class="ghost" id="refreshBtn">↻ Обновить</button><button class="primary" id="remainingBtn">Запустить P0-потоки</button></div>
       </header>
 
-      <div class="stage-ribbon"><span class="active">1 · Поиск / скачивание</span><span>2 · Разбор документа</span><span>3 · Извлечение знаний</span><span>4 · Связи / конфликты</span><span>5 · Аналитик</span><span>6 · KB Ready</span></div>
+      <div class="stage-ribbon"><span class="reg">0 · Нормативка РФ</span><span class="active">1 · Поиск / скачивание</span><span>2 · Разбор документа</span><span>3 · Извлечение знаний</span><span>4 · Связи / конфликты</span><span>5 · Аналитик</span><span>6 · Review / KB Ready</span></div>
+
+      <section class="panel" id="libraryPanel">
+        <div class="panel-head"><div><span class="eyebrow">ROLE LIBRARY FACTORY</span><h2>Заказать библиотеку роли</h2></div><span class="muted">Россия сначала → мировые практики → конвейер знаний</span></div>
+        <div class="library-order-form">
+          <div class="context-field"><label for="libraryRoleSelect">РОЛЬ / KB</label><select id="libraryRoleSelect"></select></div>
+          <div class="context-field"><label for="libraryMaturitySelect">УРОВЕНЬ</label><select id="libraryMaturitySelect"><option>MIN</option><option>MEDIUM</option><option>MAX</option></select></div>
+          <div class="context-field"><label for="libraryModeSelect">РЕЖИМ</label><select id="libraryModeSelect"><option value="AUTO_BOUNDED">AUTO_BOUNDED</option><option value="REVIEW_EACH_STAGE">REVIEW_EACH_STAGE</option></select></div>
+          <button class="primary" id="libraryStartBtn">Заказать и запустить</button>
+        </div>
+        <div class="chips"><span class="chip on">RU Official Regulatory · first</span><span class="chip">Official Web</span><span class="chip">GitHub</span><span class="chip">Telegram</span><span class="chip">Local Library</span></div>
+        <div id="libraryOrders" class="library-order-grid" style="margin-top:14px"></div>
+      </section>
 
       <section class="search-hero panel" id="searchPanel">
         <div class="panel-head"><div><span class="eyebrow">STAGE 1 · SEARCH CONTEXT</span><h2>Куда ищем и куда складываем</h2></div><span class="muted">роль → тема → папка</span></div>
@@ -80,7 +95,7 @@
         <section class="panel evidence-panel">
           <div class="panel-head"><div><span class="eyebrow">EVIDENCE MAP</span><h2>Карта прохождения</h2></div><span class="muted">source → evidence → KB</span></div>
           <div class="evidence-map">
-            <div class="node source">TELEGRAM<small>discovery</small></div><div class="line l1"></div>
+            <div class="node source">RU / TELEGRAM<small>regulatory + discovery</small></div><div class="line l1"></div>
             <div class="node evidence">EVIDENCE<small>provenance + SHA</small></div><div class="line l2"></div>
             <div class="node analyst">ANALYST<small>review / challenge</small></div><div class="line l3"></div>
             <div class="node kb">KNOWLEDGE BASE<small>human promotion</small></div>

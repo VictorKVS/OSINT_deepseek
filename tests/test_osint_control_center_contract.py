@@ -37,3 +37,15 @@ def test_parallel_p0_windows_use_isolated_telethon_session_files():
     assert "ml_llm_engineer.session" in text
     assert "TELEGRAM_SESSION_PATH" in text
     assert text.count("start \"FATHER") == 3
+
+
+def test_control_center_waits_for_health_before_opening_browser():
+    text = Path("scripts/run_osint_control_center.ps1").read_text(encoding="utf-8")
+    server_index = text.index("Start-Process -FilePath $Python")
+    health_index = text.index("Invoke-WebRequest -UseBasicParsing -Uri $HealthUrl")
+    ready_index = text.index("[WEB] READY")
+    browser_index = text.index("Start-Process $Url")
+    assert server_index < health_index < ready_index < browser_index
+    assert "http://127.0.0.1:8765/api/overview" in text
+    assert "Test-NetConnection 127.0.0.1 -Port 8765" in text
+    assert "server did not become healthy" in text

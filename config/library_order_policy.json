@@ -1,0 +1,53 @@
+{
+  "schema_version": "1.0",
+  "policy_id": "FATHER-LIBRARY-ORDER-001",
+  "status": "ACTIVE",
+  "scope": "ALL_ROLE_KNOWLEDGE_BASE_LIBRARY_ORDERS",
+  "max_parallel_streams": 5,
+  "default_sources": [
+    "OFFICIAL_WEB",
+    "GITHUB",
+    "TELEGRAM",
+    "LOCAL_LIBRARY"
+  ],
+  "source_semantics": {
+    "OFFICIAL_WEB": "authoritative or primary acquisition where available",
+    "GITHUB": "primary project documentation, reference implementations and open technical material",
+    "TELEGRAM": "discovery and accessible candidate acquisition only",
+    "LOCAL_LIBRARY": "user-owned or otherwise authorized local material"
+  },
+  "copyright_policy": {
+    "auto_download_open_or_official_material": true,
+    "auto_download_commercial_books_from_unverified_mirrors": false,
+    "commercial_book_discovery_only_until_access_is_authorized": true
+  },
+  "maturity_levels": {
+    "MIN": {
+      "required_dimensions": ["AUTHORITATIVE_BASIS", "PRACTICE", "VALIDATION_OR_FAILURE"],
+      "gap_is_allowed_if_explicit": true
+    },
+    "MEDIUM": {
+      "required_dimensions": ["AUTHORITATIVE_BASIS", "PRACTICE", "VALIDATION", "COUNTER_EVIDENCE", "TEMPLATES_OR_EXAMPLES"],
+      "independent_source_classes_required": true
+    },
+    "MAX": {
+      "required_dimensions": ["AUTHORITATIVE_BASIS", "PRACTICE", "VALIDATION", "COUNTER_EVIDENCE", "BENCHMARK_OR_EVAL", "CHANGE_MONITORING", "GOLDEN_DECISIONS"],
+      "human_review_required_before_kb_promotion": true
+    }
+  },
+  "pipeline": [
+    "ORDER_CREATED",
+    "STAGE_1_ACQUISITION",
+    "STAGE_1_COVERAGE",
+    "STAGE_2_DOCUMENT_COMPILER",
+    "STAGE_3_KNOWLEDGE_EXTRACTION",
+    "STAGE_4_RELATIONS_AND_CONFLICTS",
+    "STAGE_5_ANALYST_AND_CRITIC",
+    "STAGE_6_REVIEW",
+    "KB_READY"
+  ],
+  "promotion_policy": {
+    "kb_auto_promotion": false,
+    "human_review_required": true
+  }
+}

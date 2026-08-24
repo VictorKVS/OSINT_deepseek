@@ -1,0 +1,89 @@
+{
+  "schema_version": "1.0",
+  "profile_id": "ARCHITECT-TELEGRAM-ACQUISITION-001",
+  "role_id": "ARCHITECT",
+  "purpose": "Find and download missing architect/course source materials from Telegram locations already accessible to the operator account, preserving provenance and deduplicating against the local course corpus.",
+  "policy": {
+    "access_scope": "ALREADY_ACCESSIBLE_TO_AUTHORIZED_TELEGRAM_SESSION_ONLY",
+    "auto_join_channels": false,
+    "access_control_bypass": false,
+    "paywall_bypass": false,
+    "download_video_by_default": false,
+    "auto_extract_archives": false,
+    "commit_downloaded_payloads_to_git": false,
+    "kb_auto_promotion": false,
+    "provenance_required": true,
+    "sha256_required": true
+  },
+  "course_root_candidates": [
+    "G:/1/OTUS",
+    "../OTUS"
+  ],
+  "inventory": {
+    "lesson_folder_pattern": "^\\s*(\\d+)",
+    "max_scan_depth": 2,
+    "primary_source_extensions": [
+      ".pdf", ".ppt", ".pptx", ".doc", ".docx", ".odt", ".epub", ".djvu"
+    ],
+    "downloadable_extensions": [
+      ".pdf", ".ppt", ".pptx", ".doc", ".docx", ".odt", ".epub", ".djvu", ".txt", ".md", ".ipynb", ".zip", ".7z", ".rar"
+    ],
+    "lesson_is_source_complete_when_primary_file_exists": true
+  },
+  "telegram": {
+    "max_search_streams": 5,
+    "max_download_streams": 5,
+    "search_limit_per_query": 30,
+    "max_queries": 80,
+    "max_file_size_mb": 100,
+    "default_session_path": "legacy/telegram/reader_session",
+    "api_id_env": "TELEGRAM_API_ID",
+    "api_hash_env": "TELEGRAM_API_HASH",
+    "session_env": "TELEGRAM_SESSION_PATH"
+  },
+  "role_topic_seeds": [
+    "C4 Model software architecture",
+    "architecture decision record ADR",
+    "system design distributed systems",
+    "RAG architecture LangChain",
+    "LLM architecture production",
+    "AI system architecture",
+    "LLM evaluation architecture",
+    "OWASP LLM security architecture",
+    "VRAM LLM sizing",
+    "MLOps LLMOps architecture",
+    "Terraform IaC architecture",
+    "ArgoCD GitOps canary",
+    "Kubernetes KEDA autoscaling",
+    "semantic cache LLM",
+    "FinOps AI infrastructure",
+    "multi-cloud architecture",
+    "multi-tenancy architecture",
+    "federated learning privacy",
+    "AI governance model cards",
+    "API as product architecture",
+    "technical radar architecture"
+  ],
+  "outputs": {
+    "local_download_root": "data/architect_telegram_downloads",
+    "report": "reports/architect_telegram/LATEST_ARCHITECT_TELEGRAM_RUN.json"
+  },
+  "metrics": [
+    "lessons_total",
+    "lessons_with_primary_sources",
+    "lessons_missing_primary_sources",
+    "queries_total",
+    "search_hits_total",
+    "media_candidates_total",
+    "downloaded_total",
+    "payload_reused_total",
+    "skipped_type_total",
+    "skipped_size_total",
+    "errors_total",
+    "bytes_downloaded",
+    "elapsed_seconds",
+    "throughput_files_per_second",
+    "throughput_megabytes_per_second",
+    "speedup_vs_1_stream_pct"
+  ]
+}

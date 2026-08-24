@@ -45,8 +45,70 @@ function Get-DnsStatus {
 function Get-SafeProxyServer {
     param([string] $Raw)
     if ([string]::IsNullOrWhiteSpace($Raw)) { return $null }
-    # Never expose embedded credentials if a proxy URL contains userinfo.
     return ($Raw -replace '(?i)(://)[^/@;]+@', '$1***@')
+}
+
+function Get-InstalledTransportClients {
+    $pattern = '(?i)(amnezia|wireguard|openvpn|hiddify|clash|v2ray|xray|sing-box|singbox|outline|tailscale|zerotier|proton vpn|mullvad|windscribe)'
+    $found = @{}
+
+    $uninstallRoots = @(
+        'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*',
+        'HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*',
+        'HKLM:\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*'
+    )
+    foreach ($root in $uninstallRoots) {
+        try {
+            foreach ($item in Get-ItemProperty $root -ErrorAction SilentlyContinue) {
+                $name = [string]$item.DisplayName
+                if ($name -and $name -match $pattern) {
+                    $key = $name.ToLowerInvariant()
+                    if (-not $found.ContainsKey($key)) {
+                        $found[$key] = [pscustomobject]@{
+                            name = $name
+                            evidence = 'WINDOWS_UNINSTALL_REGISTRY'
+                            active_process = $false
+                        }
+                    }
+                }
+            }
+        } catch { }
+    }
+
+    try {
+        foreach ($process in Get-Process -ErrorAction SilentlyContinue | Where-Object { $_.ProcessName -match $pattern }) {
+            $name = [string]$process.ProcessName
+            $key = $name.ToLowerInvariant()
+            if ($found.ContainsKey($key)) {
+                $found[$key].active_process = $true
+            } else {
+                $found[$key] = [pscustomobject]@{
+                    name = $name
+                    evidence = 'RUNNING_PROCESS'
+                    active_process = $true
+                }
+            }
+        }
+    } catch { }
+
+    $commands = @('wireguard','openvpn','hiddify','clash-verge','clash','v2rayN','v2ray','xray','sing-box','tailscale','zerotier-cli')
+    foreach ($commandName in $commands) {
+        try {
+            $command = Get-Command $commandName -ErrorAction SilentlyContinue
+            if ($command) {
+                $key = $commandName.ToLowerInvariant()
+                if (-not $found.ContainsKey($key)) {
+                    $found[$key] = [pscustomobject]@{
+                        name = $commandName
+                        evidence = 'COMMAND_ON_PATH'
+                        active_process = $false
+                    }
+                }
+            }
+        } catch { }
+    }
+
+    return @($found.Values | Sort-Object name)
 }
 
 $dns = @(
@@ -116,6 +178,8 @@ try {
     }
 } catch { }
 
+$installedTransportClients = @(Get-InstalledTransportClients)
+
 $winHttpText = $null
 try {
     $raw = (& netsh winhttp show proxy 2>$null | Out-String).Trim()
@@ -142,6 +206,9 @@ if ($directReachable) {
 } elseif ($tunnelAdapters.Count -gt 0) {
     $routeState = 'TUNNEL_ADAPTER_PRESENT_BUT_TELEGRAM_UNREACHABLE'
     $exitCode = 4
+} elseif ($installedTransportClients.Count -gt 0) {
+    $routeState = 'TRANSPORT_CLIENT_INSTALLED_NOT_ACTIVE'
+    $exitCode = 4
 } else {
     $routeState = 'DIRECT_BLOCKED_NO_APPROVED_ALTERNATE_ROUTE'
     $exitCode = 4
@@ -149,7 +216,7 @@ if ($directReachable) {
 
 $report = [ordered]@{
     record_type = 'TELEGRAM_WINDOWS_NETWORK_PATH_DIAGNOSTIC'
-    schema_version = '1.0'
+    schema_version = '1.1'
     observed_at = [DateTimeOffset]::UtcNow.ToString('o')
     route_state = $routeState
     direct_reachable = $directReachable
@@ -158,6 +225,7 @@ $report = [ordered]@{
     explicit_socks5 = $explicitProxy
     local_proxy_candidates = $localProxyCandidates
     tunnel_adapters = $tunnelAdapters
+    installed_transport_clients = $installedTransportClients
     windows_user_proxy = [ordered]@{
         enabled = $userProxyEnabled
         server = $userProxyServer
@@ -167,6 +235,7 @@ $report = [ordered]@{
         auto_use_unknown_proxy = $false
         auto_change_windows_routes = $false
         auto_enable_vpn = $false
+        auto_launch_transport_client = $false
         secrets_in_report = $false
     }
 }
@@ -189,11 +258,17 @@ if ($localProxyCandidates.Count -gt 0) {
 if ($tunnelAdapters.Count -gt 0) {
     Write-Host ('Tunnel-like adapters UP: ' + (($tunnelAdapters | ForEach-Object { $_.name }) -join ', '))
 }
+if ($installedTransportClients.Count -gt 0) {
+    Write-Host ('Installed transport clients: ' + (($installedTransportClients | ForEach-Object { $_.name }) -join ', '))
+}
 Write-Host "Report: $ReportPath"
 
 if ($routeState -eq 'LOCAL_PROXY_CANDIDATE_REQUIRES_EXPLICIT_CONFIG') {
     Write-Host 'A local listener may be a proxy, but FATHER will not guess its protocol.'
     Write-Host 'After confirming a SOCKS5 port locally, set TELEGRAM_SOCKS5_HOST and TELEGRAM_SOCKS5_PORT in this shell and rerun.'
+} elseif ($routeState -eq 'TRANSPORT_CLIENT_INSTALLED_NOT_ACTIVE') {
+    Write-Host 'A VPN/proxy client appears installed but no usable Telegram route is active.'
+    Write-Host 'Start an approved client in system/full-tunnel mode, then rerun this diagnostic.'
 } elseif ($routeState -eq 'DIRECT_BLOCKED_NO_APPROVED_ALTERNATE_ROUTE') {
     Write-Host 'No reachable direct Telegram path was observed.'
     Write-Host 'Enable an approved system tunnel/VPN or configure an explicit SOCKS5 route, then rerun.'

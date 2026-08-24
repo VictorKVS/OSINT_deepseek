@@ -19,6 +19,7 @@ STATIC = Path(__file__).resolve().parent / "static"
 REPORTS = ROOT / "reports"
 JOBS_PATH = REPORTS / "osint_control_center" / "jobs.json"
 TRACE_PATH = REPORTS / "osint_control_center" / "trace_events.jsonl"
+DOWNLOAD_PROGRESS_ROOT = REPORTS / "osint_control_center" / "downloads"
 ROLE_REGISTRY = ROOT / "config" / "team_role_material_registry.json"
 SAFE_ROLE = re.compile(r"^[A-Z0-9_]{2,64}$")
 TRACE_LOCK = threading.Lock()
@@ -136,6 +137,64 @@ def latest_role_reports() -> list[dict]:
     return out
 
 
+def download_overview() -> dict:
+    live: list[dict] = []
+    if DOWNLOAD_PROGRESS_ROOT.exists():
+        for path in sorted(DOWNLOAD_PROGRESS_ROOT.glob("*.json")):
+            payload = read_json(path)
+            if not isinstance(payload, dict):
+                continue
+            items = list((payload.get("items") or {}).values())
+            live.append({
+                "role_id": payload.get("role_id"),
+                "stage": payload.get("stage"),
+                "state": payload.get("state"),
+                "overall_progress_pct": payload.get("overall_progress_pct"),
+                "items_total": payload.get("items_total"),
+                "queued_total": payload.get("queued_total"),
+                "downloading_total": payload.get("downloading_total"),
+                "hashing_total": payload.get("hashing_total"),
+                "downloaded_total": payload.get("downloaded_total"),
+                "reused_total": payload.get("reused_total"),
+                "failed_total": payload.get("failed_total"),
+                "bytes_received_total": payload.get("bytes_received_total"),
+                "bytes_expected_total": payload.get("bytes_expected_total"),
+                "updated_at_epoch": payload.get("updated_at_epoch"),
+                "items": items,
+            })
+
+    history: list[dict] = []
+    sources: list[tuple[str, dict]] = []
+    architect = read_json(REPORTS / "architect_telegram" / "LATEST_ARCHITECT_TELEGRAM_RUN.json", {}) or {}
+    if architect:
+        sources.append(("ARCHITECT", architect))
+    for report in latest_role_reports():
+        sources.append((str(report.get("role_id") or "UNKNOWN"), report))
+    for role_id, report in sources:
+        for status_key, status in (("downloads", "DOWNLOADED"), ("reused", "REUSED")):
+            for row in report.get(status_key, []) or []:
+                history.append({
+                    "role_id": role_id,
+                    "stage": "STAGE_1_ACQUISITION",
+                    "status": status,
+                    "file_name": row.get("file_name"),
+                    "file_size": row.get("file_size"),
+                    "progress_pct": 100.0,
+                    "sha256": row.get("sha256"),
+                    "local_path": row.get("local_path"),
+                    "source_url": row.get("source_url"),
+                    "chat_id": row.get("chat_id"),
+                    "message_id": row.get("message_id"),
+                })
+    return {
+        "stage": "STAGE_1_ACQUISITION",
+        "live": live,
+        "history": history[-200:],
+        "live_roles_total": len(live),
+        "historical_items_total": len(history),
+    }
+
+
 def overview() -> dict:
     registry = read_json(ROLE_REGISTRY, {}) or {}
     architect = read_json(REPORTS / "architect_telegram" / "LATEST_ARCHITECT_TELEGRAM_RUN.json", {}) or {}
@@ -157,6 +216,7 @@ def overview() -> dict:
         "role_reports": roles,
         "jobs": load_jobs(),
         "trace_events": load_traces(50),
+        "downloads": download_overview(),
         "metrics": {
             "search_hits_total": total_hits,
             "downloaded_total": downloaded,
@@ -268,6 +328,8 @@ class Handler(BaseHTTPRequestHandler):
             return self.send_json({"jobs": load_jobs()})
         if parsed.path == "/api/traces":
             return self.send_json({"trace_events": load_traces(500)})
+        if parsed.path == "/api/downloads":
+            return self.send_json(download_overview())
         if parsed.path == "/api/search-results":
             root = REPORTS / "osint_control_center" / "searches"
             rows = []

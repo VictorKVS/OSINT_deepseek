@@ -11,7 +11,7 @@ $DpapiStorePath = Join-Path $RepoRoot '.runtime\telegram\credentials.dpapi.json'
 $SetupScript = Join-Path $RepoRoot 'scripts\setup_telegram_credentials.ps1'
 $NetworkPreflightScript = Join-Path $RepoRoot 'scripts\test_telegram_network_path.ps1'
 $TelethonAuthScript = Join-Path $RepoRoot 'scripts\authorize_telethon_session.py'
-$RunnerScript = Join-Path $RepoRoot 'scripts\run_team_role_acquisition.py'
+$RunnerScript = Join-Path $RepoRoot 'scripts\run_team_role_acquisition_live.py'
 $BibliographyProbeScript = Join-Path $RepoRoot 'scripts\probe_programmer_bibliography_telegram.py'
 
 function Resolve-Python {
@@ -140,6 +140,6 @@ if ($BibliographyProbe) {
 
 if (-not (Test-Path -LiteralPath $RunnerScript -PathType Leaf)) { exit 6 }
 Write-Host ''
-Write-Host "[ACQUIRE] Starting universal role acquisition for $($Role.ToUpperInvariant())."
+Write-Host "[ACQUIRE] Starting universal role acquisition with live download telemetry for $($Role.ToUpperInvariant())."
 & $pythonExe $RunnerScript --role $Role @RunnerArgs
 exit $LASTEXITCODE

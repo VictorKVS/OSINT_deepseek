@@ -1,0 +1,108 @@
+{
+  "schema_version": "1.0",
+  "inventory_id": "FATHER-RU-PROGRAMMER-FSTEC-001",
+  "role_id": "PROGRAMMER",
+  "knowledge_base_id": "PROGRAMMING_KB",
+  "snapshot_date": "2026-08-24",
+  "applicability_class": "CONDITIONAL_REGULATED_CONTEXT",
+  "principle": "FSTEC requirements are activated by system/product/regulatory context and must not be projected onto every programming task by default.",
+  "contexts": [
+    {
+      "context_id": "STATE_AND_GOVERNMENT_INFORMATION_SYSTEMS",
+      "state": "CURRENT_PRIMARY_SEED_WITH_SCHEDULED_CHANGE",
+      "documents": [
+        {
+          "designation": "Приказ ФСТЭК России от 11.04.2025 № 117",
+          "title": "Об утверждении Требований о защите информации, содержащейся в государственных информационных системах, иных информационных системах государственных органов, государственных унитарных предприятий, государственных учреждений",
+          "status_on_snapshot_date": "ACTIVE",
+          "effective_from": "2026-03-01",
+          "official_publication": "https://publication.pravo.gov.ru/document/0001202506170011",
+          "registration": "Минюст России 16.06.2025 № 82619",
+          "currentness_note": "Replaced the previous GIS protection regime including FSTEC Order 17 from 2026-03-01; exact replacement chain must remain evidence-linked.",
+          "role_relevance": "security requirements can translate into software architecture, identification/authentication, logging, integrity, access-control and secure-development implementation tasks"
+        },
+        {
+          "designation": "Приказ ФСТЭК России от 08.05.2026 № 137",
+          "title": "О внесении изменений в Требования, утвержденные приказом ФСТЭК России от 11.04.2025 № 117",
+          "status_on_snapshot_date": "PUBLISHED_NOT_YET_EFFECTIVE",
+          "effective_from": "2026-09-01",
+          "partial_effective_from": "2027-03-01",
+          "registration": "Минюст России 10.08.2026 № 87797",
+          "official_publication_locator": "OFFICIAL_PUBLICATION_URL_TO_BE_CAPTURED",
+          "currentness_evidence_state": "CURRENT_SECONDARY_CROSSCHECK_OFFICIAL_LOCATOR_PENDING",
+          "role_relevance": "future-dated change must be represented before it becomes current so project applicability can switch on the correct date"
+        }
+      ],
+      "historical": [
+        {
+          "designation": "Приказ ФСТЭК России от 11.02.2013 № 17",
+          "status": "SUPERSEDED_FROM_2026-03-01",
+          "superseded_by": "Приказ ФСТЭК России от 11.04.2025 № 117"
+        }
+      ]
+    },
+    {
+      "context_id": "SIGNIFICANT_KII_OBJECTS",
+      "state": "PRIMARY_SEED_AMENDMENT_CHAIN_RESEARCH_REQUIRED",
+      "documents": [
+        {
+          "designation": "Приказ ФСТЭК России от 25.12.2017 № 239",
+          "title": "Об утверждении Требований по обеспечению безопасности значимых объектов критической информационной инфраструктуры Российской Федерации",
+          "official_publication": "https://publication.pravo.gov.ru/document/0001201803270041",
+          "status": "CURRENTNESS_CHAIN_REVIEW_REQUIRED",
+          "known_change": "Приказ ФСТЭК России от 28.08.2024 № 159",
+          "role_relevance": "software and components deployed in significant KII objects may inherit security implementation and testing requirements"
+        },
+        {
+          "designation": "Приказ ФСТЭК России от 21.12.2017 № 235",
+          "title": "Об утверждении Требований к созданию систем безопасности значимых объектов критической информационной инфраструктуры Российской Федерации и обеспечению их функционирования",
+          "official_publication": "https://publication.pravo.gov.ru/document/0001201802220016",
+          "status": "CURRENTNESS_CHAIN_REVIEW_REQUIRED",
+          "known_change": "Приказ ФСТЭК России от 20.04.2023 № 69",
+          "role_relevance": "system-security lifecycle context around software development and operation"
+        }
+      ]
+    },
+    {
+      "context_id": "SECURITY_SOFTWARE_CERTIFICATION_PROCESS",
+      "state": "PRIMARY_CURRENT_SEED",
+      "activation": "organization develops software security tools or requires certification of secure-development processes",
+      "documents": [
+        {
+          "designation": "Приказ ФСТЭК России от 01.12.2023 № 240",
+          "title": "Об утверждении Порядка проведения сертификации процессов безопасной разработки программного обеспечения средств защиты информации",
+          "official_publication": "https://publication.pravo.gov.ru/document/0001202404170002",
+          "status": "ACTIVE_WITH_AMENDMENT",
+          "known_change": "Приказ ФСТЭК России от 30.06.2025 № 230",
+          "role_relevance": "direct process requirements when secure-development process certification is in scope"
+        },
+        {
+          "designation": "Приказ ФСТЭК России от 30.06.2025 № 230",
+          "title": "О внесении изменений в Порядок проведения сертификации процессов безопасной разработки программного обеспечения средств защиты информации, утвержденный приказом ФСТЭК России от 01.12.2023 № 240",
+          "official_publication": "https://publication.pravo.gov.ru/document/0001202509190005",
+          "status": "ACTIVE_AMENDMENT",
+          "role_relevance": "current amendment chain for secure-development process certification"
+        }
+      ]
+    }
+  ],
+  "unresolved_sectors": [
+    "personal-data information-system developer implications and current FSTEC Order 21 amendment chain",
+    "state-information-system technical controls mapped to concrete developer work products under Order 117",
+    "significant-KII Order 239 and Order 235 full amendment/currentness chains as of snapshot date",
+    "FSTEC methodologies and certification documents directly governing vulnerability analysis, secure coding, testing and remediation",
+    "sector overlays for healthcare, finance, telecom, energy and transport"
+  ],
+  "currentness_watch": [
+    {
+      "designation": "Приказ ФСТЭК России от 08.05.2026 № 137",
+      "watch_date": "2026-09-01",
+      "action": "switch affected Order 117 requirements to effective state and preserve previous applicability snapshot"
+    },
+    {
+      "designation": "Приказ ФСТЭК России от 08.05.2026 № 137, пункт 7 приложения",
+      "watch_date": "2027-03-01",
+      "action": "activate deferred amendment"
+    }
+  ]
+}

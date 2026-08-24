@@ -4,6 +4,7 @@ import json
 import mimetypes
 import os
 import re
+import shutil
 import subprocess
 import sys
 import threading
@@ -20,14 +21,24 @@ REPORTS = ROOT / "reports"
 JOBS_PATH = REPORTS / "osint_control_center" / "jobs.json"
 TRACE_PATH = REPORTS / "osint_control_center" / "trace_events.jsonl"
 DOWNLOAD_PROGRESS_ROOT = REPORTS / "osint_control_center" / "downloads"
+DOWNLOAD_RECEIPT_ROOT = REPORTS / "osint_control_center" / "download_receipts"
 ROLE_REGISTRY = ROOT / "config" / "team_role_material_registry.json"
 SAFE_ROLE = re.compile(r"^[A-Z0-9_]{2,64}$")
+SAFE_TARGET = re.compile(r"^[A-Z0-9_]+-TOPIC-\d{2}$")
+SAFE_CHAT = re.compile(r"^-?\d{1,24}$")
+SAFE_USERNAME = re.compile(r"^[A-Za-z0-9_]{3,64}$")
 TRACE_LOCK = threading.Lock()
 
 ALLOWED_ACTIONS = {
     "PROGRAMMER_BIBLIOGRAPHY_PROBE": [str(ROOT / "RUN_PROGRAMMER_BIBLIOGRAPHY_PROBE.cmd")],
     "PROGRAMMER_BIBLIOGRAPHY_PLAN": [str(ROOT / "RUN_PROGRAMMER_BIBLIOGRAPHY_NEXT.cmd")],
     "REMAINING_P0_WINDOWS": [str(ROOT / "RUN_REMAINING_P0_SEARCH_WINDOWS.cmd")],
+}
+TELEGRAM_JOB_KINDS = {
+    "TELEGRAM_QUERY_PROBE",
+    "TELEGRAM_DOWNLOAD",
+    "ROLE_ACQUISITION",
+    "PROGRAMMER_BIBLIOGRAPHY_PROBE",
 }
 
 
@@ -120,9 +131,51 @@ def trace_event(job: dict, *, status: str, state_before: str, state_after: str, 
     return event
 
 
+def registry_payload() -> dict:
+    return read_json(ROLE_REGISTRY, {}) or {}
+
+
 def role_ids() -> set[str]:
-    registry = read_json(ROLE_REGISTRY, {}) or {}
-    return {str(row.get("role_id", "")).upper() for row in registry.get("roles", [])}
+    return {str(row.get("role_id", "")).upper() for row in registry_payload().get("roles", [])}
+
+
+def role_catalog() -> list[dict]:
+    rows: list[dict] = []
+    for role in registry_payload().get("roles", []):
+        role_id = str(role.get("role_id", "")).upper()
+        if not role_id or role_id == "ARCHITECT":
+            continue
+        topics = []
+        for index, topic in enumerate(role.get("topics", []), start=1):
+            target_id = f"{role_id}-TOPIC-{index:02d}"
+            topics.append({
+                "target_id": target_id,
+                "label": str(topic),
+                "destination": f"data/team_role_telegram/{role_id.casefold()}/{target_id.casefold()}",
+            })
+        rows.append({
+            "role_id": role_id,
+            "knowledge_base_id": role.get("knowledge_base_id"),
+            "priority": role.get("priority"),
+            "stream_id": role.get("stream_id"),
+            "topics": topics,
+        })
+    return rows
+
+
+def resolve_role_target(role_id: str, target_id: str) -> tuple[dict, dict]:
+    role_id = role_id.strip().upper().replace("-", "_")
+    target_id = target_id.strip().upper()
+    if not SAFE_ROLE.fullmatch(role_id) or not SAFE_TARGET.fullmatch(target_id):
+        raise ValueError("invalid role or target format")
+    for role in role_catalog():
+        if role["role_id"] != role_id:
+            continue
+        for topic in role["topics"]:
+            if topic["target_id"] == target_id:
+                return role, topic
+        raise ValueError("target does not belong to selected role")
+    raise ValueError("unknown role")
 
 
 def latest_role_reports() -> list[dict]:
@@ -140,15 +193,17 @@ def latest_role_reports() -> list[dict]:
 def download_overview() -> dict:
     live: list[dict] = []
     if DOWNLOAD_PROGRESS_ROOT.exists():
-        for path in sorted(DOWNLOAD_PROGRESS_ROOT.glob("*.json")):
+        for path in sorted(DOWNLOAD_PROGRESS_ROOT.glob("*.json"), key=lambda p: p.stat().st_mtime, reverse=True):
             payload = read_json(path)
             if not isinstance(payload, dict):
                 continue
             items = list((payload.get("items") or {}).values())
             live.append({
+                "registry_file": path.name,
                 "role_id": payload.get("role_id"),
                 "stage": payload.get("stage"),
                 "state": payload.get("state"),
+                "context": payload.get("context") or {},
                 "overall_progress_pct": payload.get("overall_progress_pct"),
                 "items_total": payload.get("items_total"),
                 "queued_total": payload.get("queued_total"),
@@ -177,6 +232,7 @@ def download_overview() -> dict:
                     "role_id": role_id,
                     "stage": "STAGE_1_ACQUISITION",
                     "status": status,
+                    "target_id": (row.get("matched_target_ids") or [None])[0],
                     "file_name": row.get("file_name"),
                     "file_size": row.get("file_size"),
                     "progress_pct": 100.0,
@@ -186,17 +242,43 @@ def download_overview() -> dict:
                     "chat_id": row.get("chat_id"),
                     "message_id": row.get("message_id"),
                 })
+
+    if DOWNLOAD_RECEIPT_ROOT.exists():
+        for path in sorted(DOWNLOAD_RECEIPT_ROOT.glob("*.json"), key=lambda p: p.stat().st_mtime):
+            row = read_json(path)
+            if not isinstance(row, dict):
+                continue
+            if row.get("status") not in {"DOWNLOADED", "REUSED", "FAILED"}:
+                continue
+            history.append({
+                "role_id": row.get("role_id"),
+                "stage": "STAGE_1_ACQUISITION",
+                "status": row.get("status"),
+                "target_id": row.get("target_id"),
+                "topic": row.get("topic"),
+                "file_name": row.get("file_name"),
+                "file_size": row.get("file_size"),
+                "progress_pct": 100.0 if row.get("status") in {"DOWNLOADED", "REUSED"} else 0.0,
+                "sha256": row.get("sha256"),
+                "local_path": row.get("local_path"),
+                "source_url": row.get("source_url"),
+                "chat_id": row.get("chat_id"),
+                "message_id": row.get("message_id"),
+                "command_id": row.get("command_id"),
+                "error": row.get("error"),
+            })
+
     return {
         "stage": "STAGE_1_ACQUISITION",
-        "live": live,
-        "history": history[-200:],
+        "live": live[:100],
+        "history": history[-300:],
         "live_roles_total": len(live),
         "historical_items_total": len(history),
     }
 
 
 def overview() -> dict:
-    registry = read_json(ROLE_REGISTRY, {}) or {}
+    registry = registry_payload()
     architect = read_json(REPORTS / "architect_telegram" / "LATEST_ARCHITECT_TELEGRAM_RUN.json", {}) or {}
     bibliography = read_json(REPORTS / "team_role_telegram" / "LATEST_PROGRAMMER_BIBLIOGRAPHY_PROBE.json", {}) or {}
     acquisition_plan = read_json(REPORTS / "team_role_telegram" / "LATEST_PROGRAMMER_BIBLIOGRAPHY_ACQUISITION_PLAN.json", {}) or {}
@@ -212,6 +294,7 @@ def overview() -> dict:
         "bibliography": bibliography,
         "acquisition_plan": acquisition_plan,
         "roles": registry.get("roles", []),
+        "role_catalog": role_catalog(),
         "streams": registry.get("streams", []),
         "role_reports": roles,
         "jobs": load_jobs(),
@@ -225,6 +308,36 @@ def overview() -> dict:
             "speedup_vs_1_stream_pct": None,
         },
     }
+
+
+def _source_session_file() -> tuple[Path, Path]:
+    raw = os.getenv("TELEGRAM_SESSION_PATH", "").strip()
+    base = Path(raw) if raw else ROOT / "legacy" / "telegram" / "reader_session"
+    if not base.is_absolute():
+        base = ROOT / base
+    if base.suffix == ".session":
+        return base, base.with_suffix("")
+    return base.with_suffix(".session"), base
+
+
+def child_env(job: dict) -> dict[str, str]:
+    env = os.environ.copy()
+    env["FATHER_TRACE_ID"] = str(job["trace_id"])
+    env["FATHER_CORRELATION_ID"] = str(job["correlation_id"])
+    env["FATHER_TASK_ID"] = str(job["task_id"])
+    env["FATHER_COMMAND_ID"] = str(job["command_id"])
+    if job.get("parent_command_id"):
+        env["FATHER_PARENT_COMMAND_ID"] = str(job["parent_command_id"])
+
+    if job.get("kind") in TELEGRAM_JOB_KINDS:
+        source_file, _ = _source_session_file()
+        if source_file.is_file():
+            target_dir = ROOT / ".runtime" / "telegram" / "sessions"
+            target_dir.mkdir(parents=True, exist_ok=True)
+            target_base = target_dir / f"ui_{job['id']}"
+            shutil.copy2(source_file, target_base.with_suffix(".session"))
+            env["TELEGRAM_SESSION_PATH"] = str(target_base)
+    return env
 
 
 def spawn_job(kind: str, command: list[str], meta: dict | None = None) -> dict:
@@ -256,7 +369,7 @@ def spawn_job(kind: str, command: list[str], meta: dict | None = None) -> dict:
     def worker():
         try:
             flags = getattr(subprocess, "CREATE_NEW_CONSOLE", 0)
-            proc = subprocess.Popen(command, cwd=str(ROOT), creationflags=flags)
+            proc = subprocess.Popen(command, cwd=str(ROOT), creationflags=flags, env=child_env(job))
             started = time.time()
             update_job(job["id"], state="RUNNING", pid=proc.pid, started_at_epoch=started)
             running = {**job, "state": "RUNNING", "pid": proc.pid, "started_at_epoch": started}
@@ -278,6 +391,11 @@ def spawn_job(kind: str, command: list[str], meta: dict | None = None) -> dict:
     return job
 
 
+def _python() -> str:
+    py = ROOT / ".venv" / "Scripts" / "python.exe"
+    return str(py if py.exists() else Path(sys.executable))
+
+
 def action_command(payload: dict) -> tuple[str, list[str], dict]:
     action = str(payload.get("action", "")).upper().strip()
     common = {
@@ -288,25 +406,90 @@ def action_command(payload: dict) -> tuple[str, list[str], dict]:
         "trigger": "USER_ACTION",
     }
     common = {k: v for k, v in common.items() if v is not None}
+
     if action == "ROLE_ACQUISITION":
         role = str(payload.get("role", "")).upper().strip().replace("-", "_")
         if not SAFE_ROLE.fullmatch(role) or role not in role_ids() or role == "ARCHITECT":
             raise ValueError("unknown or unsupported role")
-        return action, [str(ROOT / "RUN_TEAM_ROLE_ACQUISITION.cmd"), role], {**common, "role": role, "executor": "ROLE_ACQUISITION_WORKER", "input_refs": [f"role:{role}"]}
+        return action, [str(ROOT / "RUN_TEAM_ROLE_ACQUISITION.cmd"), role], {
+            **common,
+            "role": role,
+            "executor": "ROLE_ACQUISITION_WORKER",
+            "input_refs": [f"role:{role}"],
+        }
+
     if action == "TELEGRAM_QUERY_PROBE":
         query = " ".join(str(payload.get("query", "")).split()).strip()
         if not query or len(query) > 240:
             raise ValueError("query must contain 1..240 characters")
-        py = ROOT / ".venv" / "Scripts" / "python.exe"
-        python_exe = str(py if py.exists() else Path(sys.executable))
-        return action, [python_exe, str(ROOT / "scripts" / "probe_osint_query.py"), "--query", query], {**common, "query": query, "executor": "TELEGRAM_COLLECTOR", "input_refs": [f"query:{query}"]}
+        role_id = str(payload.get("role", "")).upper().strip().replace("-", "_")
+        target_id = str(payload.get("target_id", "")).upper().strip()
+        role, topic = resolve_role_target(role_id, target_id)
+        command = [
+            _python(),
+            str(ROOT / "scripts" / "probe_osint_query.py"),
+            "--query", query,
+            "--role", role_id,
+            "--target-id", target_id,
+        ]
+        return action, command, {
+            **common,
+            "role": role_id,
+            "target_id": target_id,
+            "topic": topic["label"],
+            "query": query,
+            "executor": "TELEGRAM_COLLECTOR",
+            "input_refs": [f"role:{role_id}", f"target:{target_id}", f"query:{query}"],
+        }
+
+    if action == "TELEGRAM_DOWNLOAD":
+        role_id = str(payload.get("role", "")).upper().strip().replace("-", "_")
+        target_id = str(payload.get("target_id", "")).upper().strip()
+        _, topic = resolve_role_target(role_id, target_id)
+        chat_id = str(payload.get("chat_id", "")).strip()
+        if not SAFE_CHAT.fullmatch(chat_id):
+            raise ValueError("invalid Telegram chat_id")
+        try:
+            message_id = int(payload.get("message_id"))
+        except (TypeError, ValueError) as exc:
+            raise ValueError("invalid Telegram message_id") from exc
+        if message_id <= 0:
+            raise ValueError("invalid Telegram message_id")
+        username = str(payload.get("chat_username", "") or "").strip().lstrip("@")
+        if username and not SAFE_USERNAME.fullmatch(username):
+            raise ValueError("invalid Telegram username")
+        expected_file_name = str(payload.get("file_name", "") or "").strip()[:260]
+        command = [
+            _python(),
+            str(ROOT / "scripts" / "download_osint_telegram_item.py"),
+            "--role", role_id,
+            "--target-id", target_id,
+            "--chat-id", chat_id,
+            "--message-id", str(message_id),
+        ]
+        if username:
+            command.extend(["--chat-username", username])
+        if expected_file_name:
+            command.extend(["--expected-file-name", expected_file_name])
+        return action, command, {
+            **common,
+            "role": role_id,
+            "target_id": target_id,
+            "topic": topic["label"],
+            "chat_id": chat_id,
+            "message_id": message_id,
+            "file_name": expected_file_name,
+            "executor": "TELEGRAM_DOWNLOAD_WORKER",
+            "input_refs": [f"role:{role_id}", f"target:{target_id}", f"telegram:{chat_id}:{message_id}"],
+        }
+
     if action in ALLOWED_ACTIONS:
         return action, ALLOWED_ACTIONS[action], {**common, "executor": action}
     raise ValueError("action is not allowed")
 
 
 class Handler(BaseHTTPRequestHandler):
-    server_version = "FATHER-OSINT-ControlCenter/0.1"
+    server_version = "FATHER-OSINT-ControlCenter/0.2"
 
     def log_message(self, fmt, *args):
         return
@@ -330,6 +513,8 @@ class Handler(BaseHTTPRequestHandler):
             return self.send_json({"trace_events": load_traces(500)})
         if parsed.path == "/api/downloads":
             return self.send_json(download_overview())
+        if parsed.path == "/api/catalog":
+            return self.send_json({"roles": role_catalog()})
         if parsed.path == "/api/search-results":
             root = REPORTS / "osint_control_center" / "searches"
             rows = []

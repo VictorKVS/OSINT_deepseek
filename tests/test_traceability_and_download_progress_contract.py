@@ -28,6 +28,7 @@ def test_osint_control_center_has_project_traceability_plan_and_runtime_trace():
 def test_stage_1_acquisition_exposes_live_download_progress():
     helper = Path("scripts/download_progress_registry.py").read_text(encoding="utf-8")
     wrapper = Path("scripts/run_team_role_acquisition_live.py").read_text(encoding="utf-8")
+    targeted = Path("scripts/download_osint_telegram_item.py").read_text(encoding="utf-8")
     ps1 = Path("scripts/run_team_role_acquisition.ps1").read_text(encoding="utf-8")
     app = Path("osint_web/app.py").read_text(encoding="utf-8")
     html = Path("osint_web/static/index.html").read_text(encoding="utf-8")
@@ -39,16 +40,37 @@ def test_stage_1_acquisition_exposes_live_download_progress():
     assert "overall_progress_pct" in helper
     assert "speed_bytes_per_second" in helper
     assert "progress_callback" in wrapper
+    assert "progress_callback=on_progress" in targeted
     assert "run_team_role_acquisition_live.py" in ps1
     assert 'parsed.path == "/api/downloads"' in app
-    assert "Список скачивания и прогресс" in html
+    assert '"TELEGRAM_DOWNLOAD"' in app
+    assert "Общий список скачивания и прогресс" in html
+    assert "Скачать отмеченные" in html
     assert "renderDownloads" in js
+    assert "result-download" in js
     assert "progress-fill" in js
     assert "fmtSpeed" in js
 
 
-def test_download_progress_registry_is_per_role_and_atomic():
+def test_download_progress_registry_is_atomic_and_supports_independent_job_keys():
     helper = Path("scripts/download_progress_registry.py").read_text(encoding="utf-8")
-    assert 'f"{self.role_id}.json"' in helper
+    assert "registry_key" in helper
+    assert "_safe_registry_key" in helper
     assert "os.replace(tmp, self.path)" in helper
     assert "0.25" in helper
+
+
+def test_targeted_download_routes_to_role_topic_and_keeps_trace_context():
+    targeted = Path("scripts/download_osint_telegram_item.py").read_text(encoding="utf-8")
+    app = Path("osint_web/app.py").read_text(encoding="utf-8")
+    probe = Path("scripts/probe_osint_query.py").read_text(encoding="utf-8")
+    assert 'OUTPUT_ROOT = ROOT / "data" / "team_role_telegram"' in targeted
+    assert "resolve_context" in targeted
+    assert "target_id" in targeted and "topic" in targeted
+    assert "FATHER_COMMAND_ID" in targeted
+    assert "sha256" in targeted
+    assert "kb_auto_promotion" in targeted
+    assert 'action == "TELEGRAM_DOWNLOAD"' in app
+    assert "resolve_role_target" in app
+    assert "child_env" in app and "TELEGRAM_SESSION_PATH" in app
+    assert "--role" in probe and "--target-id" in probe

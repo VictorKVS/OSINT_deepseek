@@ -22,6 +22,14 @@ REPORT = REPO_ROOT / "reports" / "security_current_only" / "LATEST_DEPARTMENTAL_
 WORKERS = 5
 MAX_CHUNK_CHARS = 2400
 
+CONTENT_BLOCK_MARKERS = (
+    "документ в некоммерческой версии консультантплюс доступен по расписанию",
+    "этот документ в некоммерческой версии консультантплюс доступен по расписанию",
+    "тексты документов всегда доступны в коммерческой версии консультантплюс",
+    "вы можете заказать документ на e-mail",
+    "откройте документ в системе консультантплюс",
+)
+
 
 def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
@@ -47,6 +55,53 @@ def _dedupe(rows: list[dict[str, object]], key: str) -> list[dict[str, object]]:
             seen.add(value)
             out.append(row)
     return out
+
+
+def _content_quality(text: str) -> tuple[bool, str]:
+    stripped = text.strip()
+    folded = stripped.casefold().replace("ё", "е")
+    if any(marker in folded for marker in CONTENT_BLOCK_MARKERS):
+        return False, "REFERENCE_ACCESS_WINDOW_BLOCKED"
+    if len(stripped) < 600:
+        return False, "TEXT_TOO_SHORT_FOR_LEGAL_BODY"
+    legal_anchor = any(marker in folded for marker in ("приказ", "постановление", "федеральный закон", "распоряжение"))
+    operative_anchor = any(marker in folded for marker in ("приказываю", "постановляет", "утвердить", "определить", "в соответствии", "настоящ"))
+    if not (legal_anchor and operative_anchor):
+        return False, "LEGAL_BODY_MARKERS_NOT_CONFIRMED"
+    return True, "PASS"
+
+
+def _blocked_result(row: dict[str, object], document_id: str, reason: str, text_bytes: bytes, started: float) -> dict[str, object]:
+    return {
+        "schema_version": "1.1",
+        "record_type": "SECURITY_DEPARTMENTAL_SHADOW_D4_D9",
+        "document_id": document_id,
+        "title": row.get("title"),
+        "source_sha256": row.get("sha256"),
+        "normalized_sha256": _sha_bytes(text_bytes),
+        "source_url": row.get("source_url"),
+        "source_status": row.get("status"),
+        "trust_tier": row.get("trust_tier"),
+        "queue_legal_status": row.get("queue_legal_status", "VERIFY_CURRENTNESS"),
+        "status": "CONTENT_INSUFFICIENT",
+        "content_quality_pass": False,
+        "content_quality_reason": reason,
+        "reacquisition_required": True,
+        "stage_scope": "SHADOW_CANDIDATE_D4_D9_ONLY",
+        "official_pipeline_advanced": False,
+        "exact_official_evidence_acquired": bool(row.get("exact_official_evidence_acquired")),
+        "currentness_verified": False,
+        "legal_truth_eligible": False,
+        "kb_promotion_allowed": False,
+        "review_state": "BLOCKED_NEEDS_FULL_TEXT",
+        "structure_nodes": 0,
+        "chunks": 0,
+        "terms": 0,
+        "definitions": 0,
+        "requirements": 0,
+        "entities": 0,
+        "seconds": time.perf_counter() - started,
+    }
 
 
 def _process(row: dict[str, object]) -> dict[str, object]:
@@ -80,6 +135,10 @@ def _process(row: dict[str, object]) -> dict[str, object]:
             "status": "INPUT_SHA256_INVALID",
             "seconds": time.perf_counter() - started,
         }
+
+    content_quality_pass, content_quality_reason = _content_quality(text)
+    if not content_quality_pass:
+        return _blocked_result(row, document_id, content_quality_reason, text_bytes, started)
 
     version_id = f"CAND-{source_sha256[:24]}"
     version = DocumentVersion(
@@ -129,7 +188,7 @@ def _process(row: dict[str, object]) -> dict[str, object]:
 
     exact_official = bool(row.get("exact_official_evidence_acquired"))
     manifest = {
-        "schema_version": "1.0",
+        "schema_version": "1.1",
         "record_type": "SECURITY_DEPARTMENTAL_SHADOW_D4_D9",
         "document_id": document_id,
         "title": row.get("title"),
@@ -142,6 +201,8 @@ def _process(row: dict[str, object]) -> dict[str, object]:
         "queue_legal_status": row.get("queue_legal_status", "VERIFY_CURRENTNESS"),
         "parser_version": PARSER_VERSION,
         "extractor_version": EXTRACTOR_VERSION,
+        "content_quality_pass": True,
+        "content_quality_reason": "PASS",
         "structure_nodes": len(nodes),
         "chunks": len(chunks),
         "terms": len(terms),
@@ -179,7 +240,7 @@ def main() -> int:
     source_rows = [row for row in payload.get("results", []) if isinstance(row, dict)]
     targets = [
         row for row in source_rows
-        if str(row.get("status") or "") in {"WORKING_COPY_NORMALIZED", "NORMALIZED"}
+        if str(row.get("status") or "") in {"WORKING_COPY_NORMALIZED", "NORMALIZED", "WORKING_COPY_CONTENT_BLOCKED"}
         and str(row.get("normalized_path") or "").strip()
     ]
 
@@ -198,17 +259,19 @@ def main() -> int:
     results.sort(key=lambda item: str(item.get("document_id") or ""))
     total_seconds = time.perf_counter() - started
     ready = sum(item.get("status") == "READY_D9_SHADOW_CANDIDATE" for item in results)
-    failed = len(results) - ready
+    content_insufficient = sum(item.get("status") == "CONTENT_INSUFFICIENT" for item in results)
+    failed = len(results) - ready - content_insufficient
 
     summary = {
         "record_type": "SECURITY_DEPARTMENTAL_D4_D9_CANDIDATE_SUMMARY",
-        "schema_version": "1.0",
+        "schema_version": "1.1",
         "observed_at": _utc_now(),
         "workers": WORKERS,
         "input_report": INPUT_REPORT.relative_to(REPO_ROOT).as_posix(),
         "input_results_total": len(source_rows),
         "targets_total": len(targets),
         "ready_d9_shadow_candidates": ready,
+        "content_insufficient_total": content_insufficient,
         "failed_total": failed,
         "structure_nodes": sum(int(item.get("structure_nodes") or 0) for item in results),
         "chunks": sum(int(item.get("chunks") or 0) for item in results),
@@ -227,7 +290,7 @@ def main() -> int:
     REPORT.parent.mkdir(parents=True, exist_ok=True)
     REPORT.write_text(json.dumps(summary, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     print(json.dumps(summary, ensure_ascii=False, indent=2))
-    return 0 if failed == 0 and ready == len(targets) else 1
+    return 0 if failed == 0 and content_insufficient == 0 and ready == len(targets) else 1
 
 
 if __name__ == "__main__":

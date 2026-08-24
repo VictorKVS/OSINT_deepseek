@@ -41,6 +41,16 @@ def test_global_document_bindings_carry_maturity_and_importance():
     assert policy["acceptance_gates"]["unresolved_necessary_binding_at_or_below_target_maturity_blocks_completion"] is True
 
 
+def test_library_orders_execute_necessary_before_optional_work():
+    policy = load("config/library_order_policy.json")
+    execution = policy["priority_execution"]
+    assert execution["default_importance_order"] == ["NECESSARY", "DESIRABLE", "INTERESTING_LATER"]
+    assert execution["auto_execute"] == ["NECESSARY"]
+    assert execution["queue_after_core"] == ["DESIRABLE"]
+    assert execution["hold_by_default"] == ["INTERESTING_LATER"]
+    assert policy["classification_standard"] == "config/father_scope_priority_standard.json"
+
+
 def test_docs_explain_that_the_axes_are_independent():
     text = Path("docs/FATHER_SCOPE_PRIORITY_STANDARD.md").read_text(encoding="utf-8")
     assert "MIN" in text and "MEDIUM" in text and "MAX" in text

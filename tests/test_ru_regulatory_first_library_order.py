@@ -8,7 +8,8 @@ def test_library_order_policy_requires_ru_regulatory_layer_first():
     assert rule["mode"] == "RU_REGULATORY_AND_NATIONAL_STANDARDS_FIRST"
     assert rule["required_before_global_maturity_claim"] is True
     assert rule["superseded_documents_do_not_close_current_gate"] is True
-    assert policy["pipeline"][1] == "STAGE_0_RU_REGULATORY_BASELINE"
+    assert policy["pipeline"][1] == "STAGE_0_GLOBAL_DOCUMENT_REGISTRY_RESOLUTION"
+    assert policy["pipeline"][2] == "STAGE_0_RU_REGULATORY_BASELINE"
     assert "RU_REGULATORY_BASELINE" in policy["maturity_levels"]["MIN"]["required_dimensions"]
 
 
@@ -38,6 +39,14 @@ def test_library_order_creation_embeds_ru_stage_and_blocks_missing_roles():
     assert '"STAGE_0_RU_REGULATORY_BASELINE"' in text
     assert '"RU_REGULATORY_BASELINE_GAP"' in text
     assert '"current_stage": "STAGE_0_RU_REGULATORY_BASELINE"' in text
+
+
+def test_library_order_start_attaches_global_registry_before_execution():
+    text = Path("scripts/start_library_order.py").read_text(encoding="utf-8")
+    assert "build_global_document_registry.py" in text
+    assert "attach_global_registry" in text
+    assert "STAGE_0_GLOBAL_DOCUMENT_REGISTRY_RESOLUTION" in text
+    assert "resolved_document_refs" in text
 
 
 def test_library_order_runner_enforces_ru_stage_before_acquisition():

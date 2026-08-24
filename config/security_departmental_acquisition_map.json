@@ -1,0 +1,135 @@
+{
+  "schema_version": "1.0",
+  "queue_id": "SECURITY-DEPARTMENTAL-ACQUISITION-001",
+  "as_of": "2026-08-24",
+  "mode": "CURRENT_ONLY",
+  "policy": "Official publication route first. Commercial legal-reference URLs are A2 working-copy fallbacks only and never establish current legal truth. Every item remains VERIFY_CURRENTNESS until exact official bytes, SHA-256, legal status and amendment/replacement chain are verified.",
+  "documents": [
+    {
+      "document_id": "DOC-RU-MINZDRAV-340N-2023",
+      "title": "Приказ Минздрава России от 03.07.2023 № 340н об определении угроз безопасности персональных данных",
+      "domain": "PDN,HEALTHCARE_SECURITY,THREAT_MODEL",
+      "priority": "P0",
+      "legal_status": "VERIFY_CURRENTNESS",
+      "official_source_url": "https://publication.pravo.gov.ru/document/0001202308080006",
+      "status_reference_url": "https://www.consultant.ru/document/cons_doc_LAW_454263/"
+    },
+    {
+      "document_id": "DOC-RU-MINTRANS-141-2023",
+      "title": "Приказ Минтранса России от 19.04.2023 № 141 об определении угроз безопасности персональных данных",
+      "domain": "PDN,THREAT_MODEL",
+      "priority": "P1",
+      "legal_status": "VERIFY_CURRENTNESS",
+      "official_source_url": "https://publication.pravo.gov.ru/document/0001202305290032",
+      "status_reference_url": "https://www.consultant.ru/document/cons_doc_LAW_448209/"
+    },
+    {
+      "document_id": "DOC-RU-MINPROMTORG-954-2022",
+      "title": "Приказ Минпромторга России от 24.03.2022 № 954 об определении угроз безопасности персональных данных",
+      "domain": "PDN,THREAT_MODEL",
+      "priority": "P1",
+      "legal_status": "VERIFY_CURRENTNESS",
+      "official_source_url": "https://publication.pravo.gov.ru/document/0001202207010031",
+      "status_reference_url": "https://www.consultant.ru/document/cons_doc_LAW_420853/"
+    },
+    {
+      "document_id": "DOC-RU-MINEKONOM-785-2023",
+      "title": "Приказ Минэкономразвития России от 13.11.2023 № 785 об определении угроз безопасности персональных данных",
+      "domain": "PDN,THREAT_MODEL",
+      "priority": "P2",
+      "legal_status": "VERIFY_CURRENTNESS",
+      "official_source_url": "https://publication.pravo.gov.ru/document/0001202402220007",
+      "status_reference_url": "https://www.consultant.ru/document/cons_doc_LAW_470472/"
+    },
+    {
+      "document_id": "DOC-RU-MINENERGO-819-2019",
+      "title": "Приказ Минэнерго России от 02.08.2019 № 819 об определении угроз безопасности персональных данных",
+      "domain": "PDN,THREAT_MODEL",
+      "priority": "P1",
+      "legal_status": "VERIFY_CURRENTNESS",
+      "official_source_url": "https://publication.pravo.gov.ru/document/0001201910150029",
+      "status_reference_url": "https://www.consultant.ru/document/cons_doc_LAW_335487/"
+    },
+    {
+      "document_id": "DOC-RU-SFR-1284-2024",
+      "title": "Приказ Социального фонда России от 24.07.2024 № 1284 об определении угроз безопасности персональных данных",
+      "domain": "PDN,THREAT_MODEL",
+      "priority": "P1",
+      "legal_status": "VERIFY_CURRENTNESS",
+      "official_source_url": null,
+      "status_reference_url": "https://www.consultant.ru/document/cons_doc_LAW_487823/"
+    },
+    {
+      "document_id": "DOC-RU-ROSFMON-30-2019",
+      "title": "Приказ Росфинмониторинга от 06.02.2019 № 30 об определении угроз безопасности персональных данных для ГИС ЕИС Росфинмониторинга",
+      "domain": "PDN,GIS_REGULATED_IS,THREAT_MODEL",
+      "priority": "P1",
+      "legal_status": "VERIFY_CURRENTNESS",
+      "official_source_url": null,
+      "status_reference_url": "https://www.consultant.ru/document/cons_doc_LAW_333067/"
+    },
+    {
+      "document_id": "DOC-RU-ROSFMON-149-2025",
+      "title": "Приказ Росфинмониторинга от 22.07.2025 № 149 о внесении изменения в приказ № 30",
+      "domain": "PDN,GIS_REGULATED_IS,THREAT_MODEL",
+      "priority": "P1",
+      "legal_status": "VERIFY_CURRENTNESS",
+      "official_source_url": "https://publication.pravo.gov.ru/document/0001202510280006",
+      "status_reference_url": "https://www.consultant.ru/document/cons_doc_LAW_517119/"
+    },
+    {
+      "document_id": "DOC-RU-MINPROMTORG-1981-2023",
+      "title": "Приказ Минпромторга России от 31.05.2023 № 1981 по оценке актуальности и достоверности сведений категорирования КИИ",
+      "domain": "KII",
+      "priority": "P1",
+      "legal_status": "VERIFY_CURRENTNESS",
+      "official_source_url": "https://publication.pravo.gov.ru/document/0001202308220008",
+      "status_reference_url": "https://www.consultant.ru/document/cons_doc_LAW_455276/"
+    },
+    {
+      "document_id": "DOC-RU-PP-4-2026",
+      "title": "Постановление Правительства РФ от 16.01.2026 № 4 — отраслевые особенности категорирования КИИ в области атомной энергии",
+      "domain": "KII",
+      "priority": "P0",
+      "legal_status": "VERIFY_CURRENTNESS",
+      "official_source_url": "https://publication.pravo.gov.ru/document/0001202601160013",
+      "status_reference_url": "https://www.consultant.ru/document/cons_doc_LAW_524547/"
+    },
+    {
+      "document_id": "DOC-RU-PP-92-2026",
+      "title": "Постановление Правительства РФ от 06.02.2026 № 92 — отраслевые особенности категорирования КИИ в банковской сфере и иных сферах финансового рынка",
+      "domain": "KII",
+      "priority": "P0",
+      "legal_status": "VERIFY_CURRENTNESS",
+      "official_source_url": "https://publication.pravo.gov.ru/document/0001202602070010",
+      "status_reference_url": "https://www.consultant.ru/document/cons_doc_LAW_526087/"
+    },
+    {
+      "document_id": "DOC-RU-PP-246-2026",
+      "title": "Постановление Правительства РФ от 07.03.2026 № 246 — отраслевые особенности категорирования КИИ в сфере науки",
+      "domain": "KII",
+      "priority": "P0",
+      "legal_status": "VERIFY_CURRENTNESS",
+      "official_source_url": "https://publication.pravo.gov.ru/document/0001202603070013",
+      "status_reference_url": "https://www.consultant.ru/document/cons_doc_LAW_528317/"
+    },
+    {
+      "document_id": "DOC-RU-PP-303-2026",
+      "title": "Постановление Правительства РФ от 23.03.2026 № 303 — отраслевые особенности категорирования КИИ в сфере государственной регистрации прав на недвижимость",
+      "domain": "KII",
+      "priority": "P0",
+      "legal_status": "VERIFY_CURRENTNESS",
+      "official_source_url": "https://publication.pravo.gov.ru/document/0001202603240036",
+      "status_reference_url": "https://www.consultant.ru/document/cons_doc_LAW_529733/"
+    },
+    {
+      "document_id": "DOC-RU-PP-356-2026",
+      "title": "Постановление Правительства РФ от 31.03.2026 № 356 — отраслевые особенности категорирования КИИ в ракетно-космической промышленности",
+      "domain": "KII",
+      "priority": "P0",
+      "legal_status": "VERIFY_CURRENTNESS",
+      "official_source_url": "https://publication.pravo.gov.ru/document/0001202604010039",
+      "status_reference_url": "https://www.consultant.ru/document/cons_doc_LAW_530539/"
+    }
+  ]
+}

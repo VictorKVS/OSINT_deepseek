@@ -152,8 +152,10 @@ if (-not $credentials.ApiId -or -not $credentials.ApiHash) {
     Write-Host "Python: $pythonExe"
     Write-Host 'TELEGRAM_API_ID: MISSING'
     Write-Host 'TELEGRAM_API_HASH: MISSING'
+    Write-Host 'Secret values are not printed or persisted by this bootstrap.'
     Write-Host 'No saved credentials were found. Starting one-time local DPAPI setup.'
     Write-Host 'Values will be entered only in this PowerShell window and will not be printed.'
+    Write-Host 'Do not paste them into chat.'
     Write-Host ''
 
     if (-not (Test-Path -LiteralPath $SetupScript -PathType Leaf)) {
@@ -190,7 +192,8 @@ Write-Host '============================================================'
 Write-Host "Python: $pythonExe"
 Write-Host "TELEGRAM_API_ID: SET [$($apiId.Source)]"
 Write-Host "TELEGRAM_API_HASH: SET [$($apiHash.Source)]"
-Write-Host 'Secret values are not printed. DPAPI storage, when used, stays local under .runtime.'
+Write-Host 'Secret values are not printed or persisted by this bootstrap.'
+Write-Host 'When local setup is used, only DPAPI-encrypted ciphertext is stored under .runtime.'
 Write-Host ''
 
 $env:PYTHONPATH = "$RepoRoot;$($env:PYTHONPATH)"

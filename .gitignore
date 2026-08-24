@@ -32,6 +32,8 @@ data/runtime/
 data/m5_live_telegram/
 # Architect Telegram acquisition payloads are local course/source material and never enter public Git.
 data/architect_telegram_downloads/
+# Universal team-role Telegram payloads are local source material and never enter public Git.
+data/team_role_telegram/
 # Knowledge Factory live acquisition: exact originals, extracted text and local registries stay local.
 # Only sanitized review exports under reports/pdn_live/ may be committed for review.
 data/knowledge_factory/

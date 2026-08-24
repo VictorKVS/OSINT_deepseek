@@ -155,7 +155,7 @@ if (-not $credentials.ApiId -or -not $credentials.ApiHash) {
     Write-Host 'Secret values are not printed or persisted by this bootstrap.'
     Write-Host 'No saved credentials were found. Starting one-time local DPAPI setup.'
     Write-Host 'Values will be entered only in this PowerShell window and will not be printed.'
-    Write-Host 'Do not paste them into chat.'
+    Write-Host 'do not paste them into chat'
     Write-Host ''
 
     if (-not (Test-Path -LiteralPath $SetupScript -PathType Leaf)) {

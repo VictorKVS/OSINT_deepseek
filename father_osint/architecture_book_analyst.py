@@ -161,7 +161,13 @@ class ArchitectureBookAnalyst:
                     ),
                 )
 
-            normalized = " " + " ".join(sentence.casefold().split()) + " "
+            # Signal markers are token/phrase oriented. Normalize punctuation to
+            # spaces so a phrase such as "Архитектурный компромисс:" matches the
+            # same marker as "архитектурный компромисс между ..." without
+            # broad substring matching inside words. Keep +/#/- for technical
+            # terms and hyphenated English markers such as trade-off.
+            signal_text = re.sub(r"[^0-9A-Za-zА-Яа-яЁё_+#-]+", " ", sentence.casefold())
+            normalized = " " + " ".join(signal_text.split()) + " "
             matched_any = False
             for candidate_type, markers in self._signals.items():
                 if any(marker.casefold() in normalized for marker in markers):

@@ -1,0 +1,70 @@
+{
+  "schema_version": "1.0",
+  "queue_id": "SECURITY-SECTORAL-KII-CURRENT-ONLY-001",
+  "as_of": "2026-08-24",
+  "mode": "CURRENT_ONLY",
+  "purpose": "Concrete queue of officially published 2026 sectoral KII categorization acts. Official publication identity is verified; currentness/replacement chain must still be checked before legal-truth promotion.",
+  "promotion_policy": "OFFICIAL_PUBLICATION_FOUND is not equivalent to CURRENT. Exact bytes, SHA-256, legal status and replacement/amendment chain are required before promotion.",
+  "items": [
+    {
+      "document_id": "DOC-RU-PP-4-2026",
+      "domain": "KII",
+      "sector": "ATOMIC_ENERGY",
+      "authority": "Правительство РФ",
+      "title": "Постановление Правительства Российской Федерации от 16.01.2026 № 4 об утверждении отраслевых особенностей категорирования объектов КИИ, функционирующих в области атомной энергии",
+      "priority": "P0",
+      "publication_number": "0001202601160013",
+      "official_source_url": "https://publication.pravo.gov.ru/document/0001202601160013",
+      "publication_status": "OFFICIAL_PUBLICATION_FOUND",
+      "currentness_state": "VERIFY_CURRENTNESS"
+    },
+    {
+      "document_id": "DOC-RU-PP-92-2026",
+      "domain": "KII",
+      "sector": "BANKING_AND_FINANCIAL_MARKET",
+      "authority": "Правительство РФ",
+      "title": "Постановление Правительства Российской Федерации от 06.02.2026 № 92 об утверждении отраслевых особенностей категорирования объектов КИИ в банковской сфере и иных сферах финансового рынка",
+      "priority": "P0",
+      "publication_number": "0001202602070010",
+      "official_source_url": "https://publication.pravo.gov.ru/document/0001202602070010",
+      "publication_status": "OFFICIAL_PUBLICATION_FOUND",
+      "currentness_state": "VERIFY_CURRENTNESS"
+    },
+    {
+      "document_id": "DOC-RU-PP-246-2026",
+      "domain": "KII",
+      "sector": "SCIENCE",
+      "authority": "Правительство РФ",
+      "title": "Постановление Правительства Российской Федерации от 07.03.2026 № 246 об утверждении отраслевых особенностей категорирования объектов КИИ в сфере науки",
+      "priority": "P0",
+      "publication_number": "0001202603070013",
+      "official_source_url": "https://publication.pravo.gov.ru/document/0001202603070013",
+      "publication_status": "OFFICIAL_PUBLICATION_FOUND",
+      "currentness_state": "VERIFY_CURRENTNESS"
+    },
+    {
+      "document_id": "DOC-RU-PP-303-2026",
+      "domain": "KII",
+      "sector": "REAL_ESTATE_REGISTRATION",
+      "authority": "Правительство РФ",
+      "title": "Постановление Правительства Российской Федерации от 23.03.2026 № 303 об утверждении отраслевых особенностей категорирования объектов КИИ в сфере государственной регистрации прав на недвижимое имущество и сделок с ним",
+      "priority": "P0",
+      "publication_number": "0001202603240036",
+      "official_source_url": "https://publication.pravo.gov.ru/document/0001202603240036",
+      "publication_status": "OFFICIAL_PUBLICATION_FOUND",
+      "currentness_state": "VERIFY_CURRENTNESS"
+    },
+    {
+      "document_id": "DOC-RU-PP-356-2026",
+      "domain": "KII",
+      "sector": "ROCKET_SPACE_INDUSTRY",
+      "authority": "Правительство РФ",
+      "title": "Постановление Правительства Российской Федерации от 31.03.2026 № 356 об утверждении отраслевых особенностей категорирования объектов КИИ, функционирующих в сфере ракетно-космической промышленности",
+      "priority": "P0",
+      "publication_number": "0001202604010039",
+      "official_source_url": "https://publication.pravo.gov.ru/document/0001202604010039",
+      "publication_status": "OFFICIAL_PUBLICATION_FOUND",
+      "currentness_state": "VERIFY_CURRENTNESS"
+    }
+  ]
+}

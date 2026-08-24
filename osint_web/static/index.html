@@ -17,6 +17,7 @@
         <button class="nav" data-view="sources">◉ <span>Источники</span></button>
         <button class="nav" data-view="knowledge">◇ <span>Базы знаний</span></button>
         <button class="nav" data-view="jobs">▤ <span>Очередь задач</span></button>
+        <button class="nav" data-view="trace">⇄ <span>Трассировка</span></button>
       </nav>
       <div class="sidebar-foot"><span class="dot online"></span><span id="networkState">NETWORK CHECK</span><small>local operator console</small></div>
     </aside>
@@ -69,6 +70,11 @@
       <section class="panel jobs-panel">
         <div class="panel-head"><div><span class="eyebrow">EXECUTION LOG</span><h2>Последние задачи</h2></div><span class="muted">allowlisted local actions only</span></div>
         <div id="jobs" class="jobs"></div>
+      </section>
+
+      <section class="panel jobs-panel" id="tracePanel">
+        <div class="panel-head"><div><span class="eyebrow">COMMAND TRACE</span><h2>Трассировка команд</h2></div><span class="muted">actor → command → state → evidence → next</span></div>
+        <div id="traces" class="jobs"></div>
       </section>
     </main>
   </div>

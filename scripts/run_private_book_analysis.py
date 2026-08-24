@@ -26,29 +26,17 @@ def find_workspace(private_root: Path, explicit: str | None) -> Path:
     if explicit:
         return Path(explicit)
     manifests = sorted(
-        private_root.glob("*/translation_manifest.json"),
+        private_root.glob("*/structure_manifest.json"),
         key=lambda path: path.stat().st_mtime,
         reverse=True,
     )
     if not manifests:
-        raise FileNotFoundError("translation manifest not found")
+        raise FileNotFoundError("structure manifest not found; translate and run book_structure.py first")
     return manifests[0].parent
 
 
-def classify_unit(text: str) -> str:
-    stripped = text.strip()
-    if not stripped:
-        return "EMPTY"
-    if len(stripped) <= 140 and (
-        stripped.isupper()
-        or stripped.casefold().startswith(("глава ", "часть ", "chapter ", "part "))
-    ):
-        return "HEADING"
-    return "PARAGRAPH"
-
-
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Analyze one fully translated private architecture book.")
+    parser = argparse.ArgumentParser(description="Analyze one structured translated private architecture book.")
     parser.add_argument("workspace", nargs="?")
     parser.add_argument("--private-root", default=r"G:\1\OTUS\_PRIVATE_BOOK_CORPUS")
     args = parser.parse_args()
@@ -68,44 +56,66 @@ def main() -> int:
         )
         return 3
 
+    structure_manifest_path = workspace / "structure_manifest.json"
+    if not structure_manifest_path.is_file():
+        print("ERROR: structure_manifest.json missing; run OTUS tools/book_structure.py", file=sys.stderr)
+        return 4
+    structure_manifest = json.loads(structure_manifest_path.read_text(encoding="utf-8"))
+    if structure_manifest.get("status") != "SEMANTIC_STRUCTURE_READY":
+        print(
+            f"ERROR: structure status is {structure_manifest.get('status')}; analysis blocked",
+            file=sys.stderr,
+        )
+        return 5
+
+    semantic_units_path = Path(structure_manifest["semantic_units_path"])
+    semantic_units = load_jsonl(semantic_units_path)
+    if not semantic_units:
+        print("ERROR: semantic_units.jsonl is empty", file=sys.stderr)
+        return 6
+
     source_manifest = json.loads((workspace / "source_manifest.json").read_text(encoding="utf-8"))
-    units = load_jsonl(Path(translation_manifest["units_path"]))
+    item = source_manifest["item"]
 
     materials: list[Material] = []
-    current_heading: list[str] = []
-    for unit in units:
+    for unit in semantic_units:
         translated = str(unit.get("translated_text") or "").strip()
         if not translated:
-            print(f"ERROR: untranslated unit {unit.get('unit_id')}", file=sys.stderr)
-            return 4
-        unit_type = classify_unit(translated)
-        if unit_type == "HEADING":
-            current_heading = [translated]
+            continue
         materials.append(
             Material(
                 source_type="book",
-                source_locator=f"private-library://{source_manifest['item']['item_id']}#unit={unit['unit_id']}",
-                title=f"{source_manifest['item']['normalized_title']} :: {unit['order']}",
+                source_locator=(
+                    f"private-library://{item['item_id']}"
+                    f"#page={unit.get('source_page_start')}"
+                    f"&semantic={unit.get('semantic_id')}"
+                ),
+                title=f"{item['normalized_title']} :: semantic {unit.get('order')}",
                 raw_text=translated,
-                local_path=str(workspace / "translation_units.jsonl"),
+                local_path=str(semantic_units_path),
                 metadata={
-                    "book_id": source_manifest["item"]["item_id"],
-                    "translation_unit_id": unit["unit_id"],
-                    "source_text_sha256": unit["source_text_sha256"],
+                    "book_id": item["item_id"],
+                    "semantic_id": unit.get("semantic_id"),
+                    "translation_unit_id": unit.get("source_unit_id"),
+                    "source_text_sha256": unit.get("source_text_sha256"),
                     "source_page_start": unit.get("source_page_start"),
                     "source_page_end": unit.get("source_page_end"),
-                    "heading_path": list(current_heading),
-                    "unit_type": unit_type,
+                    "source_char_start": unit.get("source_char_start"),
+                    "source_char_end": unit.get("source_char_end"),
+                    "heading_path": unit.get("heading_path") or [],
+                    "unit_type": unit.get("unit_type") or "PARAGRAPH",
                     "translation_method": unit.get("translation_method"),
                     "translation_model": unit.get("translation_model"),
+                    "semantic_review_status": unit.get("review_status") or "NEEDS_REVIEW",
+                    "provenance_level": "TRANSLATED_SEMANTIC_BLOCK_TO_EXACT_SOURCE_PAGE_UNIT",
                 },
             )
         )
 
     package = MaterialPackage(
-        task_id=f"book:{source_manifest['item']['item_id']}",
+        task_id=f"book:{item['item_id']}",
         materials=materials,
-        notes="Private translated architecture book corpus.",
+        notes="Private translated and semantically structured architecture book corpus.",
     )
     result = ArchitectureBookAnalyst().analyze(package)
 
@@ -121,11 +131,14 @@ def main() -> int:
             {
                 "schema_version": result.schema_version,
                 "task_id": result.task_id,
-                "book_id": source_manifest["item"]["item_id"],
-                "book_title": source_manifest["item"]["normalized_title"],
+                "book_id": item["item_id"],
+                "book_title": item["normalized_title"],
+                "source_semantic_units": len(semantic_units),
+                "materials_analyzed": len(materials),
                 "counters": result.counters,
                 "review_status": "NEEDS_REVIEW",
                 "candidate_file": str(output_path),
+                "structure_manifest": str(structure_manifest_path),
                 "next_stage": "CROSS_SOURCE_REVIEW",
             },
             ensure_ascii=False,
@@ -136,7 +149,9 @@ def main() -> int:
     )
 
     print("status=KNOWLEDGE_CANDIDATES_READY")
-    print(f"book={source_manifest['item']['normalized_title']}")
+    print(f"book={item['normalized_title']}")
+    print(f"semantic_units={len(semantic_units)}")
+    print(f"materials_analyzed={len(materials)}")
     for key, value in sorted(result.counters.items()):
         print(f"{key}={value}")
     print(f"output={output_path}")

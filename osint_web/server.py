@@ -29,7 +29,13 @@ def main() -> int:
     port = int(os.getenv("OSINT_WEB_PORT", "8765"))
     print(f"FATHER OSINT Control Center: http://{host}:{port}")
     print("Local-only by default. Ctrl+C to stop.")
-    QuietThreadingHTTPServer((host, port), Handler).serve_forever()
+    server = QuietThreadingHTTPServer((host, port), Handler)
+    try:
+        server.serve_forever()
+    except KeyboardInterrupt:
+        print("\n[WEB] Stop requested by operator.")
+    finally:
+        server.server_close()
     return 0
 
 

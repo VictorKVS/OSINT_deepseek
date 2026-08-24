@@ -1,0 +1,79 @@
+{
+  "schema_version": "1.0",
+  "watchlist_id": "SECURITY-DEPARTMENTAL-ORDERS-001",
+  "as_of": "2026-08-24",
+  "mode": "CURRENT_ONLY",
+  "purpose": "Discover and acquire current or future-effective departmental acts that regulate or materially constrain PDN, KII, GIS and sectoral information-security practice. This complements core regulator acts and is not itself proof of currentness.",
+  "coverage": {
+    "core_regulators": ["ФСТЭК России", "ФСБ России", "Роскомнадзор", "НКЦКИ"],
+    "sectoral_foiv": ["Минздрав России", "Минтранс России", "Минпромторг России", "Минэкономразвития России", "Минцифры России", "иные федеральные органы исполнительной власти по применимости"],
+    "domains": ["PDN", "KII", "GIS_REGULATED_IS", "INCIDENT_RESPONSE", "THREAT_MODEL"]
+  },
+  "verified_seed_items": [
+    {
+      "document_id": "DOC-RU-MINZDRAV-340N-2023",
+      "domain": "PDN,HEALTHCARE_SECURITY,THREAT_MODEL",
+      "authority": "Минздрав России",
+      "title": "Приказ Минздрава России от 03.07.2023 № 340н об определении угроз безопасности персональных данных, актуальных при обработке ПДн в ИСПДн в регулируемых Минздравом сферах",
+      "priority": "P0",
+      "publication_number": "0001202308080006",
+      "source": "publication.pravo.gov.ru",
+      "state": "DISCOVERED_OFFICIAL_PUBLICATION__VERIFY_CURRENTNESS"
+    },
+    {
+      "document_id": "DOC-RU-MINTRANS-141-2023",
+      "domain": "PDN,THREAT_MODEL",
+      "authority": "Минтранс России",
+      "title": "Приказ Минтранса России от 19.04.2023 № 141 об определении угроз безопасности персональных данных, актуальных при обработке ПДн в ИСПДн в регулируемых Минтрансом сферах",
+      "priority": "P1",
+      "source": "publication.pravo.gov.ru",
+      "state": "DISCOVERED_OFFICIAL_PUBLICATION__VERIFY_CURRENTNESS"
+    },
+    {
+      "document_id": "DOC-RU-MINPROMTORG-954-2022",
+      "domain": "PDN,THREAT_MODEL",
+      "authority": "Минпромторг России",
+      "title": "Приказ Минпромторга России от 24.03.2022 № 954 об определении угроз безопасности персональных данных, актуальных при обработке ПДн в ИСПДн в регулируемых Минпромторгом сферах",
+      "priority": "P1",
+      "publication_number": "0001202207010031",
+      "source": "publication.pravo.gov.ru",
+      "state": "DISCOVERED_OFFICIAL_PUBLICATION__VERIFY_CURRENTNESS"
+    },
+    {
+      "document_id": "DOC-RU-MINEKONOM-785-2023",
+      "domain": "PDN,THREAT_MODEL",
+      "authority": "Минэкономразвития России",
+      "title": "Приказ Минэкономразвития России от 13.11.2023 № 785 об определении угроз безопасности персональных данных при осуществлении функций Министерства",
+      "priority": "P2",
+      "publication_number": "0001202402220007",
+      "source": "publication.pravo.gov.ru",
+      "state": "DISCOVERED_OFFICIAL_PUBLICATION__VERIFY_CURRENTNESS"
+    },
+    {
+      "document_id": "DOC-RU-MINPROMTORG-1981-2023",
+      "domain": "KII",
+      "authority": "Минпромторг России",
+      "title": "Приказ Минпромторга России от 31.05.2023 № 1981 о порядке оценки актуальности и достоверности сведений категорирования КИИ для оборонной, металлургической и химической промышленности",
+      "priority": "P1",
+      "publication_number": "0001202308220008",
+      "source": "publication.pravo.gov.ru",
+      "state": "DISCOVERED_OFFICIAL_PUBLICATION__VERIFY_CURRENTNESS"
+    }
+  ],
+  "discovery_queries": [
+    "об определении угроз безопасности персональных данных",
+    "критической информационной инфраструктуры",
+    "категорирования объектов критической информационной инфраструктуры",
+    "государственных информационных систем защита информации",
+    "информационных систем персональных данных",
+    "компьютерных атак компьютерных инцидентов",
+    "модель угроз безопасности информации",
+    "аттестации объектов информатизации"
+  ],
+  "discovery_policy": {
+    "primary": "publication.pravo.gov.ru API and official FOIV sites",
+    "scope": "federal departmental acts first; regional acts only when an explicit project/jurisdiction requires them",
+    "currentness": "Every discovered act remains VERIFY_CURRENTNESS until exact identity, current legal status and replacement/amendment chain are checked.",
+    "promotion": "No departmental act can produce legal-truth claims from discovery metadata alone."
+  }
+}

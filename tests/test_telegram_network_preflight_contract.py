@@ -8,15 +8,22 @@ def test_telegram_network_preflight_is_read_only_and_fail_closed():
     assert "web.telegram.org" in text
     assert "Get-NetTCPConnection -State Listen" in text
     assert "Get-NetAdapter" in text
+    assert "Get-InstalledTransportClients" in text
+    assert "WINDOWS_UNINSTALL_REGISTRY" in text
+    assert "COMMAND_ON_PATH" in text
+    assert "installed_transport_clients" in text
+    assert "TRANSPORT_CLIENT_INSTALLED_NOT_ACTIVE" in text
     assert "auto_use_unknown_proxy = $false" in text
     assert "auto_change_windows_routes = $false" in text
     assert "auto_enable_vpn = $false" in text
+    assert "auto_launch_transport_client = $false" in text
     assert "DIRECT_BLOCKED_NO_APPROVED_ALTERNATE_ROUTE" in text
     assert "LOCAL_PROXY_CANDIDATE_REQUIRES_EXPLICIT_CONFIG" in text
     assert "Set-NetRoute" not in text
     assert "New-NetRoute" not in text
     assert "Remove-NetRoute" not in text
     assert "Set-NetFirewall" not in text
+    assert "Start-Process" not in text
 
 
 def test_architect_launcher_runs_network_gate_before_telethon():

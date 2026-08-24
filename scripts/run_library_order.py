@@ -58,6 +58,25 @@ def update_stage(order: dict[str, Any], stage: str, state: str, *, evidence: str
         row["note"] = note
 
 
+def validate_ru_stage(order: dict[str, Any]) -> tuple[bool, str]:
+    baseline = order.get("ru_regulatory_baseline") or {}
+    stage = (order.get("stages") or {}).get("STAGE_0_RU_REGULATORY_BASELINE") or {}
+    docs = baseline.get("documents") or []
+    required = set(baseline.get("required_clusters") or [])
+    covered = {str(row.get("cluster")) for row in docs if row.get("status") == "ACTIVE" and row.get("verification_state") == "OFFICIAL_METADATA_VERIFIED"}
+    missing = sorted(required - covered)
+    superseded_current = [row.get("designation") for row in docs if row.get("status") == "SUPERSEDED"]
+    if not docs:
+        return False, "Russian regulatory baseline contains no active official-metadata documents"
+    if missing:
+        return False, f"Russian regulatory baseline misses required cluster(s): {', '.join(missing)}"
+    if superseded_current:
+        return False, f"superseded documents cannot close the current gate: {', '.join(str(x) for x in superseded_current)}"
+    if baseline.get("state") != "READY_FOR_APPLICABILITY_REVIEW":
+        return False, f"Russian regulatory baseline state is {baseline.get('state') or stage.get('state') or 'UNKNOWN'}"
+    return True, "official metadata and required Russian baseline clusters are represented; applicability review remains explicit"
+
+
 def handoff_manifest(order: dict[str, Any], acquisition: dict[str, Any], coverage: dict[str, Any]) -> Path:
     path = ORDER_ROOT / f"{order['order_id']}_STAGE2_HANDOFF.json"
     materials: list[dict[str, Any]] = []
@@ -74,12 +93,13 @@ def handoff_manifest(order: dict[str, Any], acquisition: dict[str, Any], coverag
                 "next_stage": "STAGE_2_DOCUMENT_COMPILER",
             })
     payload = {
-        "schema_version": "1.0",
+        "schema_version": "1.1",
         "record_type": "LIBRARY_ORDER_STAGE2_HANDOFF",
         "order_id": order["order_id"],
         "role_id": order["role_id"],
         "knowledge_base_id": order["knowledge_base_id"],
         "maturity_target": order["maturity_target"],
+        "ru_regulatory_baseline": order.get("ru_regulatory_baseline", {}),
         "materials_total": len(materials),
         "materials": materials,
         "coverage_ref": stage_ref(TEAM_REPORT_ROOT / f"LATEST_{order['role_id']}_COVERAGE.json"),
@@ -113,6 +133,30 @@ def main() -> int:
             env[env_name] = str(trace[key])
 
     order["state"] = "RUNNING"
+    order["current_stage"] = "STAGE_0_RU_REGULATORY_BASELINE"
+    ok, ru_note = validate_ru_stage(order)
+    if not ok:
+        update_stage(order, "STAGE_0_RU_REGULATORY_BASELINE", "BLOCKED", note=ru_note)
+        order["state"] = "BLOCKED_RU_REGULATORY_BASELINE"
+        order["gaps"].append({
+            "type": "RU_REGULATORY_BASELINE_GAP",
+            "blocking_for_maturity_claim": True,
+            "blocking_for_global_layer": True,
+            "note": ru_note,
+        })
+        order["next_actions"] = ["BUILD_OR_REPAIR_RU_REGULATORY_BASELINE"]
+        write_json(order_path, order)
+        print(json.dumps({
+            "status": order["state"],
+            "order_id": order["order_id"],
+            "role_id": role_id,
+            "current_stage": order["current_stage"],
+            "reason": ru_note,
+        }, ensure_ascii=False, indent=2))
+        return 1
+
+    ru_stage_state = "PASS_METADATA_VERIFIED_APPLICABILITY_REVIEW_REQUIRED"
+    update_stage(order, "STAGE_0_RU_REGULATORY_BASELINE", ru_stage_state, note=ru_note)
     order["current_stage"] = "STAGE_1_ACQUISITION"
     update_stage(order, "STAGE_1_ACQUISITION", "RUNNING")
     write_json(order_path, order)
@@ -137,7 +181,7 @@ def main() -> int:
         acquisition = {"downloads": [], "reused": [], "search_hits_total": 0, "downloaded_total": 0, "payload_reused_total": 0, "bytes_downloaded": 0, "errors_total": 0}
         update_stage(order, "STAGE_1_ACQUISITION", "PASS_WITHOUT_TELEGRAM", note="Telegram was not requested")
 
-    for source in sorted(requested_sources - {"TELEGRAM"}):
+    for source in sorted(requested_sources - {"TELEGRAM", "RU_OFFICIAL_REGULATORY"}):
         state = (order.get("source_states") or {}).get(source)
         if state in {"CONNECTOR_PENDING", "MANUAL_OR_USER_AUTHORIZED_IMPORT_PENDING"}:
             order["gaps"].append({
@@ -179,7 +223,7 @@ def main() -> int:
     metrics["topics_gap"] = int(coverage.get("topics_gap") or 0)
 
     handoff = handoff_manifest(order, acquisition, coverage)
-    update_stage(order, "STAGE_2_DOCUMENT_COMPILER", "READY_FOR_HANDOFF", evidence=stage_ref(handoff), note="Adapter-driven Stage 2 handoff prepared; unsupported file/profile adapters must remain explicit gaps")
+    update_stage(order, "STAGE_2_DOCUMENT_COMPILER", "READY_FOR_HANDOFF", evidence=stage_ref(handoff), note="RU baseline is attached; adapter-driven Stage 2 handoff prepared. Applicability review remains separate from source acquisition.")
 
     blocking_source_gaps = [gap for gap in order.get("gaps", []) if gap.get("blocking_for_requested_multisource_order")]
     if blocking_source_gaps:
@@ -189,15 +233,14 @@ def main() -> int:
     else:
         order["state"] = "STAGE_1_COMPLETE"
         order["current_stage"] = "STAGE_2_DOCUMENT_COMPILER"
-        order["next_actions"] = ["RUN_STAGE_2_HANDOFF"]
+        order["next_actions"] = ["REVIEW_RU_REGULATORY_APPLICABILITY", "RUN_STAGE_2_HANDOFF"]
 
-    # Do not claim full maturity or KB readiness from Stage 1 alone.
     if coverage.get("overall_min_gate") != "PROVEN":
         order["gaps"].append({
             "type": "MATURITY_NOT_YET_PROVEN",
             "maturity_target": order["maturity_target"],
             "coverage_gate": coverage.get("overall_min_gate"),
-            "note": "Downloaded file counts do not prove the requested role maturity.",
+            "note": "Downloaded file counts do not prove the requested role maturity; Russian applicability and global authoritative coverage remain separate gates.",
         })
 
     write_json(order_path, order)
@@ -206,6 +249,7 @@ def main() -> int:
         "order_id": order["order_id"],
         "role_id": role_id,
         "maturity_target": order["maturity_target"],
+        "ru_regulatory_stage": order["stages"]["STAGE_0_RU_REGULATORY_BASELINE"]["state"],
         "current_stage": order["current_stage"],
         "topics_total": order["topics_total"],
         "topics_covered": metrics["topics_covered"],

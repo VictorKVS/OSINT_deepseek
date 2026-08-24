@@ -3,7 +3,6 @@ from __future__ import annotations
 import argparse
 import asyncio
 import json
-import os
 import time
 from pathlib import Path
 from typing import Any
@@ -139,6 +138,7 @@ async def _run(args: argparse.Namespace) -> dict[str, Any]:
     skipped_size_total = 0
     bytes_downloaded = 0
     search_hits_total = 0
+    candidate_map: dict[str, Candidate] = {}
 
     allowed_exts = {str(value).casefold() for value in architect_profile["inventory"]["downloadable_extensions"]}
     await client.connect()
@@ -156,7 +156,6 @@ async def _run(args: argparse.Namespace) -> dict[str, Any]:
             raw_hits.extend(await task)
         search_hits_total = len(raw_hits)
 
-        candidate_map: dict[str, Candidate] = {}
         for message, target in raw_hits:
             info = _message_file_info(message)
             if info is None:
@@ -192,6 +191,28 @@ async def _run(args: argparse.Namespace) -> dict[str, Any]:
                 target_dir.mkdir(parents=True, exist_ok=True)
                 original = _safe_name(candidate.file_name, fallback=f"telegram_{candidate.message_id}{candidate.extension}")
                 destination = target_dir / f"{_safe_name(candidate.chat_id)}_{candidate.message_id}_{original}"
+
+                if destination.exists():
+                    try:
+                        digest = _sha256_file(destination)
+                        if digest in existing_hashes:
+                            return "REUSED", {
+                                "role_id": role_id,
+                                "knowledge_base_id": role.get("knowledge_base_id"),
+                                "chat_id": candidate.chat_id,
+                                "message_id": candidate.message_id,
+                                "chat_title": candidate.chat_title,
+                                "source_url": candidate.source_url,
+                                "file_name": candidate.file_name,
+                                "local_path": _local_display_path(destination),
+                                "sha256": digest,
+                                "matched_target_ids": list(candidate.matched_target_ids),
+                                "matched_queries": list(candidate.matched_queries),
+                                "reason": "existing local role payload",
+                            }
+                    except OSError:
+                        pass
+
                 try:
                     downloaded = await client.download_media(candidate.message, file=str(destination))
                     if not downloaded:

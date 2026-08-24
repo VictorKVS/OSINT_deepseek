@@ -1,0 +1,21 @@
+{
+  "schema_version": "1.0",
+  "standard_id": "FATHER-UI-BRAND-001",
+  "scope": "ALL_FATHER_SITES_AND_WEB_APPS",
+  "rules": {
+    "top_brand_mark_required": true,
+    "preferred_placement": "TOP_LEFT",
+    "visible_on_mobile": true,
+    "home_link_required": true,
+    "accessible_name_required": true,
+    "product_name_may_follow_mark": true,
+    "plain_text_without_mark_is_not_enough": true,
+    "favicon_required_for_public_showcase": true
+  },
+  "acceptance": {
+    "desktop_min_mark_px": 32,
+    "mobile_min_mark_px": 28,
+    "brand_mark_present_before_primary_page_content": true,
+    "brand_mark_click_target": "/"
+  }
+}

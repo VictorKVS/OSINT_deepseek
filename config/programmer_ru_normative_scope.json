@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "scope_id": "FATHER-RU-PROGRAMMER-NORMATIVE-SCOPE-001",
   "role_id": "PROGRAMMER",
   "knowledge_base_id": "PROGRAMMING_KB",
@@ -64,14 +64,22 @@
     },
     {
       "sector_id": "FSTEC_AND_REGULATED_INFORMATION_SYSTEMS",
-      "state": "RESEARCH_REQUIRED",
-      "activation": "GIS, protected information systems, security-certified software, or regulator-controlled development context",
+      "state": "CONDITIONAL_CURRENT_PRIMARY_SEEDED_WITH_WATCH",
+      "inventory_ref": "config/programmer_ru_fstec_regulated_systems.json",
+      "activation": "GIS, protected information systems, significant KII objects, security-certified software, or regulator-controlled development context",
+      "current_seeds": [
+        "Приказ ФСТЭК России от 11.04.2025 № 117",
+        "Приказ ФСТЭК России от 25.12.2017 № 239",
+        "Приказ ФСТЭК России от 21.12.2017 № 235",
+        "Приказ ФСТЭК России от 01.12.2023 № 240",
+        "Приказ ФСТЭК России от 30.06.2025 № 230"
+      ],
+      "scheduled_change": "Приказ ФСТЭК России от 08.05.2026 № 137 — основной срок 2026-09-01, отложенный пункт 2027-03-01",
       "research_targets": [
-        "current FSTEC orders for state information systems",
-        "current FSTEC requirements for personal-data information systems",
-        "current FSTEC requirements for significant KII objects",
-        "current FSTEC secure-software-development methodologies and references to standards",
-        "certification and vulnerability-remediation requirements applicable to software developers"
+        "current personal-data information-system developer implications and FSTEC Order 21 amendment chain",
+        "full currentness chains for Orders 239 and 235",
+        "current FSTEC methodologies and certification documents governing vulnerability analysis, testing and remediation",
+        "exact developer-work-product mapping under Order 117 and its scheduled amendments"
       ]
     },
     {
@@ -86,7 +94,7 @@
           "verification_state": "OFFICIAL_PUBLICATION_METADATA_VERIFIED"
         }
       ],
-      "next": "map current subordinate acts and technical requirements to developer activities"
+      "next": "complete subordinate-act currentness and map technical requirements to developer activities"
     },
     {
       "sector_id": "PERSONAL_DATA_152_FZ",
@@ -97,9 +105,11 @@
     },
     {
       "sector_id": "STATE_INFORMATION_SYSTEMS",
-      "state": "RESEARCH_REQUIRED",
-      "activation": "software is part of a state information system",
-      "next": "map current government/FSTEC requirements, documentation, testing and secure-development implications"
+      "state": "CONDITIONAL_PRIMARY_RULE_SEEDED_MAPPING_REQUIRED",
+      "activation": "software is part of a state information system or another information system in the scope of FSTEC Order 117",
+      "primary_rule": "Приказ ФСТЭК России от 11.04.2025 № 117",
+      "future_change": "Приказ ФСТЭК России от 08.05.2026 № 137",
+      "next": "map protection measures and lifecycle obligations to concrete software requirements, architecture, coding, testing and evidence artifacts"
     },
     {
       "sector_id": "SECTOR_SPECIFIC",

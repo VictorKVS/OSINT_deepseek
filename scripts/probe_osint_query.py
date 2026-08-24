@@ -24,6 +24,16 @@ def slug(text: str) -> str:
     return value[:80] or "query"
 
 
+def trace_context() -> dict[str, Any]:
+    return {
+        "trace_id": os.getenv("FATHER_TRACE_ID"),
+        "correlation_id": os.getenv("FATHER_CORRELATION_ID"),
+        "task_id": os.getenv("FATHER_TASK_ID"),
+        "command_id": os.getenv("FATHER_COMMAND_ID"),
+        "parent_command_id": os.getenv("FATHER_PARENT_COMMAND_ID"),
+    }
+
+
 def credentials() -> tuple[int, str, Path]:
     profile = load_json(PROFILE)["telegram"]
     api_id = os.getenv(str(profile.get("api_id_env", "TELEGRAM_API_ID")), "").strip()
@@ -107,6 +117,7 @@ async def run(query: str, limit: int, *, role_id: str | None, target_id: str | N
         "files_total": sum(1 for row in rows if row["has_file"]),
         "elapsed_seconds": elapsed,
         "results": rows,
+        **trace_context(),
     }
 
 
@@ -137,9 +148,10 @@ def main() -> int:
             "topic": topic,
             "error": f"{type(exc).__name__}: {exc}",
             "probe_only": True,
+            **trace_context(),
         }
     path.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    print(json.dumps({k: report.get(k) for k in ("status", "query", "role_id", "target_id", "results_total", "files_total", "elapsed_seconds", "error") if k in report}, ensure_ascii=False, indent=2))
+    print(json.dumps({k: report.get(k) for k in ("status", "query", "role_id", "target_id", "results_total", "files_total", "elapsed_seconds", "command_id", "error") if k in report}, ensure_ascii=False, indent=2))
     print(f"Report: {path.relative_to(ROOT)}")
     return 0 if report.get("status") == "PASS" else 1
 

@@ -39,7 +39,22 @@ def test_programmer_normative_scope_is_measurable_not_all_or_nothing_claim():
     scope = json.loads(Path("config/programmer_ru_normative_scope.json").read_text(encoding="utf-8"))
     sectors = {row["sector_id"]: row for row in scope["sectors"]}
     assert sectors["ESPD_GOST_19"]["state"] == "COMPLETE_CURRENT_CATALOG_STATUS"
-    assert sectors["FSTEC_AND_REGULATED_INFORMATION_SYSTEMS"]["state"] == "RESEARCH_REQUIRED"
+    assert sectors["FSTEC_AND_REGULATED_INFORMATION_SYSTEMS"]["state"] == "CONDITIONAL_CURRENT_PRIMARY_SEEDED_WITH_WATCH"
+    assert sectors["FSTEC_AND_REGULATED_INFORMATION_SYSTEMS"]["inventory_ref"] == "config/programmer_ru_fstec_regulated_systems.json"
+    assert "08.05.2026 № 137" in sectors["FSTEC_AND_REGULATED_INFORMATION_SYSTEMS"]["scheduled_change"]
     assert sectors["AUTOMATED_SYSTEMS_GOST_34"]["state"] == "CONDITIONAL_CORE_VERIFIED"
     assert sectors["KII_187_FZ"]["state"] == "CONDITIONAL_PRIMARY_LAW_SEEDED"
+    assert sectors["STATE_INFORMATION_SYSTEMS"]["state"] == "CONDITIONAL_PRIMARY_RULE_SEEDED_MAPPING_REQUIRED"
     assert scope["global_layer_gate"]["allowed_to_claim_role_maturity_before_ru_applicability_review"] is False
+
+
+def test_programmer_fstec_overlay_tracks_current_and_future_dated_requirements():
+    inv = json.loads(Path("config/programmer_ru_fstec_regulated_systems.json").read_text(encoding="utf-8"))
+    assert inv["applicability_class"] == "CONDITIONAL_REGULATED_CONTEXT"
+    contexts = {row["context_id"]: row for row in inv["contexts"]}
+    gis = contexts["STATE_AND_GOVERNMENT_INFORMATION_SYSTEMS"]
+    docs = {row["designation"]: row for row in gis["documents"]}
+    assert docs["Приказ ФСТЭК России от 11.04.2025 № 117"]["status_on_snapshot_date"] == "ACTIVE"
+    assert docs["Приказ ФСТЭК России от 08.05.2026 № 137"]["status_on_snapshot_date"] == "PUBLISHED_NOT_YET_EFFECTIVE"
+    assert docs["Приказ ФСТЭК России от 08.05.2026 № 137"]["effective_from"] == "2026-09-01"
+    assert inv["currentness_watch"][0]["watch_date"] == "2026-09-01"

@@ -1,9 +1,10 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "registry_id": "FATHER-GLOBAL-DOCUMENT-REGISTRY-001",
   "status": "MANDATORY",
   "scope": "ALL_FATHER_KNOWLEDGE_BASES_AND_ROLES",
   "principle": "A document is registered once globally; roles, domains and projects reference it through applicability bindings.",
+  "classification_standard": "config/father_scope_priority_standard.json",
   "canonical_layers": [
     "DOCUMENT",
     "DOCUMENT_VERSION",
@@ -41,6 +42,8 @@
     "applicability",
     "activation_condition",
     "legal_force_class",
+    "maturity_level",
+    "importance_class",
     "review_state"
   ],
   "allowed_subject_types": [
@@ -51,6 +54,8 @@
     "SYSTEM_CLASS",
     "SECTOR"
   ],
+  "allowed_maturity_values": ["MIN", "MEDIUM", "MAX"],
+  "allowed_importance_values": ["NECESSARY", "DESIRABLE", "INTERESTING_LATER"],
   "legal_status_model": [
     "CURRENT",
     "FUTURE_EFFECTIVE",
@@ -84,6 +89,8 @@
     "duplicate_canonical_document_ids_are_defects": true,
     "conflicting_current_status_is_a_review_blocker": true,
     "superseded_document_cannot_close_current_gate": true,
-    "applicability_must_not_be_inferred_from_active_status": true
+    "applicability_must_not_be_inferred_from_active_status": true,
+    "every_binding_has_two_axis_classification": true,
+    "unresolved_necessary_binding_at_or_below_target_maturity_blocks_completion": true
   }
 }

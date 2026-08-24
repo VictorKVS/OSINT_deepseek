@@ -46,26 +46,50 @@ class DownloadProgressRegistry:
             "items": {},
         }
 
-    def start(self, items: list[dict[str, Any]]) -> None:
+    def start(self, items: list[dict[str, Any]] | None = None) -> None:
         now = time.time()
-        self.payload["state"] = "RUNNING"
-        self.payload["started_at_epoch"] = now
-        self.payload["updated_at_epoch"] = now
-        self.payload["items"] = {str(row["item_id"]): dict(row) for row in items}
-        for row in self.payload["items"].values():
-            row.setdefault("status", "QUEUED")
-            row.setdefault("bytes_received", 0)
-            row.setdefault("total_bytes", row.get("file_size") or 0)
-            row.setdefault("progress_pct", 0.0)
-            row.setdefault("speed_bytes_per_second", 0.0)
-            row.setdefault("started_at_epoch", None)
-            row.setdefault("updated_at_epoch", now)
-            row.setdefault("finished_at_epoch", None)
-            row.setdefault("sha256", None)
-            row.setdefault("local_path", None)
-            row.setdefault("error", None)
-        self._recount()
-        self.flush(force=True)
+        with self._lock:
+            self.payload["state"] = "RUNNING"
+            self.payload["started_at_epoch"] = now
+            self.payload["updated_at_epoch"] = now
+            self.payload["finished_at_epoch"] = None
+            self.payload["items"] = {}
+            for row in items or []:
+                self._ensure_item_locked(str(row["item_id"]), row, now)
+            self._recount()
+            self._flush_locked(force=True)
+
+    def ensure_item(self, item_id: str, **fields: Any) -> None:
+        now = time.time()
+        with self._lock:
+            self._ensure_item_locked(str(item_id), fields, now)
+            self.payload["state"] = "RUNNING"
+            if self.payload.get("started_at_epoch") is None:
+                self.payload["started_at_epoch"] = now
+            self.payload["updated_at_epoch"] = now
+            self._recount()
+            self._flush_locked(force=True)
+
+    def _ensure_item_locked(self, item_id: str, fields: dict[str, Any], now: float) -> None:
+        if item_id in self.payload["items"]:
+            row = self.payload["items"][item_id]
+            for key, value in fields.items():
+                if value is not None:
+                    row[key] = value
+            return
+        row = {"item_id": item_id, **dict(fields)}
+        row.setdefault("status", "QUEUED")
+        row.setdefault("bytes_received", 0)
+        row.setdefault("total_bytes", row.get("file_size") or 0)
+        row.setdefault("progress_pct", 0.0)
+        row.setdefault("speed_bytes_per_second", 0.0)
+        row.setdefault("started_at_epoch", None)
+        row.setdefault("updated_at_epoch", now)
+        row.setdefault("finished_at_epoch", None)
+        row.setdefault("sha256", None)
+        row.setdefault("local_path", None)
+        row.setdefault("error", None)
+        self.payload["items"][item_id] = row
 
     def update(self, item_id: str, *, status: str | None = None, bytes_received: int | None = None,
                total_bytes: int | None = None, sha256: str | None = None, local_path: str | None = None,

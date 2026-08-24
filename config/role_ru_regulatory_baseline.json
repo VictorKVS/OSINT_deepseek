@@ -1,0 +1,138 @@
+{
+  "schema_version": "1.0",
+  "baseline_id": "FATHER-RU-ROLE-REGULATORY-001",
+  "status": "ACTIVE",
+  "scope": "ALL_ROLE_LIBRARY_ORDERS",
+  "principle": "RUSSIAN_REGULATORY_AND_NATIONAL_STANDARDS_FIRST_THEN_GLOBAL_PRACTICE",
+  "rules": {
+    "ru_baseline_required_before_global_maturity_claim": true,
+    "official_status_verification_required": true,
+    "superseded_document_must_not_close_current_gate": true,
+    "mandatory_vs_voluntary_vs_conditional_must_be_separate": true,
+    "global_sources_are_second_layer": true,
+    "legal_or_regulatory_applicability_requires_human_review": true
+  },
+  "source_priority": [
+    "RUSSIAN_LAW_AND_GOVERNMENT_ACT",
+    "RUSSIAN_REGULATOR_ACT",
+    "ROSSTANDART_NATIONAL_STANDARD",
+    "RUSSIAN_OFFICIAL_METHODOLOGY",
+    "RUSSIAN_PRIMARY_INDUSTRY_GUIDE",
+    "INTERNATIONAL_STANDARD",
+    "PRIMARY_VENDOR_OR_PROJECT_DOCS",
+    "BOOK_OR_COURSE",
+    "COMMUNITY_DISCOVERY"
+  ],
+  "roles": {
+    "PROGRAMMER": {
+      "knowledge_base_id": "PROGRAMMING_KB",
+      "baseline_state": "SEEDED_VERIFIED_OFFICIAL_METADATA",
+      "required_clusters": [
+        "SOFTWARE_LIFECYCLE",
+        "PROGRAM_DOCUMENTATION",
+        "SECURE_SOFTWARE_DEVELOPMENT",
+        "SOFTWARE_SECURITY_THREATS",
+        "STATIC_ANALYSIS"
+      ],
+      "documents": [
+        {
+          "document_id": "RU-PROG-GOST-19.101-2024",
+          "designation": "ГОСТ 19.101-2024",
+          "title": "Единая система программной документации. Виды программ и программных документов",
+          "cluster": "PROGRAM_DOCUMENTATION",
+          "status": "ACTIVE",
+          "effective_from": "2025-01-30",
+          "replaces": ["ГОСТ 19.101-77"],
+          "applicability": "GENERAL_PROGRAM_DOCUMENTATION_BASELINE",
+          "legal_force_class": "NATIONAL_STANDARD_CHECK_APPLICABILITY",
+          "official_source": "https://protect.gost.ru/gost/details/5cee0533-a1f4-41fe-bcb3-bc79e7e74490",
+          "verification_state": "OFFICIAL_METADATA_VERIFIED"
+        },
+        {
+          "document_id": "RU-PROG-GOST-19.102-77",
+          "designation": "ГОСТ 19.102-77",
+          "title": "Единая система программной документации. Стадии разработки",
+          "cluster": "PROGRAM_DOCUMENTATION",
+          "status": "ACTIVE",
+          "effective_from": "1980-01-01",
+          "replaces": [],
+          "applicability": "DEVELOPMENT_STAGES_REFERENCE",
+          "legal_force_class": "NATIONAL_STANDARD_CHECK_APPLICABILITY",
+          "official_source": "https://protect.gost.ru/gost/details/a847749a-0f9d-4c69-9a1d-f66de432e251",
+          "verification_state": "OFFICIAL_METADATA_VERIFIED"
+        },
+        {
+          "document_id": "RU-PROG-GOST-R-ISOIEC-12207-2010",
+          "designation": "ГОСТ Р ИСО/МЭК 12207-2010",
+          "title": "Информационная технология. Системная и программная инженерия. Процессы жизненного цикла программных средств",
+          "cluster": "SOFTWARE_LIFECYCLE",
+          "status": "ACTIVE",
+          "effective_from": "2012-03-01",
+          "replaces": ["ГОСТ Р ИСО/МЭК 12207-99"],
+          "applicability": "SOFTWARE_LIFECYCLE_BASELINE",
+          "legal_force_class": "NATIONAL_STANDARD_CHECK_APPLICABILITY",
+          "official_source": "https://protect.gost.ru/gost/details/350d1d97-8905-4368-8a8c-7ce7c041bb09",
+          "verification_state": "OFFICIAL_METADATA_VERIFIED"
+        },
+        {
+          "document_id": "RU-PROG-GOST-R-56939-2024",
+          "designation": "ГОСТ Р 56939-2024",
+          "title": "Защита информации. Разработка безопасного программного обеспечения. Общие требования",
+          "cluster": "SECURE_SOFTWARE_DEVELOPMENT",
+          "status": "ACTIVE",
+          "effective_from": "2024-12-20",
+          "replaces": ["ГОСТ Р 56939-2016"],
+          "applicability": "SECURE_SOFTWARE_DEVELOPMENT_BASELINE",
+          "legal_force_class": "NATIONAL_STANDARD_CHECK_REFERENCED_OBLIGATION",
+          "official_source": "https://protect.gost.ru/gost/details/f3818925-a96f-4f55-96e9-46b44720ee64",
+          "verification_state": "OFFICIAL_METADATA_VERIFIED"
+        },
+        {
+          "document_id": "RU-PROG-GOST-R-58412-2019",
+          "designation": "ГОСТ Р 58412-2019",
+          "title": "Защита информации. Разработка безопасного программного обеспечения. Угрозы безопасности информации при разработке программного обеспечения",
+          "cluster": "SOFTWARE_SECURITY_THREATS",
+          "status": "ACTIVE",
+          "effective_from": "2019-11-01",
+          "replaces": [],
+          "applicability": "SECURE_DEVELOPMENT_THREAT_BASELINE",
+          "legal_force_class": "NATIONAL_STANDARD_CHECK_APPLICABILITY",
+          "official_source": "https://protect.gost.ru/gost/details/07745487-3b1c-4efd-aafb-a038b50037a0",
+          "verification_state": "OFFICIAL_METADATA_VERIFIED"
+        },
+        {
+          "document_id": "RU-PROG-GOST-R-71207-2024",
+          "designation": "ГОСТ Р 71207-2024",
+          "title": "Защита информации. Разработка безопасного программного обеспечения. Статический анализ программного обеспечения. Общие требования",
+          "cluster": "STATIC_ANALYSIS",
+          "status": "ACTIVE",
+          "effective_from": "2024-04-01",
+          "replaces": [],
+          "applicability": "STATIC_ANALYSIS_BASELINE",
+          "legal_force_class": "NATIONAL_STANDARD_CHECK_APPLICABILITY",
+          "official_source": "https://protect.gost.ru/gost/details/9dd6f064-6014-4416-a3ca-ef72ce0a6c3a",
+          "verification_state": "OFFICIAL_METADATA_VERIFIED"
+        }
+      ],
+      "known_superseded": [
+        {
+          "designation": "ГОСТ 19.101-77",
+          "status": "SUPERSEDED",
+          "superseded_by": "ГОСТ 19.101-2024"
+        },
+        {
+          "designation": "ГОСТ Р 56939-2016",
+          "status": "SUPERSEDED",
+          "superseded_by": "ГОСТ Р 56939-2024"
+        }
+      ],
+      "next_research": [
+        "expand active ESPD standards relevant to specifications, program text, descriptions and test methods",
+        "map GOST 34-series applicability for software delivered as part of automated systems",
+        "map FSTEC orders and methodologies that make secure-development requirements mandatory in regulated contexts",
+        "map sector-specific requirements for GIS, KII, personal data and financial systems",
+        "after RU baseline, attach ISO/IEC/IEEE, OWASP, NIST SSDF and vendor/project practices as GLOBAL_LAYER"
+      ]
+    }
+  }
+}

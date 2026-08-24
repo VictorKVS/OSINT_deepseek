@@ -14,3 +14,12 @@ def test_departmental_discovery_cmd_exports_repo_root_pythonpath():
     text = Path("RUN_SECURITY_DEPARTMENTAL_DISCOVERY.cmd").read_text(encoding="utf-8")
     assert 'set "PYTHONPATH=%CD%;%PYTHONPATH%"' in text
     assert "%PY% scripts\\discover_security_departmental_orders.py" in text
+
+
+def test_departmental_discovery_preserves_verified_seeds_when_api_is_degraded():
+    text = Path("scripts/discover_security_departmental_orders.py").read_text(encoding="utf-8")
+    assert "DEGRADED_WITH_VERIFIED_SEED_FALLBACK" in text
+    assert '"seed_candidate_total"' in text
+    assert '"live_api_candidate_total"' in text
+    assert '"candidate_origin": "VERIFIED_SEED"' in text
+    assert "Exact bytes, SHA-256, legal status and replacement/amendment chain verification are required" in text

@@ -38,9 +38,22 @@ def test_architect_telegram_runner_builds_gaps_and_preserves_lineage():
     assert "extractall" not in text.casefold()
 
 
-def test_architect_telegram_cmd_requires_existing_telethon_runtime():
-    text = Path("RUN_ARCHITECT_TELEGRAM_ACQUISITION.cmd").read_text(encoding="utf-8")
-    assert 'set "PYTHONPATH=%CD%;%PYTHONPATH%"' in text
-    assert "import telethon" in text
-    assert "No Telegram search or download was attempted." in text
-    assert "%PY% scripts\\run_architect_telegram_acquisition.py %*" in text
+def test_architect_telegram_cmd_routes_through_safe_powershell_bootstrap():
+    cmd = Path("RUN_ARCHITECT_TELEGRAM_ACQUISITION.cmd").read_text(encoding="utf-8")
+    assert 'powershell.exe -NoProfile -ExecutionPolicy Bypass -File "scripts\\run_architect_telegram_acquisition.ps1" %*' in cmd
+    assert "TELEGRAM_API_HASH" not in cmd
+    assert "TELEGRAM_API_ID" not in cmd
+
+
+def test_architect_telegram_bootstrap_reads_local_secret_sources_without_printing_values():
+    text = Path("scripts/run_architect_telegram_acquisition.ps1").read_text(encoding="utf-8")
+    assert "WINDOWS_$($scope.ToUpperInvariant())_ENV" in text
+    assert "Read-DotEnvValue" in text
+    assert "TELEGRAM_API_ID" in text
+    assert "TELEGRAM_API_HASH" in text
+    assert "[Environment]::SetEnvironmentVariable('TELEGRAM_API_ID'" in text
+    assert "[Environment]::SetEnvironmentVariable('TELEGRAM_API_HASH'" in text
+    assert "Secret values are not printed or persisted by this bootstrap." in text
+    assert "do not paste them into chat" in text
+    assert "Write-Host $apiId.Value" not in text
+    assert "Write-Host $apiHash.Value" not in text

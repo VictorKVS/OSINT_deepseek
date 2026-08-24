@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title desc">
+  <title id="title">FATHER</title>
+  <desc id="desc">FATHER product family mark</desc>
+  <defs>
+    <linearGradient id="g" x1="8" y1="8" x2="56" y2="56" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#49d8ff"/>
+      <stop offset="1" stop-color="#6d7cff"/>
+    </linearGradient>
+  </defs>
+  <path d="M32 3 54 15v34L32 61 10 49V15L32 3Z" fill="#0b1924" stroke="url(#g)" stroke-width="3"/>
+  <path d="M21 18h24v7H29v8h13v7H29v16h-8V18Z" fill="url(#g)"/>
+  <circle cx="49" cy="15" r="4" fill="#65e6a6"/>
+</svg>

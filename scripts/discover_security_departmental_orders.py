@@ -27,10 +27,38 @@ def norm(value: str) -> str:
     return value.casefold().replace("ё", "е")
 
 
+def _seed_candidates(watch: dict[str, object]) -> list[dict[str, object]]:
+    rows: list[dict[str, object]] = []
+    for raw in watch.get("verified_seed_items", []):
+        if not isinstance(raw, dict):
+            continue
+        publication_number = str(raw.get("publication_number") or "").strip() or None
+        title = str(raw.get("title") or "").strip()
+        if not title:
+            continue
+        rows.append(
+            {
+                "document_id": str(raw.get("document_id") or "").strip() or None,
+                "publication_number": publication_number,
+                "title": title,
+                "authority": str(raw.get("authority") or "").strip() or None,
+                "domain": str(raw.get("domain") or "").strip() or None,
+                "priority": str(raw.get("priority") or "").strip() or None,
+                "source": str(raw.get("source") or "publication.pravo.gov.ru").strip(),
+                "seed_state": str(raw.get("state") or "VERIFY_CURRENTNESS").strip(),
+                "candidate_origin": "VERIFIED_SEED",
+                "candidate_only": True,
+                "verification": "VERIFY_CURRENTNESS_AND_EXACT_SOURCE",
+            }
+        )
+    return rows
+
+
 def main() -> int:
     watch = json.loads(WATCHLIST.read_text(encoding="utf-8"))
     queries = [str(v).strip() for v in watch.get("discovery_queries", []) if str(v).strip()]
     authorities = [str(v).strip() for v in watch.get("coverage", {}).get("sectoral_foiv", []) if str(v).strip()]
+    seed_rows = _seed_candidates(watch)
     known = {
         str(row.get("publication_number") or "").strip()
         for row in watch.get("verified_seed_items", [])
@@ -71,10 +99,17 @@ def main() -> int:
                     title_n = norm(hit.title)
                     authority_match = next((a for a in authorities if norm(a.replace(" России", "")) in title_n), None)
                     if not authority_match:
-                        # Keep strong scope matches even if the authority wording differs from the watchlist name.
-                        if not any(token in title_n for token in (
-                            "министерств", "федеральн", "служб", "агентств", "фонд пенсионного", "социального страхования"
-                        )):
+                        if not any(
+                            token in title_n
+                            for token in (
+                                "министерств",
+                                "федеральн",
+                                "служб",
+                                "агентств",
+                                "фонд пенсионного",
+                                "социального страхования",
+                            )
+                        ):
                             continue
                     key = hit.eo_number or f"{hit.number}|{hit.document_date}|{hit.title}"
                     if not key:
@@ -88,46 +123,70 @@ def main() -> int:
                         "matched_query": query,
                         "matched_authority": authority_match,
                         "known_seed": bool(hit.eo_number and hit.eo_number in known),
+                        "candidate_origin": "LIVE_API",
                         "candidate_only": True,
                         "verification": "VERIFY_CURRENTNESS_AND_EXACT_SOURCE",
                     }
                     query_hits += 1
                 if len(items) < PAGE_SIZE:
                     break
-            query_results.append({
-                "query": query,
-                "status": "COMPLETE",
-                "items_scanned": scanned,
-                "hits": query_hits,
-                "transport": getattr(client.transport, "last_transport", None),
-            })
+            query_results.append(
+                {
+                    "query": query,
+                    "status": "COMPLETE",
+                    "items_scanned": scanned,
+                    "hits": query_hits,
+                    "transport": getattr(client.transport, "last_transport", None),
+                }
+            )
         except Exception as exc:
             source_failed = True
-            query_results.append({
-                "query": query,
-                "status": "DEGRADED_SOURCE_UNAVAILABLE",
-                "items_scanned": scanned,
-                "hits": query_hits,
-                "error": f"{type(exc).__name__}: {exc}",
-                "transport_failures": list(getattr(client.transport, "last_failures", []) or []),
-            })
+            query_results.append(
+                {
+                    "query": query,
+                    "status": "DEGRADED_SOURCE_UNAVAILABLE",
+                    "items_scanned": scanned,
+                    "hits": query_hits,
+                    "error": f"{type(exc).__name__}: {exc}",
+                    "transport_failures": list(getattr(client.transport, "last_failures", []) or []),
+                }
+            )
 
-    rows = sorted(candidates.values(), key=lambda r: (str(r.get("document_date") or ""), str(r.get("title") or "")), reverse=True)
+    live_rows = sorted(
+        candidates.values(),
+        key=lambda r: (str(r.get("document_date") or ""), str(r.get("title") or "")),
+        reverse=True,
+    )
+    live_known_publications = {
+        str(row.get("eo_number") or "").strip()
+        for row in live_rows
+        if bool(row.get("known_seed")) and str(row.get("eo_number") or "").strip()
+    }
+    fallback_seeds = [
+        row
+        for row in seed_rows
+        if not row.get("publication_number") or str(row.get("publication_number")) not in live_known_publications
+    ]
+    operational_rows = live_rows + fallback_seeds
+
     summary = {
         "record_type": "SECURITY_DEPARTMENTAL_DISCOVERY",
-        "schema_version": "1.0",
+        "schema_version": "1.1",
         "observed_at": utc_now(),
         "watchlist": WATCHLIST.relative_to(REPO_ROOT).as_posix(),
         "queries_total": len(queries),
         "queries_complete": sum(r.get("status") == "COMPLETE" for r in query_results),
         "source_degraded": source_failed,
-        "candidate_total": len(rows),
-        "new_candidate_total": sum(not bool(r.get("known_seed")) for r in rows),
-        "known_seed_matches": sum(bool(r.get("known_seed")) for r in rows),
+        "discovery_mode": "DEGRADED_WITH_VERIFIED_SEED_FALLBACK" if source_failed else "LIVE_API_PLUS_VERIFIED_SEEDS",
+        "live_api_candidate_total": len(live_rows),
+        "seed_candidate_total": len(seed_rows),
+        "candidate_total": len(operational_rows),
+        "new_candidate_total": sum(not bool(r.get("known_seed")) for r in live_rows),
+        "known_seed_matches": sum(bool(r.get("known_seed")) for r in live_rows),
         "legal_truth_promoted": False,
-        "promotion_policy": "Discovery metadata never promotes CURRENT. Exact source, identity and currentness/replacement chain verification are required.",
+        "promotion_policy": "Discovery metadata and verified seed identity never promote CURRENT. Exact bytes, SHA-256, legal status and replacement/amendment chain verification are required.",
         "query_results": query_results,
-        "candidates": rows,
+        "candidates": operational_rows,
     }
     REPORT_DIR.mkdir(parents=True, exist_ok=True)
     REPORT.write_text(json.dumps(summary, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")

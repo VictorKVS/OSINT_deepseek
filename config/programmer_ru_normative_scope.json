@@ -1,0 +1,117 @@
+{
+  "schema_version": "1.0",
+  "scope_id": "FATHER-RU-PROGRAMMER-NORMATIVE-SCOPE-001",
+  "role_id": "PROGRAMMER",
+  "knowledge_base_id": "PROGRAMMING_KB",
+  "snapshot_date": "2026-08-24",
+  "completion_rule": "Every applicable sector must be COMPLETE or have an explicit bounded GAP/NOT_APPLICABLE decision before RU normative coverage can be claimed complete.",
+  "sectors": [
+    {
+      "sector_id": "LEGAL_FORCE_OF_STANDARDIZATION",
+      "state": "SEEDED_EXACT_TEXT_REVIEW_REQUIRED",
+      "primary_sources": [
+        {
+          "designation": "Федеральный закон от 29.06.2015 № 162-ФЗ",
+          "title": "О стандартизации в Российской Федерации",
+          "official_publication": "https://publication.pravo.gov.ru/document/0001201506300047",
+          "verification_state": "OFFICIAL_PUBLICATION_METADATA_VERIFIED",
+          "next": "acquire current exact text and model the rules that determine voluntary, referenced, contractual and otherwise binding application"
+        }
+      ],
+      "purpose": "Separate current status of a standard from its legal or contractual applicability."
+    },
+    {
+      "sector_id": "ESPD_GOST_19",
+      "state": "COMPLETE_CURRENT_CATALOG_STATUS",
+      "inventory_ref": "config/programmer_ru_espd_inventory.json",
+      "active_documents": 28,
+      "historical_superseded_records": 1,
+      "next": "exact-text acquisition, amendments/effective-date enrichment and applicability classification"
+    },
+    {
+      "sector_id": "SOFTWARE_LIFECYCLE_AND_ENGINEERING",
+      "state": "SEEDED",
+      "baseline_designations": [
+        "ГОСТ Р ИСО/МЭК 12207-2010",
+        "ГОСТ Р 56923-2016"
+      ],
+      "next": "enumerate current Russian-adopted ISO/IEC/IEEE software and systems engineering standards relevant to developer work products, quality and maintenance"
+    },
+    {
+      "sector_id": "SECURE_SOFTWARE_DEVELOPMENT",
+      "state": "SEEDED",
+      "baseline_designations": [
+        "ГОСТ Р 56939-2024",
+        "ГОСТ Р 58412-2019",
+        "ГОСТ Р 71207-2024"
+      ],
+      "next": "enumerate related secure-development, dynamic analysis, composition/SBOM, vulnerability and testing standards and current regulator references"
+    },
+    {
+      "sector_id": "AUTOMATED_SYSTEMS_GOST_34",
+      "state": "CONDITIONAL_CORE_VERIFIED",
+      "inventory_ref": "config/programmer_ru_automated_systems_conditional.json",
+      "activation": "software is part of an automated system or project/contract/regulation activates this layer",
+      "current_core_designations": [
+        "ГОСТ Р 59853-2021",
+        "ГОСТ 34.201-2020",
+        "ГОСТ Р 59793-2021",
+        "ГОСТ 34.602-2020",
+        "ГОСТ Р 59792-2021"
+      ],
+      "historical_replacements_tracked": true,
+      "next": "enumerate remaining current automated-system standards relevant to developer artifacts and acceptance"
+    },
+    {
+      "sector_id": "FSTEC_AND_REGULATED_INFORMATION_SYSTEMS",
+      "state": "RESEARCH_REQUIRED",
+      "activation": "GIS, protected information systems, security-certified software, or regulator-controlled development context",
+      "research_targets": [
+        "current FSTEC orders for state information systems",
+        "current FSTEC requirements for personal-data information systems",
+        "current FSTEC requirements for significant KII objects",
+        "current FSTEC secure-software-development methodologies and references to standards",
+        "certification and vulnerability-remediation requirements applicable to software developers"
+      ]
+    },
+    {
+      "sector_id": "KII_187_FZ",
+      "state": "CONDITIONAL_PRIMARY_LAW_SEEDED",
+      "activation": "software supports or is part of a KII object",
+      "primary_sources": [
+        {
+          "designation": "Федеральный закон от 26.07.2017 № 187-ФЗ",
+          "title": "О безопасности критической информационной инфраструктуры Российской Федерации",
+          "official_publication": "https://publication.pravo.gov.ru/Document/View/0001201707260023",
+          "verification_state": "OFFICIAL_PUBLICATION_METADATA_VERIFIED"
+        }
+      ],
+      "next": "map current subordinate acts and technical requirements to developer activities"
+    },
+    {
+      "sector_id": "PERSONAL_DATA_152_FZ",
+      "state": "CONDITIONAL_EXISTING_SECURITY_KB_REUSE_REQUIRED",
+      "activation": "software processes personal data",
+      "reuse": "Existing Security/PDN Knowledge Factory corpus; do not duplicate independent legal truth.",
+      "next": "link developer-specific controls, privacy-by-design requirements and secure coding implications to existing verified legal nodes"
+    },
+    {
+      "sector_id": "STATE_INFORMATION_SYSTEMS",
+      "state": "RESEARCH_REQUIRED",
+      "activation": "software is part of a state information system",
+      "next": "map current government/FSTEC requirements, documentation, testing and secure-development implications"
+    },
+    {
+      "sector_id": "SECTOR_SPECIFIC",
+      "state": "RESEARCH_REQUIRED",
+      "activation": "sector determines additional obligations",
+      "subsectors": ["healthcare", "finance", "telecom", "energy", "transport", "state services", "defence and state-secret contexts"],
+      "next": "build separate applicability overlays rather than mixing all sector obligations into the generic programmer baseline"
+    }
+  ],
+  "global_layer_gate": {
+    "allowed_to_collect_global_practice_in_parallel": true,
+    "allowed_to_claim_role_maturity_before_ru_applicability_review": false,
+    "principle": "Global practice may be collected in parallel for efficiency, but maturity and professional completeness in the Russian context are gated by the RU normative scope."
+  }
+}

@@ -4,6 +4,9 @@ Set-Location $RepoRoot
 $Store = Join-Path $RepoRoot '.runtime\telegram\credentials.dpapi.json'
 $Python = Join-Path $RepoRoot '.venv\Scripts\python.exe'
 if (-not (Test-Path $Python)) { $Python = (Get-Command python).Source }
+$App = Join-Path $RepoRoot 'osint_web\app.py'
+$Url = 'http://127.0.0.1:8765/'
+$HealthUrl = 'http://127.0.0.1:8765/api/overview'
 
 function Unprotect([string]$cipher) {
     $secure = ConvertTo-SecureString $cipher
@@ -34,6 +37,47 @@ $env:PYTHONPATH = "$RepoRoot;$($env:PYTHONPATH)"
 & $Python (Join-Path $RepoRoot 'scripts\authorize_telethon_session.py')
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
-Start-Process 'http://127.0.0.1:8765/'
-& $Python (Join-Path $RepoRoot 'osint_web\app.py')
-exit $LASTEXITCODE
+if (-not (Test-Path -LiteralPath $App -PathType Leaf)) {
+    throw "OSINT Control Center app is missing: $App"
+}
+
+Write-Host '[WEB] Starting local server...'
+$server = Start-Process -FilePath $Python -ArgumentList @($App) -WorkingDirectory $RepoRoot -PassThru -NoNewWindow
+
+$ready = $false
+for ($i = 0; $i -lt 40; $i++) {
+    if ($server.HasExited) { break }
+    try {
+        $response = Invoke-WebRequest -UseBasicParsing -Uri $HealthUrl -TimeoutSec 1
+        if ($response.StatusCode -eq 200) {
+            $ready = $true
+            break
+        }
+    } catch { }
+    Start-Sleep -Milliseconds 250
+}
+
+if (-not $ready) {
+    if (-not $server.HasExited) {
+        Stop-Process -Id $server.Id -Force -ErrorAction SilentlyContinue
+    }
+    Write-Host '[WEB] FAILED: local server did not become healthy on 127.0.0.1:8765.'
+    Write-Host 'Diagnostic commands:'
+    Write-Host '  Test-NetConnection 127.0.0.1 -Port 8765'
+    Write-Host '  .\.venv\Scripts\python.exe .\osint_web\app.py'
+    exit 7
+}
+
+Write-Host '[WEB] READY: http://127.0.0.1:8765/'
+Write-Host '[WEB] Opening browser...'
+Start-Process $Url
+Write-Host '[WEB] Server is running. Close this window or press Ctrl+C to stop it.'
+
+try {
+    Wait-Process -Id $server.Id
+} finally {
+    if (-not $server.HasExited) {
+        Stop-Process -Id $server.Id -Force -ErrorAction SilentlyContinue
+    }
+}
+exit $server.ExitCode

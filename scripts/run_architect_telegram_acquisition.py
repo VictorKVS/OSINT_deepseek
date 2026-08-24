@@ -8,7 +8,6 @@ import os
 import re
 import sys
 import time
-from collections import defaultdict
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -27,6 +26,16 @@ class SearchTarget:
     lesson_number: int | None = None
     lesson_title: str | None = None
     local_path: str | None = None
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "target_id": self.target_id,
+            "query": self.query,
+            "kind": self.kind,
+            "lesson_number": self.lesson_number,
+            "lesson_title": self.lesson_title,
+            "local_path": self.local_path,
+        }
 
 
 @dataclass(slots=True)
@@ -215,6 +224,13 @@ def _message_file_info(message: Any) -> tuple[str, str, str | None, int | None] 
     if name and not ext:
         ext = Path(name).suffix.casefold()
     mime = str(getattr(file_obj, "mime_type", None) or "").strip() or None
+    if not ext and mime:
+        ext = {
+            "application/pdf": ".pdf",
+            "application/vnd.openxmlformats-officedocument.presentationml.presentation": ".pptx",
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document": ".docx",
+            "application/epub+zip": ".epub",
+        }.get(mime.casefold(), "")
     size_raw = getattr(file_obj, "size", None)
     size = int(size_raw) if isinstance(size_raw, int) else None
     if not name:
@@ -291,6 +307,13 @@ def _target_dir_for_candidate(output_root: Path, candidate: Candidate, targets_b
     return output_root / "role_topics"
 
 
+def _local_display_path(path: Path) -> str:
+    try:
+        return path.resolve().relative_to(REPO_ROOT.resolve()).as_posix()
+    except ValueError:
+        return str(path.resolve())
+
+
 async def _run(args: argparse.Namespace) -> dict[str, Any]:
     started = time.perf_counter()
     profile = _load_profile()
@@ -304,7 +327,6 @@ async def _run(args: argparse.Namespace) -> dict[str, Any]:
         output_root = REPO_ROOT / output_root
     output_root.mkdir(parents=True, exist_ok=True)
 
-    # Include prior Telegram downloads in payload deduplication.
     for path in output_root.rglob("*"):
         if path.is_file() and path.name != "manifest.json" and not path.name.endswith(".json"):
             try:
@@ -398,7 +420,7 @@ async def _run(args: argparse.Namespace) -> dict[str, Any]:
                                 "chat_title": candidate.chat_title,
                                 "source_url": candidate.source_url,
                                 "file_name": candidate.file_name,
-                                "local_path": destination.relative_to(REPO_ROOT).as_posix(),
+                                "local_path": _local_display_path(destination),
                                 "sha256": digest,
                                 "matched_target_ids": candidate.matched_target_ids,
                                 "matched_queries": candidate.matched_queries,
@@ -437,7 +459,7 @@ async def _run(args: argparse.Namespace) -> dict[str, Any]:
                         return "REUSED", {**common, "local_path": None, "reason": "SHA-256 already exists in course/download corpus"}
                     existing_hashes.add(digest)
                     bytes_downloaded += size
-                    return "DOWNLOADED", {**common, "local_path": path.relative_to(REPO_ROOT).as_posix()}
+                    return "DOWNLOADED", {**common, "local_path": _local_display_path(path)}
                 except Exception as exc:
                     return "ERROR", {
                         "chat_id": candidate.chat_id,
@@ -489,7 +511,7 @@ async def _run(args: argparse.Namespace) -> dict[str, Any]:
         "speedup_note": "No 1-stream speedup is claimed until the same target/query set is measured on the same workstation.",
         "kb_auto_promotion": False,
         "lessons": lessons,
-        "targets": [target.__dict__ for target in targets],
+        "targets": [target.to_dict() for target in targets],
         "downloads": downloaded_rows,
         "reused": reused_rows,
         "errors": errors,

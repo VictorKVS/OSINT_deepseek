@@ -72,4 +72,6 @@ def test_control_center_suppresses_only_expected_client_disconnect_tracebacks():
     assert "ConnectionAbortedError" in text
     assert "10053" in text and "10054" in text
     assert "super().handle_error" in text
+    assert "except KeyboardInterrupt" in text
+    assert "Stop requested by operator" in text
     assert "osint_web\\server.py" in launcher

@@ -21,6 +21,15 @@ def test_departmental_shadow_runner_reuses_existing_algorithms():
     assert "WORKERS = 5" in text
 
 
+def test_departmental_shadow_rejects_access_gated_reference_shells():
+    text = Path("scripts/run_security_departmental_candidate_d4_d9.py").read_text(encoding="utf-8")
+    assert "CONTENT_BLOCK_MARKERS" in text
+    assert "REFERENCE_ACCESS_WINDOW_BLOCKED" in text
+    assert '"status": "CONTENT_INSUFFICIENT"' in text
+    assert '"reacquisition_required": True' in text
+    assert '"content_insufficient_total"' in text
+
+
 def test_departmental_shadow_cmd_bootstraps_repo_root():
     text = Path("RUN_SECURITY_DEPARTMENTAL_D4_D9_CANDIDATE.cmd").read_text(encoding="utf-8")
     assert 'set "PYTHONPATH=%CD%;%PYTHONPATH%"' in text

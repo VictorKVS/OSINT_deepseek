@@ -6,6 +6,12 @@ on:
       - agent/knowledge-factory-m1
     paths:
       - .github/workflows/departmental-evening-acquisition.yml
+  pull_request:
+    branches:
+      - main
+    paths:
+      - .github/workflows/departmental-evening-acquisition.yml
+      - scripts/run_security_departmental_evening_resume.py
   workflow_dispatch:
 
 permissions:

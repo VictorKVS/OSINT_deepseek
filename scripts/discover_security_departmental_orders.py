@@ -12,6 +12,7 @@ if str(REPO_ROOT) not in sys.path:
 from father_osint.pravo_publication import MAX_JSON_BYTES, PravoPublicationClient, PravoPublicationError, PravoPublicationHit
 
 WATCHLIST = REPO_ROOT / "config" / "security_departmental_orders_watchlist.json"
+SECTORAL_KII_QUEUE = REPO_ROOT / "config" / "security_sectoral_kii_current_only_queue.json"
 REPORT_DIR = REPO_ROOT / "reports" / "security_current_only"
 REPORT = REPORT_DIR / "LATEST_DEPARTMENTAL_DISCOVERY.json"
 PAGE_SIZE = 200
@@ -27,42 +28,57 @@ def norm(value: str) -> str:
     return value.casefold().replace("ё", "е")
 
 
-def _seed_candidates(watch: dict[str, object]) -> list[dict[str, object]]:
-    rows: list[dict[str, object]] = []
+def _seed_candidate(raw: dict[str, object], *, state_key: str, source_default: str) -> dict[str, object] | None:
+    publication_number = str(raw.get("publication_number") or "").strip() or None
+    title = str(raw.get("title") or "").strip()
+    if not title:
+        return None
+    return {
+        "document_id": str(raw.get("document_id") or "").strip() or None,
+        "publication_number": publication_number,
+        "title": title,
+        "authority": str(raw.get("authority") or "").strip() or None,
+        "domain": str(raw.get("domain") or "").strip() or None,
+        "priority": str(raw.get("priority") or "").strip() or None,
+        "source": str(raw.get("source") or raw.get("official_source_url") or source_default).strip(),
+        "seed_state": str(raw.get(state_key) or raw.get("state") or "VERIFY_CURRENTNESS").strip(),
+        "candidate_origin": "VERIFIED_SEED",
+        "candidate_only": True,
+        "verification": "VERIFY_CURRENTNESS_AND_EXACT_SOURCE",
+    }
+
+
+def _seed_candidates(watch: dict[str, object], sectoral: dict[str, object]) -> list[dict[str, object]]:
+    by_key: dict[str, dict[str, object]] = {}
     for raw in watch.get("verified_seed_items", []):
         if not isinstance(raw, dict):
             continue
-        publication_number = str(raw.get("publication_number") or "").strip() or None
-        title = str(raw.get("title") or "").strip()
-        if not title:
+        row = _seed_candidate(raw, state_key="state", source_default="publication.pravo.gov.ru")
+        if row is None:
             continue
-        rows.append(
-            {
-                "document_id": str(raw.get("document_id") or "").strip() or None,
-                "publication_number": publication_number,
-                "title": title,
-                "authority": str(raw.get("authority") or "").strip() or None,
-                "domain": str(raw.get("domain") or "").strip() or None,
-                "priority": str(raw.get("priority") or "").strip() or None,
-                "source": str(raw.get("source") or "publication.pravo.gov.ru").strip(),
-                "seed_state": str(raw.get("state") or "VERIFY_CURRENTNESS").strip(),
-                "candidate_origin": "VERIFIED_SEED",
-                "candidate_only": True,
-                "verification": "VERIFY_CURRENTNESS_AND_EXACT_SOURCE",
-            }
-        )
-    return rows
+        key = str(row.get("publication_number") or row.get("document_id") or row.get("title"))
+        by_key[key] = row
+    for raw in sectoral.get("items", []):
+        if not isinstance(raw, dict):
+            continue
+        row = _seed_candidate(raw, state_key="currentness_state", source_default="publication.pravo.gov.ru")
+        if row is None:
+            continue
+        key = str(row.get("publication_number") or row.get("document_id") or row.get("title"))
+        by_key[key] = row
+    return list(by_key.values())
 
 
 def main() -> int:
     watch = json.loads(WATCHLIST.read_text(encoding="utf-8"))
+    sectoral = json.loads(SECTORAL_KII_QUEUE.read_text(encoding="utf-8")) if SECTORAL_KII_QUEUE.exists() else {"items": []}
     queries = [str(v).strip() for v in watch.get("discovery_queries", []) if str(v).strip()]
     authorities = [str(v).strip() for v in watch.get("coverage", {}).get("sectoral_foiv", []) if str(v).strip()]
-    seed_rows = _seed_candidates(watch)
+    seed_rows = _seed_candidates(watch, sectoral)
     known = {
         str(row.get("publication_number") or "").strip()
-        for row in watch.get("verified_seed_items", [])
-        if isinstance(row, dict) and str(row.get("publication_number") or "").strip()
+        for row in seed_rows
+        if str(row.get("publication_number") or "").strip()
     }
 
     client = PravoPublicationClient()
@@ -171,9 +187,10 @@ def main() -> int:
 
     summary = {
         "record_type": "SECURITY_DEPARTMENTAL_DISCOVERY",
-        "schema_version": "1.1",
+        "schema_version": "1.2",
         "observed_at": utc_now(),
         "watchlist": WATCHLIST.relative_to(REPO_ROOT).as_posix(),
+        "sectoral_kii_queue": SECTORAL_KII_QUEUE.relative_to(REPO_ROOT).as_posix(),
         "queries_total": len(queries),
         "queries_complete": sum(r.get("status") == "COMPLETE" for r in query_results),
         "source_degraded": source_failed,

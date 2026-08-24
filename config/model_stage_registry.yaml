@@ -1,0 +1,195 @@
+schema_version: father-osint.model-stage-registry.v0.1
+mode: CALIBRATION
+
+principles:
+  semantic_tasks_use_models: true
+  evidence_identity_is_deterministic: true
+  model_output_never_replaces_source_evidence: true
+  champion_challenger_enabled: true
+  unsupported_claims_fail_closed: true
+
+stages:
+  M0_EVIDENCE_IDENTITY:
+    semantic: false
+    champion: DETERMINISTIC_ONLY
+    challengers: []
+    outputs:
+      - source_id
+      - sha256
+      - mime_type
+      - byte_length
+      - source_locator
+
+  M1_DOCUMENT_LAYOUT:
+    semantic: true
+    capability: DOCUMENT_LAYOUT_OCR
+    champion: AUTO_BENCHMARK
+    challengers:
+      - DOCLING_LAYOUT
+      - OCR_FALLBACK
+      - VISION_FALLBACK
+    promotion_gate:
+      required:
+        - page_provenance
+        - block_coordinates
+        - reading_order
+
+  M2_TABLE_FIGURE_FORMULA:
+    semantic: true
+    capability: STRUCTURED_DOCUMENT_ELEMENTS
+    champion: AUTO_BENCHMARK
+    challengers:
+      - TABLE_STRUCTURE_MODEL
+      - VISION_MODEL
+    promotion_gate:
+      required:
+        - page_locator
+        - structural_geometry
+
+  M3_TRANSLATION:
+    semantic: true
+    capability: EN_RU_TECHNICAL_TRANSLATION
+    champion: TOURNAMENT_SELECTED
+    challengers:
+      - SPECIALIZED_MT
+      - GENERAL_LLM
+    production_policy:
+      full_model_tournament_every_document: false
+      canary_fraction: 0.05
+    promotion_gate:
+      required:
+        - source_unit_id
+        - source_text_sha256
+        - translation_qc_pass
+
+  M4_SEMANTIC_STRUCTURE:
+    semantic: true
+    capability: DOCUMENT_SEMANTIC_STRUCTURE
+    champion: AUTO_BENCHMARK
+    challengers:
+      - RULE_BASED_BASELINE
+      - LLM_CLASSIFIER
+    promotion_gate:
+      required:
+        - semantic_id
+        - source_span_id
+        - parent_child_consistency
+
+  M5_TERMINOLOGY:
+    semantic: true
+    capability: TERMINOLOGY_EXTRACTION
+    champion: AUTO_BENCHMARK
+    challengers:
+      - EXTRACTION_LLM
+      - EMBEDDING_CLUSTERER
+    output_types:
+      - TERM_CANDIDATE
+      - ALIAS_CANDIDATE
+      - DEFINITION_CANDIDATE
+      - ABBREVIATION_CANDIDATE
+    promotion_gate:
+      required:
+        - exact_evidence_span
+
+  M6_KNOWLEDGE_EXTRACTION:
+    semantic: true
+    capability: KNOWLEDGE_EXTRACTION
+    champion: AUTO_BENCHMARK
+    challengers:
+      - GENERAL_LLM_EXTRACTOR
+      - DOMAIN_LLM_EXTRACTOR
+    output_types:
+      - CLAIM_CANDIDATE
+      - PRINCIPLE_CANDIDATE
+      - PATTERN_CANDIDATE
+      - TRADEOFF_CANDIDATE
+      - DECISION_CRITERION_CANDIDATE
+      - FAILURE_MODE_CANDIDATE
+      - EXAMPLE_CANDIDATE
+    default_review_status: NEEDS_REVIEW
+    promotion_gate:
+      required:
+        - exact_evidence_span
+        - source_object_id
+
+  M7_RELATION_DISCOVERY:
+    semantic: true
+    capability: RELATION_DISCOVERY
+    champion: HYBRID
+    challengers:
+      - EMBEDDING_RETRIEVER
+      - RERANKER
+      - RELATION_CLASSIFIER
+    allowed_relations:
+      - SUPPORTS
+      - CONTRADICTS
+      - REFINES
+      - SPECIALIZES
+      - GENERALIZES
+      - ALTERNATIVE_TO
+      - USES_DIFFERENT_DEFINITION
+      - APPLIES_WHEN
+      - FAILS_WHEN
+    promotion_gate:
+      required:
+        - source_endpoint
+        - target_endpoint
+        - evidence_for_relation
+
+  M8_CONTRADICTION_VERIFICATION:
+    semantic: true
+    capability: NLI_VERIFICATION
+    champion: AUTO_BENCHMARK
+    challengers:
+      - NLI_MODEL
+      - VERIFIER_LLM
+    promotion_gate:
+      required:
+        - evidence_side_a
+        - evidence_side_b
+
+  M9_PROFESSOR_SYNTHESIS:
+    semantic: true
+    capability: CROSS_SOURCE_REASONING
+    champion: STRONG_REASONING_MODEL
+    challengers:
+      - PROFESSOR_CHALLENGER
+    retrieval_required: true
+    default_review_status: NEEDS_REVIEW
+    promotion_gate:
+      required:
+        - supporting_evidence_ids
+        - explicit_uncertainty
+
+  M10_INDEPENDENT_JUDGE:
+    semantic: true
+    capability: VERIFICATION_JUDGE
+    champion: INDEPENDENT_MODEL
+    challengers:
+      - SECOND_JUDGE
+    human_review_on_close_margin: true
+
+  M11_KB_PROMOTION:
+    semantic: false
+    champion: DETERMINISTIC_ONLY
+    challengers: []
+    required_before_publish:
+      - schema_valid
+      - evidence_coverage_valid
+      - review_policy_satisfied
+      - no_fail_closed_flags
+
+telemetry:
+  collect:
+    - stage_id
+    - model_id
+    - model_role
+    - input_objects
+    - input_chars
+    - output_objects
+    - duration_seconds
+    - retry_count
+    - qc_pass_rate
+    - human_reject_rate
+    - judge_disagreement_rate
+    - rework_rate

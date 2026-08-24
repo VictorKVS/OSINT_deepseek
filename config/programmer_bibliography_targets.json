@@ -1,0 +1,202 @@
+{
+  "schema_version": "1.0",
+  "registry_id": "PROGRAMMER-BIBLIOGRAPHY-PROBE-001",
+  "role_id": "PROGRAMMER",
+  "purpose": "Probe Telegram availability for a bounded first-wave programmer bibliography before any targeted download.",
+  "policy": {
+    "probe_only": true,
+    "download": false,
+    "auto_join_channels": false,
+    "access_control_bypass": false,
+    "paywall_bypass": false,
+    "max_parallel_streams": 5,
+    "max_results_per_query": 20,
+    "max_candidates_per_target": 5,
+    "allowed_extensions": [".pdf", ".epub", ".djvu", ".mobi", ".doc", ".docx", ".txt", ".md", ".zip", ".7z", ".rar"]
+  },
+  "targets": [
+    {
+      "id": "BOOK-001",
+      "priority": "P0",
+      "kind": "BOOK",
+      "author": "Luciano Ramalho",
+      "title": "Fluent Python, 2nd Edition",
+      "year": 2022,
+      "topics": ["python data model", "typing", "async", "metaprogramming"],
+      "query_variants": ["Luciano Ramalho Fluent Python 2nd Edition", "Fluent Python Ramalho", "Fluent Python 2e"]
+    },
+    {
+      "id": "BOOK-002",
+      "priority": "P0",
+      "kind": "BOOK",
+      "author": "Brett Slatkin",
+      "title": "Effective Python, 3rd Edition",
+      "year": 2025,
+      "topics": ["python practices", "api design", "concurrency", "robustness"],
+      "query_variants": ["Brett Slatkin Effective Python 3rd Edition", "Effective Python Slatkin", "Effective Python 3e"]
+    },
+    {
+      "id": "BOOK-003",
+      "priority": "P0",
+      "kind": "BOOK",
+      "author": "David Beazley",
+      "title": "Python Distilled",
+      "topics": ["python runtime", "language semantics", "modules", "concurrency"],
+      "query_variants": ["David Beazley Python Distilled", "Python Distilled Beazley"]
+    },
+    {
+      "id": "BOOK-004",
+      "priority": "P0",
+      "kind": "BOOK",
+      "author": "Harry Percival; Bob Gregory",
+      "title": "Architecture Patterns with Python",
+      "topics": ["ddd", "repository", "unit of work", "cqrs", "event driven"],
+      "query_variants": ["Harry Percival Bob Gregory Architecture Patterns with Python", "Architecture Patterns with Python", "Cosmic Python"]
+    },
+    {
+      "id": "BOOK-005",
+      "priority": "P0",
+      "kind": "BOOK",
+      "author": "Martin Fowler",
+      "title": "Refactoring, 2nd Edition",
+      "year": 2018,
+      "topics": ["refactoring", "code smells", "safe change"],
+      "query_variants": ["Martin Fowler Refactoring 2nd Edition", "Refactoring Fowler 2e", "Refactoring Improving the Design of Existing Code Fowler"]
+    },
+    {
+      "id": "BOOK-006",
+      "priority": "P0",
+      "kind": "BOOK",
+      "author": "Michael Feathers",
+      "title": "Working Effectively with Legacy Code",
+      "topics": ["legacy code", "characterization tests", "seams"],
+      "query_variants": ["Michael Feathers Working Effectively with Legacy Code", "Working Effectively with Legacy Code"]
+    },
+    {
+      "id": "BOOK-007",
+      "priority": "P0",
+      "kind": "BOOK",
+      "author": "Kent Beck",
+      "title": "Test-Driven Development: By Example",
+      "topics": ["tdd", "testing", "red green refactor"],
+      "query_variants": ["Kent Beck Test Driven Development By Example", "TDD By Example Kent Beck"]
+    },
+    {
+      "id": "BOOK-008",
+      "priority": "P0",
+      "kind": "BOOK",
+      "author": "Harry Percival",
+      "title": "Test-Driven Development with Python",
+      "topics": ["python tdd", "web testing", "integration testing"],
+      "query_variants": ["Harry Percival Test Driven Development with Python", "TDD with Python Percival", "Obey the Testing Goat"]
+    },
+    {
+      "id": "BOOK-009",
+      "priority": "P0",
+      "kind": "BOOK",
+      "author": "Steve Freeman; Nat Pryce",
+      "title": "Growing Object-Oriented Software, Guided by Tests",
+      "topics": ["outside in testing", "mocks", "object design"],
+      "query_variants": ["Steve Freeman Nat Pryce Growing Object Oriented Software Guided by Tests", "Growing Object-Oriented Software Guided by Tests", "GOOS Freeman Pryce"]
+    },
+    {
+      "id": "BOOK-010",
+      "priority": "P0",
+      "kind": "BOOK",
+      "author": "Eric Evans",
+      "title": "Domain-Driven Design",
+      "topics": ["ddd", "bounded context", "aggregates", "ubiquitous language"],
+      "query_variants": ["Eric Evans Domain Driven Design", "Domain-Driven Design Evans", "DDD Evans"]
+    },
+    {
+      "id": "BOOK-011",
+      "priority": "P0",
+      "kind": "BOOK",
+      "author": "Martin Kleppmann",
+      "title": "Designing Data-Intensive Applications",
+      "topics": ["distributed systems", "transactions", "replication", "streaming"],
+      "query_variants": ["Martin Kleppmann Designing Data Intensive Applications", "Designing Data-Intensive Applications", "DDIA Kleppmann"]
+    },
+    {
+      "id": "BOOK-012",
+      "priority": "P0",
+      "kind": "BOOK",
+      "author": "Michael T. Nygard",
+      "title": "Release It!, 2nd Edition",
+      "topics": ["production stability", "circuit breaker", "bulkhead", "failure modes"],
+      "query_variants": ["Michael Nygard Release It 2nd Edition", "Release It Nygard", "Release It 2e"]
+    },
+    {
+      "id": "BOOK-013",
+      "priority": "P0",
+      "kind": "BOOK",
+      "author": "Patrick Viafore",
+      "title": "Robust Python",
+      "topics": ["typing", "maintainability", "defensive programming"],
+      "query_variants": ["Patrick Viafore Robust Python", "Robust Python Viafore"]
+    },
+    {
+      "id": "BOOK-014",
+      "priority": "P0",
+      "kind": "BOOK",
+      "author": "Matthew Fowler",
+      "title": "Python Concurrency with asyncio",
+      "topics": ["asyncio", "concurrency", "networking", "task management"],
+      "query_variants": ["Matthew Fowler Python Concurrency with asyncio", "Python Concurrency with asyncio"]
+    },
+    {
+      "id": "BOOK-015",
+      "priority": "P1",
+      "kind": "BOOK",
+      "author": "Micha Gorelick; Ian Ozsvald",
+      "title": "High Performance Python, 2nd Edition",
+      "topics": ["profiling", "performance", "memory", "concurrency"],
+      "query_variants": ["Micha Gorelick Ian Ozsvald High Performance Python 2nd Edition", "High Performance Python 2e", "High Performance Python Gorelick Ozsvald"]
+    },
+    {
+      "id": "BOOK-016",
+      "priority": "P0",
+      "kind": "BOOK",
+      "author": "Alex Petrov",
+      "title": "Database Internals",
+      "topics": ["storage engines", "indexes", "distributed databases"],
+      "query_variants": ["Alex Petrov Database Internals", "Database Internals Petrov"]
+    },
+    {
+      "id": "WORK-001",
+      "priority": "P0",
+      "kind": "PAPER_OR_ESSAY",
+      "author": "Roy T. Fielding",
+      "title": "Architectural Styles and the Design of Network-based Software Architectures",
+      "topics": ["rest", "http architecture"],
+      "query_variants": ["Roy Fielding Architectural Styles Design Network-based Software Architectures", "Fielding REST dissertation"]
+    },
+    {
+      "id": "WORK-002",
+      "priority": "P0",
+      "kind": "PAPER_OR_ESSAY",
+      "author": "Leslie Lamport",
+      "title": "Time, Clocks, and the Ordering of Events in a Distributed System",
+      "topics": ["distributed systems", "logical clocks", "ordering"],
+      "query_variants": ["Leslie Lamport Time Clocks Ordering Events Distributed System", "Lamport Time Clocks Ordering Events"]
+    },
+    {
+      "id": "WORK-003",
+      "priority": "P0",
+      "kind": "PAPER_OR_ESSAY",
+      "author": "David L. Parnas",
+      "title": "On the Criteria To Be Used in Decomposing Systems into Modules",
+      "topics": ["modularity", "information hiding"],
+      "query_variants": ["David Parnas Criteria Decomposing Systems into Modules", "Parnas Decomposing Systems Modules"]
+    },
+    {
+      "id": "WORK-004",
+      "priority": "P0",
+      "kind": "PAPER_OR_ESSAY",
+      "author": "Frederick P. Brooks Jr.",
+      "title": "No Silver Bullet: Essence and Accidents of Software Engineering",
+      "topics": ["software engineering", "complexity"],
+      "query_variants": ["Fred Brooks No Silver Bullet", "No Silver Bullet Essence Accidents Software Engineering"]
+    }
+  ]
+}

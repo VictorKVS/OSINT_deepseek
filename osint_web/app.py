@@ -22,7 +22,9 @@ JOBS_PATH = REPORTS / "osint_control_center" / "jobs.json"
 TRACE_PATH = REPORTS / "osint_control_center" / "trace_events.jsonl"
 DOWNLOAD_PROGRESS_ROOT = REPORTS / "osint_control_center" / "downloads"
 DOWNLOAD_RECEIPT_ROOT = REPORTS / "osint_control_center" / "download_receipts"
+LIBRARY_ORDER_ROOT = REPORTS / "library_orders"
 ROLE_REGISTRY = ROOT / "config" / "team_role_material_registry.json"
+RU_BASELINE = ROOT / "config" / "role_ru_regulatory_baseline.json"
 SAFE_ROLE = re.compile(r"^[A-Z0-9_]{2,64}$")
 SAFE_TARGET = re.compile(r"^[A-Z0-9_]+-TOPIC-\d{2}$")
 SAFE_CHAT = re.compile(r"^-?\d{1,24}$")
@@ -39,6 +41,7 @@ TELEGRAM_JOB_KINDS = {
     "TELEGRAM_DOWNLOAD",
     "ROLE_ACQUISITION",
     "PROGRAMMER_BIBLIOGRAPHY_PROBE",
+    "LIBRARY_ORDER_START",
 }
 
 
@@ -135,11 +138,16 @@ def registry_payload() -> dict:
     return read_json(ROLE_REGISTRY, {}) or {}
 
 
+def ru_baseline_payload() -> dict:
+    return read_json(RU_BASELINE, {}) or {}
+
+
 def role_ids() -> set[str]:
     return {str(row.get("role_id", "")).upper() for row in registry_payload().get("roles", [])}
 
 
 def role_catalog() -> list[dict]:
+    baseline_roles = ru_baseline_payload().get("roles") or {}
     rows: list[dict] = []
     for role in registry_payload().get("roles", []):
         role_id = str(role.get("role_id", "")).upper()
@@ -153,12 +161,15 @@ def role_catalog() -> list[dict]:
                 "label": str(topic),
                 "destination": f"data/team_role_telegram/{role_id.casefold()}/{target_id.casefold()}",
             })
+        ru_role = baseline_roles.get(role_id) or {}
         rows.append({
             "role_id": role_id,
             "knowledge_base_id": role.get("knowledge_base_id"),
             "priority": role.get("priority"),
             "stream_id": role.get("stream_id"),
             "topics": topics,
+            "ru_regulatory_state": ru_role.get("baseline_state") or "RESEARCH_REQUIRED",
+            "ru_regulatory_documents_total": len(ru_role.get("documents") or []),
         })
     return rows
 
@@ -188,6 +199,33 @@ def latest_role_reports() -> list[dict]:
         if isinstance(payload, dict):
             out.append({"path": str(path.relative_to(ROOT)).replace("\\", "/"), **payload})
     return out
+
+
+def load_library_orders(limit: int = 50) -> list[dict]:
+    if not LIBRARY_ORDER_ROOT.exists():
+        return []
+    rows: list[dict] = []
+    paths = [p for p in LIBRARY_ORDER_ROOT.glob("LIB-*.json") if "_STAGE2_HANDOFF" not in p.name]
+    for path in sorted(paths, key=lambda p: p.stat().st_mtime, reverse=True)[:limit]:
+        payload = read_json(path)
+        if not isinstance(payload, dict) or payload.get("record_type") != "FATHER_LIBRARY_ORDER":
+            continue
+        rows.append({
+            "order_id": payload.get("order_id"),
+            "role_id": payload.get("role_id"),
+            "knowledge_base_id": payload.get("knowledge_base_id"),
+            "maturity_target": payload.get("maturity_target"),
+            "execution_mode": payload.get("execution_mode"),
+            "state": payload.get("state"),
+            "current_stage": payload.get("current_stage"),
+            "stages": payload.get("stages") or {},
+            "metrics": payload.get("metrics") or {},
+            "gaps": payload.get("gaps") or [],
+            "ru_regulatory_baseline": payload.get("ru_regulatory_baseline") or {},
+            "requested_sources": payload.get("requested_sources") or [],
+            "updated_at_epoch": payload.get("updated_at_epoch"),
+        })
+    return rows
 
 
 def download_overview() -> dict:
@@ -297,6 +335,7 @@ def overview() -> dict:
         "role_catalog": role_catalog(),
         "streams": registry.get("streams", []),
         "role_reports": roles,
+        "library_orders": load_library_orders(30),
         "jobs": load_jobs(),
         "trace_events": load_traces(50),
         "downloads": download_overview(),
@@ -407,6 +446,32 @@ def action_command(payload: dict) -> tuple[str, list[str], dict]:
     }
     common = {k: v for k, v in common.items() if v is not None}
 
+    if action == "LIBRARY_ORDER_START":
+        role = str(payload.get("role", "")).upper().strip().replace("-", "_")
+        maturity = str(payload.get("maturity", "MIN")).upper().strip()
+        mode = str(payload.get("mode", "AUTO_BOUNDED")).upper().strip()
+        if not SAFE_ROLE.fullmatch(role) or role not in role_ids() or role == "ARCHITECT":
+            raise ValueError("unknown or unsupported role")
+        if maturity not in {"MIN", "MEDIUM", "MAX"}:
+            raise ValueError("unsupported maturity")
+        if mode not in {"AUTO_BOUNDED", "REVIEW_EACH_STAGE"}:
+            raise ValueError("unsupported library order mode")
+        command = [
+            _python(),
+            str(ROOT / "scripts" / "start_library_order.py"),
+            "--role", role,
+            "--maturity", maturity,
+            "--mode", mode,
+        ]
+        return action, command, {
+            **common,
+            "role": role,
+            "maturity": maturity,
+            "mode": mode,
+            "executor": "LIBRARY_ORDER_ORCHESTRATOR",
+            "input_refs": [f"role:{role}", f"maturity:{maturity}", "policy:RU_REGULATORY_FIRST"],
+        }
+
     if action == "ROLE_ACQUISITION":
         role = str(payload.get("role", "")).upper().strip().replace("-", "_")
         if not SAFE_ROLE.fullmatch(role) or role not in role_ids() or role == "ARCHITECT":
@@ -489,7 +554,7 @@ def action_command(payload: dict) -> tuple[str, list[str], dict]:
 
 
 class Handler(BaseHTTPRequestHandler):
-    server_version = "FATHER-OSINT-ControlCenter/0.2"
+    server_version = "FATHER-OSINT-ControlCenter/0.3"
 
     def log_message(self, fmt, *args):
         return
@@ -515,6 +580,8 @@ class Handler(BaseHTTPRequestHandler):
             return self.send_json(download_overview())
         if parsed.path == "/api/catalog":
             return self.send_json({"roles": role_catalog()})
+        if parsed.path == "/api/library-orders":
+            return self.send_json({"orders": load_library_orders(100)})
         if parsed.path == "/api/search-results":
             root = REPORTS / "osint_control_center" / "searches"
             rows = []

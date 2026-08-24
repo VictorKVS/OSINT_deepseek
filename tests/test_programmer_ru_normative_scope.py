@@ -35,7 +35,7 @@ def test_programmer_automated_systems_layer_tracks_current_replacements():
     assert historical["ГОСТ 34.602-89"]["superseded_by"] == "ГОСТ 34.602-2020"
 
 
-def test_programmer_normative_scope_is_measurable_not_all-or-nothing_claim():
+def test_programmer_normative_scope_is_measurable_not_all_or_nothing_claim():
     scope = json.loads(Path("config/programmer_ru_normative_scope.json").read_text(encoding="utf-8"))
     sectors = {row["sector_id"]: row for row in scope["sectors"]}
     assert sectors["ESPD_GOST_19"]["state"] == "COMPLETE_CURRENT_CATALOG_STATUS"

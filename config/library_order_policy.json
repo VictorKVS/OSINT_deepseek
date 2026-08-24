@@ -1,16 +1,27 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "policy_id": "FATHER-LIBRARY-ORDER-001",
   "status": "ACTIVE",
   "scope": "ALL_ROLE_KNOWLEDGE_BASE_LIBRARY_ORDERS",
   "max_parallel_streams": 5,
+  "regulatory_first_policy": {
+    "mode": "RU_REGULATORY_AND_NATIONAL_STANDARDS_FIRST",
+    "baseline_registry": "config/role_ru_regulatory_baseline.json",
+    "required_before_global_maturity_claim": true,
+    "official_status_verification_required": true,
+    "superseded_documents_do_not_close_current_gate": true,
+    "applicability_and_legal_force_are_separate_fields": true,
+    "world_practices_start_after_ru_baseline": true
+  },
   "default_sources": [
+    "RU_OFFICIAL_REGULATORY",
     "OFFICIAL_WEB",
     "GITHUB",
     "TELEGRAM",
     "LOCAL_LIBRARY"
   ],
   "source_semantics": {
+    "RU_OFFICIAL_REGULATORY": "Russian laws, regulator acts, Rosstandart national standards and official methodologies; first knowledge layer",
     "OFFICIAL_WEB": "authoritative or primary acquisition where available",
     "GITHUB": "primary project documentation, reference implementations and open technical material",
     "TELEGRAM": "discovery and accessible candidate acquisition only",
@@ -23,20 +34,21 @@
   },
   "maturity_levels": {
     "MIN": {
-      "required_dimensions": ["AUTHORITATIVE_BASIS", "PRACTICE", "VALIDATION_OR_FAILURE"],
+      "required_dimensions": ["RU_REGULATORY_BASELINE", "AUTHORITATIVE_BASIS", "PRACTICE", "VALIDATION_OR_FAILURE"],
       "gap_is_allowed_if_explicit": true
     },
     "MEDIUM": {
-      "required_dimensions": ["AUTHORITATIVE_BASIS", "PRACTICE", "VALIDATION", "COUNTER_EVIDENCE", "TEMPLATES_OR_EXAMPLES"],
+      "required_dimensions": ["RU_REGULATORY_BASELINE", "AUTHORITATIVE_BASIS", "PRACTICE", "VALIDATION", "COUNTER_EVIDENCE", "TEMPLATES_OR_EXAMPLES"],
       "independent_source_classes_required": true
     },
     "MAX": {
-      "required_dimensions": ["AUTHORITATIVE_BASIS", "PRACTICE", "VALIDATION", "COUNTER_EVIDENCE", "BENCHMARK_OR_EVAL", "CHANGE_MONITORING", "GOLDEN_DECISIONS"],
+      "required_dimensions": ["RU_REGULATORY_BASELINE", "AUTHORITATIVE_BASIS", "PRACTICE", "VALIDATION", "COUNTER_EVIDENCE", "BENCHMARK_OR_EVAL", "CHANGE_MONITORING", "GOLDEN_DECISIONS"],
       "human_review_required_before_kb_promotion": true
     }
   },
   "pipeline": [
     "ORDER_CREATED",
+    "STAGE_0_RU_REGULATORY_BASELINE",
     "STAGE_1_ACQUISITION",
     "STAGE_1_COVERAGE",
     "STAGE_2_DOCUMENT_COMPILER",

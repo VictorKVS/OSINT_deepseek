@@ -11,6 +11,9 @@ def test_departmental_acquisition_runner_reuses_v2_contract():
     assert 'result["currentness_verified"] = False' in text
     assert 'result["legal_truth_eligible"] = False' in text
     assert "CURRENTNESS_AND_AMENDMENT_CHAIN_NOT_VERIFIED" in text
+    assert "WORKING_COPY_CONTENT_BLOCKED" in text
+    assert "A2_CONTENT_NOT_FULL_LEGAL_TEXT" in text
+    assert '"working_copy_content_blocked_total"' in text
     assert "Exact official bytes prove provenance/identity only" in text
 
 

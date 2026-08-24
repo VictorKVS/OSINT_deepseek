@@ -1,12 +1,16 @@
 from __future__ import annotations
 
 import json
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
+REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
 from father_osint.pravo_publication import MAX_JSON_BYTES, PravoPublicationClient, PravoPublicationError, PravoPublicationHit
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
 WATCHLIST = REPO_ROOT / "config" / "security_departmental_orders_watchlist.json"
 REPORT_DIR = REPO_ROOT / "reports" / "security_current_only"
 REPORT = REPORT_DIR / "LATEST_DEPARTMENTAL_DISCOVERY.json"

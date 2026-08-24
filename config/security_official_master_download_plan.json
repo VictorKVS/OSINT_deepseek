@@ -1,0 +1,129 @@
+{
+  "schema_version": "1.0",
+  "plan_id": "FATHER-SECURITY-OFFICIAL-MASTER-001",
+  "status": "ACTIVE",
+  "workers": 5,
+  "mode": "REUSE_FIRST_OFFICIAL_ONLY",
+  "classification_standard": "config/father_scope_priority_standard.json",
+  "source_registries": [
+    {
+      "source_id": "PDN_CURRENT",
+      "path": "config/pdn_current_only_registry.json",
+      "documents_field": "documents",
+      "classification_map": {
+        "P0": {"maturity_level": "MIN", "importance_class": "NECESSARY"},
+        "P1": {"maturity_level": "MEDIUM", "importance_class": "DESIRABLE"},
+        "P2": {"maturity_level": "MAX", "importance_class": "INTERESTING_LATER"}
+      }
+    },
+    {
+      "source_id": "SECURITY_DEPARTMENTAL",
+      "path": "config/security_departmental_acquisition_map.json",
+      "documents_field": "documents",
+      "classification_map": {
+        "P0": {"maturity_level": "MEDIUM", "importance_class": "DESIRABLE"},
+        "P1": {"maturity_level": "MEDIUM", "importance_class": "DESIRABLE"},
+        "P2": {"maturity_level": "MAX", "importance_class": "INTERESTING_LATER"}
+      }
+    }
+  ],
+  "official_route_overrides": {
+    "DOC-RU-PP-687-2008": "https://government.ru/docs/all/65436/",
+    "DOC-RU-RKN-178-2022": "https://publication.pravo.gov.ru/document/0001202211290004",
+    "DOC-RU-RKN-179-2022": "https://publication.pravo.gov.ru/document/0001202211290008",
+    "DOC-RU-RKN-180-2022": "https://publication.pravo.gov.ru/document/0001202212150022",
+    "DOC-RU-RKN-187-2022": "https://publication.pravo.gov.ru/document/0001202212280052",
+    "DOC-RU-FSTEC-137-2026": "https://publication.pravo.gov.ru/document/0001202608110006",
+    "DOC-RU-FZ-149-2006": "https://government.ru/docs/all/98199/",
+    "DOC-RU-FZ-323-2011": "https://government.ru/docs/all/100186/"
+  },
+  "extra_documents": [
+    {
+      "document_id": "DOC-RU-FZ-187-2017",
+      "title": "Федеральный закон от 26.07.2017 № 187-ФЗ «О безопасности критической информационной инфраструктуры Российской Федерации»",
+      "domain": "KII,SECURITY_CORE",
+      "legal_status": "CURRENT",
+      "official_source_url": "https://publication.pravo.gov.ru/Document/View/0001201707260023",
+      "maturity_level": "MIN",
+      "importance_class": "NECESSARY"
+    },
+    {
+      "document_id": "DOC-RU-FSTEC-235-2017",
+      "title": "Приказ ФСТЭК России от 21.12.2017 № 235",
+      "domain": "KII,SECURITY_CORE",
+      "legal_status": "VERIFY_CURRENTNESS",
+      "official_source_url": null,
+      "maturity_level": "MIN",
+      "importance_class": "NECESSARY"
+    },
+    {
+      "document_id": "DOC-RU-FSTEC-239-2017",
+      "title": "Приказ ФСТЭК России от 25.12.2017 № 239",
+      "domain": "KII,SECURITY_CORE",
+      "legal_status": "VERIFY_CURRENTNESS",
+      "official_source_url": "https://fstec.ru/normotvorcheskaya/akty/53-prikazy/1592-prikaz-fstek-rossii-ot-25-dekabrya-2017-g-n-239",
+      "maturity_level": "MIN",
+      "importance_class": "NECESSARY"
+    },
+    {
+      "document_id": "DOC-RU-FSTEC-240-2023",
+      "title": "Приказ ФСТЭК России от 28.11.2023 № 240 о требованиях к безопасной разработке программного обеспечения средств защиты информации",
+      "domain": "SECURE_SOFTWARE_DEVELOPMENT",
+      "legal_status": "VERIFY_CURRENTNESS",
+      "official_source_url": "https://rg.ru/documents/2024/04/18/fstek-prikaz240-site-dok.html",
+      "maturity_level": "MEDIUM",
+      "importance_class": "NECESSARY"
+    },
+    {
+      "document_id": "DOC-RU-FSTEC-230-2025",
+      "title": "Приказ ФСТЭК России № 230 от 2025 года об изменении требований безопасной разработки",
+      "domain": "SECURE_SOFTWARE_DEVELOPMENT",
+      "legal_status": "VERIFY_CURRENTNESS",
+      "official_source_url": "https://publication.pravo.gov.ru/document/0001202509190005",
+      "maturity_level": "MEDIUM",
+      "importance_class": "NECESSARY"
+    },
+    {
+      "document_id": "DOC-RU-GOST-R-56939-2024",
+      "title": "ГОСТ Р 56939-2024. Защита информации. Разработка безопасного программного обеспечения. Общие требования",
+      "domain": "SECURE_SOFTWARE_DEVELOPMENT",
+      "legal_status": "CURRENT",
+      "official_source_url": "https://protect.gost.ru/gost/details/f3818925-a96f-4f55-96e9-46b44720ee64",
+      "maturity_level": "MIN",
+      "importance_class": "NECESSARY"
+    },
+    {
+      "document_id": "DOC-RU-GOST-R-58412-2019",
+      "title": "ГОСТ Р 58412-2019. Угрозы безопасности информации при разработке программного обеспечения",
+      "domain": "SECURE_SOFTWARE_DEVELOPMENT,THREAT_MODEL",
+      "legal_status": "CURRENT",
+      "official_source_url": "https://protect.gost.ru/gost/details/07745487-3b1c-4efd-aafb-a038b50037a0",
+      "maturity_level": "MIN",
+      "importance_class": "NECESSARY"
+    },
+    {
+      "document_id": "DOC-RU-GOST-R-71207-2024",
+      "title": "ГОСТ Р 71207-2024. Статический анализ программного обеспечения. Общие требования",
+      "domain": "SECURE_SOFTWARE_DEVELOPMENT,STATIC_ANALYSIS",
+      "legal_status": "CURRENT",
+      "official_source_url": "https://protect.gost.ru/gost/details/9dd6f064-6014-4416-a3ca-ef72ce0a6c3a",
+      "maturity_level": "MEDIUM",
+      "importance_class": "DESIRABLE"
+    }
+  ],
+  "output": {
+    "report": "reports/security_current_only/LATEST_MASTER_OFFICIAL_DOWNLOAD_RUN.json",
+    "raw_root": "data/security_current_only/raw",
+    "normalized_root": "data/security_current_only/normalized",
+    "metadata_root": "data/security_current_only/metadata"
+  },
+  "rules": {
+    "default_execute_all_unique_documents": true,
+    "reuse_exact_before_network": true,
+    "declared_local_a0_is_reused_without_redownload": true,
+    "a2_working_copy_never_satisfies_official_exact": true,
+    "reference_hosts_are_never_used_as_official_fallback": true,
+    "missing_official_route_is_gap_not_substitution": true,
+    "kb_auto_promotion": false
+  }
+}

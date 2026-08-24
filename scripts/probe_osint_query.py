@@ -12,6 +12,7 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[1]
 REPORT_ROOT = ROOT / "reports" / "osint_control_center" / "searches"
 PROFILE = ROOT / "config" / "architect_telegram_acquisition_profile.json"
+ROLE_REGISTRY = ROOT / "config" / "team_role_material_registry.json"
 
 
 def load_json(path: Path) -> dict[str, Any]:
@@ -20,7 +21,7 @@ def load_json(path: Path) -> dict[str, Any]:
 
 def slug(text: str) -> str:
     value = re.sub(r"[^0-9A-Za-zА-Яа-яЁё]+", "-", text.strip().casefold()).strip("-")
-    return (value[:80] or "query")
+    return value[:80] or "query"
 
 
 def credentials() -> tuple[int, str, Path]:
@@ -36,7 +37,25 @@ def credentials() -> tuple[int, str, Path]:
     return int(api_id), api_hash, session
 
 
-async def run(query: str, limit: int) -> dict[str, Any]:
+def resolve_context(role_id: str | None, target_id: str | None) -> tuple[str | None, str | None, str | None]:
+    if not role_id and not target_id:
+        return None, None, None
+    if not role_id or not target_id:
+        raise RuntimeError("role and target-id must be provided together")
+    registry = load_json(ROLE_REGISTRY)
+    normalized = role_id.strip().upper().replace("-", "_")
+    for role in registry.get("roles", []):
+        if str(role.get("role_id", "")).upper() != normalized:
+            continue
+        for index, topic in enumerate(role.get("topics", []), start=1):
+            expected = f"{normalized}-TOPIC-{index:02d}"
+            if expected == target_id:
+                return normalized, expected, str(topic)
+        raise RuntimeError(f"target {target_id!r} does not belong to role {normalized}")
+    raise RuntimeError(f"unknown role {role_id!r}")
+
+
+async def run(query: str, limit: int, *, role_id: str | None, target_id: str | None, topic: str | None) -> dict[str, Any]:
     from telethon import TelegramClient  # type: ignore
 
     api_id, api_hash, session = credentials()
@@ -81,6 +100,9 @@ async def run(query: str, limit: int) -> dict[str, Any]:
         "query": query,
         "source": "TELEGRAM",
         "probe_only": True,
+        "role_id": role_id,
+        "target_id": target_id,
+        "topic": topic,
         "results_total": len(rows),
         "files_total": sum(1 for row in rows if row["has_file"]),
         "elapsed_seconds": elapsed,
@@ -92,19 +114,32 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--query", required=True)
     parser.add_argument("--limit", type=int, default=50)
+    parser.add_argument("--role", default=None)
+    parser.add_argument("--target-id", default=None)
     args = parser.parse_args()
     query = " ".join(args.query.split()).strip()
     if not query or len(query) > 240:
         raise SystemExit("query must contain 1..240 characters")
+    role_id, target_id, topic = resolve_context(args.role, args.target_id)
     REPORT_ROOT.mkdir(parents=True, exist_ok=True)
     stamp = time.strftime("%Y%m%d-%H%M%S")
-    path = REPORT_ROOT / f"{stamp}_{slug(query)}.json"
+    context_slug = slug(role_id or "unassigned")
+    path = REPORT_ROOT / f"{stamp}_{context_slug}_{slug(query)}.json"
     try:
-        report = asyncio.run(run(query, max(1, min(args.limit, 100))))
+        report = asyncio.run(run(query, max(1, min(args.limit, 100)), role_id=role_id, target_id=target_id, topic=topic))
     except Exception as exc:
-        report = {"record_type": "OSINT_CONTROL_CENTER_QUERY_PROBE", "status": "FATAL", "query": query, "error": f"{type(exc).__name__}: {exc}", "probe_only": True}
+        report = {
+            "record_type": "OSINT_CONTROL_CENTER_QUERY_PROBE",
+            "status": "FATAL",
+            "query": query,
+            "role_id": role_id,
+            "target_id": target_id,
+            "topic": topic,
+            "error": f"{type(exc).__name__}: {exc}",
+            "probe_only": True,
+        }
     path.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    print(json.dumps({k: report.get(k) for k in ("status", "query", "results_total", "files_total", "elapsed_seconds", "error") if k in report}, ensure_ascii=False, indent=2))
+    print(json.dumps({k: report.get(k) for k in ("status", "query", "role_id", "target_id", "results_total", "files_total", "elapsed_seconds", "error") if k in report}, ensure_ascii=False, indent=2))
     print(f"Report: {path.relative_to(ROOT)}")
     return 0 if report.get("status") == "PASS" else 1
 

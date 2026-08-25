@@ -1,0 +1,132 @@
+{
+  "schema_version": "1.0",
+  "registry_id": "FATHER-KNOWLEDGE-SOURCE-REGISTRY-001",
+  "as_of": "2026-08-25",
+  "purpose": "Trace professional and academic claims used by FATHER agents to primary standards, consensus bodies, official technology documentation, academic material, and empirical engineering evidence.",
+  "trust_dimensions": [
+    "LEGAL_AUTHORITY",
+    "TECHNICAL_CONSENSUS",
+    "SCIENTIFIC_OR_EMPIRICAL_EVIDENCE",
+    "PRIMARY_TECHNICAL_AUTHORITY",
+    "PROJECT_EVIDENCE"
+  ],
+  "rules": {
+    "no_single_scalar_trust_score": true,
+    "current_regulatory_truth_resolves_via_global_document_registry": true,
+    "version_sensitive_technical_sources_require_freshness_tracking": true,
+    "telegram_and_books_may_seed_claims_but_do_not_override_primary_or_consensus_sources": true,
+    "golden_decision_requires_source_refs_or_explicit_gap": true
+  },
+  "sources": [
+    {
+      "source_id": "SRC-IEEE-SWEBOK-V4A",
+      "name": "Guide to the Software Engineering Body of Knowledge (SWEBOK) v4.0a",
+      "owner": "IEEE Computer Society",
+      "source_class": "PROFESSIONAL_CONSENSUS",
+      "canonical_url": "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+      "status": "CURRENT_VERIFIED",
+      "last_verified_at": "2026-08-25",
+      "trust": {"LEGAL_AUTHORITY":"NONE","TECHNICAL_CONSENSUS":"VERY_HIGH","SCIENTIFIC_OR_EMPIRICAL_EVIDENCE":"HIGH","PRIMARY_TECHNICAL_AUTHORITY":"HIGH","PROJECT_EVIDENCE":"NONE"},
+      "aliases": ["SWEBOK_V4_SOFTWARE_CONSTRUCTION", "SWEBOK_V4_SOFTWARE_ENGINEERING_OPERATIONS"]
+    },
+    {
+      "source_id": "SRC-ACM-CS2023",
+      "name": "CS2023: ACM/IEEE-CS/AAAI Computer Science Curricula",
+      "owner": "ACM / IEEE Computer Society / AAAI",
+      "source_class": "ACADEMIC_PROFESSIONAL_CURRICULUM",
+      "canonical_url": "https://csed.acm.org/",
+      "status": "CURRENT_VERIFIED",
+      "last_verified_at": "2026-08-25",
+      "trust": {"LEGAL_AUTHORITY":"NONE","TECHNICAL_CONSENSUS":"VERY_HIGH","SCIENTIFIC_OR_EMPIRICAL_EVIDENCE":"HIGH","PRIMARY_TECHNICAL_AUTHORITY":"HIGH","PROJECT_EVIDENCE":"NONE"},
+      "aliases": ["ACM_ALGORITHMICS_BODY_OF_KNOWLEDGE"]
+    },
+    {
+      "source_id": "SRC-NIST-SSDF-1.1",
+      "name": "NIST SP 800-218 Secure Software Development Framework (SSDF) v1.1",
+      "owner": "NIST",
+      "source_class": "GOVERNMENT_TECHNICAL_GUIDANCE",
+      "canonical_url": "https://csrc.nist.gov/pubs/sp/800/218/final",
+      "status": "CURRENT_FINAL_WITH_NEWER_DRAFT_TRACKED_SEPARATELY",
+      "last_verified_at": "2026-08-25",
+      "trust": {"LEGAL_AUTHORITY":"CONTEXT_DEPENDENT","TECHNICAL_CONSENSUS":"VERY_HIGH","SCIENTIFIC_OR_EMPIRICAL_EVIDENCE":"HIGH","PRIMARY_TECHNICAL_AUTHORITY":"VERY_HIGH","PROJECT_EVIDENCE":"NONE"},
+      "aliases": ["NIST_SSDF", "NIST_SSDF_INPUT_VALIDATION_GUIDANCE", "SECURE_INPUT_VALIDATION_CONSENSUS"]
+    },
+    {
+      "source_id": "SRC-IETF-RFC9110",
+      "name": "RFC 9110 HTTP Semantics",
+      "owner": "IETF / RFC Editor",
+      "source_class": "INTERNET_STANDARD",
+      "canonical_url": "https://www.rfc-editor.org/rfc/rfc9110",
+      "status": "CURRENT_VERIFIED",
+      "last_verified_at": "2026-08-25",
+      "trust": {"LEGAL_AUTHORITY":"NONE","TECHNICAL_CONSENSUS":"VERY_HIGH","SCIENTIFIC_OR_EMPIRICAL_EVIDENCE":"HIGH","PRIMARY_TECHNICAL_AUTHORITY":"VERY_HIGH","PROJECT_EVIDENCE":"NONE"},
+      "aliases": ["HTTP_SEMANTICS_STANDARD"]
+    },
+    {
+      "source_id": "SRC-OWASP-ASVS-5.0.0",
+      "name": "OWASP Application Security Verification Standard 5.0.0",
+      "owner": "OWASP Foundation",
+      "source_class": "OPEN_SECURITY_STANDARD",
+      "canonical_url": "https://owasp.org/www-project-application-security-verification-standard/",
+      "status": "CURRENT_VERIFIED",
+      "last_verified_at": "2026-08-25",
+      "trust": {"LEGAL_AUTHORITY":"NONE","TECHNICAL_CONSENSUS":"VERY_HIGH","SCIENTIFIC_OR_EMPIRICAL_EVIDENCE":"HIGH","PRIMARY_TECHNICAL_AUTHORITY":"HIGH","PROJECT_EVIDENCE":"NONE"},
+      "aliases": ["OWASP_SECURE_CODING_GUIDANCE"]
+    },
+    {
+      "source_id": "SRC-PYTHON-LANGUAGE-3",
+      "name": "The Python Language Reference",
+      "owner": "Python Software Foundation",
+      "source_class": "PRIMARY_TECHNOLOGY_DOCUMENTATION",
+      "canonical_url": "https://docs.python.org/3/reference/",
+      "status": "CURRENT_VERSIONED",
+      "last_verified_at": "2026-08-25",
+      "trust": {"LEGAL_AUTHORITY":"NONE","TECHNICAL_CONSENSUS":"HIGH","SCIENTIFIC_OR_EMPIRICAL_EVIDENCE":"N_A","PRIMARY_TECHNICAL_AUTHORITY":"VERY_HIGH","PROJECT_EVIDENCE":"NONE"},
+      "aliases": ["PYTHON_LANGUAGE_REFERENCE"]
+    },
+    {
+      "source_id": "SRC-PYTHON-STDLIB-3",
+      "name": "The Python Standard Library",
+      "owner": "Python Software Foundation",
+      "source_class": "PRIMARY_TECHNOLOGY_DOCUMENTATION",
+      "canonical_url": "https://docs.python.org/3/library/",
+      "status": "CURRENT_VERSIONED",
+      "last_verified_at": "2026-08-25",
+      "trust": {"LEGAL_AUTHORITY":"NONE","TECHNICAL_CONSENSUS":"HIGH","SCIENTIFIC_OR_EMPIRICAL_EVIDENCE":"N_A","PRIMARY_TECHNICAL_AUTHORITY":"VERY_HIGH","PROJECT_EVIDENCE":"NONE"},
+      "aliases": ["PYTHON_STANDARD_LIBRARY"]
+    },
+    {
+      "source_id": "SRC-MIT-ALGORITHMS-6.046J",
+      "name": "MIT OpenCourseWare 6.046J Design and Analysis of Algorithms",
+      "owner": "MIT OpenCourseWare",
+      "source_class": "UNIVERSITY_COURSE",
+      "canonical_url": "https://ocw.mit.edu/courses/6-046j-design-and-analysis-of-algorithms-spring-2015/",
+      "status": "VERIFIED_STABLE_ACADEMIC_MATERIAL",
+      "last_verified_at": "2026-08-25",
+      "trust": {"LEGAL_AUTHORITY":"NONE","TECHNICAL_CONSENSUS":"HIGH","SCIENTIFIC_OR_EMPIRICAL_EVIDENCE":"VERY_HIGH","PRIMARY_TECHNICAL_AUTHORITY":"HIGH","PROJECT_EVIDENCE":"NONE"},
+      "aliases": ["UNIVERSITY_ALGORITHMS_REFERENCE"]
+    },
+    {
+      "source_id": "SRC-GOOGLE-SRE",
+      "name": "Google Site Reliability Engineering Books",
+      "owner": "Google",
+      "source_class": "PRODUCTION_ENGINEERING_REFERENCE",
+      "canonical_url": "https://sre.google/books/",
+      "status": "CURRENT_VERIFIED",
+      "last_verified_at": "2026-08-25",
+      "trust": {"LEGAL_AUTHORITY":"NONE","TECHNICAL_CONSENSUS":"HIGH","SCIENTIFIC_OR_EMPIRICAL_EVIDENCE":"HIGH","PRIMARY_TECHNICAL_AUTHORITY":"HIGH","PROJECT_EVIDENCE":"HIGH"},
+      "aliases": ["SRE_RELIABILITY_CONSENSUS"]
+    },
+    {
+      "source_id": "SRC-DORA-CORE",
+      "name": "DORA Core Model and Research",
+      "owner": "Google Cloud DORA",
+      "source_class": "EMPIRICAL_SOFTWARE_DELIVERY_RESEARCH",
+      "canonical_url": "https://dora.dev/research/",
+      "status": "CURRENT_VERIFIED",
+      "last_verified_at": "2026-08-25",
+      "trust": {"LEGAL_AUTHORITY":"NONE","TECHNICAL_CONSENSUS":"HIGH","SCIENTIFIC_OR_EMPIRICAL_EVIDENCE":"VERY_HIGH","PRIMARY_TECHNICAL_AUTHORITY":"HIGH","PROJECT_EVIDENCE":"HIGH"},
+      "aliases": ["DORA_SOFTWARE_DELIVERY_EVIDENCE"]
+    }
+  ]
+}

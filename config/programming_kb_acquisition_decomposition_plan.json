@@ -1,0 +1,170 @@
+{
+  "schema_version": "1.0",
+  "plan_id": "FATHER-PROGRAMMING-KB-ACQUIRE-DECOMPOSE-001",
+  "status": "ACTIVE_P0",
+  "role_id": "PROGRAMMER",
+  "knowledge_base_id": "PROGRAMMING_KB",
+  "region_profile": "RU",
+  "principle": "Download or register authoritative source material once, preserve original/provenance, decompose it into typed knowledge objects, then build relations. Tasks and model training remain downstream consumers of this graph.",
+  "rights_and_truth_rules": {
+    "official_legal_truth_from_official_source_only": true,
+    "no_access_control_or_paywall_bypass": true,
+    "commercial_books": "DISCOVERY_OR_USER_AUTHORIZED_COPY_ONLY",
+    "telegram": "DISCOVERY_AND_CANDIDATE_SOURCE_ONLY",
+    "sha256_for_payloads": true,
+    "deduplicate_exact_payloads": true,
+    "preserve_independent_provenance": true
+  },
+  "acquisition_batches": [
+    {
+      "order": 1,
+      "batch_id": "RU_NORMATIVE_CORE",
+      "importance_class": "NECESSARY",
+      "what_to_acquire": [
+        "Федеральный закон №162-ФЗ о стандартизации — current exact official text and amendment/effective-date chain",
+        "ЕСПД / ГОСТ 19 — all 28 active records from config/programmer_ru_espd_inventory.json; exact legally accessible text when available, otherwise official metadata plus explicit TEXT_GAP",
+        "ГОСТ Р ИСО/МЭК 12207-2010 and current Russian-adopted software/systems engineering lifecycle standards relevant to developer work",
+        "ГОСТ Р 56923-2016 and related software quality/engineering standards",
+        "ГОСТ Р 56939-2024, ГОСТ Р 58412-2019, ГОСТ Р 71207-2024 and related secure-development/testing/vulnerability standards",
+        "Conditional ГОСТ 34 current core from config/programmer_ru_automated_systems_conditional.json",
+        "FSTEC/regulator documents activated by GIS/KII/PDN/regulated context, reusing Global Document Registry rather than duplicating legal truth",
+        "Sector overlays only when activation conditions apply: healthcare, finance, telecom, energy, transport, state services, defence/state-secret contexts"
+      ],
+      "source_policy": "OFFICIAL_RU_FIRST",
+      "outputs": ["DOCUMENT", "DOCUMENT_VERSION", "LEGAL_STATUS", "EFFECTIVE_DATE", "AMENDMENT_EDGE", "APPLICABILITY_RULE", "STANDARD_REQUIREMENT", "WORK_PRODUCT_RULE"]
+    },
+    {
+      "order": 2,
+      "batch_id": "LANGUAGE_PRIMARY_SOURCES",
+      "importance_class": "NECESSARY",
+      "what_to_acquire": [
+        "Python: Language Reference, Standard Library, PEP index and version-sensitive official documentation",
+        "Go: official language specification, standard library/package documentation and official language guidance",
+        "Java: Java Language Specification, JVM Specification and official platform/API documentation",
+        "C#/.NET: official C# language specification and .NET runtime/API documentation",
+        "C/C++: current standards status/authoritative public working material plus primary compiler/runtime documentation where implementation-specific behavior matters",
+        "Rust: Rust Reference, standard library documentation and official language material",
+        "JavaScript/TypeScript: ECMAScript specification plus official TypeScript language/documentation material"
+      ],
+      "source_policy": "PRIMARY_LANGUAGE_AUTHORITY_ONLY_FOR_LANGUAGE_FACTS",
+      "outputs": ["LANGUAGE", "LANGUAGE_VERSION", "LANGUAGE_FEATURE", "TYPE_SYSTEM_PROPERTY", "MEMORY_MODEL_PROPERTY", "CONCURRENCY_PROPERTY", "RUNTIME_PROPERTY", "LANGUAGE_LIMITATION", "STANDARD_LIBRARY_CAPABILITY"]
+    },
+    {
+      "order": 3,
+      "batch_id": "LANGUAGE_SELECTION_EVIDENCE",
+      "importance_class": "NECESSARY",
+      "what_to_acquire": [
+        "SWEBOK software construction/design/operations material",
+        "ACM/IEEE-CS/AAAI CS2023 curriculum material relevant to programming languages, software engineering, algorithms and systems",
+        "Peer-reviewed or university material on language paradigms, type systems, concurrency, memory safety and performance where a choice rule depends on it",
+        "Reproducible project benchmarks for concrete runtime/version/hardware when performance claims are used"
+      ],
+      "source_policy": "CONSENSUS_PLUS_PRIMARY_PLUS_EMPIRICAL",
+      "outputs": ["LANGUAGE_SELECTION_RULE", "PREFERRED_WHEN", "AVOID_WHEN", "TRADEOFF", "DECISION_MATRIX", "BENCHMARK_EVIDENCE"]
+    },
+    {
+      "order": 4,
+      "batch_id": "ALGORITHMS_AND_DATA_STRUCTURES",
+      "importance_class": "NECESSARY",
+      "what_to_acquire": [
+        "Open university algorithm courses/notes with proofs and complexity analysis (MIT OCW seed already registered)",
+        "ACM/IEEE algorithmics curriculum/body-of-knowledge material",
+        "Additional peer-reviewed or university-level sources for sorting, searching, graphs, dynamic programming, greedy methods, string algorithms, hashing, trees, heaps, union-find, shortest paths and concurrency-relevant structures",
+        "Reproducible benchmark fixtures only when asymptotic analysis is insufficient for an implementation choice"
+      ],
+      "source_policy": "SCIENTIFIC_OR_UNIVERSITY_FIRST",
+      "outputs": ["ALGORITHM", "DATA_STRUCTURE", "PRECONDITION", "INVARIANT", "CORRECTNESS_BASIS", "TIME_COMPLEXITY", "SPACE_COMPLEXITY", "ALGORITHM_SELECTION_RULE", "COUNTEREXAMPLE", "BENCHMARK_EVIDENCE"]
+    },
+    {
+      "order": 5,
+      "batch_id": "ENGINEERING_AND_SECURE_COMPOSITION",
+      "importance_class": "NECESSARY",
+      "what_to_acquire": [
+        "NIST SSDF",
+        "OWASP ASVS and other directly relevant OWASP primary project material",
+        "IETF RFCs for protocol semantics used in software design (HTTP seed: RFC 9110)",
+        "Primary DB/framework/runtime documentation only when the KB reaches that technology layer",
+        "Google SRE/DORA and other empirical engineering evidence for operations/reliability choices"
+      ],
+      "source_policy": "STANDARD_OR_PRIMARY_TECHNICAL_SOURCE_FIRST",
+      "outputs": ["SECURE_DEVELOPMENT_RULE", "PROTOCOL_RULE", "RELIABILITY_RULE", "TEST_RULE", "OBSERVABILITY_RULE", "DECISION_CARD", "PATTERN", "ANTI_PATTERN"]
+    },
+    {
+      "order": 6,
+      "batch_id": "BOOKS_CASES_COMMUNITY",
+      "importance_class": "DESIRABLE",
+      "what_to_acquire": [
+        "Openly licensed books/course notes and author/publisher-authorized material",
+        "User-owned/local commercial books for private extraction where authorized",
+        "Conference talks, technical articles, reputable GitHub reference implementations",
+        "Telegram materials as discovery/candidate evidence only"
+      ],
+      "source_policy": "SUPPLEMENTARY_NEVER_OVERRIDES_PRIMARY",
+      "outputs": ["EXAMPLE", "EXPLANATION", "CASE_STUDY", "CANDIDATE_PATTERN", "CANDIDATE_ANTI_PATTERN", "COUNTEREVIDENCE"]
+    }
+  ],
+  "factory_decomposition": {
+    "for_every_document": [
+      "preserve ORIGINAL with source URI, acquisition time, media type and SHA-256",
+      "create DOCUMENT and DOCUMENT_VERSION identities",
+      "extract title, issuer/author, publication/version/effective dates and status",
+      "parse structure: part/chapter/section/clause/table/figure/code/example",
+      "create stable CHUNK objects with location anchors",
+      "extract TERMS and DEFINITIONS",
+      "extract atomic CLAIMS/FACTS/REQUIREMENTS separately",
+      "extract conditions, exceptions, prohibitions, permissions and recommendations",
+      "extract named entities: standards, languages, algorithms, data structures, artifacts, roles, controls, metrics",
+      "extract examples and counterexamples separately from normative statements",
+      "assign source class and trust dimensions",
+      "create GAP when exact text, currentness, applicability or evidence is unavailable"
+    ],
+    "specialized_extractors": {
+      "LEGAL_STANDARD": ["requirement", "applicability condition", "actor", "action", "object", "evidence/work product", "effective date", "mandatory/conditional/voluntary status", "amendment/supersession"],
+      "LANGUAGE_SPEC": ["feature", "syntax/semantics", "type rule", "memory rule", "concurrency rule", "runtime property", "undefined/implementation-specific behavior", "version boundary", "example"],
+      "ALGORITHM_SOURCE": ["problem class", "precondition", "invariant", "correctness basis", "time complexity", "space complexity", "data assumptions", "failure/edge cases", "alternative algorithms", "selection condition"],
+      "ENGINEERING_GUIDE": ["practice", "context", "benefit", "cost/tradeoff", "failure mode", "control", "metric", "evidence", "anti-pattern"],
+      "BOOK_OR_COMMUNITY": ["claim", "example", "author interpretation", "candidate rule", "candidate counterexample", "source confidence"]
+    }
+  },
+  "node_types": [
+    "REGION_PROFILE", "DOCUMENT", "DOCUMENT_VERSION", "SOURCE", "STANDARD", "LEGAL_NORM", "APPLICABILITY_RULE", "STANDARD_REQUIREMENT", "WORK_PRODUCT_RULE", "TERM", "DEFINITION", "LANGUAGE", "LANGUAGE_VERSION", "LANGUAGE_FEATURE", "LANGUAGE_LIMITATION", "LANGUAGE_SELECTION_RULE", "ALGORITHM", "DATA_STRUCTURE", "PRECONDITION", "INVARIANT", "CORRECTNESS_BASIS", "COMPLEXITY_BOUND", "ALGORITHM_SELECTION_RULE", "DECISION_RULE", "DECISION_CARD", "PATTERN", "ANTI_PATTERN", "SECURITY_CONTROL", "TEST_RULE", "BENCHMARK_EVIDENCE", "EXAMPLE", "COUNTEREXAMPLE", "GAP"
+  ],
+  "relation_types": [
+    "APPLIES_IN_REGION", "MANDATORY_IF", "VOLUNTARY_UNLESS_ACTIVATED", "EFFECTIVE_FROM", "AMENDS", "SUPERSEDES", "DEFINED_IN", "DERIVED_FROM", "SUPPORTED_BY", "CONFLICTS_WITH", "REQUIRES", "IMPLEMENTS", "PRODUCES_WORK_PRODUCT", "PREFERRED_WHEN", "AVOID_WHEN", "HAS_FEATURE", "HAS_LIMITATION", "HAS_PRECONDITION", "HAS_INVARIANT", "HAS_COMPLEXITY", "USES_DATA_STRUCTURE", "ALTERNATIVE_TO", "VERIFIED_BY", "EVIDENCED_BY", "EXAMPLE_OF", "COUNTEREXAMPLE_TO", "TEACHES", "DEMONSTRATES"
+  ],
+  "minimum_relation_examples": [
+    "REGION-RU <-APPLIES_IN_REGION- ГОСТ/LEGAL_NORM",
+    "STANDARD_REQUIREMENT -DEFINED_IN-> DOCUMENT_VERSION",
+    "LANGUAGE_SELECTION_RULE -PREFERRED_WHEN-> CONTEXT/CONSTRAINT",
+    "LANGUAGE_SELECTION_RULE -SUPPORTED_BY-> SOURCE/BENCHMARK_EVIDENCE",
+    "ALGORITHM -HAS_PRECONDITION-> PRECONDITION",
+    "ALGORITHM -HAS_COMPLEXITY-> COMPLEXITY_BOUND",
+    "ALGORITHM_SELECTION_RULE -ALTERNATIVE_TO-> another algorithm rule",
+    "DECISION_CARD -REQUIRES-> APPLICABILITY_RULE/LANGUAGE_SELECTION_RULE/ALGORITHM_SELECTION_RULE",
+    "TASK -TEACHES-> KNOWLEDGE_NODE only after PROGRAMMING_KB MIN gate"
+  ],
+  "promotion_gates": {
+    "source_to_kb_node": [
+      "source/provenance exists",
+      "exact text or explicit TEXT_GAP",
+      "status/version known where material",
+      "claim type is explicit",
+      "applicability is explicit for normative statements",
+      "source confidence/trust dimension recorded"
+    ],
+    "decision_rule": [
+      "at least one authoritative/primary/academic basis",
+      "conditions and non-applicability are explicit",
+      "counterexample or limitation exists where relevant",
+      "no global-best assertion without context",
+      "version/region boundaries are preserved"
+    ]
+  },
+  "training_policy": {
+    "state": "HOLD_UNTIL_PROGRAMMING_KB_MIN_READY",
+    "existing_8_goldens": "KEEP_AS_REGRESSION_FIXTURES",
+    "existing_40_derived": "KEEP_AS_HOLD_CANDIDATES",
+    "new_task_generation": "PAUSED",
+    "model_training": "DISABLED"
+  }
+}

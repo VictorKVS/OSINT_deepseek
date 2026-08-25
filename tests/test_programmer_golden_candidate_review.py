@@ -42,6 +42,33 @@ def test_golden_candidate_validate_only_passes_and_preserves_holdout_isolation()
     assert payload["validation_errors"] == []
 
 
+def test_stdlib_regression_verifier_passes_without_pytest_dependency():
+    script = ROOT / "scripts" / "verify_programmer_min_reference_stdlib.py"
+    proc = subprocess.run(
+        [sys.executable, str(script)],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+        timeout=20,
+        check=False,
+    )
+    assert proc.returncode == 0, proc.stdout + proc.stderr
+    payload = json.loads(proc.stdout)
+    assert payload["status"] == "PASS"
+    assert payload["checks_total"] == 8
+    assert payload["checks_passed"] == 8
+    assert payload["checks_failed"] == 0
+    assert payload["holdout_implementation_leak_total"] == 0
+
+
+def test_golden_review_has_local_environment_fallback_but_does_not_mask_real_pytest_failures():
+    text = (ROOT / "scripts" / "review_programmer_golden_candidates.py").read_text(encoding="utf-8")
+    assert '"-c", "import pytest"' in text
+    assert "STDLIB_FALLBACK" in text
+    assert "If pytest exists and the tests" in text
+    assert "no fallback is allowed" in text
+
+
 def test_one_click_golden_review_runs_automated_tests_but_not_model_training():
     text = (ROOT / "RUN_PROGRAMMER_GOLDEN_CANDIDATES.cmd").read_text(encoding="utf-8")
     assert "review_programmer_golden_candidates.py" in text

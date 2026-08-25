@@ -64,7 +64,8 @@ def test_master_runner_is_reuse_first_official_only_bounded_and_traceable():
 
 def test_one_click_master_security_launcher_exists():
     text = Path("RUN_SECURITY_OFFICIAL_MASTER_DOWNLOAD.cmd").read_text(encoding="utf-8")
-    assert "run_security_official_master_download.py" in text
+    assert "run_security_official_master_download_multiroute.py" in text
     assert "LATEST_MASTER_OFFICIAL_DOWNLOAD_RUN.json" in text
     assert "reuse-first" in text
     assert "official-only" in text
+    assert "advisory per-route" in text

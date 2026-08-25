@@ -1,6 +1,7 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "registry_id": "FATHER-GLOBAL-DOCUMENT-SOURCES-001",
+  "principle": "All legal, regulatory and standards documents enter one global canonical registry; role/domain/KB files are import observations and applicability-binding sources only.",
   "sources": [
     {
       "source_id": "PDN_CURRENT",
@@ -28,6 +29,20 @@
       "path": "config/role_ru_regulatory_baseline.json",
       "adapter": "ROLE_BASELINE_DOCUMENTS",
       "authority": "ROLE_SEED_WITH_OFFICIAL_METADATA",
+      "enabled": true
+    },
+    {
+      "source_id": "PROGRAMMER_FSTEC_REGULATED",
+      "path": "config/programmer_ru_fstec_regulated_systems.json",
+      "adapter": "FSTEC_REGULATED_DOCUMENTS",
+      "authority": "OFFICIAL_PUBLICATION_METADATA_AND_REGULATOR_SCOPE",
+      "enabled": true
+    },
+    {
+      "source_id": "PROGRAMMER_RU_NORMATIVE_SCOPE",
+      "path": "config/programmer_ru_normative_scope.json",
+      "adapter": "PROGRAMMER_NORMATIVE_SCOPE",
+      "authority": "PROGRAMMER_L1_SCOPE_AND_APPLICABILITY_BINDINGS",
       "enabled": true
     }
   ],

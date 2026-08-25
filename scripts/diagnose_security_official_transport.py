@@ -2,14 +2,18 @@ from __future__ import annotations
 
 import hashlib
 import json
+import sys
 import time
 from pathlib import Path
 from typing import Any
 
-from father_osint.acquisition import UrllibArtifactFetcher
-from father_osint.official_transport import CurlArtifactFetcher, RobustOfficialArtifactFetcher
-
 ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from father_osint.acquisition import UrllibArtifactFetcher  # noqa: E402
+from father_osint.official_transport import CurlArtifactFetcher, RobustOfficialArtifactFetcher  # noqa: E402
+
 REPORT = ROOT / "reports" / "security_current_only" / "LATEST_OFFICIAL_TRANSPORT_DIAGNOSTIC.json"
 TIMEOUT_SECONDS = 45.0
 MAX_BYTES = 5 * 1024 * 1024
@@ -86,7 +90,7 @@ def main() -> int:
         for row in rows
     )
     payload = {
-        "schema_version": "1.0",
+        "schema_version": "1.1",
         "record_type": "SECURITY_OFFICIAL_TRANSPORT_DIAGNOSTIC",
         "mode": "READ_ONLY_NETWORK_PROBE",
         "status": "PASS" if robust_pass_total == len(PROBES) else "FAIL",

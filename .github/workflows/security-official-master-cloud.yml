@@ -1,0 +1,115 @@
+name: Security Official Master Cloud Recovery
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "15 17 * * *"
+  push:
+    branches:
+      - agent/knowledge-factory-m1
+    paths:
+      - ".github/workflows/security-official-master-cloud.yml"
+      - "scripts/run_security_official_master_download.py"
+      - "scripts/run_security_official_master_download_multiroute.py"
+      - "scripts/stamp_security_master_cloud_environment.py"
+      - "father_osint/official_transport.py"
+      - "config/security_official_master_download_plan.json"
+      - "config/pdn_current_only_registry.json"
+      - "config/security_departmental_acquisition_map.json"
+
+permissions:
+  contents: read
+
+env:
+  FATHER_EXECUTION_ENVIRONMENT_ID: GITHUB_ACTIONS_UBUNTU_LATEST
+
+jobs:
+  recover-security-official-master:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      PYTHONPATH: ${{ github.workspace }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install optional PDF extractor
+        run: python -m pip install --disable-pip-version-check --quiet pypdf
+
+      - name: Show execution environment
+        run: |
+          python --version
+          uname -a
+          getent hosts publication.pravo.gov.ru || true
+          getent hosts government.ru || true
+          getent hosts rg.ru || true
+          getent hosts cdnstatic.rg.ru || true
+          getent hosts fstec.ru || true
+          getent hosts protect.gost.ru || true
+
+      - name: Run official multiroute master
+        id: master
+        continue-on-error: true
+        run: python scripts/run_security_official_master_download_multiroute.py
+
+      - name: Stamp execution environment
+        if: always()
+        run: python scripts/stamp_security_master_cloud_environment.py
+
+      - name: Show compact master report
+        if: always()
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = Path('reports/security_current_only/LATEST_MASTER_OFFICIAL_DOWNLOAD_RUN.json')
+          if not p.exists():
+              print('MASTER_REPORT_MISSING')
+              raise SystemExit(0)
+          x = json.loads(p.read_text(encoding='utf-8'))
+          keys = [
+              'status','execution_environment_id','documents_unique_total',
+              'reused_exact_total','reused_declared_local_a0_total','downloaded_total',
+              'failed_total','need_official_source_total','bytes_downloaded',
+              'elapsed_seconds','failed_error_classes'
+          ]
+          print(json.dumps({k:x.get(k) for k in keys}, ensure_ascii=False, indent=2))
+          PY
+
+      - name: Upload official master recovery evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-official-master-cloud-${{ github.run_id }}
+          if-no-files-found: warn
+          retention-days: 14
+          path: |
+            reports/security_current_only/LATEST_MASTER_OFFICIAL_DOWNLOAD_RUN.json
+            reports/global_document_registry/GLOBAL_DOCUMENT_REGISTRY.json
+            reports/global_document_registry/APPLICABILITY_BINDINGS.json
+            reports/global_document_registry/REGISTRY_CONFLICTS.json
+            data/security_current_only/raw/*.bin
+            data/security_current_only/normalized/*.txt
+            data/security_current_only/metadata/*.json
+            config/security_official_master_download_plan.json
+
+      - name: Preserve partial-success semantics
+        if: always()
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = Path('reports/security_current_only/LATEST_MASTER_OFFICIAL_DOWNLOAD_RUN.json')
+          if not p.exists():
+              raise SystemExit('master report missing')
+          x = json.loads(p.read_text(encoding='utf-8'))
+          usable = int(x.get('downloaded_total') or 0) + int(x.get('reused_exact_total') or 0) + int(x.get('reused_declared_local_a0_total') or 0)
+          print(f"usable_or_reused={usable} failed={x.get('failed_total')} missing_route={x.get('need_official_source_total')}")
+          raise SystemExit(0 if usable > 0 else 2)
+          PY

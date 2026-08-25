@@ -1,6 +1,7 @@
 param(
     [Parameter(Mandatory = $true)][string] $Role,
     [switch] $BibliographyProbe,
+    [switch] $AlgorithmBibliographyProbe,
     [Parameter(ValueFromRemainingArguments = $true)][string[]] $RunnerArgs
 )
 
@@ -13,6 +14,7 @@ $NetworkPreflightScript = Join-Path $RepoRoot 'scripts\test_telegram_network_pat
 $TelethonAuthScript = Join-Path $RepoRoot 'scripts\authorize_telethon_session.py'
 $RunnerScript = Join-Path $RepoRoot 'scripts\run_team_role_acquisition_live.py'
 $BibliographyProbeScript = Join-Path $RepoRoot 'scripts\probe_programmer_bibliography_telegram.py'
+$AlgorithmBibliographyProbeScript = Join-Path $RepoRoot 'scripts\probe_programmer_algorithm_bibliography_telegram.py'
 
 function Resolve-Python {
     $venv = Join-Path $RepoRoot '.venv\Scripts\python.exe'
@@ -122,6 +124,19 @@ Write-Host '[AUTH] Checking shared local Telethon session...'
 & $pythonExe $TelethonAuthScript
 if ($LASTEXITCODE -ne 0) {
     Write-Host 'Telethon authorization did not complete; role acquisition was not started.'
+    exit $LASTEXITCODE
+}
+
+if ($AlgorithmBibliographyProbe) {
+    if ($Role.ToUpperInvariant() -ne 'PROGRAMMER') {
+        Write-Host 'Algorithm bibliography probe is currently defined only for PROGRAMMER.'
+        exit 6
+    }
+    if (-not (Test-Path -LiteralPath $AlgorithmBibliographyProbeScript -PathType Leaf)) { exit 6 }
+    Write-Host ''
+    Write-Host '[PROBE] Checking Telegram availability for the PROGRAMMER algorithms bibliography.'
+    Write-Host '[PROBE] No files will be downloaded.'
+    & $pythonExe $AlgorithmBibliographyProbeScript @RunnerArgs
     exit $LASTEXITCODE
 }
 

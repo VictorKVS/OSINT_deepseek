@@ -1,0 +1,185 @@
+{
+  "schema_version": "1.0",
+  "registry_id": "FATHER-PROGRAMMING-KB-SOURCE-LAYERS-001",
+  "status": "ACTIVE_P0",
+  "role_id": "PROGRAMMER",
+  "knowledge_base_id": "PROGRAMMING_KB",
+  "region_profile": "RU",
+  "principle": "Build PROGRAMMING_KB in source-authority order: regional legal/normative truth first, primary language authority second, scientific/professional evidence next, books as explanatory/practice material, then world production evidence. Training is downstream of all required MIN layers.",
+  "layer_order": [
+    "L1_RU_LAW_GOST_REGULATORS",
+    "L2_LANGUAGE_PRIMARY_AUTHORITY",
+    "L3_SCIENTIFIC_PROFESSIONAL_CONSENSUS",
+    "L4_BOOKS_EDUCATIONAL_PRACTICE",
+    "L5_WORLD_PRODUCTION_EVIDENCE",
+    "L6_TASKS_AND_TRAINING"
+  ],
+  "layers": [
+    {
+      "layer_id": "L1_RU_LAW_GOST_REGULATORS",
+      "authority": ["LEGAL_AUTHORITY", "REGIONAL_APPLICABILITY"],
+      "purpose": "Determine mandatory, conditional, contractual, voluntary, current, superseded and future-effective obligations before technical choices are recommended.",
+      "required_for_min": true,
+      "source_refs": [
+        "config/programmer_ru_normative_scope.json",
+        "config/programmer_ru_espd_inventory.json",
+        "config/programmer_ru_automated_systems_conditional.json",
+        "config/programmer_ru_fstec_regulated_systems.json",
+        "config/global_document_registry_policy.json"
+      ],
+      "core_clusters": [
+        "Federal Law 162-FZ standardization applicability",
+        "ESPD GOST 19",
+        "software lifecycle and software engineering",
+        "secure software development",
+        "conditional automated systems GOST 34",
+        "FSTEC/GIS/KII/PDN overlays when activated",
+        "sector overlays when activated"
+      ],
+      "rule": "A current GOST is not automatically mandatory; applicability is a separate reviewed edge. Exact legal/normative truth is resolved through the Global Document Registry and official evidence."
+    },
+    {
+      "layer_id": "L2_LANGUAGE_PRIMARY_AUTHORITY",
+      "authority": ["PRIMARY_TECHNICAL_AUTHORITY"],
+      "purpose": "Describe language semantics, standard library/runtime behavior, official idioms and version-sensitive constraints from the language/project maintainers or standards body.",
+      "required_for_min": true,
+      "targets": [
+        {
+          "source_id": "LANGSRC-PYTHON-REFERENCE",
+          "language": "Python",
+          "name": "The Python Language Reference",
+          "url": "https://docs.python.org/3/reference/",
+          "acquisition": "OFFICIAL_OPEN_WEB"
+        },
+        {
+          "source_id": "LANGSRC-PYTHON-STDLIB",
+          "language": "Python",
+          "name": "The Python Standard Library",
+          "url": "https://docs.python.org/3/library/",
+          "acquisition": "OFFICIAL_OPEN_WEB"
+        },
+        {
+          "source_id": "LANGSRC-GO-SPEC",
+          "language": "Go",
+          "name": "The Go Programming Language Specification",
+          "url": "https://go.dev/ref/spec",
+          "acquisition": "OFFICIAL_OPEN_WEB"
+        },
+        {
+          "source_id": "LANGSRC-GO-DOCS",
+          "language": "Go",
+          "name": "Go official documentation",
+          "url": "https://go.dev/doc/",
+          "acquisition": "OFFICIAL_OPEN_WEB"
+        },
+        {
+          "source_id": "LANGSRC-JAVA-JLS",
+          "language": "Java",
+          "name": "Java Language Specification",
+          "url": "https://docs.oracle.com/javase/specs/",
+          "acquisition": "OFFICIAL_OPEN_WEB_VERSIONED"
+        },
+        {
+          "source_id": "LANGSRC-CSHARP-SPEC",
+          "language": "C#/.NET",
+          "name": "C# standard specification and feature specifications",
+          "url": "https://learn.microsoft.com/en-us/dotnet/csharp/specification/",
+          "acquisition": "OFFICIAL_OPEN_WEB_VERSIONED"
+        },
+        {
+          "source_id": "LANGSRC-RUST-REFERENCE",
+          "language": "Rust",
+          "name": "The Rust Reference",
+          "url": "https://doc.rust-lang.org/reference/",
+          "acquisition": "OFFICIAL_OPEN_WEB_VERSIONED"
+        },
+        {
+          "source_id": "LANGSRC-ECMASCRIPT-SPEC",
+          "language": "JavaScript",
+          "name": "ECMAScript Language Specification",
+          "url": "https://tc39.es/ecma262/",
+          "acquisition": "OFFICIAL_OPEN_WEB_LIVING_SPEC"
+        },
+        {
+          "source_id": "LANGSRC-TYPESCRIPT-DOCS",
+          "language": "TypeScript",
+          "name": "TypeScript Documentation and Handbook",
+          "url": "https://www.typescriptlang.org/docs/",
+          "acquisition": "OFFICIAL_OPEN_WEB_VERSIONED"
+        },
+        {
+          "source_id": "LANGSRC-CPP-STANDARD",
+          "language": "C++",
+          "name": "ISO C++ standard / WG21 authority",
+          "url": "https://isocpp.org/std/the-standard",
+          "acquisition": "PRIMARY_METADATA_AND_AUTHORIZED_STANDARD_COPY",
+          "rights_gate": "Exact published ISO standard text may require an authorized copy."
+        },
+        {
+          "source_id": "LANGSRC-C-STANDARD",
+          "language": "C",
+          "name": "ISO C standard / WG14 authority",
+          "url": "https://www.open-std.org/jtc1/sc22/wg14/",
+          "acquisition": "PRIMARY_METADATA_AND_AUTHORIZED_STANDARD_COPY",
+          "rights_gate": "Exact published ISO standard text may require an authorized copy."
+        }
+      ],
+      "rule": "Community guidance and books may explain a language but cannot override its primary specification, current implementation documentation or measured project evidence."
+    },
+    {
+      "layer_id": "L3_SCIENTIFIC_PROFESSIONAL_CONSENSUS",
+      "authority": ["TECHNICAL_CONSENSUS", "SCIENTIFIC_OR_EMPIRICAL_EVIDENCE"],
+      "purpose": "Provide correctness, complexity, software engineering and security foundations for choices rather than folklore.",
+      "required_for_min": true,
+      "source_refs": [
+        "SRC-IEEE-SWEBOK-V4A",
+        "SRC-ACM-CS2023",
+        "SRC-NIST-SSDF-1.1",
+        "SRC-IETF-RFC9110",
+        "SRC-OWASP-ASVS-5.0.0",
+        "SRC-MIT-ALGORITHMS-6.046J"
+      ],
+      "rule": "Algorithm and engineering choices are represented as conditional rules with preconditions, counterexamples and evidence, not as globally best solutions."
+    },
+    {
+      "layer_id": "L4_BOOKS_EDUCATIONAL_PRACTICE",
+      "authority": ["EXPLANATION", "REFERENCE_IMPLEMENTATION", "PRACTICE_EXAMPLES"],
+      "purpose": "Add worked examples, pedagogy, alternative explanations and implementation patterns after primary/consensus anchors exist.",
+      "required_for_min": true,
+      "source_refs": [
+        "config/programmer_bibliography_targets.json",
+        "config/programmer_algorithm_bibliography_targets.json",
+        "config/programmer_bibliography_acquisition_registry.json"
+      ],
+      "telegram_role": "DISCOVERY_ONLY_UNLESS_USER_OWNED_OR_AUTHORIZED",
+      "rule": "A Telegram match proves discoverability, not rights or technical truth. Commercial full text requires an owned/authorized copy before ingestion."
+    },
+    {
+      "layer_id": "L5_WORLD_PRODUCTION_EVIDENCE",
+      "authority": ["PROJECT_EVIDENCE", "EMPIRICAL_SOFTWARE_DELIVERY_EVIDENCE"],
+      "purpose": "Validate how recommendations behave in production through reputable engineering guides, benchmarks, incident evidence and reproducible measurements.",
+      "required_for_min": true,
+      "source_refs": [
+        "SRC-GOOGLE-SRE",
+        "SRC-DORA-CORE"
+      ],
+      "future_targets": [
+        "language/runtime official performance guidance",
+        "reproducible benchmark suites",
+        "production postmortems",
+        "OpenSSF/CNCF supply-chain and platform practices where applicable"
+      ],
+      "rule": "Production evidence can refine technical recommendations but cannot override applicable law or a primary language specification."
+    },
+    {
+      "layer_id": "L6_TASKS_AND_TRAINING",
+      "authority": ["EVALUATION", "LEARNING"],
+      "purpose": "Test whether the agent can apply already-reviewed knowledge nodes and relations.",
+      "required_for_min": false,
+      "state": "HOLD_UNTIL_L1_L5_MIN_GATES",
+      "rule": "Tasks are downstream evaluation artifacts. They never create normative or technical truth by themselves."
+    }
+  ],
+  "completion_rule": "PROGRAMMING_KB_MIN_READY may be true only when required layers L1-L5 have reviewable evidence, explicit coverage metrics and no unresolved NECESSARY gap that blocks the requested RU profile.",
+  "no_scalar_truth_score": true
+}

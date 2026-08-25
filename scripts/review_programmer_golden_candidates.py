@@ -14,6 +14,7 @@ TASKS = ROOT / "config" / "programmer_training_task_library.json"
 SOURCES = ROOT / "config" / "knowledge_source_registry.json"
 POLICY = ROOT / "config" / "programmer_golden_case_review_policy.json"
 REFERENCE = ROOT / "training" / "programmer" / "min_reference_solutions.py"
+STDLIB_REGRESSION = ROOT / "scripts" / "verify_programmer_min_reference_stdlib.py"
 REPORT_DIR = ROOT / "reports" / "programmer_training_gym"
 REPORT = REPORT_DIR / "GOLDEN_CASE_CANDIDATES.json"
 LATEST = REPORT_DIR / "LATEST_PROGRAMMER_GOLDEN_CANDIDATE_REVIEW.json"
@@ -63,17 +64,41 @@ def reference_functions_present() -> tuple[set[str], set[str]]:
     return present, holdout_present
 
 
-def run_targeted_tests() -> tuple[bool, str]:
-    proc = subprocess.run(
-        [sys.executable, "-m", "pytest", "-q", "tests/test_programmer_training_reference_solutions.py"],
+def _run(command: list[str], timeout: int = 60) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        command,
         cwd=ROOT,
         capture_output=True,
         text=True,
-        timeout=60,
+        timeout=timeout,
         check=False,
     )
+
+
+def run_targeted_tests() -> tuple[bool, str, str, str]:
+    """Run the strongest available local regression engine.
+
+    Pytest is preferred when installed. A missing pytest package is an environment
+    limitation, not a reference-solution defect, so a dependency-free stdlib
+    verifier executes the same MIN contracts. If pytest exists and the tests
+    fail, no fallback is allowed: the real regression failure remains blocking.
+    """
+    probe = _run([sys.executable, "-c", "import pytest"], timeout=15)
+    if probe.returncode == 0:
+        proc = _run(
+            [sys.executable, "-m", "pytest", "-q", "tests/test_programmer_training_reference_solutions.py"],
+            timeout=60,
+        )
+        output = (proc.stdout + "\n" + proc.stderr).strip()
+        return proc.returncode == 0, output[-6000:], "PYTEST", "pytest available in selected Python environment"
+
+    proc = _run([sys.executable, str(STDLIB_REGRESSION)], timeout=30)
     output = (proc.stdout + "\n" + proc.stderr).strip()
-    return proc.returncode == 0, output[-6000:]
+    probe_detail = (probe.stdout + "\n" + probe.stderr).strip()
+    note = "pytest unavailable in selected Python environment; used dependency-free stdlib regression verifier"
+    if probe_detail:
+        note += ": " + probe_detail[-1000:]
+    return proc.returncode == 0, output[-6000:], "STDLIB_FALLBACK", note
 
 
 def build_candidates(*, run_tests: bool) -> tuple[dict[str, Any], list[dict[str, Any]]]:
@@ -95,8 +120,10 @@ def build_candidates(*, run_tests: bool) -> tuple[dict[str, Any], list[dict[str,
 
     regression_pass = None
     regression_output = "NOT_RUN"
+    regression_engine = "NOT_RUN"
+    regression_note = "NOT_RUN"
     if run_tests and not validation_errors:
-        regression_pass, regression_output = run_targeted_tests()
+        regression_pass, regression_output, regression_engine, regression_note = run_targeted_tests()
         if not regression_pass:
             validation_errors.append("targeted regression tests failed")
 
@@ -136,6 +163,7 @@ def build_candidates(*, run_tests: bool) -> tuple[dict[str, Any], list[dict[str,
                 "holdout_implementation_absent": not holdout_present,
                 "source_refs_resolved": not unresolved_sources,
                 "targeted_regression_tests": "PASS" if regression_pass is True else "FAIL" if regression_pass is False else "NOT_RUN",
+                "targeted_regression_engine": regression_engine,
             },
             "state": state,
             "critic_review_state": "PENDING" if automated_pass else "BLOCKED",
@@ -147,7 +175,7 @@ def build_candidates(*, run_tests: bool) -> tuple[dict[str, Any], list[dict[str,
     failed = len(candidates) - passed
     summary = {
         "record_type": "PROGRAMMER_GOLDEN_CANDIDATE_REVIEW",
-        "schema_version": "1.0",
+        "schema_version": "1.1",
         "status": "PASS" if failed == 0 and not validation_errors else "FAIL",
         "policy_id": policy.get("policy_id"),
         "tasks_total": len(candidates),
@@ -157,6 +185,9 @@ def build_candidates(*, run_tests: bool) -> tuple[dict[str, Any], list[dict[str,
         "training_ready_total": 0,
         "holdout_implementation_leak_total": len(holdout_present),
         "targeted_regression_tests": "PASS" if regression_pass is True else "FAIL" if regression_pass is False else "NOT_RUN",
+        "targeted_regression_engine": regression_engine,
+        "targeted_regression_note": regression_note,
+        "targeted_regression_output_tail": regression_output,
         "validation_errors": validation_errors,
         "reference_solution_sha256": sha256_file(REFERENCE),
         "source_registry_sha256": sha256_file(SOURCES),
@@ -170,7 +201,7 @@ def build_candidates(*, run_tests: bool) -> tuple[dict[str, Any], list[dict[str,
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Review FATHER Programmer MIN reference solutions into Golden Case candidates.")
-    parser.add_argument("--validate-only", action="store_true", help="Validate metadata/source bindings without executing pytest.")
+    parser.add_argument("--validate-only", action="store_true", help="Validate metadata/source bindings without executing regression checks.")
     args = parser.parse_args()
     summary, candidates = build_candidates(run_tests=not args.validate_only)
     if not args.validate_only:

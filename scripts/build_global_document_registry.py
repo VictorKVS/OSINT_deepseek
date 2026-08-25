@@ -27,9 +27,28 @@ def designation_key(value: str | None) -> str | None:
     return re.sub(r"\s+", " ", value.strip().upper().replace("№ ", "№"))
 
 
+def _date_year(value: str) -> str | None:
+    match = re.search(r"\b(?:19|20)\d{2}\b", value)
+    return match.group(0) if match else None
+
+
 def canonical_document_id(designation: str | None, fallback: str | None) -> str:
     if designation:
-        value = designation.upper()
+        normalized = re.sub(r"\s+", " ", designation.strip().upper())
+        number = re.search(r"№\s*(\d+)\s*-?\s*ФЗ\b", normalized)
+        if "ФЕДЕРАЛЬНЫЙ ЗАКОН" in normalized and number:
+            year = _date_year(normalized)
+            return f"DOC-RU-FZ-{number.group(1)}-{year}" if year else f"DOC-RU-FZ-{number.group(1)}"
+        number = re.search(r"№\s*(\d+)\b", normalized)
+        year = _date_year(normalized)
+        if "ПРИКАЗ ФСТЭК" in normalized and number:
+            return f"DOC-RU-FSTEC-{number.group(1)}-{year}" if year else f"DOC-RU-FSTEC-{number.group(1)}"
+        if "ПРИКАЗ ФСБ" in normalized and number:
+            return f"DOC-RU-FSB-{number.group(1)}-{year}" if year else f"DOC-RU-FSB-{number.group(1)}"
+        if "ПОСТАНОВЛЕНИЕ ПРАВИТЕЛЬСТВА" in normalized and number:
+            return f"DOC-RU-PP-{number.group(1)}-{year}" if year else f"DOC-RU-PP-{number.group(1)}"
+
+        value = normalized
         replacements = {
             "ГОСТ Р ": "GOST-R-",
             "ГОСТ ": "GOST-",
@@ -55,16 +74,22 @@ def normalize_status(value: str | None) -> str:
     raw = str(value or "VERIFY_CURRENTNESS").upper()
     mapping = {
         "ACTIVE": "CURRENT",
+        "ACTIVE_WITH_AMENDMENT": "CURRENT",
+        "ACTIVE_AMENDMENT": "CURRENT",
         "CURRENT": "CURRENT",
         "FUTURE_EFFECTIVE": "FUTURE_EFFECTIVE",
+        "PUBLISHED_NOT_YET_EFFECTIVE": "FUTURE_EFFECTIVE",
         "CONDITIONAL": "CONDITIONAL",
         "SUPERSEDED": "SUPERSEDED",
         "REPLACED": "SUPERSEDED",
         "NOT_VALID_IN_RF": "SUPERSEDED",
         "REPEALED": "REPEALED",
         "DRAFT": "DRAFT",
+        "CURRENTNESS_CHAIN_REVIEW_REQUIRED": "VERIFY_CURRENTNESS",
         "VERIFY_CURRENTNESS": "VERIFY_CURRENTNESS",
     }
+    if raw.startswith("SUPERSEDED"):
+        return "SUPERSEDED"
     return mapping.get(raw, "VERIFY_CURRENTNESS")
 
 
@@ -103,6 +128,11 @@ def new_document(*, document_id: str, designation: str | None, title: str, statu
                  verified_at: str | None, source_id: str, source_path: str, source_payload: dict[str, Any],
                  document_type: str | None = None) -> dict[str, Any]:
     dtype = document_type or doc_type(designation)
+    verification_state = (
+        source_payload.get("verification_state")
+        or source_payload.get("detail_metadata_state")
+        or source_payload.get("currentness_evidence_state")
+    )
     return {
         "document_id": document_id,
         "jurisdiction": "RU",
@@ -124,7 +154,7 @@ def new_document(*, document_id: str, designation: str | None, title: str, statu
                 "observed_status": status,
                 "observed_designation": designation,
                 "observed_title": title,
-                "verification_state": source_payload.get("verification_state") or source_payload.get("detail_metadata_state"),
+                "verification_state": verification_state,
                 "official_source_url": official_url,
             }
         ],
@@ -174,7 +204,7 @@ def add_relation(relations: list[dict[str, Any]], *, from_id: str, relation_type
 
 def add_binding(bindings: list[dict[str, Any]], *, document_id: str, subject_type: str, subject_id: str,
                 applicability: str, activation: str | None, legal_force: str, review_state: str,
-                source_id: str) -> None:
+                source_id: str, maturity_level: str = "MIN", importance_class: str = "NECESSARY") -> None:
     identity = (document_id, subject_type, subject_id, applicability, activation)
     if any((r["document_id"], r["subject_type"], r["subject_id"], r["applicability"], r.get("activation_condition")) == identity for r in bindings):
         return
@@ -186,9 +216,22 @@ def add_binding(bindings: list[dict[str, Any]], *, document_id: str, subject_typ
         "applicability": applicability,
         "activation_condition": activation,
         "legal_force_class": legal_force,
+        "maturity_level": maturity_level,
+        "importance_class": importance_class,
         "review_state": review_state,
         "source_id": source_id,
     })
+
+
+def add_role_and_kb_bindings(bindings: list[dict[str, Any]], *, document_id: str, applicability: str,
+                             activation: str | None, legal_force: str, review_state: str,
+                             source_id: str) -> None:
+    add_binding(bindings, document_id=document_id, subject_type="ROLE", subject_id="PROGRAMMER",
+                applicability=applicability, activation=activation, legal_force=legal_force,
+                review_state=review_state, source_id=source_id)
+    add_binding(bindings, document_id=document_id, subject_type="KNOWLEDGE_BASE", subject_id="PROGRAMMING_KB",
+                applicability=applicability, activation=activation, legal_force=legal_force,
+                review_state=review_state, source_id=source_id)
 
 
 def import_pdn(payload: dict[str, Any], source: dict[str, Any], add_doc, bindings, relations) -> None:
@@ -221,9 +264,10 @@ def import_espd(payload: dict[str, Any], source: dict[str, Any], add_doc, bindin
             document_type="NATIONAL_STANDARD",
         )
         canonical = add_doc(incoming, designation_key(designation))
-        add_binding(bindings, document_id=canonical, subject_type="ROLE", subject_id="PROGRAMMER",
-                    applicability="ESPD_PROGRAM_DOCUMENTATION", activation="project, contract, customer or regulatory context activates ESPD requirements",
-                    legal_force="NATIONAL_STANDARD_CHECK_APPLICABILITY", review_state="APPLICABILITY_REVIEW_REQUIRED", source_id=source["source_id"])
+        add_role_and_kb_bindings(bindings, document_id=canonical, applicability="ESPD_PROGRAM_DOCUMENTATION",
+                                 activation="project, contract, customer or regulatory context activates ESPD requirements",
+                                 legal_force="NATIONAL_STANDARD_CHECK_APPLICABILITY",
+                                 review_state="APPLICABILITY_REVIEW_REQUIRED", source_id=source["source_id"])
         if row.get("superseded_by"):
             add_relation(relations, from_id=canonical, relation_type="SUPERSEDED_BY", to_designation=str(row["superseded_by"]), source_id=source["source_id"])
 
@@ -242,6 +286,9 @@ def import_automated_systems(payload: dict[str, Any], source: dict[str, Any], ad
         )
         canonical = add_doc(incoming, designation_key(designation))
         add_binding(bindings, document_id=canonical, subject_type="ROLE", subject_id=role_id,
+                    applicability="AUTOMATED_SYSTEMS_CONDITIONAL", activation=activation,
+                    legal_force="NATIONAL_STANDARD_CHECK_PROJECT_REFERENCE", review_state="CONDITIONAL", source_id=source["source_id"])
+        add_binding(bindings, document_id=canonical, subject_type="KNOWLEDGE_BASE", subject_id="PROGRAMMING_KB",
                     applicability="AUTOMATED_SYSTEMS_CONDITIONAL", activation=activation,
                     legal_force="NATIONAL_STANDARD_CHECK_PROJECT_REFERENCE", review_state="CONDITIONAL", source_id=source["source_id"])
         replaced = row.get("replaces") or row.get("replaces_for_rf_use")
@@ -287,11 +334,114 @@ def import_role_baseline(payload: dict[str, Any], source: dict[str, Any], add_do
                 add_relation(relations, from_id=canonical, relation_type="SUPERSEDES", to_designation=str(replaced), source_id=source["source_id"])
 
 
+def _official_url(row: dict[str, Any]) -> str | None:
+    for key in ("official_publication", "official_source", "official_source_url", "official_publication_locator"):
+        value = str(row.get(key) or "").strip()
+        if value.startswith("https://"):
+            return value
+    return None
+
+
+def import_fstec_regulated(payload: dict[str, Any], source: dict[str, Any], add_doc, bindings, relations) -> None:
+    for context in payload.get("contexts", []) or []:
+        context_id = str(context.get("context_id") or "FSTEC_REGULATED_CONTEXT")
+        activation = str(context.get("activation") or f"project/system context activates {context_id}")
+        for row in context.get("documents", []) or []:
+            designation = str(row.get("designation") or "").strip()
+            if not designation:
+                continue
+            incoming = new_document(
+                document_id=canonical_document_id(designation, None), designation=designation,
+                title=str(row.get("title") or designation),
+                status=normalize_status(row.get("status_on_snapshot_date") or row.get("status")),
+                effective_from=row.get("effective_from"), official_url=_official_url(row), revision=None,
+                verified_at=payload.get("snapshot_date"), source_id=source["source_id"], source_path=source["path"],
+                source_payload=row, document_type="REGULATOR_ACT",
+            )
+            canonical = add_doc(incoming, designation_key(designation))
+            add_role_and_kb_bindings(bindings, document_id=canonical, applicability=f"FSTEC_{context_id}",
+                                     activation=activation, legal_force="REGULATOR_ACT_CONDITIONAL_BY_SYSTEM_CONTEXT",
+                                     review_state=str(context.get("state") or "APPLICABILITY_REVIEW_REQUIRED"),
+                                     source_id=source["source_id"])
+        for row in context.get("historical", []) or []:
+            designation = str(row.get("designation") or "").strip()
+            if not designation:
+                continue
+            incoming = new_document(
+                document_id=canonical_document_id(designation, None), designation=designation, title=designation,
+                status=normalize_status(row.get("status")), effective_from=None, official_url=None, revision=None,
+                verified_at=payload.get("snapshot_date"), source_id=source["source_id"], source_path=source["path"],
+                source_payload=row, document_type="REGULATOR_ACT",
+            )
+            canonical = add_doc(incoming, designation_key(designation))
+            if row.get("superseded_by"):
+                add_relation(relations, from_id=canonical, relation_type="SUPERSEDED_BY",
+                             to_designation=str(row["superseded_by"]), source_id=source["source_id"])
+
+
+def _scope_designations(sector: dict[str, Any]) -> list[str]:
+    values: list[str] = []
+    for key in ("baseline_designations", "current_core_designations", "current_seeds"):
+        for value in sector.get(key, []) or []:
+            if str(value).strip():
+                values.append(str(value).strip())
+    for key in ("primary_rule", "future_change"):
+        value = str(sector.get(key) or "").strip()
+        if value:
+            values.append(value)
+    return values
+
+
+def import_programmer_normative_scope(payload: dict[str, Any], source: dict[str, Any], add_doc, bindings, relations) -> None:
+    snapshot = payload.get("snapshot_date")
+    for sector in payload.get("sectors", []) or []:
+        sector_id = str(sector.get("sector_id") or "PROGRAMMER_RU_NORMATIVE")
+        activation = str(sector.get("activation") or "Russian project applicability review activates this normative sector")
+        review_state = str(sector.get("state") or "REVIEW_REQUIRED")
+        for row in sector.get("primary_sources", []) or []:
+            designation = str(row.get("designation") or "").strip()
+            if not designation:
+                continue
+            incoming = new_document(
+                document_id=canonical_document_id(designation, None), designation=designation,
+                title=str(row.get("title") or designation), status="VERIFY_CURRENTNESS",
+                effective_from=row.get("effective_from"), official_url=_official_url(row), revision=None,
+                verified_at=snapshot, source_id=source["source_id"], source_path=source["path"], source_payload=row,
+                document_type=doc_type(designation, "LEGAL_OR_REGULATORY_DOCUMENT"),
+            )
+            canonical = add_doc(incoming, designation_key(designation))
+            add_role_and_kb_bindings(bindings, document_id=canonical, applicability=sector_id,
+                                     activation=activation, legal_force="CHECK_PRIMARY_LEGAL_APPLICABILITY",
+                                     review_state=review_state, source_id=source["source_id"])
+
+        for designation in _scope_designations(sector):
+            incoming = new_document(
+                document_id=canonical_document_id(designation, None), designation=designation, title=designation,
+                status="VERIFY_CURRENTNESS", effective_from=None, official_url=None, revision=None,
+                verified_at=snapshot, source_id=source["source_id"], source_path=source["path"], source_payload=sector,
+                document_type=doc_type(designation),
+            )
+            canonical = add_doc(incoming, designation_key(designation))
+            add_role_and_kb_bindings(bindings, document_id=canonical, applicability=sector_id,
+                                     activation=activation, legal_force="CHECK_APPLICABILITY",
+                                     review_state=review_state, source_id=source["source_id"])
+
+        if sector_id == "PERSONAL_DATA_152_FZ":
+            for did in ("DOC-RU-FZ-152-2006", "DOC-RU-PP-1119-2012", "DOC-RU-FSTEC-21-2013", "DOC-RU-FSB-378-2014"):
+                add_role_and_kb_bindings(bindings, document_id=did, applicability=sector_id,
+                                         activation="software processes personal data",
+                                         legal_force="CHECK_PRIMARY_LEGAL_APPLICABILITY",
+                                         review_state="REUSE_EXISTING_SECURITY_PDN_KB",
+                                         source_id=source["source_id"])
+
+
 ADAPTERS = {
     "PDN_DOCUMENTS": import_pdn,
     "ESPD_RECORDS": import_espd,
     "AUTOMATED_SYSTEMS_RECORDS": import_automated_systems,
     "ROLE_BASELINE_DOCUMENTS": import_role_baseline,
+    "FSTEC_REGULATED_DOCUMENTS": import_fstec_regulated,
+    "PROGRAMMER_NORMATIVE_SCOPE": import_programmer_normative_scope,
 }
 
 
@@ -337,6 +487,9 @@ def build() -> tuple[dict[str, Any], dict[str, Any], dict[str, Any]]:
     relation_missing = [row for row in relations if row["from_document_id"] not in known_ids or row["to_document_id"] not in known_ids]
     for row in relation_missing:
         conflicts.append({"type": "RELATION_ENDPOINT_NOT_REGISTERED", **row})
+    binding_missing = [row for row in bindings if row["document_id"] not in known_ids]
+    for row in binding_missing:
+        conflicts.append({"type": "BINDING_DOCUMENT_NOT_REGISTERED", "binding_id": row["binding_id"], "document_id": row["document_id"]})
 
     status_counts: dict[str, int] = {}
     for row in documents:
@@ -344,7 +497,7 @@ def build() -> tuple[dict[str, Any], dict[str, Any], dict[str, Any]]:
         status_counts[status] = status_counts.get(status, 0) + 1
 
     registry = {
-        "schema_version": "1.0",
+        "schema_version": "1.1",
         "record_type": "FATHER_GLOBAL_DOCUMENT_REGISTRY",
         "registry_id": policy["registry_id"],
         "generated_at_epoch": time.time(),
@@ -361,18 +514,19 @@ def build() -> tuple[dict[str, Any], dict[str, Any], dict[str, Any]]:
             "duplicate_canonical_document_ids": len(documents) != len(known_ids),
             "conflicting_current_status_total": sum(1 for row in conflicts if row.get("type") == "CONFLICTING_CURRENT_STATUS"),
             "relation_missing_endpoint_total": len(relation_missing),
-            "ready_for_shared_use": not any(row.get("type") == "CONFLICTING_CURRENT_STATUS" for row in conflicts),
+            "binding_missing_document_total": len(binding_missing),
+            "ready_for_shared_use": not any(row.get("type") in {"CONFLICTING_CURRENT_STATUS", "BINDING_DOCUMENT_NOT_REGISTERED"} for row in conflicts),
         },
     }
     bindings_payload = {
-        "schema_version": "1.0",
+        "schema_version": "1.1",
         "record_type": "FATHER_GLOBAL_APPLICABILITY_BINDINGS",
         "registry_id": policy["registry_id"],
         "bindings_total": len(bindings),
         "bindings": bindings,
     }
     conflicts_payload = {
-        "schema_version": "1.0",
+        "schema_version": "1.1",
         "record_type": "FATHER_GLOBAL_DOCUMENT_REGISTRY_CONFLICTS",
         "registry_id": policy["registry_id"],
         "conflicts_total": len(conflicts),
@@ -383,7 +537,7 @@ def build() -> tuple[dict[str, Any], dict[str, Any], dict[str, Any]]:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Build the shared FATHER global document registry")
-    parser.add_argument("--strict", action="store_true", help="Fail if canonical status conflicts or missing relation endpoints exist")
+    parser.add_argument("--strict", action="store_true", help="Fail if canonical status conflicts, missing relation endpoints or missing binding documents exist")
     args = parser.parse_args()
     config = load_json(SOURCES_CONFIG)
     registry, bindings, conflicts = build()
@@ -402,7 +556,11 @@ def main() -> int:
         "bindings_path": out["bindings_path"],
         "conflicts_path": out["conflicts_path"],
     }, ensure_ascii=False, indent=2))
-    blockers = registry["acceptance"]["conflicting_current_status_total"] + registry["acceptance"]["relation_missing_endpoint_total"]
+    blockers = (
+        registry["acceptance"]["conflicting_current_status_total"]
+        + registry["acceptance"]["relation_missing_endpoint_total"]
+        + registry["acceptance"]["binding_missing_document_total"]
+    )
     return 1 if args.strict and blockers else 0
 
 

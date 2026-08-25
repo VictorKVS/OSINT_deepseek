@@ -2,18 +2,16 @@
 setlocal
 cd /d "%~dp0"
 
-set "PY=.venv\Scripts\python.exe"
-if not exist "%PY%" set "PY=python"
-
 echo ============================================================
 echo FATHER Programmer - Algorithms bibliography Telegram probe
 echo ============================================================
 echo Scope: algorithms + data structures + analysis + Python/Java/C++/Go/Rust
- echo Mode: search/probe only, no book download
- echo Workers: up to 5
- echo.
+echo Mode: search/probe only, no book download
+echo Workers: up to 5
+echo Credentials: Windows env / DPAPI bootstrap + Telethon session check
+echo.
 
-"%PY%" scripts\probe_programmer_algorithm_bibliography_telegram.py --priority ALL
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File "scripts\run_team_role_acquisition.ps1" -Role PROGRAMMER -AlgorithmBibliographyProbe --priority ALL
 set "RC=%ERRORLEVEL%"
 
 echo.

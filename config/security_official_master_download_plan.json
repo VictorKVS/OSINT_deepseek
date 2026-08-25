@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "plan_id": "FATHER-SECURITY-OFFICIAL-MASTER-001",
   "status": "ACTIVE",
   "workers": 5,
@@ -33,7 +33,13 @@
     "DOC-RU-RKN-179-2022": "https://publication.pravo.gov.ru/document/0001202211290008",
     "DOC-RU-RKN-180-2022": "https://publication.pravo.gov.ru/document/0001202212150022",
     "DOC-RU-RKN-187-2022": "https://publication.pravo.gov.ru/document/0001202212280052",
+    "DOC-RU-FSTEC-117-2025": "https://publication.pravo.gov.ru/document/0001202506170011",
     "DOC-RU-FSTEC-137-2026": "https://publication.pravo.gov.ru/document/0001202608110006",
+    "DOC-RU-FSTEC-230-2025": "https://publication.pravo.gov.ru/document/0001202509190005",
+    "DOC-RU-FSTEC-235-2017": "https://publication.pravo.gov.ru/document/0001201802220016",
+    "DOC-RU-FSTEC-239-2017": "https://publication.pravo.gov.ru/document/0001201803270041",
+    "DOC-RU-FSTEC-240-2023": "https://publication.pravo.gov.ru/document/0001202404170002",
+    "DOC-RU-FZ-187-2017": "https://publication.pravo.gov.ru/document/0001201707260023",
     "DOC-RU-FZ-149-2006": "https://government.ru/docs/all/98199/",
     "DOC-RU-FZ-323-2011": "https://government.ru/docs/all/100186/"
   },
@@ -43,7 +49,7 @@
       "title": "Федеральный закон от 26.07.2017 № 187-ФЗ «О безопасности критической информационной инфраструктуры Российской Федерации»",
       "domain": "KII,SECURITY_CORE",
       "legal_status": "CURRENT",
-      "official_source_url": "https://publication.pravo.gov.ru/Document/View/0001201707260023",
+      "official_source_url": "https://publication.pravo.gov.ru/document/0001201707260023",
       "maturity_level": "MIN",
       "importance_class": "NECESSARY"
     },
@@ -52,7 +58,7 @@
       "title": "Приказ ФСТЭК России от 21.12.2017 № 235",
       "domain": "KII,SECURITY_CORE",
       "legal_status": "VERIFY_CURRENTNESS",
-      "official_source_url": null,
+      "official_source_url": "https://publication.pravo.gov.ru/document/0001201802220016",
       "maturity_level": "MIN",
       "importance_class": "NECESSARY"
     },
@@ -61,24 +67,24 @@
       "title": "Приказ ФСТЭК России от 25.12.2017 № 239",
       "domain": "KII,SECURITY_CORE",
       "legal_status": "VERIFY_CURRENTNESS",
-      "official_source_url": "https://fstec.ru/normotvorcheskaya/akty/53-prikazy/1592-prikaz-fstek-rossii-ot-25-dekabrya-2017-g-n-239",
+      "official_source_url": "https://publication.pravo.gov.ru/document/0001201803270041",
       "maturity_level": "MIN",
       "importance_class": "NECESSARY"
     },
     {
       "document_id": "DOC-RU-FSTEC-240-2023",
-      "title": "Приказ ФСТЭК России от 28.11.2023 № 240 о требованиях к безопасной разработке программного обеспечения средств защиты информации",
+      "title": "Приказ ФСТЭК России от 01.12.2023 № 240 «Об утверждении Порядка проведения сертификации процессов безопасной разработки программного обеспечения средств защиты информации»",
       "domain": "SECURE_SOFTWARE_DEVELOPMENT",
-      "legal_status": "VERIFY_CURRENTNESS",
-      "official_source_url": "https://rg.ru/documents/2024/04/18/fstek-prikaz240-site-dok.html",
+      "legal_status": "CURRENT",
+      "official_source_url": "https://publication.pravo.gov.ru/document/0001202404170002",
       "maturity_level": "MEDIUM",
       "importance_class": "NECESSARY"
     },
     {
       "document_id": "DOC-RU-FSTEC-230-2025",
-      "title": "Приказ ФСТЭК России № 230 от 2025 года об изменении требований безопасной разработки",
+      "title": "Приказ ФСТЭК России от 30.06.2025 № 230 «О внесении изменений в Порядок проведения сертификации процессов безопасной разработки программного обеспечения средств защиты информации»",
       "domain": "SECURE_SOFTWARE_DEVELOPMENT",
-      "legal_status": "VERIFY_CURRENTNESS",
+      "legal_status": "CURRENT",
       "official_source_url": "https://publication.pravo.gov.ru/document/0001202509190005",
       "maturity_level": "MEDIUM",
       "importance_class": "NECESSARY"
@@ -124,6 +130,7 @@
     "a2_working_copy_never_satisfies_official_exact": true,
     "reference_hosts_are_never_used_as_official_fallback": true,
     "missing_official_route_is_gap_not_substitution": true,
+    "prefer_official_publication_route_over_secondary_official_landing_page": true,
     "kb_auto_promotion": false
   }
 }

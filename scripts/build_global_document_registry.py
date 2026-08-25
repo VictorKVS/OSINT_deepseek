@@ -176,9 +176,14 @@ def merge_document(target: dict[str, Any], incoming: dict[str, Any], conflicts: 
     rank = {"CURRENT": 6, "FUTURE_EFFECTIVE": 5, "CONDITIONAL": 4, "SUPERSEDED": 3, "REPEALED": 2, "DRAFT": 1, "VERIFY_CURRENTNESS": 0}
     if rank.get(observed, 0) > rank.get(current, 0):
         target["legal_status"] = observed
-    for key in ("effective_from", "current_revision_date", "official_source_url", "last_verified_at", "issuer"):
+    for key in ("designation", "effective_from", "current_revision_date", "official_source_url", "last_verified_at", "issuer"):
         if not target.get(key) and incoming.get(key):
             target[key] = incoming[key]
+    generic_types = {"OFFICIAL_DOCUMENT", "LEGAL_OR_REGULATORY_DOCUMENT"}
+    target_type = str(target.get("document_type") or "")
+    incoming_type = str(incoming.get("document_type") or "")
+    if target_type in generic_types and incoming_type and incoming_type not in generic_types:
+        target["document_type"] = incoming_type
     if incoming.get("title") and len(str(incoming["title"])) > len(str(target.get("title") or "")):
         target["title"] = incoming["title"]
     alias = incoming.get("document_id")

@@ -1,0 +1,38 @@
+{
+  "schema_version": "1.0",
+  "policy_id": "FATHER-PROGRAMMER-GOLDEN-CASE-REVIEW-001",
+  "status": "ACTIVE_MIN_FOUNDATION",
+  "role_id": "PROGRAMMER",
+  "maturity_level": "MIN",
+  "importance_class": "NECESSARY",
+  "principle": "Reference solutions become Golden Cases only after automated correctness checks, source alignment, critic review and explicit promotion.",
+  "automated_candidate_gates": [
+    "task belongs to TRAIN split",
+    "reference implementation exists",
+    "HOLDOUT implementation is absent",
+    "all source_refs resolve in Knowledge Source Registry",
+    "targeted regression tests pass"
+  ],
+  "critic_gates": [
+    "requirements satisfied",
+    "edge cases adequately covered",
+    "algorithmic choice is appropriate",
+    "security implications reviewed where applicable",
+    "decision summary is concise and source-traceable",
+    "no hidden dependency on HOLDOUT data"
+  ],
+  "states": [
+    "AUTOMATED_CHECKS_PENDING",
+    "CANDIDATE_PASS_CRITIC_PENDING",
+    "CANDIDATE_FAIL",
+    "GOLDEN_APPROVED"
+  ],
+  "promotion_rules": {
+    "automated_pass_is_not_golden": true,
+    "critic_review_required": true,
+    "human_or_authorized_professor_approval_required": true,
+    "holdout_never_exported_to_training": true,
+    "golden_case_versioned": true
+  },
+  "training_export_rule": "Only GOLDEN_APPROVED TRAIN records may be exported to SFT or preference datasets."
+}

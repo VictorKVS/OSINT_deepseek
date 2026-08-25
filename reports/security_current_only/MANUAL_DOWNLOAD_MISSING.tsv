@@ -1,0 +1,38 @@
+group	document_id	title	official_route	status
+A	DOC-RU-FZ-187-2017	Федеральный закон от 26.07.2017 № 187-ФЗ «О безопасности критической информационной инфраструктуры РФ»	https://publication.pravo.gov.ru/document/0001201707260023	DOWNLOAD_MANUALLY
+A	DOC-RU-FZ-149-2006	Федеральный закон от 27.07.2006 № 149-ФЗ «Об информации, информационных технологиях и о защите информации»	https://government.ru/docs/all/98199/	DOWNLOAD_MANUALLY
+A	DOC-RU-FZ-323-2011	Федеральный закон от 21.11.2011 № 323-ФЗ «Об основах охраны здоровья граждан в РФ»	https://government.ru/docs/all/100186/	DOWNLOAD_MANUALLY
+A	DOC-RU-PP-687-2008	Постановление Правительства РФ от 15.09.2008 № 687	https://government.ru/docs/all/65436/	DOWNLOAD_MANUALLY
+A	DOC-RU-PP-211-2012	Постановление Правительства РФ от 21.03.2012 № 211	OFFICIAL_ROUTE_TO_RESOLVE	DOWNLOAD_MANUALLY_RECORD_URL
+A	DOC-RU-RKN-178-2022	Приказ Роскомнадзора от 27.10.2022 № 178 — требования к оценке вреда	https://publication.pravo.gov.ru/document/0001202211290004	DOWNLOAD_MANUALLY
+A	DOC-RU-RKN-179-2022	Приказ Роскомнадзора от 28.10.2022 № 179 — подтверждение уничтожения ПДн	https://publication.pravo.gov.ru/document/0001202211290008	DOWNLOAD_MANUALLY
+A	DOC-RU-RKN-180-2022	Приказ Роскомнадзора от 28.10.2022 № 180 — формы уведомлений	https://publication.pravo.gov.ru/document/0001202212150022	DOWNLOAD_MANUALLY
+A	DOC-RU-RKN-187-2022	Приказ Роскомнадзора от 14.11.2022 № 187 — взаимодействие по реестру инцидентов ПДн	https://publication.pravo.gov.ru/document/0001202212280052	DOWNLOAD_MANUALLY
+A	DOC-RU-RKN-140-2025	Приказ Роскомнадзора от 19.06.2025 № 140 — обезличивание ПДн	https://publication.pravo.gov.ru/document/0001202508010002	DOWNLOAD_MANUALLY
+A	DOC-RU-FSTEC-137-2026	Приказ ФСТЭК России от 08.05.2026 № 137 — изменения к приказу № 117	https://publication.pravo.gov.ru/document/0001202608110006	DOWNLOAD_MANUALLY
+A	DOC-RU-MINZDRAV-340N-2023	Приказ Минздрава России от 03.07.2023 № 340н — угрозы безопасности ПДн	https://publication.pravo.gov.ru/document/0001202308080006	DOWNLOAD_MANUALLY
+A	DOC-RU-MINTRANS-141-2023	Приказ Минтранса России от 19.04.2023 № 141 — угрозы безопасности ПДн	https://publication.pravo.gov.ru/document/0001202305290032	DOWNLOAD_MANUALLY
+A	DOC-RU-MINPROMTORG-954-2022	Приказ Минпромторга России от 24.03.2022 № 954 — угрозы безопасности ПДн	https://publication.pravo.gov.ru/document/0001202207010031	DOWNLOAD_MANUALLY
+A	DOC-RU-MINEKONOM-785-2023	Приказ Минэкономразвития России от 13.11.2023 № 785 — угрозы безопасности ПДн	https://publication.pravo.gov.ru/document/0001202402220007	DOWNLOAD_MANUALLY
+A	DOC-RU-MINENERGO-819-2019	Приказ Минэнерго России от 02.08.2019 № 819 — угрозы безопасности ПДн	https://publication.pravo.gov.ru/document/0001201910150029	DOWNLOAD_MANUALLY
+A	DOC-RU-SFR-1284-2024	Приказ Социального фонда России от 24.07.2024 № 1284 — угрозы безопасности ПДн	OFFICIAL_ROUTE_TO_RESOLVE	DOWNLOAD_MANUALLY_RECORD_URL
+A	DOC-RU-ROSFMON-30-2019	Приказ Росфинмониторинга от 06.02.2019 № 30 — угрозы безопасности ПДн	OFFICIAL_ROUTE_TO_RESOLVE	DOWNLOAD_MANUALLY_RECORD_URL
+A	DOC-RU-ROSFMON-149-2025	Приказ Росфинмониторинга от 22.07.2025 № 149 — изменение приказа № 30	https://publication.pravo.gov.ru/document/0001202510280006	DOWNLOAD_MANUALLY
+A	DOC-RU-MINPROMTORG-1981-2023	Приказ Минпромторга России от 31.05.2023 № 1981 — сведения категорирования КИИ	https://publication.pravo.gov.ru/document/0001202308220008	DOWNLOAD_MANUALLY
+A	DOC-RU-PP-4-2026	Постановление Правительства РФ от 16.01.2026 № 4 — КИИ, атомная энергия	https://publication.pravo.gov.ru/document/0001202601160013	DOWNLOAD_MANUALLY
+A	DOC-RU-PP-92-2026	Постановление Правительства РФ от 06.02.2026 № 92 — КИИ, банковская и финансовая сфера	https://publication.pravo.gov.ru/document/0001202602070010	DOWNLOAD_MANUALLY
+A	DOC-RU-PP-246-2026	Постановление Правительства РФ от 07.03.2026 № 246 — КИИ, наука	https://publication.pravo.gov.ru/document/0001202603070013	DOWNLOAD_MANUALLY
+A	DOC-RU-PP-303-2026	Постановление Правительства РФ от 23.03.2026 № 303 — КИИ, госрегистрация недвижимости	https://publication.pravo.gov.ru/document/0001202603240036	DOWNLOAD_MANUALLY
+A	DOC-RU-PP-356-2026	Постановление Правительства РФ от 31.03.2026 № 356 — КИИ, ракетно-космическая промышленность	https://publication.pravo.gov.ru/document/0001202604010039	DOWNLOAD_MANUALLY
+B	DOC-RU-GOST-R-56939-2024	ГОСТ Р 56939-2024. Защита информации. Разработка безопасного ПО. Общие требования	https://protect.gost.ru/gost/details/f3818925-a96f-4f55-96e9-46b44720ee64	DOWNLOAD_FULL_TEXT_ARTIFACT
+B	DOC-RU-GOST-R-58412-2019	ГОСТ Р 58412-2019. Угрозы безопасности информации при разработке ПО	https://protect.gost.ru/gost/details/07745487-3b1c-4efd-aafb-a038b50037a0	DOWNLOAD_FULL_TEXT_ARTIFACT
+B	DOC-RU-GOST-R-71207-2024	ГОСТ Р 71207-2024. Статический анализ ПО. Общие требования	https://protect.gost.ru/gost/details/9dd6f064-6014-4416-a3ca-ef72ce0a6c3a	DOWNLOAD_FULL_TEXT_ARTIFACT
+C	DOC-RU-FSTEC-117-2025	Приказ ФСТЭК России № 117	CLOUD_RECOVERY	ALREADY_ACQUIRED_DO_NOT_REDOWNLOAD
+C	DOC-RU-FSTEC-230-2025	Приказ ФСТЭК России № 230	CLOUD_RECOVERY	ALREADY_ACQUIRED_DO_NOT_REDOWNLOAD
+C	DOC-RU-FSTEC-235-2017	Приказ ФСТЭК России № 235	CLOUD_RECOVERY	ALREADY_ACQUIRED_DO_NOT_REDOWNLOAD
+C	DOC-RU-FSTEC-239-2017	Приказ ФСТЭК России № 239	CLOUD_RECOVERY	ALREADY_ACQUIRED_DO_NOT_REDOWNLOAD
+C	DOC-RU-FSTEC-240-2023	Приказ ФСТЭК России № 240	CLOUD_RECOVERY	ALREADY_ACQUIRED_DO_NOT_REDOWNLOAD
+D	DOC-RU-FZ-152-2006	Федеральный закон № 152-ФЗ	LOCAL_A0	SHA_PROVENANCE_INVENTORY_ONLY
+D	DOC-RU-PP-1119-2012	Постановление Правительства РФ № 1119	LOCAL_A0	SHA_PROVENANCE_INVENTORY_ONLY
+D	DOC-RU-FSTEC-21-2013	Приказ ФСТЭК России № 21	LOCAL_A0	SHA_PROVENANCE_INVENTORY_ONLY
+D	DOC-RU-FSB-378-2014	Приказ ФСБ России № 378	LOCAL_A0	SHA_PROVENANCE_INVENTORY_ONLY

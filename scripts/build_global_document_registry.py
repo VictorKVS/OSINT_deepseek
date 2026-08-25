@@ -455,16 +455,20 @@ def build() -> tuple[dict[str, Any], dict[str, Any], dict[str, Any]]:
     bindings: list[dict[str, Any]] = []
 
     def add_doc(incoming: dict[str, Any], identity: str) -> str:
-        if not identity:
-            identity = incoming["document_id"]
+        incoming_id = str(incoming["document_id"])
+        existing_identity = id_to_identity.get(incoming_id)
+        if existing_identity:
+            identity = existing_identity
+        elif not identity:
+            identity = incoming_id
         if identity in documents_by_identity:
             target = documents_by_identity[identity]
             merge_document(target, incoming, conflicts)
-            id_to_identity[incoming["document_id"]] = identity
+            id_to_identity[incoming_id] = identity
             return target["document_id"]
         documents_by_identity[identity] = incoming
-        id_to_identity[incoming["document_id"]] = identity
-        return incoming["document_id"]
+        id_to_identity[incoming_id] = identity
+        return incoming_id
 
     imported_sources = []
     for source in config.get("sources", []):

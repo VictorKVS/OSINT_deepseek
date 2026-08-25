@@ -1,0 +1,25 @@
+name: Main Analyst Contract
+
+on:
+  pull_request:
+    paths:
+      - "scripts/run_programmer_book_main_analyst.py"
+      - "scripts/run_programmer_book_main_analyst_resilient.py"
+      - "tests/test_programmer_book_main_analyst_contract.py"
+      - "tests/test_programmer_book_main_analyst_resilient_contract.py"
+      - "RUN_PROGRAMMER_BOOK_MAIN_ANALYST_PILOT.cmd"
+      - ".github/workflows/main-analyst-contract.yml"
+  workflow_dispatch:
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Compile Main Analyst runners
+        run: python -m py_compile scripts/run_programmer_book_main_analyst.py scripts/run_programmer_book_main_analyst_resilient.py tests/test_programmer_book_main_analyst_contract.py tests/test_programmer_book_main_analyst_resilient_contract.py
+      - name: Run focused Main Analyst contract tests
+        run: python -m unittest tests.test_programmer_book_main_analyst_contract tests.test_programmer_book_main_analyst_resilient_contract -v

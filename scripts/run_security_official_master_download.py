@@ -6,6 +6,7 @@ import json
 import subprocess
 import sys
 import time
+from collections import Counter
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
 from pathlib import Path
@@ -15,14 +16,18 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 REPO_ROOT = SCRIPT_DIR.parent
 if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
 
 import run_security_current_only_5stream as base
 from download_progress_registry import DownloadProgressRegistry
+from father_osint.official_transport import RobustOfficialArtifactFetcher
 
 PLAN_PATH = REPO_ROOT / "config" / "security_official_master_download_plan.json"
 REPORT_PATH = REPO_ROOT / "reports" / "security_current_only" / "LATEST_MASTER_OFFICIAL_DOWNLOAD_RUN.json"
 BUILD_GLOBAL = REPO_ROOT / "scripts" / "build_global_document_registry.py"
 WORKERS = 5
+ROBUST_FETCHER = RobustOfficialArtifactFetcher(minimum_timeout_seconds=45.0)
 
 base.OFFICIAL_HOSTS.add("protect.gost.ru")
 
@@ -105,7 +110,13 @@ def merge_plan(plan: dict[str, Any]) -> tuple[list[dict[str, Any]], int]:
     overrides = plan.get("official_route_overrides") or {}
     for doc in docs.values():
         classes = doc.get("classifications") or []
-        strongest = sorted(classes, key=lambda c: (importance_rank.get(c["importance_class"], 9), maturity_rank.get(c["maturity_level"], 9)))[0]
+        strongest = sorted(
+            classes,
+            key=lambda c: (
+                importance_rank.get(c["importance_class"], 9),
+                maturity_rank.get(c["maturity_level"], 9),
+            ),
+        )[0]
         doc["maturity_level"] = strongest["maturity_level"]
         doc["importance_class"] = strongest["importance_class"]
         if overrides.get(doc["document_id"]):
@@ -145,6 +156,20 @@ def exact_reuse(doc: dict[str, Any]) -> dict[str, Any] | None:
     }
 
 
+def robust_fetch(url: str) -> tuple[bytes, str | None, str, str]:
+    artifact = ROBUST_FETCHER.fetch(
+        url,
+        timeout_seconds=base.TIMEOUT_SECONDS,
+        max_bytes=base.MAX_BYTES,
+    )
+    final_url = str(artifact.final_url or url)
+    if not base._is_official(final_url):
+        raise RuntimeError(f"redirected off official allowlist: {final_url}")
+    if not artifact.data:
+        raise RuntimeError("empty response")
+    return artifact.data, artifact.mime_type, final_url, "ROBUST_OFFICIAL_TRANSPORT"
+
+
 def acquire(doc: dict[str, Any], progress: DownloadProgressRegistry) -> dict[str, Any]:
     did = str(doc["document_id"])
     started = time.perf_counter()
@@ -161,7 +186,15 @@ def acquire(doc: dict[str, Any], progress: DownloadProgressRegistry) -> dict[str
 
     reused = exact_reuse(doc)
     if reused:
-        progress.update(did, status="REUSED", bytes_received=int(reused["byte_length"]), total_bytes=int(reused["byte_length"]), sha256=reused["sha256"], local_path=reused["raw_path"], force=True)
+        progress.update(
+            did,
+            status="REUSED",
+            bytes_received=int(reused["byte_length"]),
+            total_bytes=int(reused["byte_length"]),
+            sha256=reused["sha256"],
+            local_path=reused["raw_path"],
+            force=True,
+        )
         return {**common, **reused, "seconds": time.perf_counter() - started}
 
     if doc.get("download_status") == "LOCAL_A0_AVAILABLE":
@@ -182,12 +215,13 @@ def acquire(doc: dict[str, Any], progress: DownloadProgressRegistry) -> dict[str
             "status": "NEED_OFFICIAL_SOURCE",
             "network_used": False,
             "official_source_url": url or None,
+            "error_class": "MISSING_OR_NON_OFFICIAL_ROUTE",
             "seconds": time.perf_counter() - started,
         }
 
     progress.update(did, status="DOWNLOADING", force=True)
     try:
-        data, mime, final_url, transport = base._fetch(url)
+        data, mime, final_url, transport = robust_fetch(url)
         digest = hashlib.sha256(data).hexdigest()
         progress.update(did, status="HASHING", bytes_received=len(data), total_bytes=len(data), force=True)
         stem = base._safe_name(did)
@@ -213,6 +247,7 @@ def acquire(doc: dict[str, Any], progress: DownloadProgressRegistry) -> dict[str
             "currentness_verified": False,
             "promotion_block_reason": "CURRENTNESS_AND_AMENDMENT_CHAIN_NOT_VERIFIED",
             "source_url": final_url,
+            "requested_source_url": url,
             "transport": transport,
             "mime_type": mime,
             "byte_length": len(data),
@@ -224,18 +259,41 @@ def acquire(doc: dict[str, Any], progress: DownloadProgressRegistry) -> dict[str
             "seconds": time.perf_counter() - started,
         }
         base.META_DIR.mkdir(parents=True, exist_ok=True)
-        (base.META_DIR / f"{stem}.json").write_text(json.dumps(meta, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-        progress.update(did, status=semantic_status, bytes_received=len(data), total_bytes=len(data), sha256=digest, local_path=rel(raw_path), force=True)
+        (base.META_DIR / f"{stem}.json").write_text(
+            json.dumps(meta, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
+        progress.update(
+            did,
+            status=semantic_status,
+            bytes_received=len(data),
+            total_bytes=len(data),
+            sha256=digest,
+            local_path=rel(raw_path),
+            force=True,
+        )
         return {**meta, "status": "DOWNLOADED"}
     except Exception as exc:
         error = f"{type(exc).__name__}: {exc}"
         progress.update(did, status="FAILED", error=error, force=True)
-        return {**common, "status": "FAILED", "official_source_url": url, "error": error, "network_used": True, "seconds": time.perf_counter() - started}
+        return {
+            **common,
+            "status": "FAILED",
+            "official_source_url": url,
+            "error": error,
+            "error_class": type(exc).__name__,
+            "network_used": True,
+            "seconds": time.perf_counter() - started,
+        }
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Reuse-first official security document master downloader")
-    parser.add_argument("--necessary-only", action="store_true", help="Only execute NECESSARY items; default executes the full deduplicated plan")
+    parser.add_argument(
+        "--necessary-only",
+        action="store_true",
+        help="Only execute NECESSARY items; default executes the full deduplicated plan",
+    )
     args = parser.parse_args()
     started = time.perf_counter()
     plan = load_json(PLAN_PATH)
@@ -250,18 +308,24 @@ def main() -> int:
     progress = DownloadProgressRegistry(
         "SECURITY_ENGINEER",
         registry_key="security_official_master",
-        context={"task": "SECURITY_OFFICIAL_MASTER_DOWNLOAD", "workers": WORKERS, "mode": "NECESSARY_ONLY" if args.necessary_only else "ALL"},
+        context={
+            "task": "SECURITY_OFFICIAL_MASTER_DOWNLOAD",
+            "workers": WORKERS,
+            "mode": "NECESSARY_ONLY" if args.necessary_only else "ALL",
+        },
     )
-    progress.start([
-        {
-            "item_id": d["document_id"],
-            "file_name": d.get("title"),
-            "target_id": d.get("domain"),
-            "maturity_level": d.get("maturity_level"),
-            "importance_class": d.get("importance_class"),
-        }
-        for d in documents
-    ])
+    progress.start(
+        [
+            {
+                "item_id": d["document_id"],
+                "file_name": d.get("title"),
+                "target_id": d.get("domain"),
+                "maturity_level": d.get("maturity_level"),
+                "importance_class": d.get("importance_class"),
+            }
+            for d in documents
+        ]
+    )
 
     results: list[dict[str, Any]] = []
     with ThreadPoolExecutor(max_workers=WORKERS, thread_name_prefix="security-official-master") as executor:
@@ -269,11 +333,17 @@ def main() -> int:
         for future in as_completed(futures):
             result = future.result()
             results.append(result)
-            print(f"[{result.get('status')}] {result.get('document_id')} {result.get('sha256') or ''}")
+            suffix = result.get("sha256") or result.get("error_class") or ""
+            print(f"[{result.get('status')}] {result.get('document_id')} {suffix}")
     progress.finish()
 
     results.sort(key=lambda r: str(r.get("document_id") or ""))
     elapsed = time.perf_counter() - started
+    failed_classes = Counter(
+        str(r.get("error_class") or "UNKNOWN")
+        for r in results
+        if r.get("status") == "FAILED"
+    )
     counters = {
         "documents_unique_total": len(documents),
         "source_rows_total": source_rows,
@@ -283,11 +353,21 @@ def main() -> int:
         "downloaded_total": sum(r.get("status") == "DOWNLOADED" for r in results),
         "need_official_source_total": sum(r.get("status") == "NEED_OFFICIAL_SOURCE" for r in results),
         "failed_total": sum(r.get("status") == "FAILED" for r in results),
-        "bytes_downloaded": sum(int(r.get("byte_length") or 0) for r in results if r.get("status") == "DOWNLOADED"),
+        "bytes_downloaded": sum(
+            int(r.get("byte_length") or 0)
+            for r in results
+            if r.get("status") == "DOWNLOADED"
+        ),
     }
-    status = "FAILED" if counters["failed_total"] else ("PASS_WITH_GAPS" if counters["need_official_source_total"] else "PASS")
+    status = (
+        "FAILED"
+        if counters["failed_total"]
+        else "PASS_WITH_GAPS"
+        if counters["need_official_source_total"]
+        else "PASS"
+    )
     report = {
-        "schema_version": "1.0",
+        "schema_version": "1.1",
         "record_type": "SECURITY_OFFICIAL_MASTER_DOWNLOAD_RUN",
         "status": status,
         "observed_at": utc_now(),
@@ -296,17 +376,22 @@ def main() -> int:
         "execution_mode": "NECESSARY_ONLY" if args.necessary_only else "ALL_UNIQUE_DOCUMENTS",
         "global_registry_build_status": registry_build_status,
         **counters,
+        "failed_error_classes": dict(sorted(failed_classes.items())),
         "elapsed_seconds": elapsed,
         "throughput_downloaded_docs_per_second": counters["downloaded_total"] / elapsed if elapsed > 0 else 0.0,
         "speedup_vs_1_stream_pct": None,
         "eta_seconds": None,
+        "transport_policy": "RobustOfficialArtifactFetcher: bounded urllib primary plus TLS-verifying curl fallback; no TLS weakening and final host remains official allowlist constrained.",
         "reuse_policy": "Exact official SHA reuse first; declared LOCAL_A0 is not redownloaded; A2 does not satisfy official exact acquisition.",
         "legal_truth_policy": "Official exact bytes establish source evidence only. CURRENT status/amendment-chain verification remains a separate review gate.",
         "kb_auto_promotion": False,
         "results": results,
     }
     REPORT_PATH.parent.mkdir(parents=True, exist_ok=True)
-    REPORT_PATH.write_text(json.dumps(report, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    REPORT_PATH.write_text(
+        json.dumps(report, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
     print(json.dumps({k: v for k, v in report.items() if k != "results"}, ensure_ascii=False, indent=2))
     print(f"Report: {rel(REPORT_PATH)}")
     return 1 if counters["failed_total"] else 0

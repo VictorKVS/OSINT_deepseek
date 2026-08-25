@@ -10,6 +10,7 @@ def test_official_transport_diagnostic_is_read_only_and_uses_three_authority_fam
     assert "UrllibArtifactFetcher" in text
     assert "CurlArtifactFetcher" in text
     assert "RobustOfficialArtifactFetcher" in text
+    assert "sys.path.insert" in text
     assert "write_bytes(" not in text
     assert "raw_path" not in text
     assert "normalized_path" not in text
@@ -22,3 +23,12 @@ def test_official_transport_diagnostic_launcher_is_one_click_and_read_only():
     assert "diagnose_security_official_transport.py" in text
     assert "READ ONLY" in text
     assert "LATEST_OFFICIAL_TRANSPORT_DIAGNOSTIC.json" in text
+    assert "PYTHONPATH=%CD%" in text
+
+
+def test_master_launcher_fails_fast_when_transport_preflight_fails():
+    text = Path("RUN_SECURITY_OFFICIAL_MASTER_DOWNLOAD.cmd").read_text(encoding="utf-8")
+    assert text.index("diagnose_security_official_transport.py") < text.index("run_security_official_master_download.py")
+    assert "Official transport diagnostic failed" in text
+    assert "Full 37-document acquisition was NOT started" in text
+    assert "PYTHONPATH=%CD%" in text

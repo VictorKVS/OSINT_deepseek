@@ -62,9 +62,20 @@ if (-not $downloaded) {
             Select-Object -First 1
         if (-not $artifact) { throw "No non-expired FSTEC recovery artifact found" }
     }
-    gh api -H "Accept: application/vnd.github+json" "repos/$Repo/actions/artifacts/$($artifact.id)/zip" > $Bundle
-    if ($LASTEXITCODE -ne 0 -or -not (Test-Path $Bundle) -or (Get-Item $Bundle).Length -eq 0) {
-        throw "gh artifact download failed"
+
+    $runId = $artifact.workflow_run.id
+    if (-not $runId) { throw "Artifact workflow run id is missing" }
+    if (Test-Path $TmpDir) { Remove-Item -Recurse -Force $TmpDir }
+    New-Item -ItemType Directory -Path $TmpDir | Out-Null
+
+    gh run download $runId --repo $Repo -n $artifact.name -D $TmpDir
+    if ($LASTEXITCODE -ne 0) { throw "gh run download failed" }
+    $downloadedFiles = Get-ChildItem -Path $TmpDir -Recurse -File
+    if (-not $downloadedFiles) { throw "gh run download returned no files" }
+    if (Test-Path $Bundle) { Remove-Item -Force $Bundle }
+    Compress-Archive -Path (Join-Path $TmpDir "*") -DestinationPath $Bundle -Force
+    if (-not (Test-Path $Bundle) -or (Get-Item $Bundle).Length -eq 0) {
+        throw "gh artifact packaging failed"
     }
     $downloaded = $true
 }

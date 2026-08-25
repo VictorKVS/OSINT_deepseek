@@ -1,0 +1,113 @@
+{
+  "schema_version": "1.0",
+  "policy_id": "FATHER-PROGRAMMER-TRAINING-GYM-001",
+  "status": "ACTIVE_MIN_FOUNDATION",
+  "role_id": "PROGRAMMER",
+  "knowledge_base_id": "PROGRAMMING_KB",
+  "classification_standard": "config/father_scope_priority_standard.json",
+  "principle": "Specialize an existing coder model by training professional behavior and decision discipline; keep volatile standards and current regulatory truth in traceable retrieval rather than baking them blindly into model weights.",
+  "model_strategy": {
+    "train_from_scratch": false,
+    "base_model_required": true,
+    "weights_learn": [
+      "task decomposition",
+      "constraint extraction",
+      "standards-aware decision behavior",
+      "algorithm and design selection",
+      "test-first verification habits",
+      "secure coding habits",
+      "debugging and repair patterns",
+      "concise decision rationale"
+    ],
+    "retrieval_keeps_current": [
+      "Russian regulatory requirements",
+      "standards and specifications",
+      "language and framework documentation",
+      "version-sensitive security guidance",
+      "project-specific conventions"
+    ]
+  },
+  "pipeline": [
+    "TASK_INGEST",
+    "TASK_NORMALIZE",
+    "TASK_CLASSIFY",
+    "SOURCE_BIND",
+    "CANDIDATE_GENERATION",
+    "EXECUTION_AND_CHECKS",
+    "SCORING",
+    "CRITIC_REVIEW",
+    "GOLDEN_CASE",
+    "TRAINING_DATASET_EXPORT",
+    "MODEL_TRAINING",
+    "REGRESSION_EVALUATION",
+    "MODEL_PROMOTION"
+  ],
+  "dataset_rules": {
+    "train_and_holdout_must_not_overlap": true,
+    "holdout_tasks_must_not_be_exported_to_training": true,
+    "raw_task_source_is_immutable": true,
+    "normalized_task_is_versioned": true,
+    "golden_case_requires_review": true,
+    "long_private_chain_of_thought_is_not_training_target": true,
+    "allowed_reasoning_artifact": "concise plan, assumptions, decision summary and evidence references",
+    "source_ref_or_explicit_gap_required": true
+  },
+  "execution_policy": {
+    "trusted_reference_fixtures_may_run_locally": true,
+    "model_generated_code_requires_sandbox_before_unattended_execution": true,
+    "network_access_default": "DENY_FOR_TASK_EVALUATION",
+    "filesystem_scope_default": "EPHEMERAL_TASK_WORKDIR",
+    "time_limit_required": true,
+    "resource_limits_required_before_medium_maturity": true
+  },
+  "score_weights": {
+    "correctness_and_visible_tests": 30,
+    "holdout_or_hidden_tests": 30,
+    "requirement_compliance": 10,
+    "security": 10,
+    "algorithmic_efficiency": 10,
+    "maintainability_and_clarity": 5,
+    "evidence_and_standard_alignment": 5
+  },
+  "promotion_gates": {
+    "task_to_golden_case": [
+      "all mandatory checks pass",
+      "no unresolved critical security defect",
+      "decision summary is source-traceable",
+      "critic review completed"
+    ],
+    "model_candidate_to_promoted": [
+      "no regression on frozen baseline",
+      "holdout score improves or remains within approved tolerance",
+      "security score does not regress",
+      "results are measured rather than asserted",
+      "human promotion review completed"
+    ]
+  },
+  "maturity": {
+    "MIN": {
+      "importance_class": "NECESSARY",
+      "scope": "pure Python and deterministic tasks; task library, split discipline, prompt export, manifest, review contract"
+    },
+    "MEDIUM": {
+      "importance_class": "NECESSARY",
+      "scope": "pytest, SQL, HTTP/API, refactoring, debugging, secure coding, sandbox execution, preference pairs"
+    },
+    "MAX": {
+      "importance_class": "DESIRABLE",
+      "scope": "architecture, DevSecOps, performance, concurrency, project-scale tasks, benchmark-driven reward and automated regression league"
+    }
+  },
+  "telemetry_required": [
+    "tasks_total",
+    "train_tasks_total",
+    "holdout_tasks_total",
+    "golden_cases_total",
+    "training_examples_total",
+    "pass_rate",
+    "security_fail_rate",
+    "rework_rate",
+    "regression_failures_total"
+  ],
+  "telemetry_rule": "Never claim speedup, capacity, model improvement or ETA without measured comparable runs."
+}

@@ -1,0 +1,131 @@
+{
+  "schema_version": "1.0",
+  "decision_set_id": "FATHER-PROGRAMMER-MIN-CRITIC-001",
+  "policy_id": "FATHER-PROGRAMMER-GOLDEN-CASE-REVIEW-001",
+  "role_id": "PROGRAMMER",
+  "maturity_level": "MIN",
+  "importance_class": "NECESSARY",
+  "reviewer_role": "AUTHORIZED_PROFESSOR_CRITIC",
+  "review_basis": [
+    "config/programmer_training_task_library.json",
+    "training/programmer/min_reference_solutions.py",
+    "tests/test_programmer_training_reference_solutions.py",
+    "config/knowledge_source_registry.json",
+    "operator evidence: 8/8 stdlib regression checks PASS; HOLDOUT leakage 0"
+  ],
+  "promotion_rule": "An APPROVE decision is necessary but not sufficient: the local automated candidate artifact must also be PASS and hash-compatible before promotion.",
+  "decisions": [
+    {
+      "task_id": "PT-MIN-001",
+      "decision": "APPROVE",
+      "gates": {
+        "requirements_satisfied": "PASS",
+        "edge_cases_adequately_covered": "PASS",
+        "algorithmic_choice_appropriate": "PASS",
+        "security_implications_reviewed": "PASS_NOT_SECURITY_SENSITIVE",
+        "decision_summary_source_traceable": "PASS",
+        "no_holdout_dependency": "PASS"
+      },
+      "decision_summary": "Single-pass positive-value accumulation satisfies the function contract, preserves input and handles the empty-input identity case.",
+      "source_refs": ["PYTHON_LANGUAGE_REFERENCE", "SWEBOK_V4_SOFTWARE_CONSTRUCTION"]
+    },
+    {
+      "task_id": "PT-MIN-002",
+      "decision": "APPROVE",
+      "gates": {
+        "requirements_satisfied": "PASS",
+        "edge_cases_adequately_covered": "PASS",
+        "algorithmic_choice_appropriate": "PASS",
+        "security_implications_reviewed": "PASS_NOT_SECURITY_SENSITIVE",
+        "decision_summary_source_traceable": "PASS",
+        "no_holdout_dependency": "PASS"
+      },
+      "decision_summary": "A seen-set plus result-list preserves first-seen order for string inputs without mutating the source list; expected average complexity is linear.",
+      "source_refs": ["PYTHON_STANDARD_LIBRARY", "SWEBOK_V4_SOFTWARE_CONSTRUCTION"]
+    },
+    {
+      "task_id": "PT-MIN-003",
+      "decision": "APPROVE",
+      "gates": {
+        "requirements_satisfied": "PASS",
+        "edge_cases_adequately_covered": "PASS",
+        "algorithmic_choice_appropriate": "PASS",
+        "security_implications_reviewed": "PASS",
+        "decision_summary_source_traceable": "PASS",
+        "no_holdout_dependency": "PASS"
+      },
+      "decision_summary": "The parser explicitly rejects bool, accepts int and decimal string conversion, contains ValueError for malformed strings and lets no bad-item exception escape.",
+      "source_refs": ["PYTHON_LANGUAGE_REFERENCE", "NIST_SSDF_INPUT_VALIDATION_GUIDANCE"]
+    },
+    {
+      "task_id": "PT-MIN-004",
+      "decision": "APPROVE",
+      "gates": {
+        "requirements_satisfied": "PASS",
+        "edge_cases_adequately_covered": "PASS",
+        "algorithmic_choice_appropriate": "PASS",
+        "security_implications_reviewed": "PASS_NOT_SECURITY_SENSITIVE",
+        "decision_summary_source_traceable": "PASS",
+        "no_holdout_dependency": "PASS"
+      },
+      "decision_summary": "Lower-bound binary search returns the first occurrence and preserves the required O(log n) search complexity on sorted input.",
+      "source_refs": ["ACM_ALGORITHMICS_BODY_OF_KNOWLEDGE", "UNIVERSITY_ALGORITHMS_REFERENCE"]
+    },
+    {
+      "task_id": "PT-MIN-005",
+      "decision": "APPROVE",
+      "gates": {
+        "requirements_satisfied": "PASS",
+        "edge_cases_adequately_covered": "PASS",
+        "algorithmic_choice_appropriate": "PASS",
+        "security_implications_reviewed": "PASS_NOT_SECURITY_SENSITIVE",
+        "decision_summary_source_traceable": "PASS",
+        "no_holdout_dependency": "PASS"
+      },
+      "decision_summary": "Positive chunk size is enforced with ValueError; slicing produces deterministic chunks and leaves the input list unchanged.",
+      "source_refs": ["PYTHON_LANGUAGE_REFERENCE"]
+    },
+    {
+      "task_id": "PT-MIN-006",
+      "decision": "APPROVE",
+      "gates": {
+        "requirements_satisfied": "PASS",
+        "edge_cases_adequately_covered": "PASS",
+        "algorithmic_choice_appropriate": "PASS",
+        "security_implications_reviewed": "PASS_NOT_SECURITY_SENSITIVE",
+        "decision_summary_source_traceable": "PASS",
+        "no_holdout_dependency": "PASS"
+      },
+      "decision_summary": "Zero denominator follows the explicit default-return contract; all other values use ordinary division without hidden side effects.",
+      "source_refs": ["PYTHON_LANGUAGE_REFERENCE", "SWEBOK_V4_SOFTWARE_CONSTRUCTION"]
+    },
+    {
+      "task_id": "PT-MIN-007",
+      "decision": "APPROVE",
+      "gates": {
+        "requirements_satisfied": "PASS",
+        "edge_cases_adequately_covered": "PASS",
+        "algorithmic_choice_appropriate": "PASS",
+        "security_implications_reviewed": "PASS_NOT_SECURITY_SENSITIVE",
+        "decision_summary_source_traceable": "PASS",
+        "no_holdout_dependency": "PASS"
+      },
+      "decision_summary": "Dictionary accumulation preserves case exactly as required, handles empty input and has expected linear-time counting behavior.",
+      "source_refs": ["PYTHON_STANDARD_LIBRARY", "SWEBOK_V4_SOFTWARE_CONSTRUCTION"]
+    },
+    {
+      "task_id": "PT-MIN-008",
+      "decision": "APPROVE",
+      "gates": {
+        "requirements_satisfied": "PASS",
+        "edge_cases_adequately_covered": "PASS",
+        "algorithmic_choice_appropriate": "PASS",
+        "security_implications_reviewed": "PASS_NOT_SECURITY_SENSITIVE",
+        "decision_summary_source_traceable": "PASS",
+        "no_holdout_dependency": "PASS"
+      },
+      "decision_summary": "Two-pointer merge satisfies O(n+m), handles empty and duplicate-bearing inputs, does not call sorted on the merged data and does not mutate either source list.",
+      "source_refs": ["ACM_ALGORITHMICS_BODY_OF_KNOWLEDGE", "UNIVERSITY_ALGORITHMS_REFERENCE"]
+    }
+  ]
+}

@@ -14,6 +14,9 @@ from pathlib import Path
 from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
 DATA_ROOT = ROOT / "data" / "programming_kb_sources"
 REPORT_ROOT = ROOT / "reports" / "programming_kb_factory"
 GRAPH_OUT = REPORT_ROOT / "PROGRAMMING_KB_CANDIDATE_GRAPH.json"
@@ -227,12 +230,10 @@ def process_one(source_meta_path: Path) -> dict[str, Any]:
         "review_status": "SOURCE_REGISTERED",
     })
 
-    heading_nodes: dict[str, str] = {}
     for unit in corpus.semantic_units:
         if unit.unit_type != "HEADING":
             continue
         node_id = stable_node_id("SEC", target_id, unit.semantic_id)
-        heading_nodes[unit.semantic_id] = node_id
         nodes.append({
             "id": node_id,
             "type": "SECTION",

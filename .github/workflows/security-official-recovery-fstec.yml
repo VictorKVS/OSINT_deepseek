@@ -1,0 +1,99 @@
+name: Security Official FSTEC Recovery
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - agent/knowledge-factory-m1
+    paths:
+      - ".github/workflows/security-official-recovery-fstec.yml"
+      - "scripts/run_security_official_recovery_fstec.py"
+      - "scripts/run_security_official_master_download_multiroute.py"
+      - "scripts/stamp_security_recovery_environment.py"
+      - "config/security_official_route_recovery.json"
+
+permissions:
+  contents: read
+
+jobs:
+  recover-fstec-official-pdfs:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      FATHER_EXECUTION_ENVIRONMENT_ID: GITHUB_ACTIONS_UBUNTU_LATEST
+      PYTHONPATH: ${{ github.workspace }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Show execution environment
+        run: |
+          python --version
+          uname -a
+          getent hosts cdnstatic.rg.ru || true
+          getent hosts publication.pravo.gov.ru || true
+
+      - name: Run five-document official recovery
+        id: recovery
+        continue-on-error: true
+        run: python scripts/run_security_official_recovery_fstec.py
+
+      - name: Stamp execution environment
+        if: always()
+        run: python scripts/stamp_security_recovery_environment.py
+
+      - name: Show compact recovery report
+        if: always()
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = Path('reports/security_current_only/LATEST_FSTEC_OFFICIAL_RECOVERY_RUN.json')
+          if not p.exists():
+              print('RECOVERY_REPORT_MISSING')
+              raise SystemExit(0)
+          x = json.loads(p.read_text(encoding='utf-8'))
+          keys = [
+              'status','execution_environment_id','documents_unique_total',
+              'reused_exact_total','downloaded_total','failed_total',
+              'need_official_source_total','bytes_downloaded','elapsed_seconds',
+              'failed_error_classes'
+          ]
+          print(json.dumps({k:x.get(k) for k in keys}, ensure_ascii=False, indent=2))
+          PY
+
+      - name: Upload official recovery evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fstec-official-recovery-${{ github.run_id }}
+          if-no-files-found: warn
+          retention-days: 14
+          path: |
+            reports/security_current_only/LATEST_FSTEC_OFFICIAL_RECOVERY_RUN.json
+            data/security_current_only/raw/DOC-RU-FSTEC-*.bin
+            data/security_current_only/normalized/DOC-RU-FSTEC-*.txt
+            data/security_current_only/metadata/DOC-RU-FSTEC-*.json
+            config/security_official_route_recovery.json
+
+      - name: Enforce recovery result
+        if: always()
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = Path('reports/security_current_only/LATEST_FSTEC_OFFICIAL_RECOVERY_RUN.json')
+          if not p.exists():
+              raise SystemExit('recovery report missing')
+          x = json.loads(p.read_text(encoding='utf-8'))
+          downloaded = int(x.get('downloaded_total') or 0)
+          reused = int(x.get('reused_exact_total') or 0)
+          print(f'downloaded={downloaded} reused_exact={reused}')
+          raise SystemExit(0 if downloaded + reused > 0 else 2)
+          PY

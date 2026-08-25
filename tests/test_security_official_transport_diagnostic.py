@@ -1,15 +1,17 @@
 from pathlib import Path
 
 
-def test_official_transport_diagnostic_is_read_only_and_uses_three_authority_families():
+def test_official_transport_diagnostic_is_read_only_and_uses_official_route_matrix():
     text = Path("scripts/diagnose_security_official_transport.py").read_text(encoding="utf-8")
-    assert "READ_ONLY_NETWORK_PROBE" in text
+    assert "READ_ONLY_OFFICIAL_ROUTE_MATRIX" in text
     assert "publication.pravo.gov.ru" in text
     assert "government.ru" in text
     assert "protect.gost.ru" in text
-    assert "UrllibArtifactFetcher" in text
-    assert "CurlArtifactFetcher" in text
+    assert "rg.ru" in text
+    assert "fstec.ru" in text
     assert "RobustOfficialArtifactFetcher" in text
+    assert "reachable_hosts" in text
+    assert "unreachable_hosts" in text
     assert "sys.path.insert" in text
     assert "write_bytes(" not in text
     assert "raw_path" not in text

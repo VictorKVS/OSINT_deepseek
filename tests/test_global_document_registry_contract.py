@@ -16,7 +16,14 @@ def test_global_document_registry_policy_is_mandatory_and_shared():
 def test_existing_domain_registries_are_import_sources_not_parallel_truths():
     sources = json.loads(Path("config/global_document_registry_sources.json").read_text(encoding="utf-8"))
     enabled = {row["source_id"] for row in sources["sources"] if row.get("enabled")}
-    assert {"PDN_CURRENT", "PROGRAMMER_ESPD", "PROGRAMMER_AUTOMATED_SYSTEMS", "PROGRAMMER_RU_BASELINE"} <= enabled
+    assert {
+        "PDN_CURRENT",
+        "PROGRAMMER_ESPD",
+        "PROGRAMMER_AUTOMATED_SYSTEMS",
+        "PROGRAMMER_RU_BASELINE",
+        "PROGRAMMER_FSTEC_REGULATED",
+        "PROGRAMMER_RU_NORMATIVE_SCOPE",
+    } <= enabled
 
 
 def test_builder_deduplicates_shared_documents_and_preserves_observations():
@@ -28,6 +35,7 @@ def test_builder_deduplicates_shared_documents_and_preserves_observations():
     assert len(gost[0]["source_observations"]) >= 2
     assert any(row["document_id"] == "DOC-RU-FZ-152-2006" for row in registry["documents"])
     assert registry["acceptance"]["conflicting_current_status_total"] == 0
+    assert registry["acceptance"]["binding_missing_document_total"] == 0
     assert conflicts["conflicts_total"] == registry["conflicts_total"]
 
 
@@ -40,6 +48,40 @@ def test_programmer_and_kb_use_bindings_to_shared_document_ids():
     assert programmer
     assert programming_kb
     assert all(row["document_id"] in known for row in programmer + programming_kb)
+
+
+def test_programmer_l1_laws_and_fstec_live_once_in_global_registry():
+    registry, binding_payload, _ = build()
+    documents = {row["document_id"]: row for row in registry["documents"]}
+    assert "DOC-RU-FZ-162-2015" in documents
+    assert "DOC-RU-FZ-187-2017" in documents
+    assert "DOC-RU-FSTEC-117-2025" in documents
+    assert "DOC-RU-FSTEC-137-2026" in documents
+    assert documents["DOC-RU-FSTEC-117-2025"]["document_type"] == "REGULATOR_ACT"
+    assert documents["DOC-RU-FSTEC-137-2026"]["legal_status"] == "FUTURE_EFFECTIVE"
+
+    rows = binding_payload["bindings"]
+    for document_id in ("DOC-RU-FZ-162-2015", "DOC-RU-FZ-187-2017", "DOC-RU-FSTEC-117-2025"):
+        assert any(
+            row["document_id"] == document_id
+            and row["subject_type"] == "ROLE"
+            and row["subject_id"] == "PROGRAMMER"
+            for row in rows
+        )
+        assert any(
+            row["document_id"] == document_id
+            and row["subject_type"] == "KNOWLEDGE_BASE"
+            and row["subject_id"] == "PROGRAMMING_KB"
+            for row in rows
+        )
+
+
+def test_every_global_binding_has_two_axis_classification():
+    _, binding_payload, _ = build()
+    rows = binding_payload["bindings"]
+    assert rows
+    assert all(row["maturity_level"] in {"MIN", "MEDIUM", "MAX"} for row in rows)
+    assert all(row["importance_class"] in {"NECESSARY", "DESIRABLE", "INTERESTING_LATER"} for row in rows)
 
 
 def test_library_order_start_rebuilds_and_attaches_global_registry():

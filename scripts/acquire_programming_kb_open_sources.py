@@ -65,7 +65,12 @@ def build_open_targets() -> list[dict[str, Any]]:
         target = target_by_id.get(str(route.get("id")))
         if not target:
             continue
-        rows.append({**target, **route})
+        rows.append({
+            **target,
+            **route,
+            "source_layer": "L4_BOOKS_EDUCATIONAL_PRACTICE",
+            "authority_class": "EXPLANATION_REFERENCE_IMPLEMENTATION_PRACTICE",
+        })
     rows.sort(key=lambda row: str(row.get("id")))
     return rows
 
@@ -102,24 +107,28 @@ def acquire_one(row: dict[str, Any], *, timeout: int, max_bytes: int) -> dict[st
             destination.write_bytes(data)
             status = "DOWNLOADED"
         metadata = {
-            "schema_version": "1.0",
+            "schema_version": "1.1",
             "record_type": "PROGRAMMING_KB_SOURCE",
             "target_id": target_id,
+            "source_id": row.get("source_id") or target_id,
+            "source_layer": row.get("source_layer"),
+            "authority_class": row.get("authority_class"),
+            "language": row.get("language"),
             "kind": row.get("kind"),
             "author": row.get("author"),
-            "title": row.get("title"),
+            "title": row.get("title") or row.get("name"),
             "year": row.get("year"),
             "topics": row.get("topics") or [],
             "route": row.get("route"),
             "rights_class": row.get("rights_class"),
-            "rights_basis": "OFFICIAL_OPEN_OR_INSTITUTIONAL_SOURCE",
+            "rights_basis": row.get("rights_basis") or "OFFICIAL_OPEN_OR_INSTITUTIONAL_SOURCE",
             "source_locator": url,
             "resolved_url": final_url,
             "content_type": content_type,
             "local_path": destination.relative_to(ROOT).as_posix(),
             "sha256": digest,
             "bytes": len(data),
-            "source_language": "en",
+            "source_language": row.get("source_language") or "en",
             "acquisition_status": status,
             "kb_auto_promotion": False,
             "elapsed_seconds": time.perf_counter() - started,
@@ -133,7 +142,10 @@ def acquire_one(row: dict[str, Any], *, timeout: int, max_bytes: int) -> dict[st
         return {
             "record_type": "PROGRAMMING_KB_SOURCE",
             "target_id": target_id,
-            "title": row.get("title"),
+            "source_id": row.get("source_id") or target_id,
+            "source_layer": row.get("source_layer"),
+            "authority_class": row.get("authority_class"),
+            "title": row.get("title") or row.get("name"),
             "source_locator": url,
             "route": row.get("route"),
             "rights_class": row.get("rights_class"),
@@ -198,7 +210,8 @@ def main() -> int:
     elapsed = time.perf_counter() - started
     summary = {
         "record_type": "PROGRAMMING_KB_OPEN_ACQUISITION",
-        "schema_version": "1.0",
+        "schema_version": "1.1",
+        "source_layer": "L4_BOOKS_EDUCATIONAL_PRACTICE",
         "status": "PASS" if failed == 0 else "PASS_WITH_GAPS" if downloaded + reused > 0 else "FAIL",
         "targets_total": len(results),
         "downloaded_total": downloaded,

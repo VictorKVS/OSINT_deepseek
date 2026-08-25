@@ -35,6 +35,19 @@ def test_min_task_library_has_12_unique_tasks_with_8_4_split():
     assert all(row["evaluation"]["kind"] == "PURE_FUNCTION" for row in tasks)
 
 
+def test_every_training_source_ref_resolves_to_verified_knowledge_registry_alias():
+    library = load("config/programmer_training_task_library.json")
+    registry = load("config/knowledge_source_registry.json")
+    resolved = set()
+    for source in registry["sources"]:
+        assert source["status"]
+        assert source["canonical_url"].startswith("https://")
+        resolved.add(source["source_id"])
+        resolved.update(source.get("aliases") or [])
+    refs = {ref for task in library["tasks"] for ref in task["source_refs"]}
+    assert refs <= resolved, f"unresolved source refs: {sorted(refs - resolved)}"
+
+
 def test_builder_validates_seed_without_generating_answers():
     script = ROOT / "scripts" / "build_programmer_training_gym.py"
     proc = subprocess.run(

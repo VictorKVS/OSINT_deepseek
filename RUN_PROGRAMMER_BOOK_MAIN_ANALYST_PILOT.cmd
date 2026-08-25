@@ -7,13 +7,14 @@ echo FATHER - PROGRAMMER BOOK MAIN ANALYST PILOT
 echo ============================================================
 echo Single book: Software Architecture: The Hard Parts
 echo Pilot: 3 batches, 1-stream baseline, resume-safe.
+echo Contract-aware JSON repair is enabled.
 echo KB auto-promotion is disabled.
 echo.
 
-python -m py_compile scripts\run_programmer_book_main_analyst.py
+python -m py_compile scripts\run_programmer_book_main_analyst.py scripts\run_programmer_book_main_analyst_resilient.py
 if errorlevel 1 goto :fail
 
-python scripts\run_programmer_book_main_analyst.py --limit-batches 3
+python scripts\run_programmer_book_main_analyst_resilient.py --limit-batches 3 --retries 1
 if errorlevel 1 goto :fail
 
 echo.

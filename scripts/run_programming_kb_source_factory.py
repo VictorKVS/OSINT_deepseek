@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 import sys
 import time
@@ -11,16 +12,34 @@ ROOT = Path(__file__).resolve().parents[1]
 REPORT_ROOT = ROOT / "reports" / "programming_kb_factory"
 LATEST = REPORT_ROOT / "LATEST_PROGRAMMING_KB_SOURCE_FACTORY.json"
 
-STEPS = [
-    ("RU_NORMATIVE_SCOPE_GATE", [sys.executable, "scripts/validate_programming_kb_ru_normative_scope.py"], True),
-    ("AUTHORITATIVE_L2_L3_L5_ACQUISITION", [sys.executable, "scripts/acquire_programming_kb_authoritative_sources.py"], True),
-    ("TELEGRAM_BIBLIOGRAPHY_PROBE", [sys.executable, "scripts/probe_programmer_bibliography_telegram.py"], False),
-    ("BIBLIOGRAPHY_ACQUISITION_PLAN", [sys.executable, "scripts/build_programmer_bibliography_acquisition_plan.py"], False),
-    ("BOOKS_AND_OPEN_PAPERS_ACQUISITION", [sys.executable, "scripts/acquire_programming_kb_open_sources.py"], True),
-    ("OWNED_TELEGRAM_ACQUISITION", [sys.executable, "scripts/download_programming_kb_owned_telegram_books.py"], False),
-    ("KNOWLEDGE_DECOMPOSITION", [sys.executable, "scripts/process_programming_kb_sources.py"], True),
-    ("LAYER_READINESS_AUDIT", [sys.executable, "scripts/audit_programming_kb_source_layers.py"], True),
-]
+
+def telegram_bibliography_probe_command() -> list[str]:
+    if os.name == "nt":
+        return [
+            "powershell.exe",
+            "-NoProfile",
+            "-ExecutionPolicy",
+            "Bypass",
+            "-File",
+            "scripts/run_team_role_acquisition.ps1",
+            "-Role",
+            "PROGRAMMER",
+            "-BibliographyProbe",
+        ]
+    return [sys.executable, "scripts/probe_programmer_bibliography_telegram.py"]
+
+
+def build_steps() -> list[tuple[str, list[str], bool]]:
+    return [
+        ("RU_NORMATIVE_SCOPE_GATE", [sys.executable, "scripts/validate_programming_kb_ru_normative_scope.py"], True),
+        ("AUTHORITATIVE_L2_L3_L5_ACQUISITION", [sys.executable, "scripts/acquire_programming_kb_authoritative_sources.py"], True),
+        ("TELEGRAM_BIBLIOGRAPHY_PROBE", telegram_bibliography_probe_command(), False),
+        ("BIBLIOGRAPHY_ACQUISITION_PLAN", [sys.executable, "scripts/build_programmer_bibliography_acquisition_plan.py"], False),
+        ("BOOKS_AND_OPEN_PAPERS_ACQUISITION", [sys.executable, "scripts/acquire_programming_kb_open_sources.py"], True),
+        ("OWNED_TELEGRAM_ACQUISITION", [sys.executable, "scripts/download_programming_kb_owned_telegram_books.py"], False),
+        ("KNOWLEDGE_DECOMPOSITION", [sys.executable, "scripts/process_programming_kb_sources.py"], True),
+        ("LAYER_READINESS_AUDIT", [sys.executable, "scripts/audit_programming_kb_source_layers.py"], True),
+    ]
 
 
 def run_step(name: str, command: list[str], required: bool) -> dict[str, Any]:
@@ -63,7 +82,7 @@ def main() -> int:
     started = time.perf_counter()
     REPORT_ROOT.mkdir(parents=True, exist_ok=True)
     rows: list[dict[str, Any]] = []
-    for name, command, required in STEPS:
+    for name, command, required in build_steps():
         if name == "BIBLIOGRAPHY_ACQUISITION_PLAN":
             probe = find_step(rows, "TELEGRAM_BIBLIOGRAPHY_PROBE")
             if probe and probe.get("returncode") != 0:
@@ -99,7 +118,7 @@ def main() -> int:
     elapsed = time.perf_counter() - started
     summary = {
         "record_type": "PROGRAMMING_KB_SOURCE_FACTORY_RUN",
-        "schema_version": "1.1",
+        "schema_version": "1.2",
         "status": status,
         "technical_pipeline_pass": technical_pass,
         "programming_kb_min_ready": kb_min_ready,

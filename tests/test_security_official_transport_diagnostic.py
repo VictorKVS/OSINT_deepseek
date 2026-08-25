@@ -28,9 +28,10 @@ def test_official_transport_diagnostic_launcher_is_one_click_and_read_only():
     assert "PYTHONPATH=%CD%" in text
 
 
-def test_master_launcher_fails_fast_when_transport_preflight_fails():
+def test_master_launcher_uses_advisory_transport_and_multiroute_recovery():
     text = Path("RUN_SECURITY_OFFICIAL_MASTER_DOWNLOAD.cmd").read_text(encoding="utf-8")
-    assert text.index("diagnose_security_official_transport.py") < text.index("run_security_official_master_download.py")
-    assert "Official transport diagnostic failed" in text
-    assert "Full 37-document acquisition was NOT started" in text
+    assert "run_security_official_master_download_multiroute.py" in text
+    assert "diagnose_security_official_transport.py" not in text
+    assert "Transport health: advisory per-route" in text
+    assert "never a global stop gate" in text
     assert "PYTHONPATH=%CD%" in text

@@ -1,0 +1,63 @@
+{
+  "schema_version": "1.0",
+  "policy_id": "FATHER-PROGRAMMER-MIN-EXPANSION-001",
+  "status": "ACTIVE_MIN_EXPANSION",
+  "role_id": "PROGRAMMER",
+  "maturity_level": "MIN",
+  "importance_class": "NECESSARY",
+  "principle": "Expand only from reviewed GOLDEN_APPROVED TRAIN parents; derived tasks are candidates, not automatically trusted training data.",
+  "parent_requirements": {
+    "golden_cases_required": 8,
+    "state": "GOLDEN_APPROVED",
+    "training_ready": true,
+    "split": "TRAIN",
+    "holdout_dependency": false,
+    "promotion_summary_status": "PASS",
+    "holdout_exported_total": 0
+  },
+  "derivation": {
+    "modes": [
+      "IMPLEMENT_VARIANT",
+      "REPAIR_BUG",
+      "WRITE_TESTS",
+      "CODE_REVIEW",
+      "EDGE_CASE_ANALYSIS"
+    ],
+    "tasks_per_parent": 5,
+    "expected_total": 40,
+    "split": "TRAIN",
+    "synthetic_derivation": true,
+    "derive_from_holdout": false
+  },
+  "mode_objectives": {
+    "IMPLEMENT_VARIANT": "Re-implement the same contract from requirements and constraints without copying the reference solution verbatim.",
+    "REPAIR_BUG": "Diagnose and repair a deterministic defect while preserving the original contract.",
+    "WRITE_TESTS": "Design focused tests for normal, boundary and failure behavior without seeing HOLDOUT tasks.",
+    "CODE_REVIEW": "Review a defective implementation against contract, complexity and maintainability requirements and propose corrections.",
+    "EDGE_CASE_ANALYSIS": "Identify boundary conditions, invariants and failure modes and map them to concrete tests."
+  },
+  "derived_candidate_rules": {
+    "training_ready_default": false,
+    "golden_state_default": "DERIVED_CANDIDATE_PENDING",
+    "source_refs_inherited_from_parent": true,
+    "parent_golden_case_id_required": true,
+    "parent_sha_required": true,
+    "critic_review_required_before_training_export": true,
+    "automated_checks_required_before_critic": true,
+    "no_auto_promotion": true,
+    "holdout_content_must_not_appear": true
+  },
+  "next_gate": {
+    "name": "MIN_DERIVED_CANDIDATE_REVIEW",
+    "required_checks": [
+      "parent golden still hash-compatible",
+      "all 40 derived task ids are unique",
+      "8 tasks exist for each derivation mode",
+      "no HOLDOUT task id or implementation is present",
+      "source refs resolve",
+      "repair/review mutations are deterministic and syntactically valid where code is supplied",
+      "critic review before training_ready"
+    ]
+  },
+  "telemetry_rule": "Do not count derived candidates as training examples until their own review gate passes. Do not claim model improvement, speedup or ETA from corpus generation alone."
+}

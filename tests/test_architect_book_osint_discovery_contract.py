@@ -2,12 +2,18 @@ import json
 from pathlib import Path
 
 
-def test_architect_book_registry_has_original_16_targets():
+def test_active_architect_registry_tracks_current_15_gaps():
     payload = json.loads(Path("config/architect_book_acquisition_registry.json").read_text(encoding="utf-8"))
     targets = payload["targets"]
-    assert len(targets) == 16
-    assert {row["book_id"] for row in targets} == {f"ARCH-BOOK-{i:03d}" for i in range(1, 17)}
+    assert len(targets) == 15
+    assert {row["book_id"] for row in targets} == {f"ARCH-GAP-{i:03d}" for i in range(1, 16)}
     assert payload["policy"]["commercial_fulltext_auto_download"] is False
+    assert "G:/1/OTUS/Библиотека" in payload["basis"]
+
+
+def test_legacy_python_engineering_subset_is_preserved():
+    payload = json.loads(Path("config/architect_python_engineering_book_registry.json").read_text(encoding="utf-8"))
+    assert len(payload["targets"]) == 16
 
 
 def test_discovery_scans_local_before_telegram_and_never_downloads():

@@ -190,7 +190,7 @@ def main() -> int:
         "errors_total": len(errors),
         "errors": errors,
         "policy": registry.get("policy"),
-        "kb_auto_promotion": false
+        "kb_auto_promotion": False
     }
     REPORT.parent.mkdir(parents=True, exist_ok=True)
     REPORT.write_text(json.dumps(report, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")

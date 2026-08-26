@@ -1,0 +1,95 @@
+{
+  "schema_version": "father-osint.security-legal-analytics.v0.1",
+  "profile_id": "SECURITY-LEGAL-ANALYTICS-5STREAM-001",
+  "mode": "EXISTING_CORPUS_ONLY",
+  "workers": 5,
+  "inputs": {
+    "metadata_root": "data/security_current_only/metadata",
+    "normalized_root": "data/security_current_only/normalized",
+    "master_plan": "config/security_official_master_download_plan.json",
+    "stage_registry": "config/model_stage_registry.yaml",
+    "prompt_registry": "config/model_prompt_registry.json"
+  },
+  "principles": {
+    "no_network_acquisition": true,
+    "no_source_mutation": true,
+    "extract_candidates_from_unverified_text_only_with_hold_flag": true,
+    "currentness_and_identity_are_deterministic_gates": true,
+    "model_output_never_becomes_legal_truth": true,
+    "contradiction_is_never_asserted_by_keyword_match": true,
+    "main_analyst_review_required": true,
+    "kb_auto_promotion": false
+  },
+  "streams": [
+    {
+      "stream_id": "S1_IDENTITY_CURRENTNESS",
+      "role": "LEGAL_SOURCE_CONTROLLER",
+      "objective": "Inventory identity, provenance, legal status, currentness and text availability without semantic interpretation.",
+      "semantic": false,
+      "model_stages": ["M0_EVIDENCE_IDENTITY"],
+      "outputs": ["LEGAL_SOURCE_RECORD", "LEGAL_GATE_DECISION"]
+    },
+    {
+      "stream_id": "S2_TERMS_SCOPE",
+      "role": "LEGAL_TERMINOLOGY_ANALYST",
+      "objective": "Extract candidate definitions, terminology, scope and applicability clauses with exact line evidence.",
+      "semantic": true,
+      "model_stages": ["M4_SEMANTIC_STRUCTURE", "M5_TERMINOLOGY"],
+      "outputs": ["TERM_CANDIDATE", "DEFINITION_CANDIDATE", "SCOPE_CANDIDATE", "APPLICABILITY_CANDIDATE"]
+    },
+    {
+      "stream_id": "S3_REQUIREMENTS_OBLIGATIONS",
+      "role": "LEGAL_REQUIREMENTS_ANALYST",
+      "objective": "Extract candidate obligations, prohibitions, permissions, deadlines, actors and required evidence with exact line evidence.",
+      "semantic": true,
+      "model_stages": ["M6_KNOWLEDGE_EXTRACTION"],
+      "outputs": ["REQUIREMENT_CANDIDATE", "OBLIGATION_CANDIDATE", "PROHIBITION_CANDIDATE", "PERMISSION_CANDIDATE", "DEADLINE_CANDIDATE"]
+    },
+    {
+      "stream_id": "S4_RELATIONS_CONTRADICTIONS",
+      "role": "CROSS_DOCUMENT_LEGAL_ANALYST",
+      "objective": "Discover references and candidate cross-document relations; create contradiction-review pairs but never assert conflict without M8 verification.",
+      "semantic": true,
+      "model_stages": ["M7_RELATION_DISCOVERY", "M8_CONTRADICTION_VERIFICATION"],
+      "outputs": ["REFERENCE_CANDIDATE", "RELATION_CANDIDATE", "CONTRADICTION_REVIEW_PAIR", "TEMPORAL_CHANGE_CANDIDATE"]
+    },
+    {
+      "stream_id": "S5_APPLICABILITY_CONTROL_MAPPING",
+      "role": "LEGAL_IMPLEMENTATION_ANALYST",
+      "objective": "Prepare applicability and implementation-control candidates and assemble the main analyst review queue.",
+      "semantic": true,
+      "model_stages": ["M9_PROFESSOR_SYNTHESIS", "M10_INDEPENDENT_JUDGE"],
+      "outputs": ["APPLICABILITY_CANDIDATE", "CONTROL_MAPPING_CANDIDATE", "EVIDENCE_REQUIREMENT_CANDIDATE", "MAIN_ANALYST_WORK_ITEM"]
+    }
+  ],
+  "legal_gate": {
+    "promotion_allowed_statuses": ["CURRENT"],
+    "hold_statuses": ["VERIFY_CURRENTNESS", "FUTURE_EFFECTIVE", "SUPERSEDED", "CONDITIONAL"],
+    "require_document_identity_confirmed_for_promotion": true,
+    "require_currentness_verified_for_promotion": true,
+    "allow_candidate_extraction_when_promotion_blocked": true,
+    "known_detail_page_only_ids": [
+      "DOC-RU-GOST-R-56939-2024",
+      "DOC-RU-GOST-R-58412-2019",
+      "DOC-RU-GOST-R-71207-2024"
+    ]
+  },
+  "outputs": {
+    "root": "reports/security_legal_analytics",
+    "aggregate": "reports/security_legal_analytics/LATEST_5STREAM_LEGAL_ANALYTICS.json",
+    "main_analyst_queue": "reports/security_legal_analytics/LATEST_MAIN_ANALYST_QUEUE.json"
+  },
+  "telemetry": [
+    "documents_seen_total",
+    "documents_with_text_total",
+    "documents_hold_total",
+    "candidate_objects_total",
+    "requirements_candidates_total",
+    "cross_document_pairs_total",
+    "main_analyst_queue_total",
+    "elapsed_seconds",
+    "stream_elapsed_seconds",
+    "rework_rate",
+    "speedup_vs_1_stream_pct"
+  ]
+}

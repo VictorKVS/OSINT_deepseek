@@ -3,7 +3,6 @@ from __future__ import annotations
 import argparse
 import json
 import os
-import shutil
 from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Any
@@ -47,24 +46,38 @@ def candidate_roots(extra: str | None) -> list[Path]:
     return unique
 
 
-def discover_model_files(roots: list[Path], aliases: list[str], max_files: int = 20) -> list[str]:
-    aliases_cf = [a.casefold().replace("_", "-") for a in aliases]
-    matches: list[str] = []
+def index_model_files(roots: list[Path], max_files: int = 10000) -> list[Path]:
+    """Walk each configured root once, not once per model."""
+    found: list[Path] = []
+    seen: set[str] = set()
     for root in roots:
         if not root.exists() or not root.is_dir():
             continue
         try:
-            iterator = root.rglob("*")
-            for path in iterator:
-                if len(matches) >= max_files:
-                    return matches
+            for path in root.rglob("*"):
+                if len(found) >= max_files:
+                    return found
                 if not path.is_file() or path.suffix.lower() not in MODEL_SUFFIXES:
                     continue
-                name = path.name.casefold().replace("_", "-")
-                if any(alias in name for alias in aliases_cf):
-                    matches.append(str(path))
+                key = str(path).casefold()
+                if key in seen:
+                    continue
+                seen.add(key)
+                found.append(path)
         except (OSError, PermissionError):
             continue
+    return found
+
+
+def match_model_files(indexed: list[Path], aliases: list[str], max_files: int = 20) -> list[str]:
+    aliases_cf = [a.casefold().replace("_", "-") for a in aliases]
+    matches: list[str] = []
+    for path in indexed:
+        name = path.name.casefold().replace("_", "-")
+        if any(alias in name for alias in aliases_cf):
+            matches.append(str(path))
+            if len(matches) >= max_files:
+                break
     return matches
 
 
@@ -80,13 +93,14 @@ def main() -> int:
     queue = load_json(QUEUE)
     registry = load_json(REGISTRY)
     roots = candidate_roots(args.model_roots)
+    indexed_files = index_model_files(roots)
 
     models: list[dict[str, Any]] = []
     for row in registry.get("models", []) or []:
         if not isinstance(row, dict):
             continue
         aliases = [str(x) for x in row.get("aliases") or []]
-        paths = discover_model_files(roots, aliases)
+        paths = match_model_files(indexed_files, aliases)
         logical_available = bool(paths)
         models.append({
             **row,
@@ -159,6 +173,7 @@ def main() -> int:
                 "source_sha256": item.get("source_sha256"),
                 "document_kind": item.get("document_kind"),
                 "domains": item.get("domains") or [],
+                "object_path": item.get("object_path"),
                 "stage_id": stage,
                 "execution": "LOCAL_MODEL_CHAMPION_CHALLENGER",
                 "models": model_rows,
@@ -170,10 +185,11 @@ def main() -> int:
 
     detected = [m for m in models if m.get("availability") == "DISCOVERED_LOCAL_FILE"]
     payload = {
-        "schema_version": "father-osint.local-model-assignments.v0.1",
+        "schema_version": "father-osint.local-model-assignments.v0.2",
         "record_type": "LOCAL_MODEL_SEMIFABRICATE_ASSIGNMENT_PLAN",
         "status": "READY" if detected else "NO_LOCAL_MODELS_DISCOVERED",
         "model_roots_checked": [str(p) for p in roots],
+        "indexed_model_files_total": len(indexed_files),
         "models_registered_total": len(models),
         "models_discovered_total": len(detected),
         "models_discovered": [

@@ -3,9 +3,9 @@ setlocal EnableExtensions
 cd /d "%~dp0"
 
 echo ============================================================
-echo FATHER Architect - Missing Book OSINT Discovery
+echo FATHER Architect - Current Library Gap OSINT Discovery
  echo ============================================================
-echo Step 1: scan Downloads/OTUS/local corpus for the 16-book list
+echo Step 1: scan Downloads/OTUS/local corpus for the current 15-gap list
 echo Step 2: search Telegram only for books still missing locally
 echo Commercial titles: discovery metadata only, no auto-download
 echo Open/official titles: candidate review only

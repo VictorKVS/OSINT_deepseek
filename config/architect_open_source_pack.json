@@ -1,0 +1,66 @@
+{
+  "schema_version": "1.0",
+  "pack_id": "ARCHITECT-OPEN-SOURCES-001",
+  "purpose": "Acquire legally open, official or author-published architecture/SRE learning sources into the local OTUS library with provenance and SHA-256.",
+  "default_library_root": "G:/1/OTUS/Библиотека/5. Открытые официальные источники",
+  "policy": {
+    "official_or_author_source_only": true,
+    "commercial_fulltext_auto_download": false,
+    "same_origin_crawl_only": true,
+    "max_pages_per_web_book": 120,
+    "request_delay_seconds": 0.15,
+    "preserve_exact_html": true,
+    "sha256_required": true,
+    "kb_auto_promotion": false
+  },
+  "sources": [
+    {
+      "source_id": "OPEN-GOOGLE-SRE",
+      "title": "Site Reliability Engineering",
+      "source_type": "WEB_BOOK",
+      "root_url": "https://sre.google/sre-book/table-of-contents/",
+      "allowed_prefix": "https://sre.google/sre-book/",
+      "target_dir": "01 Google - Site Reliability Engineering",
+      "trust_class": "PRIMARY_TECHNICAL_AUTHORITY",
+      "license_note": "Official Google SRE site; read-online book"
+    },
+    {
+      "source_id": "OPEN-GOOGLE-SRE-WORKBOOK",
+      "title": "The Site Reliability Workbook",
+      "source_type": "WEB_BOOK",
+      "root_url": "https://sre.google/workbook/table-of-contents/",
+      "allowed_prefix": "https://sre.google/workbook/",
+      "target_dir": "02 Google - Site Reliability Workbook",
+      "trust_class": "PRIMARY_TECHNICAL_AUTHORITY",
+      "license_note": "Official Google SRE site; read-online book"
+    },
+    {
+      "source_id": "OPEN-GOOGLE-BSRS",
+      "title": "Building Secure and Reliable Systems",
+      "source_type": "GIT_REPOSITORY",
+      "repo_url": "https://github.com/google/building-secure-and-reliable-systems.git",
+      "target_dir": "03 Google - Building Secure and Reliable Systems",
+      "trust_class": "PRIMARY_TECHNICAL_AUTHORITY",
+      "license_note": "Official Google-published book repository"
+    },
+    {
+      "source_id": "OPEN-COSMIC-PYTHON",
+      "title": "Architecture Patterns with Python",
+      "source_type": "GIT_REPOSITORY",
+      "repo_url": "https://github.com/cosmicpython/book.git",
+      "target_dir": "04 Cosmic Python - Architecture Patterns with Python",
+      "trust_class": "AUTHOR_PUBLISHED_OPEN_BOOK",
+      "license_note": "Author-published repository; free online CC edition on cosmicpython.com"
+    },
+    {
+      "source_id": "OPEN-TESTING-GOAT",
+      "title": "Test-Driven Development with Python",
+      "source_type": "WEB_BOOK",
+      "root_url": "https://www.obeythetestinggoat.com/book/toc.html",
+      "allowed_prefix": "https://www.obeythetestinggoat.com/book/",
+      "target_dir": "05 Obey the Testing Goat - TDD with Python",
+      "trust_class": "AUTHOR_PUBLISHED_OPEN_BOOK",
+      "license_note": "Author site explicitly offers a free CC-licensed edition"
+    }
+  ]
+}

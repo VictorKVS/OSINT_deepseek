@@ -15,8 +15,9 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_DOWNLOADS = Path.home() / "Downloads"
-LIBRARY = ROOT / "data" / "knowledge_intake"
+LIBRARY = ROOT / "_LOCAL_DOWNLOADS_KB_INTAKE"
 OBJECTS = LIBRARY / "objects"
+QUARANTINE = LIBRARY / "quarantine"
 MANIFESTS = LIBRARY / "manifests"
 REPORT = ROOT / "reports" / "knowledge_intake" / "LATEST_DOWNLOADS_INTAKE.json"
 QUEUE = ROOT / "reports" / "knowledge_intake" / "LATEST_MODEL_WORK_QUEUE.json"
@@ -87,9 +88,12 @@ def sample_text(path: Path, limit: int = 200_000) -> str:
                 from pypdf import PdfReader  # type: ignore
                 reader = PdfReader(str(path))
                 parts: list[str] = []
+                chars = 0
                 for page in reader.pages[:8]:
-                    parts.append(page.extract_text() or "")
-                    if sum(len(x) for x in parts) >= limit:
+                    text = page.extract_text() or ""
+                    parts.append(text)
+                    chars += len(text)
+                    if chars >= limit:
                         break
                 return "\n".join(parts)[:limit]
             except Exception:
@@ -98,6 +102,7 @@ def sample_text(path: Path, limit: int = 200_000) -> str:
             import zipfile
             with zipfile.ZipFile(path) as zf:
                 chunks: list[str] = []
+                chars = 0
                 for name in zf.namelist():
                     low = name.lower()
                     if not low.endswith((".xml", ".html", ".xhtml")):
@@ -108,7 +113,8 @@ def sample_text(path: Path, limit: int = 200_000) -> str:
                         continue
                     text = re.sub(r"<[^>]+>", " ", text)
                     chunks.append(text)
-                    if sum(len(x) for x in chunks) >= limit:
+                    chars += len(text)
+                    if chars >= limit:
                         break
                 return "\n".join(chunks)[:limit]
     except Exception:
@@ -134,10 +140,11 @@ def classify(text: str, filename: str) -> dict[str, Any]:
             kind = value
             break
 
+    low_name = filename.lower()
     if kind == "UNKNOWN":
-        if filename.lower().endswith((".ppt", ".pptx")):
+        if low_name.endswith((".ppt", ".pptx")):
             kind = "PRESENTATION"
-        elif filename.lower().endswith((".epub",)):
+        elif low_name.endswith(".epub"):
             kind = "BOOK"
 
     trust = "UNKNOWN"
@@ -146,7 +153,14 @@ def classify(text: str, filename: str) -> dict[str, Any]:
     elif kind in {"BOOK", "ARTICLE", "PRESENTATION"}:
         trust = "A3_WORKING_SOURCE"
 
-    return {"authority": authority, "domains": domains, "document_kind": kind, "trust_class": trust}
+    relevant = kind != "UNKNOWN" or domains != ["OTHER"] or authority != "UNKNOWN"
+    return {
+        "authority": authority,
+        "domains": domains,
+        "document_kind": kind,
+        "trust_class": trust,
+        "relevant_for_models": relevant,
+    }
 
 
 def model_stages(kind: str) -> list[str]:
@@ -156,14 +170,13 @@ def model_stages(kind: str) -> list[str]:
     return base
 
 
-def unique_object_path(sha: str, suffix: str) -> Path:
-    return OBJECTS / sha[:2] / f"{sha}{suffix.lower()}"
+def object_path(root: Path, sha: str, suffix: str) -> Path:
+    return root / sha[:2] / f"{sha}{suffix.lower()}"
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Inventory and copy knowledge-bearing files from Downloads into the FATHER intake library.")
+    parser = argparse.ArgumentParser(description="Inventory and copy knowledge-bearing files from Downloads into the FATHER local intake library.")
     parser.add_argument("--downloads", default=os.environ.get("FATHER_DOWNLOADS_DIR") or str(DEFAULT_DOWNLOADS))
-    parser.add_argument("--recursive", action="store_true", default=True)
     args = parser.parse_args()
 
     source_root = Path(args.downloads).expanduser().resolve()
@@ -173,10 +186,10 @@ def main() -> int:
 
     REPORT.parent.mkdir(parents=True, exist_ok=True)
     OBJECTS.mkdir(parents=True, exist_ok=True)
+    QUARANTINE.mkdir(parents=True, exist_ok=True)
     MANIFESTS.mkdir(parents=True, exist_ok=True)
 
     paths = sorted(p for p in source_root.rglob("*") if p.is_file() and p.suffix.lower() in SUPPORTED)
-    seen_sha: set[str] = set()
     rows: list[dict[str, Any]] = []
     queue: list[dict[str, Any]] = []
 
@@ -191,16 +204,16 @@ def main() -> int:
         text = sample_text(path)
         cls = classify(text, path.name)
         mime, _ = mimetypes.guess_type(path.name)
-        obj = unique_object_path(sha, path.suffix)
+        target_root = OBJECTS if cls["relevant_for_models"] else QUARANTINE
+        obj = object_path(target_root, sha, path.suffix)
         obj.parent.mkdir(parents=True, exist_ok=True)
-        duplicate = sha in seen_sha or obj.exists()
+        duplicate = obj.exists()
         if not obj.exists():
             shutil.copy2(path, obj)
-        seen_sha.add(sha)
 
         source_id = "SRC-" + sha[:24]
         manifest = {
-            "schema_version": "father-osint.downloads-intake.v0.1",
+            "schema_version": "father-osint.downloads-intake.v0.2",
             "source_id": source_id,
             "sha256": sha,
             "byte_length": size,
@@ -215,13 +228,17 @@ def main() -> int:
             "source_locator_status": "LOCAL_DOWNLOAD_PATH_ONLY",
             "duplicate_exact": duplicate,
             "sample_text_chars": len(text),
-            "review_status": "INTAKE_REVIEW_REQUIRED",
+            "relevant_for_models": cls["relevant_for_models"],
+            "review_status": "INTAKE_REVIEW_REQUIRED" if cls["relevant_for_models"] else "QUARANTINED_UNCLASSIFIED",
             "kb_auto_promotion": False,
             "observed_at": utc_now(),
         }
         (MANIFESTS / f"{source_id}.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-        rows.append({**manifest, "status": "REUSED_EXACT" if duplicate else "INGESTED"})
+        status = "REUSED_EXACT" if duplicate else "INGESTED" if cls["relevant_for_models"] else "QUARANTINED"
+        rows.append({**manifest, "status": status})
 
+        if not cls["relevant_for_models"]:
+            continue
         queue.append({
             "work_item_id": "WI-" + sha[:24],
             "source_id": source_id,
@@ -251,17 +268,20 @@ def main() -> int:
     kind_counts = Counter(str(r.get("document_kind") or "UNKNOWN") for r in rows if r.get("status") in {"INGESTED", "REUSED_EXACT"})
     domain_counts: Counter[str] = Counter()
     for r in rows:
+        if not r.get("relevant_for_models"):
+            continue
         for d in r.get("domains") or []:
             domain_counts[str(d)] += 1
 
     summary = {
-        "schema_version": "father-osint.downloads-intake-run.v0.1",
+        "schema_version": "father-osint.downloads-intake-run.v0.2",
         "record_type": "DOWNLOADS_KNOWLEDGE_INTAKE_RUN",
         "status": "PASS",
         "downloads_root": str(source_root),
         "files_supported_total": len(paths),
         "ingested_total": sum(r.get("status") == "INGESTED" for r in rows),
         "reused_exact_total": sum(r.get("status") == "REUSED_EXACT" for r in rows),
+        "quarantined_total": sum(r.get("status") == "QUARANTINED" for r in rows),
         "read_failed_total": sum(r.get("status") == "READ_FAILED" for r in rows),
         "authority_counts": dict(sorted(authority_counts.items())),
         "document_kind_counts": dict(sorted(kind_counts.items())),
@@ -275,7 +295,7 @@ def main() -> int:
     }
     REPORT.write_text(json.dumps(summary, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     QUEUE.write_text(json.dumps({
-        "schema_version": "father-osint.model-work-queue.v0.1",
+        "schema_version": "father-osint.model-work-queue.v0.2",
         "record_type": "MODEL_WORK_QUEUE",
         "state": "READY_FOR_MODEL_ROUTER",
         "stage_registry": "config/model_stage_registry.yaml",

@@ -40,7 +40,7 @@ The 2014 translated full text above does **not** close the blocker for the 2008 
 
 ### Rejected candidates for 242-FZ / 03.12.2008
 
-- Repo `Chepenkoroman/duma_analysis`, commit `3875b7e726b2ad4af6f859fba85922360b84bfbe`, path `data/txt_output/508.txt`, type `TXT`: parliamentary/draft discussion and references to the genomic-registration bill/law; not the enacted law body. Classification: `PARLIAMENTARY_DISCUSSION / MENTION_ONLY / NOT_FULL_TEXT`.
+- Repo `Chepenkoroman/duma_analysis`, commit `3875b7e726b2ad4af6f859fba85922360b84bfbe`, path `data/txt_output/508.txt`, type `TXT`: State Duma plenary transcript / parliamentary material, not the enacted law body. Classification: `PARLIAMENTARY_TRANSCRIPT / MENTION_CONTEXT / NOT_FULL_TEXT`.
 - Repo `z0tedd/Auto-lawyer`, commit `bf09910fd953209dbb3fae50fe1d10c5792c9129`, path `KnowledgeBase/СВО/Контрактники/Поиск военнослужащего/Сдача ДНК/Сдача ДНК.txt`, type `TXT`: practical DNA-submission guide citing 242-FZ/2008 as a legal basis. Classification: `SECONDARY_PROCEDURE_GUIDE / MENTION_ONLY / NOT_FULL_TEXT`.
 
 Blocker remains: `GITHUB_FULL_TEXT: 242-ФЗ / 03.12.2008`.
@@ -50,9 +50,10 @@ Blocker remains: `GITHUB_FULL_TEXT: 242-ФЗ / 03.12.2008`.
 Repo: `Gevork23/dissertacia_project`
 Commit: `8b48b17c22f269b55b2903b408459e863d8fe61f`
 Path: `regression/ruslawod_pairs/pair_0018/new.txt`
-Type: `TXT`
+Type: `TXT/blob`
+Blob SHA: `9d95f6cbcecedb56280302349a6fc31c97ce133f`
 
-Body verification shows Federal Law No. `104-ФЗ` of 01.04.2020 (Tax Code amendments); `247-ФЗ` occurs only as a cross-reference. Classification: `SEARCH_FALSE_POSITIVE / DIFFERENT_ACT_104-FZ_2020 / CROSS_REFERENCE_TO_247-FZ / REJECT_FOR_TARGET`.
+Body verification shows **Government Resolution of the Russian Federation dated 08.05.2025 No. 612**, amending Government acts and referring to the Federal Law «Об обязательных требованиях в Российской Федерации». It is not the target Federal Law No. 247-FZ itself. Classification: `SEARCH_FALSE_POSITIVE / DIFFERENT_ACT_PP612_2025 / TITLE_CROSS_REFERENCE_TO_TARGET / REJECT_FOR_TARGET`.
 
 Primary official identity check for the target: official publication portal confirms Federal Law dated 31.07.2020 No. 247-FZ «Об обязательных требованиях в Российской Федерации», publication No. `0001202007310002`, publication date 31.07.2020.
 

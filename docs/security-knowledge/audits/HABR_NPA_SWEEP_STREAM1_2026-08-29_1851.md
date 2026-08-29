@@ -8,10 +8,12 @@ Scope: continuation of Habr 432466 and the user NPA list. GitHub copies are trea
 - RELIABLE_GITHUB_ACT_CANDIDATE: +0
 - REJECTED_MENTION_ONLY: +2
 - GITHUB_FULL_TEXT_BLOCKER: +5
-- PRIMARY_OFFICIAL_FULLTEXT_CONFIRMED: +2
+- PRIMARY_OFFICIAL_FULLTEXT_CONFIRMED: +1
+- PRIMARY_OFFICIAL_PDF_FULLTEXT_INDEX_CONFIRMED: +1
 - PRIMARY_INITIAL_PUBLICATION_CONFIRMED: +2
 - PRIMARY_AMENDMENT_CONFIRMED: +2
 - HABR_STALE_TITLE_CONFLICT: +1
+- PRIMARY_DIRECT_PDF_FETCH_BLOCKER: +1
 - exact duplicates: +0
 - body-level identity conflicts: +0
 
@@ -46,9 +48,9 @@ GitHub:
 
 Primary official source:
 - official Government PDF: https://static.government.ru/media/files/Pc7fHuejbNvqv17b0RJNv0RIqTo20lUV.pdf
-- body explicitly states: approved by Government order of 24.11.2023 № 3339-р
-- contains the Strategy body
-- classification: `PRIMARY_OFFICIAL_FULLTEXT_CONFIRMED / CURRENT_LIFECYCLE_UNRESOLVED`
+- official search/index extraction states that the Strategy is approved by Government order of 24.11.2023 № 3339-р and exposes the Strategy body
+- direct PDF fetch timed out during this pass, so page-level screenshot/body verification could not be completed
+- classification: `PRIMARY_OFFICIAL_PDF_FULLTEXT_INDEX_CONFIRMED / PRIMARY_DIRECT_PDF_FETCH_BLOCKER / CURRENT_LIFECYCLE_UNRESOLVED`
 
 Full-text gate: a copy must contain the approved Strategy, not only a citation to the order.
 

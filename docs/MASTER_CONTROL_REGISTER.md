@@ -98,6 +98,14 @@ Therefore the critical path is now:
 | OPP-P3 | OPP | Brand / Reputation Monitoring | ★★★★★ | M5 + watchlist/reporting | OPPORTUNITY |
 | OPP-P4 | OPP | Technology / Market Radar | ★★★★★ | M5 + M6 + later M8 | OPPORTUNITY |
 | OPP-P5 | OPP | Consent-Based Risk Intelligence | ★★★★☆ | M5/M6 + identity/legal/access controls | CONTROLLED FUTURE |
+| OPP-P6 | OPP | FATHER Academy / Engineering Polygon | ★★★★★ | TASK_KB + safe lab isolation + state-based verifier + professional KBs | CAPTURED / DEFERRED |
+| OPP-P7 | OPP | Regulatory Digital Twin + Continuous Compliance Control | ★★★★★ | SECURITY_KB + organization classification/applicability model + control mappings + Academy/Polygon verifier + protected control-agent runtime | CAPTURED / DEFERRED |
+
+### OPP-P7 target chain
+
+`regulation / ministry / regulator guidance → applicability → requirement → organizational/technical control → responsible role → implementation target → endpoint/network/server verifier → evidence → deviation → controlled remediation → continuous compliance state`.
+
+Long-term intent: the same machine-readable control model should drive (1) synthetic organization labs for people, (2) qualification of FATHER professional agents, and later (3) authorized monitoring of real organizations. Endpoint/network/server agents begin in **observe / explain / recommend / verify** mode; automatic remediation is introduced only for explicitly approved, reversible, bounded-risk controls with audit evidence.
 
 ## Technical debt
 

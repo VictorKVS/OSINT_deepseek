@@ -447,3 +447,44 @@ No new product is promoted by this event alone. Existing Telegram-dependent oppo
 5. Prove Telegram → `Material` + provenance + hash.
 6. Write live restart/rate/isolation/checkpoint acceptance tests.
 7. Produce transport ADR from measured evidence.
+
+---
+
+## 12. 2026-08-14 — Programmer Agent / PROGRAMMING_KB research track initiated
+
+**Stage / milestone:** parallel FATHER expert-agent research track; M5 Telegram remains the active delivery milestone.  
+**Trigger / problem:** FATHER needs a Programmer Agent that can implement approved engineering tasks and justify material technical choices with traceable evidence rather than citation count or technology fashion.  
+**Decision:** create `docs/father_agents/programmer/` and start PROGRAMMING_KB governance, source acquisition and evaluation planning before any executable Programmer Agent runtime.
+
+### J-020 — Evidence-grounded Programmer Agent
+
+The first baseline now defines:
+- D0-D3 decision-impact classes;
+- E0-E6 evidence classes;
+- Knowledge Object and Decision Evidence Bundle schemas;
+- source freshness/supersession controls;
+- counter-evidence, falsification and revisit requirements;
+- smallest-sufficient-complexity rule;
+- 12-domain profession coverage matrix;
+- MIN/MEDIUM/MAX knowledge/evaluation gates.
+
+Initial source anchors were verified and registered for SWEBOK V4.0a, ISO/IEC 25010:2023, NIST SSDF v1.1, NIST SSDF v1.2 draft monitoring, OWASP ASVS 5.0.0, SLSA v1.2 and OpenSSF Scorecard.
+
+Initial coverage audit exposes **10 unresolved P0 gaps**. The MIN gate requires **0 P0 gaps**, 12/12 operational domains covered, >=120 validated/limited Knowledge Objects, >=20 reviewable decision scenarios and >=10 end-to-end code+test+evidence scenarios.
+
+No runtime code is authorized by J-020. The first executable scope, if later approved, is bounded Python/backend engineering so the decision and evidence machinery can be evaluated before broad language expansion.
+
+Detailed record: `docs/journal/J-020_PROGRAMMER_AGENT_KB_TRACK_2026-08-14.md`.  
+Append-only record: `Tree_F/TF-0015_2026-08-14_PROGRAMMER_AGENT_KB_INITIATION.md`.
+
+### Result
+
+**PARTIAL PASS.** Product boundary, evidence model, source seed, roadmap and coverage matrix exist. Canonical Python/backend source cards and the first complete D2 decision case are next.
+
+### Next action
+
+1. Acquire Python/PEP/CPython canonical sources and version policy.
+2. Acquire HTTP/IETF, OpenAPI and PostgreSQL canonical sources.
+3. Create the first validated Knowledge Objects.
+4. Execute and review one full D2 decision trace.
+5. Start the Programmer Agent evaluation corpus before runtime orchestration design.

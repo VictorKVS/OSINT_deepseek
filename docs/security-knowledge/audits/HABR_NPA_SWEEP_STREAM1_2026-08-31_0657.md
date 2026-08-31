@@ -131,6 +131,7 @@ State:
 
 Identity:
 - target Resolution title in Habr is correct.
+- Habr's regulator section label still says `Министерство цифрового развития, связи и массовых коммуникаций Российской Федерации (Минкомсвязь)`, while the current Regulation expressly gives the official abbreviated name `Минцифры России`. Classification: `HABR_STALE_REGULATOR_SHORT_NAME_CONFLICT`; this is a section-label metadata conflict, not a target NPA identity conflict.
 
 Currentness:
 - current consolidated sources show edition 21.04.2026.
@@ -142,9 +143,11 @@ Completeness gate:
 - `FULL_TEXT` requires Resolution №418 plus complete current Ministry Regulation.
 
 State:
-`CURRENT_EDITION_2026-04-21_EFFECTIVE_2026-04-30 / LATEST_ENACTED_AMENDMENT_445_2026_CORROBORATED / DRAFT_CHANGE_2026-08-07_NOT_NPA / FINALIZATION_BLOCKER / GITHUB_FULL_TEXT_BLOCKER`.
+`HABR_STALE_REGULATOR_SHORT_NAME_CONFLICT / CURRENT_EDITION_2026-04-21_EFFECTIVE_2026-04-30 / LATEST_ENACTED_AMENDMENT_445_2026_CORROBORATED / DRAFT_CHANGE_2026-08-07_NOT_NPA / FINALIZATION_BLOCKER / GITHUB_FULL_TEXT_BLOCKER`.
 
-New gate: `FRESH_DRAFT_OF_CURRENT_ACT != ENACTED_CURRENT_EDITION`.
+New gates:
+- `FRESH_DRAFT_OF_CURRENT_ACT != ENACTED_CURRENT_EDITION`.
+- `SECTION_LABEL_CAN_BE_STALE_WHILE_TARGET_ACT_TITLE_IS_CORRECT`.
 
 ## 8. Government Resolution 16.03.2009 №228 — Roskomnadzor
 
@@ -178,7 +181,8 @@ New gate: `REPEALED_APPENDIX_IN_COPY_CAN_REVEAL_OLD_OR_MIXED_EDITION`.
 - `TRANSITIVE_AMENDMENT_CHAIN +1` (№40-FZ)
 - `DRAFT_NOT_NPA +1` (draft change to №418 dated 07.08.2026)
 - `OFFICIAL_PORTAL_SNIPPET_IDENTITY_NOISE +1` (FSTEC №172 publication listing)
-- `HABR_STALE_OR_REPEALED_TARGET_CONFLICT +0` for these eight targets
+- `HABR_STALE_REGULATOR_SHORT_NAME_CONFLICT +1` (`Минкомсвязь` vs `Минцифры России`)
+- `HABR_STALE_OR_REPEALED_TARGET_NPA_CONFLICT +0` for these eight target documents
 
 ## Next unchecked regulator queue
 

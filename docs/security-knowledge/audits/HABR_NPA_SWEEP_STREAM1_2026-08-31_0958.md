@@ -96,7 +96,7 @@ This latest amendment is primary-publication verified. Any GitHub candidate lack
 
 Current consolidated edition is 20.01.2026. The amending chain includes FSTEK Orders No. 121/2021, No. 172/2022, and latest No. 9 of 20.01.2026.
 
-Order No. 9 is registered by the Ministry of Justice on 20.04.2026 under No. `86119`, directly amends the Regulation approved by Order No. 55, and entered into force 02.05.2026. A direct primary publication identifier for Order No. 9 was not resolved in this pass: `LATEST_AMENDMENT_CORROBORATED / PRIMARY_PUBLICATION_METADATA_BLOCKER`.
+Order No. 9 is registered by the Ministry of Justice on 20.04.2026 under No. `86119`, directly amends the Regulation approved by Order No. 55, and entered into force 02.05.2026. The official-publication link resolves to publication No. `0001202604210031`; direct fetch of the primary page timed out in this pass. Classification: `OFFICIAL_PUBLICATION_POINTER_CORROBORATED / PRIMARY_DIRECT_FETCH_BLOCKER`, not a missing-publication-metadata blocker.
 
 Completeness: `FULL_TEXT = Order 55 shell + complete current Regulation + all current appendices/forms`. The current Regulation has at least three appendices/forms (application, decision, certificate); omission of any required appendix is `PARTIAL_TEXT`.
 
@@ -134,7 +134,8 @@ Completeness: `FULL_TEXT = Order shell + complete Procedure + all three current 
 - `PRIMARY_REPEAL_CLAUSE_FETCH_BLOCKER +1` (PP 982 relation)
 - `PRIMARY_LATEST_AMENDMENT_PUBLICATION_CONFIRMED +2` (FSTEK 33 via 148; FSTEK 240 via 230)
 - `PRIMARY_INITIAL_PUBLICATION_CONFIRMED +1` (FSTEK 240)
-- `PRIMARY_PUBLICATION_METADATA_BLOCKER +1` (FSTEK Order 9/2026 -> Order 55)
+- `OFFICIAL_PUBLICATION_POINTER_CORROBORATED +1` (FSTEK Order 9/2026 -> Order 55)
+- `PRIMARY_DIRECT_FETCH_BLOCKER +1` (same Order 9 official page timed out)
 - `ENACTED_FUTURE_CHANGE +2` (218-FZ: 01.10.2026, 26.11.2026)
 - `PREPARED_FUTURE_EDITION_UNRESOLVED_SOURCE +1` (218-FZ: 31.12.2026)
 
@@ -144,7 +145,7 @@ Completeness: `FULL_TEXT = Order shell + complete Procedure + all three current 
 2. `LEGACY_CERTIFICATE_TRANSITION != CONTINUED_ACT_VALIDITY`.
 3. `CURRENT_BODY_CAN_HAVE_MULTIPLE_ENACTED_FUTURE_LAYERS`.
 4. `PARTIAL_INTERNAL_REPEAL_OR_REWRITE != WHOLE_ACT_REPEALED`.
-5. `LATEST_AMENDMENT_CORROBORATED_WITHOUT_PRIMARY_PUBLICATION_ID = PRIMARY_METADATA_BLOCKER`.
+5. `OFFICIAL_PUBLICATION_LINK_RESOLVED_BUT_PRIMARY_FETCH_TIMEOUT = OFFICIAL_POINTER_CORROBORATED_NOT_DIRECT_FETCH`.
 6. `FSTEK_FULLTEXT = ORDER_SHELL + APPROVED_REGULATION/PROCEDURE + ALL_CURRENT_APPENDICES`.
 7. `PRIMARY_PUBLICATION_OF_REPLACEMENT_ACT != PRIMARY_DIRECT_VERIFICATION_OF_EVERY_REPEAL_APPENDIX_ITEM`.
 

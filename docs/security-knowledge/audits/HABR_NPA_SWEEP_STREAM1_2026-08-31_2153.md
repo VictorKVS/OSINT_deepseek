@@ -76,7 +76,7 @@ Classification:
 
 Completeness gate: `order + complete approved Requirements`; order without Requirements = `PARTIAL_TEXT`.
 
-### Роскомнадзор 02.02.2023 № 13 — identity and two-appendix completeness model confirmed
+### Роскомнадзор 02.02.2023 № 13 — identity and two-appendix completeness model confirmed; 2026 draft amendment found
 
 Primary publication identity:
 
@@ -94,12 +94,15 @@ The act has two integral approved components:
 
 Therefore `FULL_TEXT = order + Appendix 1 + Appendix 2`; a copy containing only the monitoring procedure or only the monitored-information list is `PARTIAL_TEXT`.
 
-No later repeal/amendment was confirmed in targeted searches. Direct primary consolidated status remains unclosed.
+A new draft amendment was confirmed: project ID `01/02/08-26/00170056`, prepared by Roskomnadzor on 07.08.2026 and placed for disclosure/public discussion. The project is not signed and therefore is **not an enacted NPA**. It proposes adding to Appendix 2 monitored resources operated by hosting providers and owners of information resources using recommendation technologies, reflecting Federal Laws № 406-ФЗ and № 408-ФЗ of 31.07.2023. As of this pass it remains `DRAFT_AMENDMENT_FOUND_NOT_NPA`; it must not be merged into the effective body of order № 13 until a signed/registered final act is confirmed.
 
 Classification:
 
 - `PRIMARY_INITIAL_PUBLICATION_POINTER_CONFIRMED = true`
 - `TWO_APPENDIX_COMPLETENESS_GATE = true`
+- `DRAFT_AMENDMENT_FOUND_NOT_NPA = true`
+- `DRAFT_PROJECT_ID = 01/02/08-26/00170056`
+- `FINALIZATION_STATUS_BLOCKER = true`
 - `PRIMARY_DIRECT_FETCH_BLOCKER = true`
 - `PRIMARY_CONSOLIDATED_CURRENT_STATUS_BLOCKER = true`
 - `HABR_IDENTITY_CONFLICT = false`.
@@ -179,6 +182,7 @@ This is an identity-association blocker for automated lifecycle extraction, not 
 5. `REGISTRATION_NUMBER_SEARCH_HIT_WITHOUT_LEGAL_CONTEXT = SEARCH_FALSE_POSITIVE`.
 6. `SAME_AUTHORITY + SAME_NUMBER + DIFFERENT_DATE != SAME_ACT`.
 7. `AMENDMENT_ASSOCIATION_REQUIRES_BASE_ACT_DATE_AND_TITLE_MATCH`.
+8. `DRAFT_AMENDMENT != EFFECTIVE_BODY_UNTIL_SIGNED_REGISTERED_AND_PUBLISHED`.
 
 ## Counters for this pass
 
@@ -194,6 +198,8 @@ This is an identity-association blocker for automated lifecycle extraction, not 
 - `BUILT_IN_SUNSET_CONFIRMED +1`
 - `TWO_APPENDIX_COMPLETENESS_GATE +2`
 - `REPLACEMENT_EDGE_CONFIRMED +2`
+- `DRAFT_AMENDMENT_FOUND_NOT_NPA +1`
+- `FINALIZATION_STATUS_BLOCKER +1`
 - `SAME_AUTHORITY_SAME_NUMBER_DIFFERENT_DATE_COLLISION +1`
 - `PRIMARY_DIRECT_FETCH_BLOCKER +5`
 

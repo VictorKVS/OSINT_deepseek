@@ -26,6 +26,7 @@ logs/
 # Runtime/local data
 data/osint/
 data/osint_dev/
+data/osint-workbench*/
 data/runtime/
 data/m5_live_telegram/
 .runtime/

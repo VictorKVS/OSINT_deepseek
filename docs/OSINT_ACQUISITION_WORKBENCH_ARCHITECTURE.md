@@ -166,6 +166,19 @@ Needed capabilities:
 - compare historical versions;
 - human confirmation for ambiguous forms / captchas / legal acknowledgements.
 
+#### Mandatory auto-capture mode
+Borrow the strongest evidence-preservation idea from investigation tools such as Hunchly: when enabled for a case, every visited target page is automatically preserved with:
+- original and final URL after redirects;
+- UTC timestamp;
+- HTML/raw response where lawful;
+- screenshot/PDF representation;
+- SHA-256;
+- case/source/job IDs;
+- access class;
+- immutable original + parsed derivative.
+
+The analyst should not have to remember to take screenshots manually.
+
 ### 2.6 Document extraction pipeline
 Documents are often more valuable than webpages.
 
@@ -215,6 +228,15 @@ Every edge must have:
 - confidence;
 - relation status: FACT / SOURCE_CLAIM / INFERENCE / HYPOTHESIS;
 - analyst note.
+
+#### Graph query helpers
+Add analyst-friendly relational operations inspired by graph investigation products:
+- shortest path;
+- common neighbors;
+- bounded N-hop expansion;
+- path constrained by relation type/date/source;
+- recurring motif/pattern search;
+- path explanation with evidence for every edge.
 
 ### 2.8 Timeline engine
 Dates must be first-class objects.
@@ -284,6 +306,34 @@ service tags / public references
   ↓
 possible controller / economic beneficiary
 ```
+
+#### Crypto TagPacks
+Support public and private tag sets:
+```yaml
+label:
+entity_id:
+chain:
+address_or_cluster:
+source:
+confidence:
+first_seen:
+last_verified:
+visibility: PUBLIC | PRIVATE | RESTRICTED
+analyst_or_provider:
+```
+
+#### Economic Event Layer
+Do not force non-crypto analysts to reason from raw transactions alone. Interpret groups of transactions into evidence-backed economic events:
+- exchange deposit/withdrawal;
+- sweep/consolidation;
+- bridge;
+- swap;
+- mixer interaction;
+- peel-chain behavior;
+- merchant/settlement-like pattern;
+- OTC-like settlement hypothesis.
+
+Every interpretation retains underlying tx IDs, rule/model version, confidence and alternatives.
 
 ### 2.11 Contradiction register
 The system must make contradictions visible instead of hiding them.
@@ -422,6 +472,121 @@ Sections:
 
 Every paragraph should be traceable to `finding_id` and `source_id`.
 
+### 2.19 Transform SDK and internal integration hub
+Use a Maltego-like transform concept, but evidence-first.
+
+Each transform declares:
+```yaml
+transform_id:
+input_entity_types:
+output_entity_types:
+source_id:
+required_credentials:
+legal_scope:
+rate_limit:
+parser_version:
+evidence_capture_mode:
+confidence_policy:
+```
+
+Execution chain:
+`ENTITY → TRANSFORM → RAW EVIDENCE → CLAIM → RELATION/FINDING → JOURNAL`.
+
+Support:
+- public transforms;
+- internal/private transforms;
+- organization source packs;
+- transform health/status;
+- version pinning.
+
+### 2.20 Investigation workspace and bulk cross-reference
+Use an Aleph-like investigative memory model.
+
+A workspace contains:
+- documents;
+- entities;
+- source datasets;
+- lists/watchlists;
+- diagrams;
+- timelines;
+- hypotheses;
+- findings;
+- reports;
+- access controls.
+
+Allow upload of large lists of people/companies/wallets and cross-reference them against all enabled datasets and source packs.
+
+### 2.21 Case lifecycle and collaboration
+Use a Linkurious-like operational workflow independent of graph layout:
+
+```text
+NEW → TRIAGE → INVESTIGATING → REVIEW → DECISION → CLOSED → REOPENED
+```
+
+Fields:
+- owner;
+- reviewers;
+- priority/SLA;
+- comments/@mentions;
+- unread changes;
+- evidence completeness;
+- Red Team status;
+- report readiness.
+
+### 2.22 Research modes: IDENTIFY → INVESTIGATE → MONITOR
+Expose a simple three-mode workflow inspired by enterprise OSINT platforms:
+
+- **IDENTIFY** — resolve object, identifiers, aliases and likely matches.
+- **INVESTIGATE** — expand relationships, evidence, business flows, risks and hypotheses.
+- **MONITOR** — recurring source checks, saved searches and change alerts.
+
+This prevents tool overload for analysts.
+
+### 2.23 Human-governed research planning
+Before expensive or broad collection, an agent proposes a plan:
+
+```yaml
+objective:
+known_facts:
+unknowns:
+search_hypotheses:
+planned_sources:
+expected_cost_time:
+stop_conditions:
+legal_constraints:
+```
+
+The analyst can approve, edit or reject the plan. Search results must remain citation-backed and journaled.
+
+### 2.24 Secure research browser profiles
+For lawful authorized investigations, separate analyst identity from target-facing browsing:
+- isolated cookies/profiles;
+- no personal accounts;
+- proxy/geolocation policy;
+- fingerprint-isolation controls where permitted;
+- session manifest;
+- full audit trail;
+- source-specific legal restrictions.
+
+### 2.25 Multilingual query expansion
+Default behavior:
+- local-language spelling;
+- transliteration variants;
+- historical spellings;
+- company legal-form variants;
+- domain/country-specific search syntax;
+- translation of source snippets while preserving original text.
+
+### 2.26 Search-first / Graph-first / Dossier-first UX
+Do not force analysts to start from a graph.
+
+Three synchronized views:
+1. **Search/Table** — filters, bulk selection, datasets.
+2. **Graph/Map/Timeline** — relationships and patterns.
+3. **Case/Dossier** — facts, evidence, contradictions and report.
+
+Selected records can move between views without duplication.
+
 ## 3. Five analytical streams inside the platform
 
 ### Stream A — Entity / registry
@@ -472,6 +637,14 @@ Every node/edge/finding has a button showing:
 SOURCE → EXTRACTED CLAIM → NORMALIZED FACT → RELATION → FINDING → RISK → RECOMMENDATION
 ```
 
+### 4.4 Case header workflow
+Recommended global header:
+```text
+CASE | IDENTIFY | INVESTIGATE | MONITOR | REPORT | EVIDENCE READINESS
+```
+
+This keeps investigative lifecycle visible at all times.
+
 ## 5. Productivity features
 
 - reusable case templates;
@@ -490,7 +663,13 @@ SOURCE → EXTRACTED CLAIM → NORMALIZED FACT → RELATION → FINDING → RISK
 - analyst handoff without loss of context;
 - keyboard-first navigation;
 - quick tags and bookmarks;
-- "promote to fact" only after evidence gate.
+- "promote to fact" only after evidence gate;
+- bulk entity-list cross-reference;
+- visual/no-code graph query builder;
+- shortest-path/common-neighbor tools;
+- recurring pattern/motif library;
+- source/watchlist alerts;
+- secure browser profile switcher.
 
 ## 6. Data architecture
 
@@ -566,29 +745,38 @@ All findings trace to source IDs and annexes.
 - append-only journal;
 - entity graph;
 - manual finding creation;
-- source-to-finding traceability.
+- source-to-finding traceability;
+- case lifecycle/status;
+- comments/review.
 
 ### MVP-2 — Assisted acquisition
 - query planner;
-- browser capture;
+- auto-capture investigation browser;
+- transform SDK/registry;
 - registry adapters;
 - document extraction;
-- entity-resolution suggestions.
+- entity-resolution suggestions;
+- bulk cross-reference lists;
+- multilingual query expansion.
 
 ### MVP-3 — Analyst workstation
+- Search/Table + Graph/Map/Timeline + Dossier synchronized views;
 - graph + dossier drawer;
 - map;
 - timeline;
 - contradiction board;
 - Red Team workflow;
+- shortest path/common neighbors;
+- no-code query builder;
 - formal report composer.
 
 ### MVP-4 — Advanced acquisition
-- blockchain adapters;
+- blockchain adapters + TagPacks + Economic Event Layer;
 - logistics/trade adapters;
 - monitoring/change detection;
-- scheduled re-checks;
-- multi-agent orchestration.
+- watchlists and scheduled alerts;
+- multi-agent orchestration;
+- secure research browser profiles.
 
 ## 10. Success metrics
 
@@ -604,7 +792,11 @@ Measure:
 - report production time;
 - percentage of report statements with direct traceability;
 - source failure rate;
-- false entity merge rate.
+- false entity merge rate;
+- percentage of browser visits automatically evidenced;
+- time from a new alert to triage decision;
+- number of high-value pivots generated per resolved entity;
+- proportion of graph edges with source-backed provenance.
 
 Do not use "number of pages collected" as a primary productivity metric.
 
@@ -619,3 +811,33 @@ DISCOVER → VERIFY → LINK → CHALLENGE → EXPLAIN → PROVE → REPORT
 ```
 
 Pre-collected databases answer known questions quickly. The workbench must make it efficient to discover unknown relationships, preserve evidence, explain why a conclusion was made, and safely turn exploratory OSINT into a formal decision product.
+
+## 12. Competitive design synthesis
+
+Detailed competitor notes are maintained in:
+`docs/COMPETITOR_REVIEW_OSINT_INVESTIGATION_PLATFORMS_2026-09-01.md`.
+
+The target product should combine the strongest patterns observed across specialist platforms:
+
+```text
+Maltego       → Transform/pivot ecosystem
+Aleph         → investigative memory + bulk cross-reference
+Hunchly       → automatic evidence capture/audit trail
+Linkurious    → graph case management/collaboration
+Siren         → relational search + path/pattern queries
+OpenCTI       → structured source-linked knowledge/connectors
+SpiderFoot    → modular automated collection/correlation
+ShadowDragon  → Identify → Investigate → Monitor
+Babel Street  → human-governed agentic research + multilingual/secure browsing
+GraphSense    → self-hosted transparent crypto graph + TagPacks
+Chainalysis   → human-readable economic interpretation of complex crypto flows
+```
+
+### Strategic differentiation
+Do not attempt to replace every specialist data vendor.
+
+Build the orchestration/evidence layer that can consume them:
+
+> **Evidence-first agentic investigation operating system**
+
+where every machine-generated conclusion remains explainable, source-backed, challengeable and report-ready.

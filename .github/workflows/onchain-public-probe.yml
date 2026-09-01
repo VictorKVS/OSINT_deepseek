@@ -1,0 +1,72 @@
+name: Read-only public on-chain probe
+
+on:
+  push:
+    branches:
+      - research/onchain-probe-2026-09-01
+    paths:
+      - "research/onchain_probe/**"
+      - ".github/workflows/onchain-public-probe.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    name: Collect and normalize public chain data
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout research branch
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Syntax check
+        run: python -m py_compile research/onchain_probe/probe.py
+
+      - name: Run read-only probe
+        shell: bash
+        run: |
+          mkdir -p artifacts/onchain_probe
+          python research/onchain_probe/probe.py --out artifacts/onchain_probe \
+            | tee artifacts/onchain_probe/run.log
+
+      - name: Validate evidence package
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          root = Path("artifacts/onchain_probe")
+          required = [
+              root / "summary.json",
+              root / "summary.md",
+              root / "manifest.json",
+              root / "btc_events.csv",
+              root / "tron_verified_usdt.csv",
+          ]
+          missing = [str(path) for path in required if not path.exists()]
+          if missing:
+              raise SystemExit(f"Missing evidence files: {missing}")
+
+          summary = json.loads((root / "summary.json").read_text(encoding="utf-8"))
+          manifest = json.loads((root / "manifest.json").read_text(encoding="utf-8"))
+          assert summary["bitcoin"]["address"] == "1CfXQEZFcfje4bPqNbu9dtj2FXufUpqD75"
+          assert summary["tron"]["address"] == "TVpkbcdFitcVMGX9Ty9g33FNSwTzq49fkF"
+          assert isinstance(manifest, list) and manifest, "Acquisition manifest is empty"
+          print(f"Evidence package validated: {len(manifest)} source requests recorded")
+          PY
+
+      - name: Upload evidence artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: onchain-public-probe-${{ github.run_id }}
+          path: artifacts/onchain_probe/
+          if-no-files-found: error
+          retention-days: 30

@@ -1,0 +1,20 @@
+{
+  "schema_version": "father-osint.finding.v0.1",
+  "finding_id": "FND-0001",
+  "case_id": "CASE-SYNTH-0001",
+  "classification": "FACT",
+  "statement": "В синтетическом учебном реестре организация «Северный Контур» связана с учебным адресом.",
+  "evidence_grade": "A_CONFIRMED",
+  "source_ids": ["SRC-0001"],
+  "claim_ids": ["CLM-0001"],
+  "entity_ids": ["ENT-0001", "ENT-0002"],
+  "consensus_id": "CNS-0001",
+  "reasoning_summary": "Synthetic capture и claim однозначно содержат регистрационную связь.",
+  "alternative_explanations": ["Связь является только учебной записью и не описывает реальный объект."],
+  "limitations": ["Не подтверждает фактическое присутствие, деятельность или существование реальной компании."],
+  "red_team_status": "PASSED",
+  "human_approved": true,
+  "approved_by_role": "Главный аналитик",
+  "approved_at_utc": "2026-09-01T15:20:00Z",
+  "access_class": "PUBLIC"
+}

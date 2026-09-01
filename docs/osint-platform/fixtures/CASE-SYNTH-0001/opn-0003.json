@@ -1,0 +1,23 @@
+{
+  "schema_version": "father-osint.analysis-opinion.v0.1",
+  "opinion_id": "OPN-0003",
+  "run_id": "ARUN-0001",
+  "case_id": "CASE-SYNTH-0001",
+  "task_id": "TASK-0001",
+  "analyzer_id": "REDTEAM-RULE-001",
+  "analyzer_family": "DETERMINISTIC_RULE",
+  "analyzer_version": "0.1",
+  "modality": ["TEXT"],
+  "output_class": "HYPOTHESIS_CANDIDATE",
+  "answer": "The relation is acceptable inside the fixture, but should not be generalized to actual location or activity.",
+  "supporting_refs": ["SRC-0001", "CLM-0001"],
+  "contradicting_refs": ["REL-0001"],
+  "assumptions": ["Fixture is internally consistent and synthetic."],
+  "limitations": ["Challenge is semantic: registered address is not proven physical presence."],
+  "confidence_decomposition": {"authority": 0.7, "directness": 0.9, "independence": 0.8, "corroboration": 0.3, "recency": 1.0, "ambiguity": 0.25, "bias_risk": 0.1, "contradiction_severity": 0.1},
+  "data_boundary": "LOCAL_ONLY",
+  "access_class": "PUBLIC",
+  "generated_at_utc": "2026-09-01T15:10:01Z",
+  "output_sha256": "48a1aaff767ddcc2296acb26695bb2aa66c3ceb8f94aaf4f5319cbf496591eaa",
+  "can_create_fact": false
+}

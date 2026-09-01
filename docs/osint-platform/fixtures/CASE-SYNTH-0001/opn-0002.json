@@ -1,0 +1,23 @@
+{
+  "schema_version": "father-osint.analysis-opinion.v0.1",
+  "opinion_id": "OPN-0002",
+  "run_id": "ARUN-0001",
+  "case_id": "CASE-SYNTH-0001",
+  "task_id": "TASK-0001",
+  "analyzer_id": "LLM-LOCAL-REVIEW-001",
+  "analyzer_family": "LLM_LOCAL",
+  "analyzer_version": "0.1",
+  "modality": ["TEXT"],
+  "output_class": "RELATION_CANDIDATE",
+  "answer": "The source supports only the synthetic registry relation; it does not support operational presence.",
+  "supporting_refs": ["SRC-0001", "CLM-0001"],
+  "contradicting_refs": [],
+  "assumptions": ["Fixture is internally consistent and synthetic."],
+  "limitations": ["One synthetic source; no external corroboration."],
+  "confidence_decomposition": {"authority": 0.8, "directness": 0.9, "independence": 0.6, "corroboration": 0.4, "recency": 1.0, "ambiguity": 0.2, "bias_risk": 0.1, "contradiction_severity": 0.0},
+  "data_boundary": "LOCAL_ONLY",
+  "access_class": "PUBLIC",
+  "generated_at_utc": "2026-09-01T15:10:01Z",
+  "output_sha256": "659f430b774f3bfb0fcb29eba070c4bc829cd0102ca90091295fc1968cc94249",
+  "can_create_fact": false
+}

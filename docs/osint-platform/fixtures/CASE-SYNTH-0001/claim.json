@@ -1,0 +1,16 @@
+{
+  "schema_version": "father-osint.claim.v0.1",
+  "claim_id": "CLM-0001",
+  "case_id": "CASE-SYNTH-0001",
+  "source_ids": ["SRC-0001"],
+  "statement": "Синтетический реестр указывает учебный адрес организации «Северный Контур».",
+  "representation": "FAITHFUL_PARAPHRASE",
+  "locator": "synthetic line 1",
+  "subject_entity_ids": ["ENT-0001"],
+  "predicate": "REGISTERED_AT",
+  "object_entity_ids": ["ENT-0002"],
+  "object_text": "Учебный адрес",
+  "status": "SOURCE_CLAIM",
+  "access_class": "PUBLIC",
+  "limitations": ["Источник и все сущности полностью синтетические."]
+}

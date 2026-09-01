@@ -1,0 +1,23 @@
+{
+  "schema_version": "father-osint.case.v0.1",
+  "case_id": "CASE-SYNTH-0001",
+  "title": "Синтетический учебный кейс: Северный Контур",
+  "case_type": "SYNTHETIC_TRAINING",
+  "purpose": "Проверка контрактов доказательственной трассировки без использования реальных лиц и организаций.",
+  "status": "REVIEW",
+  "access_class": "PUBLIC",
+  "legal_basis_or_usage_note": "Полностью синтетические данные, созданные исключительно для тестирования архитектуры.",
+  "created_at_utc": "2026-09-01T15:00:00Z",
+  "owner_role": "Главный аналитик",
+  "scope": {
+    "allowed": ["Synthetic evidence processing", "Contract validation"],
+    "excluded": ["Real persons", "Real organizations", "Network collection"],
+    "jurisdictions": ["SYNTHETIC"],
+    "allowed_source_classes": ["PUBLIC"],
+    "active_actions_allowed": false
+  },
+  "retention_rule": "May be retained as a public regression fixture.",
+  "related_requirement_issues": [20, 21],
+  "synthetic": true,
+  "classification_decision": "PUBLIC because all names, identifiers, addresses and events are fictional."
+}

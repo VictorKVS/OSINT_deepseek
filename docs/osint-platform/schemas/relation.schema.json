@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://father.example/schemas/osint-platform/relation.schema.json",
+  "title": "Entity Relation",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "relation_id", "case_id", "from_entity_id", "relation_type", "to_entity_id", "source_ids", "claim_ids", "evidence_grade", "status", "not_implying"],
+  "properties": {
+    "schema_version": {"const": "father-osint.relation.v0.1"},
+    "relation_id": {"type": "string", "pattern": "^REL-[0-9]{4,}$"},
+    "case_id": {"type": "string", "pattern": "^CASE-[A-Z0-9][A-Z0-9-]{2,63}$"},
+    "from_entity_id": {"type": "string", "pattern": "^ENT-[0-9]{4,}$"},
+    "relation_type": {"enum": ["OWNS", "CONTROLS", "DIRECTS", "REPRESENTS", "EMPLOYED_BY", "LOCATED_AT", "SUPPLIED_TO", "MENTIONED_IN", "SANCTIONED_BY", "ALLEGED_BY", "CONFIRMED_BY", "REGISTERED_AT", "PUBLISHED_BY", "OTHER"]},
+    "to_entity_id": {"type": "string", "pattern": "^ENT-[0-9]{4,}$"},
+    "valid_from": {"type": ["string", "null"], "format": "date-time"},
+    "valid_to": {"type": ["string", "null"], "format": "date-time"},
+    "source_ids": {"type": "array", "items": {"type": "string", "pattern": "^SRC-[0-9]{4,}$"}, "minItems": 1, "uniqueItems": true},
+    "claim_ids": {"type": "array", "items": {"type": "string", "pattern": "^CLM-[0-9]{4,}$"}, "minItems": 1, "uniqueItems": true},
+    "evidence_grade": {"enum": ["A_CONFIRMED", "B_HIGHLY_PROBABLE", "C_ANALYTICAL_HYPOTHESIS", "D_LEAD"]},
+    "status": {"enum": ["CANDIDATE", "REVIEWED", "CONFIRMED", "DISPUTED", "SUPERSEDED"]},
+    "not_implying": {"type": "array", "items": {"type": "string"}, "minItems": 1}
+  }
+}

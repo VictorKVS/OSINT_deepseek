@@ -1,0 +1,23 @@
+{
+  "schema_version": "father-osint.source.v0.1",
+  "source_id": "SRC-0001",
+  "case_id": "CASE-SYNTH-0001",
+  "url": "https://registry.example/synthetic/northern-contour",
+  "title": "Синтетическая регистрационная карточка",
+  "publisher": "Учебный реестр example",
+  "source_type": "OFFICIAL_REGISTER",
+  "primary_level": "PRIMARY",
+  "accessed_at_utc": "2026-09-01T15:05:00Z",
+  "published_at": "2026-08-31T12:00:00Z",
+  "jurisdiction": "SYNTHETIC",
+  "language": "ru",
+  "affiliation": "Независимый синтетический издатель",
+  "bias_or_interest": "Создано для проверки контрактов; не описывает реальные обстоятельства.",
+  "reliability_grade": "A_CONFIRMED",
+  "what_it_supports": ["Источник содержит синтетическую запись о регистрации учебной организации."],
+  "what_it_does_not_support": ["Существование реальной компании.", "Любые выводы о реальном лице или деятельности."],
+  "access_class": "PUBLIC",
+  "legal_basis_or_usage_note": "Synthetic public fixture.",
+  "republication_status": "ALLOWED",
+  "status": "ACTIVE"
+}

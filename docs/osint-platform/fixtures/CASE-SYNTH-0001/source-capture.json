@@ -1,0 +1,20 @@
+{
+  "schema_version": "father-osint.source-capture.v0.1",
+  "capture_id": "CAP-0001",
+  "source_id": "SRC-0001",
+  "case_id": "CASE-SYNTH-0001",
+  "captured_at_utc": "2026-09-01T15:06:00Z",
+  "capture_method": "MANUAL_UPLOAD",
+  "mime_type": "text/plain",
+  "byte_size": 185,
+  "sha256": "3111d7e8d8547a5a0fe4a3b9036a11f711a975a6403f3071a908a76fa5e34384",
+  "storage_uri": "restricted://synthetic/CASE-SYNTH-0001/CAP-0001.txt",
+  "immutable": true,
+  "collector_id": "fixture-builder",
+  "collector_version": "0.1",
+  "access_class": "PUBLIC",
+  "legal_basis_or_usage_note": "Synthetic fixture.",
+  "raw_preserved": true,
+  "integrity_verified": true,
+  "quarantine_status": "NOT_REQUIRED"
+}

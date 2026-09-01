@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://father.example/schemas/osint-platform/entity.schema.json",
+  "title": "Entity",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "entity_id", "case_id", "entity_type", "display_name", "access_class", "source_ids", "status", "synthetic"],
+  "properties": {
+    "schema_version": {"const": "father-osint.entity.v0.1"},
+    "entity_id": {"type": "string", "pattern": "^ENT-[0-9]{4,}$"},
+    "case_id": {"type": "string", "pattern": "^CASE-[A-Z0-9][A-Z0-9-]{2,63}$"},
+    "entity_type": {"enum": ["PERSON", "ORGANIZATION", "ADDRESS", "DOMAIN", "ACCOUNT", "ASSET", "DOCUMENT", "EVENT", "AUTHORITY", "LOCATION"]},
+    "display_name": {"type": "string", "minLength": 1},
+    "aliases": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "identifiers": {"type": "array", "items": {"type": "object", "additionalProperties": false, "required": ["type", "value", "masked", "source_ids"], "properties": {"type": {"type": "string"}, "value": {"type": "string"}, "masked": {"type": "boolean"}, "source_ids": {"type": "array", "items": {"type": "string", "pattern": "^SRC-[0-9]{4,}$"}}}}},
+    "attributes": {"type": "object"},
+    "access_class": {"enum": ["PUBLIC", "PUBLIC_WITH_PERSONAL_DATA", "AUTHORIZED_INTERNAL", "RESTRICTED", "PROHIBITED"]},
+    "source_ids": {"type": "array", "items": {"type": "string", "pattern": "^SRC-[0-9]{4,}$"}, "minItems": 1, "uniqueItems": true},
+    "status": {"enum": ["CANDIDATE", "REVIEWED", "CONFIRMED", "DISPUTED", "SUPERSEDED"]},
+    "synthetic": {"type": "boolean"}
+  }
+}

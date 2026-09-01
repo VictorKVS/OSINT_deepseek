@@ -1,0 +1,17 @@
+{
+  "schema_version": "father-osint.analysis-run.v0.1",
+  "run_id": "ARUN-0001",
+  "case_id": "CASE-SYNTH-0001",
+  "task_id": "TASK-0001",
+  "task": "Определить, подтверждает ли источник заявленную синтетическую регистрационную связь.",
+  "input_refs": ["SRC-0001", "CAP-0001", "CLM-0001", "ENT-0001", "ENT-0002"],
+  "input_bundle_sha256": "45ca2d7fe9876bd2081b5a31afbadae9db8158776ee6da4bb53fd5031db20411",
+  "analyzer_ids": ["RULE-TRACE-001", "LLM-LOCAL-REVIEW-001", "REDTEAM-RULE-001"],
+  "independent_first_pass": true,
+  "started_at_utc": "2026-09-01T15:10:00Z",
+  "completed_at_utc": "2026-09-01T15:10:03Z",
+  "policy_decision": "ALLOW",
+  "fact_promotion_allowed": false,
+  "prompt_template_sha256": "411fe3e499d09330d6250eb9be560bf2a3a26d39f24b4f3744cc7dcd3c33d071",
+  "notes": ["No network access.", "No real-world data.", "Opinions produced independently."]
+}

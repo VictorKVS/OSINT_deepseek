@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://father.example/schemas/osint-platform/export-manifest.schema.json",
+  "title": "Export Manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "export_id", "case_id", "export_profile", "generated_at_utc", "case_revision", "included_files", "excluded_items", "gates", "reviewer_role", "review_status"],
+  "properties": {
+    "schema_version": {"const": "father-osint.export-manifest.v0.1"},
+    "export_id": {"type": "string", "pattern": "^EXP-[0-9]{4,}$"},
+    "case_id": {"type": "string", "pattern": "^CASE-[A-Z0-9][A-Z0-9-]{2,63}$"},
+    "export_profile": {"enum": ["PUBLIC_REDACTED", "AUTHORIZED_INTERNAL", "RESTRICTED"]},
+    "generated_at_utc": {"type": "string", "format": "date-time"},
+    "case_revision": {"type": "string", "minLength": 1},
+    "git_commit": {"type": ["string", "null"], "pattern": "^[a-f0-9]{40}$"},
+    "drive_revision": {"type": ["string", "null"]},
+    "included_files": {"type": "array", "items": {"type": "object", "additionalProperties": false, "required": ["path", "sha256", "access_class"], "properties": {"path": {"type": "string"}, "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"}, "access_class": {"enum": ["PUBLIC", "PUBLIC_WITH_PERSONAL_DATA", "AUTHORIZED_INTERNAL", "RESTRICTED", "PROHIBITED"]}}}, "minItems": 1},
+    "excluded_items": {"type": "array", "items": {"type": "object", "additionalProperties": false, "required": ["object_id", "reason"], "properties": {"object_id": {"type": "string"}, "reason": {"type": "string"}}}},
+    "gates": {"type": "object", "additionalProperties": false, "required": ["no_restricted_data", "pii_minimized", "claims_not_promoted", "capture_hashes_present", "red_team_complete", "metadata_sanitized", "hashes_verified"], "properties": {"no_restricted_data": {"const": true}, "pii_minimized": {"const": true}, "claims_not_promoted": {"const": true}, "capture_hashes_present": {"const": true}, "red_team_complete": {"const": true}, "metadata_sanitized": {"const": true}, "hashes_verified": {"const": true}}},
+    "reviewer_role": {"type": "string", "minLength": 3},
+    "review_status": {"enum": ["PENDING", "APPROVED", "REJECTED"]}
+  }
+}

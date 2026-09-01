@@ -69,6 +69,12 @@
 - Important: no balance/transaction statistics inferred from this failure.
 - Next: obtain primary address history from an explorer/API/node outside the blocked Sheets import path.
 
+### J-105 — Repeated indexed web search for explorer exposure
+- Queries: exact address + `btc`, `blockchain.com`, `blockchair`.
+- Result: no reliable explorer account/transaction page for the exact address surfaced through indexed search in this pass.
+- Status: `NO-HIT`
+- Interpretation: search-engine visibility is insufficient for on-chain statistics; direct explorer/API retrieval remains mandatory.
+
 ## Task 3 — TRON address
 
 ### Object
@@ -109,6 +115,26 @@
 - Result: no reliable named-entity attribution surfaced in indexed web search during this pass.
 - Status: `NO-HIT`
 - Next: inspect sender account histories, recurring counterparties, exchange tags, funding source, and post-receipt sweep behavior.
+
+### J-205 — Large-transfer monitor context
+- Secondary source: Coingrab monitor page indexed around the same time window.
+- Result: target address appears amid a high-volume stream of large TRON USDT transfers, including multiple 500k–20m USDT movements between unrelated addresses and some addresses tagged by the monitor as Binance/OKX.
+- Status: `FOUND-B/C`
+- Interpretation: this page is a whale/large-transfer feed, not an attribution database. Presence in the feed does NOT imply relationship with Binance/OKX or with other transfers shown nearby.
+- Pitfall: temporal adjacency on an aggregator page must not be converted into a graph edge.
+
+### J-206 — Temporal pattern between two known receipts
+- Known timestamps:
+  - 600,000 USDT lead: `2026-06-14 00:23:57` (secondary source; pending primary confirmation)
+  - 820 USDT confirmed: `2026-06-15 04:46:51 UTC`
+- Observation: receipts are approximately 28h23m apart and differ by three orders of magnitude.
+- Status: `FOUND-C`
+- Possible interpretations to test:
+  1. a high-value operating/settlement address receiving both large and small payments;
+  2. customer-specific deposit address on a platform where unrelated deposit amounts coexist;
+  3. OTC/merchant address;
+  4. self-custody address with unrelated counterparties.
+- Important: no classification is accepted until outbound/sweep behavior and counterparty recurrence are known.
 
 ## Five workstreams — current status
 

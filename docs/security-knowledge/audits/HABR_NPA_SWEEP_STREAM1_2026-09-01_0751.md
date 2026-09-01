@@ -34,7 +34,7 @@ No GitHub full-body duplicate and no GitHub body identity conflict were confirme
 ## Official/current-status verification
 
 ### Минкомсвязи №210/2015
-Identity and MinJust registration are corroborated: 23.06.2015, №210, registration 27.08.2015 №38668, title concerning Technical Requirements for interaction of information systems in SMEV. Secondary legal cards show edition 22.02.2017, but a current primary consolidated body was not resolved in this pass.
+Identity and MinJust registration are corroborated: 23.06.2015, №210, registration 25.08.2015 №38668; the original version was officially published 27.08.2015. Secondary legal cards show edition 22.02.2017, but a current primary consolidated body was not resolved in this pass.
 
 Status: `PRIMARY_CONSOLIDATED_CURRENT_STATUS_BLOCKER`.
 

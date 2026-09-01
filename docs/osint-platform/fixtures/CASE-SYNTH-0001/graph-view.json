@@ -1,0 +1,39 @@
+{
+  "schema_version": "father-osint.graph-view.v0.1",
+  "graph_view_id": "GVIEW-SYNTH-0001",
+  "case_id": "CASE-SYNTH-0001",
+  "purpose": "Продемонстрировать экран графа и цепочку объяснения регистрационной связи.",
+  "generated_at_utc": "2026-09-01T15:23:00Z",
+  "authoritative": false,
+  "mode": "GRAPH",
+  "query_context": {"seed_refs":["ENT-0001"],"filters":["PUBLIC","registration-evidence"],"bounded_hops":2},
+  "nodes": [
+    {"node_id":"ENT-0001","object_type":"ENTITY","subtype":"ORGANIZATION","label":"ООО «Северный Контур»","status":"CONFIRMED","access_class":"PUBLIC","source_ids":["SRC-0001"],"position":{"x":0,"y":0}},
+    {"node_id":"ENT-0002","object_type":"ENTITY","subtype":"ADDRESS","label":"Учебный адрес № 7","status":"CONFIRMED","access_class":"PUBLIC","source_ids":["SRC-0001"],"position":{"x":320,"y":0}},
+    {"node_id":"SRC-0001","object_type":"SOURCE","subtype":"SYNTHETIC_REGISTRY","label":"Синтетический учебный реестр","status":"ACTIVE","access_class":"PUBLIC","source_ids":["SRC-0001"],"position":{"x":0,"y":-220}},
+    {"node_id":"CLM-0001","object_type":"CLAIM","subtype":"REGISTRATION_CLAIM","label":"Источник сообщает регистрационный адрес","status":"REVIEWED","access_class":"PUBLIC","source_ids":["SRC-0001"],"position":{"x":160,"y":-120}},
+    {"node_id":"FND-0001","object_type":"FINDING","subtype":"FACT","label":"Регистрационная связь установлена в синтетическом реестре","status":"APPROVED","access_class":"PUBLIC","source_ids":["SRC-0001"],"position":{"x":160,"y":180}},
+    {"node_id":"GAP-SYNTH-0001","object_type":"RESEARCH_GAP","subtype":"OPERATIONAL_PRESENCE","label":"Фактическое присутствие не подтверждено","status":"NO_HIT","access_class":"PUBLIC","source_ids":[],"position":{"x":480,"y":180}}
+  ],
+  "edges": [
+    {"edge_id":"EDGE-SRC-CLM","from_node_id":"SRC-0001","to_node_id":"CLM-0001","relation_type":"ASSERTS","semantic_status":"SOURCE_CLAIM","relation_id":null,"source_ids":["SRC-0001"],"confidence_grade":"A_CONFIRMED","evidence_path_id":"EPATH-SYNTH-0001"},
+    {"edge_id":"EDGE-CLM-ORG","from_node_id":"CLM-0001","to_node_id":"ENT-0001","relation_type":"ABOUT","semantic_status":"DERIVED_NAVIGATION","relation_id":null,"source_ids":["SRC-0001"],"confidence_grade":"NOT_APPLICABLE","evidence_path_id":"EPATH-SYNTH-0001"},
+    {"edge_id":"EDGE-REL-0001","from_node_id":"ENT-0001","to_node_id":"ENT-0002","relation_type":"REGISTERED_AT","semantic_status":"FACT","relation_id":"REL-0001","source_ids":["SRC-0001"],"confidence_grade":"A_CONFIRMED","evidence_path_id":"EPATH-SYNTH-0001"},
+    {"edge_id":"EDGE-REL-FND","from_node_id":"ENT-0002","to_node_id":"FND-0001","relation_type":"SUPPORTS_FINDING","semantic_status":"DERIVED_NAVIGATION","relation_id":null,"source_ids":["SRC-0001"],"confidence_grade":"NOT_APPLICABLE","evidence_path_id":"EPATH-SYNTH-0001"},
+    {"edge_id":"EDGE-FND-GAP","from_node_id":"FND-0001","to_node_id":"GAP-SYNTH-0001","relation_type":"LIMITED_BY","semantic_status":"DERIVED_NAVIGATION","relation_id":null,"source_ids":[],"confidence_grade":"NOT_APPLICABLE","evidence_path_id":null}
+  ],
+  "evidence_paths": [{
+    "evidence_path_id": "EPATH-SYNTH-0001",
+    "target_ref": "REL-0001",
+    "steps": [
+      {"order":1,"object_type":"SOURCE","object_id":"SRC-0001","role":"origin"},
+      {"order":2,"object_type":"SOURCE_CAPTURE","object_id":"CAP-0001","role":"immutable_capture"},
+      {"order":3,"object_type":"CLAIM","object_id":"CLM-0001","role":"extracted_statement"},
+      {"order":4,"object_type":"RELATION","object_id":"REL-0001","role":"normalized_registration_relation"},
+      {"order":5,"object_type":"FINDING","object_id":"FND-0001","role":"human_approved_narrow_fact"}
+    ],
+    "limitations": ["Регистрационная связь не подтверждает фактическое присутствие или деятельность."]
+  }],
+  "unresolved_research_gap_ids": ["GAP-SYNTH-0001"],
+  "synthetic": true
+}

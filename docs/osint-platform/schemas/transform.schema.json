@@ -1,0 +1,253 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://father.example/schemas/osint-platform/transform.schema.json",
+  "title": "OSINT Evidence-First Transform Descriptor",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "transform_id",
+    "name",
+    "version",
+    "input_entity_types",
+    "output_object_types",
+    "source_id",
+    "required_credentials",
+    "legal_scope",
+    "rate_limit",
+    "parser_version",
+    "evidence_capture_mode",
+    "execution_profile",
+    "safety_class",
+    "network_policy",
+    "tool_adapter_id",
+    "output_contract",
+    "requires_human_approval",
+    "enabled",
+    "health",
+    "synthetic"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "father-osint.transform.v0.1"
+    },
+    "transform_id": {
+      "type": "string",
+      "pattern": "^TRN-[A-Z0-9-]+$"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 3
+    },
+    "version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "input_entity_types": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "PERSON",
+          "ORGANIZATION",
+          "ADDRESS",
+          "DOMAIN",
+          "PHONE",
+          "EMAIL",
+          "DOCUMENT",
+          "CONTRACT",
+          "CASE",
+          "ASSET",
+          "WALLET",
+          "TRANSACTION",
+          "EVENT",
+          "SOURCE",
+          "CLAIM",
+          "RISK"
+        ]
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "output_object_types": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "PERSON",
+          "ORGANIZATION",
+          "ADDRESS",
+          "DOMAIN",
+          "PHONE",
+          "EMAIL",
+          "DOCUMENT",
+          "CONTRACT",
+          "CASE",
+          "ASSET",
+          "WALLET",
+          "TRANSACTION",
+          "EVENT",
+          "SOURCE",
+          "CLAIM",
+          "RISK",
+          "SOURCE_CAPTURE",
+          "RELATION",
+          "FINDING",
+          "RESEARCH_GAP",
+          "SEARCH_JOURNAL"
+        ]
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "source_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^SRC-[A-Z0-9-]+$"
+    },
+    "required_credentials": {
+      "enum": [
+        "NONE",
+        "LOCAL_SECRET",
+        "EXTERNAL_SERVICE",
+        "MANUAL_SESSION"
+      ]
+    },
+    "legal_scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "allowed_case_types",
+        "allowed_access_classes",
+        "passive_only",
+        "terms_note"
+      ],
+      "properties": {
+        "allowed_case_types": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 3
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "allowed_access_classes": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "PUBLIC",
+              "PUBLIC_WITH_PERSONAL_DATA",
+              "AUTHORIZED_INTERNAL",
+              "RESTRICTED",
+              "PROHIBITED"
+            ]
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "passive_only": {
+          "type": "boolean"
+        },
+        "terms_note": {
+          "type": "string",
+          "minLength": 5
+        }
+      }
+    },
+    "rate_limit": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "max_requests",
+        "per_seconds",
+        "concurrency"
+      ],
+      "properties": {
+        "max_requests": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "per_seconds": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "concurrency": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "parser_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "evidence_capture_mode": {
+      "enum": [
+        "NONE",
+        "METADATA_ONLY",
+        "FULL_CAPTURE",
+        "EXTERNAL_REFERENCE"
+      ]
+    },
+    "execution_profile": {
+      "enum": [
+        "FIXTURE_ONLY",
+        "WINDOWS_NATIVE",
+        "WSL2_KALI",
+        "CONTAINER_ISOLATED",
+        "REMOTE_SANDBOX",
+        "MANUAL_EXTERNAL"
+      ]
+    },
+    "safety_class": {
+      "enum": [
+        "PASSIVE_PUBLIC",
+        "ACTIVE_AUTHORIZED",
+        "RESTRICTED_FORENSIC",
+        "PROHIBITED"
+      ]
+    },
+    "network_policy": {
+      "enum": [
+        "NO_NETWORK",
+        "INTERNET_READ_ONLY",
+        "ALLOWLIST_ONLY",
+        "AUTHORIZED_TARGET_SCOPE"
+      ]
+    },
+    "tool_adapter_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "output_contract": {
+      "type": "string",
+      "minLength": 3
+    },
+    "requires_human_approval": {
+      "type": "boolean"
+    },
+    "enabled": {
+      "type": "boolean"
+    },
+    "health": {
+      "enum": [
+        "HEALTHY",
+        "DEGRADED",
+        "DISABLED",
+        "UNKNOWN"
+      ]
+    },
+    "version_probe": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "synthetic": {
+      "type": "boolean"
+    }
+  }
+}

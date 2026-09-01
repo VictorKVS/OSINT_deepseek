@@ -1,0 +1,270 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://father.example/schemas/osint-platform/search-journal.schema.json",
+  "title": "OSINT Append-Only Search Journal Entry",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "journal_id",
+    "case_id",
+    "sequence",
+    "timestamp_utc",
+    "actor",
+    "action_type",
+    "stream",
+    "query_plan_id",
+    "job_id",
+    "query_or_action",
+    "source_or_transform_ids",
+    "result_code",
+    "result_summary",
+    "new_entities",
+    "new_relations",
+    "new_claims",
+    "new_findings",
+    "new_research_gaps",
+    "confidence_changes",
+    "next_pivots",
+    "access_class",
+    "previous_entry_hash",
+    "entry_hash",
+    "append_only",
+    "synthetic"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "father-osint.search-journal.v0.1"
+    },
+    "journal_id": {
+      "type": "string",
+      "pattern": "^JRN-[A-Z0-9-]+$"
+    },
+    "case_id": {
+      "type": "string",
+      "pattern": "^CASE-[A-Z0-9][A-Z0-9-]{2,63}$"
+    },
+    "sequence": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "timestamp_utc": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "actor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "actor_id",
+        "actor_type",
+        "version"
+      ],
+      "properties": {
+        "actor_id": {
+          "type": "string",
+          "minLength": 2
+        },
+        "actor_type": {
+          "enum": [
+            "HUMAN",
+            "AGENT",
+            "TOOL",
+            "SYSTEM"
+          ]
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "action_type": {
+      "enum": [
+        "PLAN",
+        "QUERY",
+        "COLLECT",
+        "PARSE",
+        "NORMALIZE",
+        "RESOLVE_ENTITY",
+        "LINK",
+        "ANALYZE",
+        "CHALLENGE",
+        "REVIEW",
+        "EXPORT",
+        "MONITOR"
+      ]
+    },
+    "stream": {
+      "enum": [
+        "ENTITY_REGISTRY",
+        "BUSINESS_TRANSACTIONS_LOGISTICS",
+        "DIGITAL_FOOTPRINT",
+        "LEGAL_SANCTIONS_ADVERSE",
+        "RED_TEAM_SOURCE_QUALITY"
+      ]
+    },
+    "query_plan_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^QPLAN-[A-Z0-9-]+$"
+    },
+    "job_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^JOB-[A-Z0-9-]+$"
+    },
+    "query_or_action": {
+      "type": "string",
+      "minLength": 2
+    },
+    "source_or_transform_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 2
+      },
+      "uniqueItems": true
+    },
+    "result_code": {
+      "enum": [
+        "FOUND",
+        "NO_HIT",
+        "BLOCKED",
+        "CONFLICT",
+        "ERROR",
+        "CANCELLED",
+        "REVIEWED"
+      ]
+    },
+    "result_summary": {
+      "type": "string",
+      "minLength": 1
+    },
+    "new_entities": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^ENT-[A-Z0-9-]+$"
+      },
+      "uniqueItems": true
+    },
+    "new_relations": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^REL-[A-Z0-9-]+$"
+      },
+      "uniqueItems": true
+    },
+    "new_claims": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^CLM-[A-Z0-9-]+$"
+      },
+      "uniqueItems": true
+    },
+    "new_findings": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^FND-[A-Z0-9-]+$"
+      },
+      "uniqueItems": true
+    },
+    "new_research_gaps": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^GAP-[A-Z0-9-]+$"
+      },
+      "uniqueItems": true
+    },
+    "confidence_changes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "subject_ref",
+          "from",
+          "to",
+          "reason",
+          "source_ids"
+        ],
+        "properties": {
+          "subject_ref": {
+            "type": "string",
+            "minLength": 2
+          },
+          "from": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": 0,
+            "maximum": 1
+          },
+          "to": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": 0,
+            "maximum": 1
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 3
+          },
+          "source_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^SRC-[A-Z0-9-]+$"
+            },
+            "uniqueItems": true
+          }
+        }
+      }
+    },
+    "next_pivots": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 2
+      }
+    },
+    "access_class": {
+      "enum": [
+        "PUBLIC",
+        "PUBLIC_WITH_PERSONAL_DATA",
+        "AUTHORIZED_INTERNAL",
+        "RESTRICTED",
+        "PROHIBITED"
+      ]
+    },
+    "previous_entry_hash": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "entry_hash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "append_only": {
+      "const": true
+    },
+    "synthetic": {
+      "type": "boolean"
+    }
+  }
+}

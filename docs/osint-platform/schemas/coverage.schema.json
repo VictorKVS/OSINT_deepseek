@@ -1,0 +1,173 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://father.example/schemas/osint-platform/coverage.schema.json",
+  "title": "OSINT Evidence Coverage Assessment",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "coverage_id",
+    "case_id",
+    "finding_id",
+    "evaluated_at_utc",
+    "policy_version",
+    "dimensions",
+    "overall_grade",
+    "report_readiness",
+    "decisive_gaps",
+    "explanation",
+    "human_review",
+    "synthetic"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "father-osint.coverage.v0.1"
+    },
+    "coverage_id": {
+      "type": "string",
+      "pattern": "^COV-[A-Z0-9-]+$"
+    },
+    "case_id": {
+      "type": "string",
+      "pattern": "^CASE-[A-Z0-9][A-Z0-9-]{2,63}$"
+    },
+    "finding_id": {
+      "type": "string",
+      "pattern": "^FND-[A-Z0-9-]+$"
+    },
+    "evaluated_at_utc": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "policy_version": {
+      "type": "string",
+      "minLength": 3
+    },
+    "dimensions": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "dimension",
+          "status",
+          "weight",
+          "evidence_refs",
+          "research_gap_ids",
+          "note"
+        ],
+        "properties": {
+          "dimension": {
+            "enum": [
+              "IDENTITY_RESOLUTION",
+              "SOURCE_AUTHORITY",
+              "SOURCE_INDEPENDENCE",
+              "DIRECTNESS",
+              "CORROBORATION",
+              "TEMPORAL_ALIGNMENT",
+              "CONTRADICTIONS",
+              "ACCESS_LEGALITY",
+              "CAPTURE_INTEGRITY"
+            ]
+          },
+          "status": {
+            "enum": [
+              "COVERED",
+              "PARTIAL",
+              "MISSING",
+              "CONFLICT",
+              "NOT_APPLICABLE"
+            ]
+          },
+          "weight": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "evidence_refs": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 2
+            },
+            "uniqueItems": true
+          },
+          "research_gap_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^GAP-[A-Z0-9-]+$"
+            },
+            "uniqueItems": true
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "overall_grade": {
+      "enum": [
+        "STRONG",
+        "ADEQUATE",
+        "WEAK",
+        "INSUFFICIENT",
+        "BLOCKED"
+      ]
+    },
+    "report_readiness": {
+      "enum": [
+        "READY",
+        "READY_WITH_LIMITATION",
+        "NOT_READY"
+      ]
+    },
+    "decisive_gaps": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^GAP-[A-Z0-9-]+$"
+      },
+      "uniqueItems": true
+    },
+    "explanation": {
+      "type": "string",
+      "minLength": 10
+    },
+    "human_review": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "reviewer_role",
+        "reviewed_at_utc"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "PENDING",
+            "APPROVED",
+            "REJECTED"
+          ]
+        },
+        "reviewer_role": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "reviewed_at_utc": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        }
+      }
+    },
+    "synthetic": {
+      "type": "boolean"
+    }
+  }
+}

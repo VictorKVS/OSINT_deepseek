@@ -1,0 +1,142 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://father.example/schemas/osint-platform/research-gap.schema.json",
+  "title": "OSINT Research Gap",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "research_gap_id",
+    "case_id",
+    "subject_refs",
+    "stream",
+    "question",
+    "why_matters",
+    "priority",
+    "state",
+    "evidence_needed",
+    "planned_pivot_ids",
+    "blocking_reasons",
+    "owner_role",
+    "opened_at_utc",
+    "resolved_at_utc",
+    "resolved_by_finding_ids",
+    "report_effect",
+    "synthetic"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "father-osint.research-gap.v0.1"
+    },
+    "research_gap_id": {
+      "type": "string",
+      "pattern": "^GAP-[A-Z0-9-]+$"
+    },
+    "case_id": {
+      "type": "string",
+      "pattern": "^CASE-[A-Z0-9][A-Z0-9-]{2,63}$"
+    },
+    "subject_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 2
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "stream": {
+      "enum": [
+        "ENTITY_REGISTRY",
+        "BUSINESS_TRANSACTIONS_LOGISTICS",
+        "DIGITAL_FOOTPRINT",
+        "LEGAL_SANCTIONS_ADVERSE",
+        "RED_TEAM_SOURCE_QUALITY"
+      ]
+    },
+    "question": {
+      "type": "string",
+      "minLength": 5
+    },
+    "why_matters": {
+      "type": "string",
+      "minLength": 5
+    },
+    "priority": {
+      "enum": [
+        "P0",
+        "P1",
+        "P2",
+        "P3"
+      ]
+    },
+    "state": {
+      "enum": [
+        "NOT_CHECKED",
+        "PLANNED",
+        "IN_PROGRESS",
+        "NO_HIT",
+        "BLOCKED",
+        "CONFLICT",
+        "RESOLVED",
+        "WAIVED"
+      ]
+    },
+    "evidence_needed": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 3
+      },
+      "minItems": 1
+    },
+    "planned_pivot_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^PVT-[A-Z0-9-]+$"
+      },
+      "uniqueItems": true
+    },
+    "blocking_reasons": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 3
+      }
+    },
+    "owner_role": {
+      "type": "string",
+      "minLength": 3
+    },
+    "opened_at_utc": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "resolved_at_utc": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "resolved_by_finding_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^FND-[A-Z0-9-]+$"
+      },
+      "uniqueItems": true
+    },
+    "report_effect": {
+      "enum": [
+        "BLOCKS_REPORT",
+        "LIMITS_REPORT",
+        "NON_BLOCKING"
+      ]
+    },
+    "synthetic": {
+      "type": "boolean"
+    }
+  }
+}

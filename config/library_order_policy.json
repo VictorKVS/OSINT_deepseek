@@ -1,0 +1,82 @@
+{
+  "schema_version": "1.3",
+  "policy_id": "FATHER-LIBRARY-ORDER-001",
+  "status": "ACTIVE",
+  "scope": "ALL_ROLE_KNOWLEDGE_BASE_LIBRARY_ORDERS",
+  "max_parallel_streams": 5,
+  "classification_standard": "config/father_scope_priority_standard.json",
+  "priority_execution": {
+    "default_importance_order": ["NECESSARY", "DESIRABLE", "INTERESTING_LATER"],
+    "auto_execute": ["NECESSARY"],
+    "queue_after_core": ["DESIRABLE"],
+    "hold_by_default": ["INTERESTING_LATER"],
+    "rule": "Target maturity controls depth; importance controls execution order. Unresolved NECESSARY items at or below target maturity block completion."
+  },
+  "global_document_registry": {
+    "policy": "config/global_document_registry_policy.json",
+    "sources": "config/global_document_registry_sources.json",
+    "runtime_registry": "reports/global_document_registry/GLOBAL_DOCUMENT_REGISTRY.json",
+    "runtime_bindings": "reports/global_document_registry/APPLICABILITY_BINDINGS.json",
+    "rule": "Library orders reference shared canonical document_id values; role-specific copies are forbidden."
+  },
+  "regulatory_first_policy": {
+    "mode": "RU_REGULATORY_AND_NATIONAL_STANDARDS_FIRST",
+    "baseline_registry": "config/role_ru_regulatory_baseline.json",
+    "baseline_registry_role": "IMPORT_SOURCE_AND_BINDING_SEED_ONLY",
+    "required_before_global_maturity_claim": true,
+    "official_status_verification_required": true,
+    "superseded_documents_do_not_close_current_gate": true,
+    "applicability_and_legal_force_are_separate_fields": true,
+    "world_practices_start_after_ru_baseline": true
+  },
+  "default_sources": [
+    "RU_OFFICIAL_REGULATORY",
+    "OFFICIAL_WEB",
+    "GITHUB",
+    "TELEGRAM",
+    "LOCAL_LIBRARY"
+  ],
+  "source_semantics": {
+    "RU_OFFICIAL_REGULATORY": "Russian laws, regulator acts, Rosstandart national standards and official methodologies; first knowledge layer",
+    "OFFICIAL_WEB": "authoritative or primary acquisition where available",
+    "GITHUB": "primary project documentation, reference implementations and open technical material",
+    "TELEGRAM": "discovery and accessible candidate acquisition only",
+    "LOCAL_LIBRARY": "user-owned or otherwise authorized local material"
+  },
+  "copyright_policy": {
+    "auto_download_open_or_official_material": true,
+    "auto_download_commercial_books_from_unverified_mirrors": false,
+    "commercial_book_discovery_only_until_access_is_authorized": true
+  },
+  "maturity_levels": {
+    "MIN": {
+      "required_dimensions": ["RU_REGULATORY_BASELINE", "AUTHORITATIVE_BASIS", "PRACTICE", "VALIDATION_OR_FAILURE"],
+      "gap_is_allowed_if_explicit": true
+    },
+    "MEDIUM": {
+      "required_dimensions": ["RU_REGULATORY_BASELINE", "AUTHORITATIVE_BASIS", "PRACTICE", "VALIDATION", "COUNTER_EVIDENCE", "TEMPLATES_OR_EXAMPLES"],
+      "independent_source_classes_required": true
+    },
+    "MAX": {
+      "required_dimensions": ["RU_REGULATORY_BASELINE", "AUTHORITATIVE_BASIS", "PRACTICE", "VALIDATION", "COUNTER_EVIDENCE", "BENCHMARK_OR_EVAL", "CHANGE_MONITORING", "GOLDEN_DECISIONS"],
+      "human_review_required_before_kb_promotion": true
+    }
+  },
+  "pipeline": [
+    "ORDER_CREATED",
+    "STAGE_0_GLOBAL_DOCUMENT_REGISTRY_RESOLUTION",
+    "STAGE_0_RU_REGULATORY_BASELINE",
+    "STAGE_1_ACQUISITION",
+    "STAGE_1_COVERAGE",
+    "STAGE_2_DOCUMENT_COMPILER",
+    "STAGE_3_KNOWLEDGE_EXTRACTION",
+    "STAGE_4_RELATIONS_AND_CONFLICTS",
+    "STAGE_5_ANALYST_AND_CRITIC",
+    "STAGE_6_REVIEW",
+    "KB_READY"
+  ],
+  "promotion_policy": {
+    "kb_auto_promotion": false,
+    "human_review_required": true
+  }
+}

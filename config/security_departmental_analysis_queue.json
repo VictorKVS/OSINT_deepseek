@@ -1,0 +1,178 @@
+{
+  "schema_version": "1.0",
+  "queue_id": "SECURITY-DEPARTMENTAL-ANALYSIS-001",
+  "as_of": "2026-08-24",
+  "mode": "ANALYSIS_UNTIL_EVENING_ACQUISITION_WINDOW",
+  "policy": "This queue is analytical only. No item may become CURRENT, legal-truth eligible, or KB-ready from metadata or A2 material alone. Exact official bytes, SHA-256 and amendment/replacement-chain verification remain mandatory before legal promotion.",
+  "streams": [
+    {
+      "stream_id": "AN-1",
+      "name": "CURRENTNESS_CHAIN",
+      "goal": "Check effective status, amendments, replacement and future-effective transitions.",
+      "output": "currentness hypothesis + evidence gaps"
+    },
+    {
+      "stream_id": "AN-2",
+      "name": "APPLICABILITY",
+      "goal": "Map each act to PDN/KII/GIS sectors, regulated organizations, systems and conditions of applicability.",
+      "output": "applicability matrix"
+    },
+    {
+      "stream_id": "AN-3",
+      "name": "STRUCTURE_AND_EXTRACTION",
+      "goal": "Define expected legal structure and content markers so shell/preview pages cannot pass D4-D9 quality gates.",
+      "output": "expected markers + parser/extractor checks"
+    },
+    {
+      "stream_id": "AN-4",
+      "name": "RELATIONS_AND_DEPENDENCIES",
+      "goal": "Build candidate links to parent laws, government acts, regulator requirements and amendment chains.",
+      "output": "candidate relation edges for later D10-D12"
+    },
+    {
+      "stream_id": "AN-5",
+      "name": "SOURCE_AND_EVIDENCE",
+      "goal": "Rank official/A2 routes, identify exact-publication locators and evidence gaps without treating A2 as legal truth.",
+      "output": "source-route readiness matrix"
+    }
+  ],
+  "documents": [
+    {
+      "document_id": "DOC-RU-MINZDRAV-340N-2023",
+      "domain": ["PDN", "HEALTHCARE_SECURITY", "THREAT_MODEL"],
+      "priority": "P0",
+      "analysis_status": "PENDING",
+      "relation_hypotheses": ["sectoral threat determination -> 152-FZ/PP-1119/FSTEC-21 context"],
+      "expected_content_markers": ["персональных данных", "угроз", "информационных систем"],
+      "currentness_status": "VERIFY_CURRENTNESS"
+    },
+    {
+      "document_id": "DOC-RU-MINTRANS-141-2023",
+      "domain": ["PDN", "THREAT_MODEL"],
+      "priority": "P1",
+      "analysis_status": "PENDING",
+      "relation_hypotheses": ["sectoral threat determination -> 152-FZ/PP-1119/FSTEC-21 context"],
+      "expected_content_markers": ["персональных данных", "угроз", "транспорт"],
+      "currentness_status": "VERIFY_CURRENTNESS"
+    },
+    {
+      "document_id": "DOC-RU-MINPROMTORG-954-2022",
+      "domain": ["PDN", "THREAT_MODEL"],
+      "priority": "P1",
+      "analysis_status": "PENDING",
+      "relation_hypotheses": ["sectoral threat determination -> 152-FZ/PP-1119/FSTEC-21 context"],
+      "expected_content_markers": ["персональных данных", "угроз"],
+      "currentness_status": "VERIFY_CURRENTNESS"
+    },
+    {
+      "document_id": "DOC-RU-MINEKONOM-785-2023",
+      "domain": ["PDN", "THREAT_MODEL"],
+      "priority": "P2",
+      "analysis_status": "PENDING",
+      "relation_hypotheses": ["sectoral threat determination -> 152-FZ/PP-1119/FSTEC-21 context"],
+      "expected_content_markers": ["персональных данных", "угроз", "Министерств"],
+      "currentness_status": "VERIFY_CURRENTNESS"
+    },
+    {
+      "document_id": "DOC-RU-MINENERGO-819-2019",
+      "domain": ["PDN", "THREAT_MODEL"],
+      "priority": "P1",
+      "analysis_status": "PENDING",
+      "relation_hypotheses": ["sectoral threat determination -> 152-FZ/PP-1119/FSTEC-21 context"],
+      "expected_content_markers": ["персональных данных", "угроз", "Минэнерго"],
+      "currentness_status": "VERIFY_CURRENTNESS"
+    },
+    {
+      "document_id": "DOC-RU-SFR-1284-2024",
+      "domain": ["PDN", "THREAT_MODEL"],
+      "priority": "P1",
+      "analysis_status": "PENDING",
+      "relation_hypotheses": ["sectoral threat determination -> 152-FZ/PP-1119/FSTEC-21 context"],
+      "expected_content_markers": ["персональных данных", "угроз", "Социального фонда"],
+      "currentness_status": "VERIFY_CURRENTNESS"
+    },
+    {
+      "document_id": "DOC-RU-ROSFMON-30-2019",
+      "domain": ["PDN", "GIS_REGULATED_IS", "THREAT_MODEL"],
+      "priority": "P1",
+      "analysis_status": "PENDING",
+      "relation_hypotheses": ["amended by DOC-RU-ROSFMON-149-2025", "sectoral threat model for a named GIS"],
+      "expected_content_markers": ["персональных данных", "угроз", "Единой информационной системы"],
+      "currentness_status": "VERIFY_CURRENTNESS"
+    },
+    {
+      "document_id": "DOC-RU-ROSFMON-149-2025",
+      "domain": ["PDN", "GIS_REGULATED_IS", "THREAT_MODEL"],
+      "priority": "P1",
+      "analysis_status": "PENDING",
+      "relation_hypotheses": ["amends DOC-RU-ROSFMON-30-2019"],
+      "expected_content_markers": ["внесении изменения", "приказ", "30"],
+      "currentness_status": "VERIFY_EFFECTIVE_CHAIN"
+    },
+    {
+      "document_id": "DOC-RU-MINPROMTORG-1981-2023",
+      "domain": ["KII"],
+      "priority": "P1",
+      "analysis_status": "PENDING",
+      "relation_hypotheses": ["categorization evidence validation -> 187-FZ/PP-127 context"],
+      "expected_content_markers": ["критической информационной инфраструктуры", "категорирован", "достоверност"],
+      "currentness_status": "VERIFY_CURRENTNESS"
+    },
+    {
+      "document_id": "DOC-RU-PP-4-2026",
+      "domain": ["KII"],
+      "priority": "P0",
+      "analysis_status": "PENDING",
+      "relation_hypotheses": ["sectoral categorization rules -> 187-FZ/PP-127 context"],
+      "expected_content_markers": ["критической информационной инфраструктуры", "отраслевых особенностей", "атомн"],
+      "currentness_status": "VERIFY_CURRENTNESS"
+    },
+    {
+      "document_id": "DOC-RU-PP-92-2026",
+      "domain": ["KII"],
+      "priority": "P0",
+      "analysis_status": "PENDING",
+      "relation_hypotheses": ["sectoral categorization rules -> 187-FZ/PP-127 context"],
+      "expected_content_markers": ["критической информационной инфраструктуры", "банковск", "финансов"],
+      "currentness_status": "VERIFY_CURRENTNESS"
+    },
+    {
+      "document_id": "DOC-RU-PP-246-2026",
+      "domain": ["KII"],
+      "priority": "P0",
+      "analysis_status": "PENDING",
+      "relation_hypotheses": ["sectoral categorization rules -> 187-FZ/PP-127 context"],
+      "expected_content_markers": ["критической информационной инфраструктуры", "отраслевых особенностей", "наук"],
+      "currentness_status": "VERIFY_CURRENTNESS"
+    },
+    {
+      "document_id": "DOC-RU-PP-303-2026",
+      "domain": ["KII"],
+      "priority": "P0",
+      "analysis_status": "PENDING",
+      "relation_hypotheses": ["sectoral categorization rules -> 187-FZ/PP-127 context"],
+      "expected_content_markers": ["критической информационной инфраструктуры", "регистрац", "недвиж"],
+      "currentness_status": "VERIFY_CURRENTNESS"
+    },
+    {
+      "document_id": "DOC-RU-PP-356-2026",
+      "domain": ["KII"],
+      "priority": "P0",
+      "analysis_status": "PENDING",
+      "relation_hypotheses": ["sectoral categorization rules -> 187-FZ/PP-127 context"],
+      "expected_content_markers": ["критической информационной инфраструктуры", "ракетно-космич", "отраслевых особенностей"],
+      "currentness_status": "VERIFY_CURRENTNESS"
+    }
+  ],
+  "promotion_boundary": {
+    "legal_truth_eligible": false,
+    "kb_promotion_allowed": false,
+    "required_before_promotion": [
+      "exact official bytes",
+      "self-computed SHA-256",
+      "verified document identity",
+      "currentness/effective-date verification",
+      "amendment/replacement-chain verification"
+    ]
+  }
+}

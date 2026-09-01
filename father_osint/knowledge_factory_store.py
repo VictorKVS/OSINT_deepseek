@@ -1,9 +1,8 @@
 from __future__ import annotations
 
 import json
-from dataclasses import asdict
 from pathlib import Path
-from typing import Iterable
+from typing import Iterable, Mapping
 
 from .knowledge_factory import AuditEvent, DocumentRecord, OfficialSource
 
@@ -11,7 +10,8 @@ from .knowledge_factory import AuditEvent, DocumentRecord, OfficialSource
 class KnowledgeFactoryStore:
     """Small append/audit-safe JSONL store for the M1 Knowledge Factory vertical.
 
-    Registry records are upserted by stable IDs. Audit records are append-only.
+    Registry records are upserted by stable IDs. Acquisition and audit records
+    are append-only. Originals are content-addressed by the acquisition layer.
     The implementation is intentionally simple for M1 and keeps the storage
     contract explicit so it can later move to PostgreSQL without changing the
     domain objects.
@@ -22,6 +22,7 @@ class KnowledgeFactoryStore:
         self.root.mkdir(parents=True, exist_ok=True)
         self.sources_file = self.root / "official_sources.jsonl"
         self.documents_file = self.root / "documents.jsonl"
+        self.acquisitions_file = self.root / "acquisitions.jsonl"
         self.audit_file = self.root / "audit.jsonl"
         self.originals_dir = self.root / "originals"
         self.originals_dir.mkdir(exist_ok=True)
@@ -46,9 +47,9 @@ class KnowledgeFactoryStore:
         tmp.replace(path)
 
     @staticmethod
-    def _append_jsonl(path: Path, row: dict) -> None:
+    def _append_jsonl(path: Path, row: Mapping[str, object]) -> None:
         with path.open("a", encoding="utf-8", newline="\n") as handle:
-            handle.write(json.dumps(row, ensure_ascii=False, sort_keys=True) + "\n")
+            handle.write(json.dumps(dict(row), ensure_ascii=False, sort_keys=True) + "\n")
 
     def save_source(self, source: OfficialSource) -> None:
         rows = self._read_jsonl(self.sources_file)
@@ -76,6 +77,10 @@ class KnowledgeFactoryStore:
             rows.append(payload)
         self._write_jsonl(self.documents_file, rows)
 
+    def append_acquisition(self, event: Mapping[str, object]) -> None:
+        """Append one immutable acquisition observation/event record."""
+        self._append_jsonl(self.acquisitions_file, event)
+
     def append_audit(self, event: AuditEvent) -> None:
         self._append_jsonl(self.audit_file, event.to_dict())
 
@@ -85,6 +90,9 @@ class KnowledgeFactoryStore:
     def list_documents(self) -> list[dict]:
         return self._read_jsonl(self.documents_file)
 
+    def list_acquisitions(self) -> list[dict]:
+        return self._read_jsonl(self.acquisitions_file)
+
     def list_audit(self) -> list[dict]:
         return self._read_jsonl(self.audit_file)
 
@@ -93,3 +101,21 @@ class KnowledgeFactoryStore:
 
     def get_document(self, document_id: str) -> dict | None:
         return next((row for row in self.list_documents() if row.get("document_id") == document_id), None)
+
+    def acquisition_counters(self) -> dict[str, int]:
+        """Return counters derived from append-only acquisition evidence."""
+        rows = self.list_acquisitions()
+        success_states = {"CREATED", "REUSED", "NEW_VERSION"}
+        return {
+            "attempts": len(rows),
+            "successes": sum(1 for row in rows if row.get("result") in success_states),
+            "failures": sum(1 for row in rows if row.get("result") == "FAILED"),
+            "blocked": sum(1 for row in rows if row.get("result") == "BLOCKED"),
+            "bytes_acquired": sum(
+                int(row.get("byte_length") or 0)
+                for row in rows
+                if row.get("result") in success_states
+            ),
+            "artifacts_reused": sum(1 for row in rows if bool(row.get("artifact_reused"))),
+            "versions_created": sum(1 for row in rows if bool(row.get("version_created"))),
+        }

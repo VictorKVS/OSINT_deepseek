@@ -1,0 +1,54 @@
+{
+  "schema_version": "1.1",
+  "registry_id": "FATHER-GLOBAL-DOCUMENT-SOURCES-001",
+  "principle": "All legal, regulatory and standards documents enter one global canonical registry; role/domain/KB files are import observations and applicability-binding sources only. More specific authority sources are imported before generic domain/scope observations so canonical metadata is deterministic.",
+  "sources": [
+    {
+      "source_id": "PROGRAMMER_FSTEC_REGULATED",
+      "path": "config/programmer_ru_fstec_regulated_systems.json",
+      "adapter": "FSTEC_REGULATED_DOCUMENTS",
+      "authority": "OFFICIAL_PUBLICATION_METADATA_AND_REGULATOR_SCOPE",
+      "enabled": true
+    },
+    {
+      "source_id": "PDN_CURRENT",
+      "path": "config/pdn_current_only_registry.json",
+      "adapter": "PDN_DOCUMENTS",
+      "authority": "EXISTING_DOMAIN_REGISTRY",
+      "enabled": true
+    },
+    {
+      "source_id": "PROGRAMMER_ESPD",
+      "path": "config/programmer_ru_espd_inventory.json",
+      "adapter": "ESPD_RECORDS",
+      "authority": "ROSSTANDART_CATALOG_SNAPSHOT",
+      "enabled": true
+    },
+    {
+      "source_id": "PROGRAMMER_AUTOMATED_SYSTEMS",
+      "path": "config/programmer_ru_automated_systems_conditional.json",
+      "adapter": "AUTOMATED_SYSTEMS_RECORDS",
+      "authority": "ROSSTANDART_OFFICIAL_METADATA",
+      "enabled": true
+    },
+    {
+      "source_id": "PROGRAMMER_RU_BASELINE",
+      "path": "config/role_ru_regulatory_baseline.json",
+      "adapter": "ROLE_BASELINE_DOCUMENTS",
+      "authority": "ROLE_SEED_WITH_OFFICIAL_METADATA",
+      "enabled": true
+    },
+    {
+      "source_id": "PROGRAMMER_RU_NORMATIVE_SCOPE",
+      "path": "config/programmer_ru_normative_scope.json",
+      "adapter": "PROGRAMMER_NORMATIVE_SCOPE",
+      "authority": "PROGRAMMER_L1_SCOPE_AND_APPLICABILITY_BINDINGS",
+      "enabled": true
+    }
+  ],
+  "output": {
+    "registry_path": "reports/global_document_registry/GLOBAL_DOCUMENT_REGISTRY.json",
+    "bindings_path": "reports/global_document_registry/APPLICABILITY_BINDINGS.json",
+    "conflicts_path": "reports/global_document_registry/REGISTRY_CONFLICTS.json"
+  }
+}

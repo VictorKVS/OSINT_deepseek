@@ -1,0 +1,71 @@
+name: Departmental Security Evening Acquisition
+
+on:
+  push:
+    branches:
+      - agent/knowledge-factory-m1
+    paths:
+      - .github/workflows/departmental-evening-acquisition.yml
+  pull_request:
+    branches:
+      - main
+    paths:
+      - .github/workflows/departmental-evening-acquisition.yml
+      - scripts/run_security_departmental_evening_resume.py
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  acquisition:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Run source preflight, 5-stream acquisition, and shadow D4-D9
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+        run: python scripts/run_security_departmental_evening_resume.py
+
+      - name: Show compact final report
+        if: always()
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = Path('reports/security_current_only/LATEST_DEPARTMENTAL_EVENING_RESUME.json')
+          if not p.is_file():
+              print('FINAL_REPORT_MISSING')
+              raise SystemExit(0)
+          d = json.loads(p.read_text(encoding='utf-8'))
+          keys = [
+              'downloaded', 'normalized', 'content_blocked', 'unresolved',
+              'requirements', 'entities', 'shadow_ready_documents',
+              'acquisition_throughput_operational_docs_per_second',
+              'acquisition_throughput_downloaded_docs_per_second',
+              'shadow_throughput_docs_per_second', 'wall_seconds',
+              'current_promotions'
+          ]
+          print(json.dumps({k: d.get(k) for k in keys}, ensure_ascii=False, indent=2))
+          PY
+
+      - name: Upload acquisition evidence and reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: departmental-security-evening-resume
+          retention-days: 7
+          if-no-files-found: warn
+          path: |
+            reports/security_current_only/LATEST_DEPARTMENTAL_EVENING_RESUME.json
+            reports/security_current_only/LATEST_DEPARTMENTAL_5STREAM_RUN.json
+            reports/security_current_only/LATEST_DEPARTMENTAL_D4_D9_CANDIDATE.json
+            reports/security_current_only/_RUNTIME_DEPARTMENTAL_RESUME_QUEUE.json
+            data/security_current_only/
+            data/knowledge_factory/security_departmental_candidate/

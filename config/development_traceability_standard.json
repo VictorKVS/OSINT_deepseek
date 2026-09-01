@@ -1,0 +1,81 @@
+{
+  "schema_version": "1.0",
+  "standard_id": "FATHER-DEVELOPMENT-TRACEABILITY-001",
+  "status": "MANDATORY",
+  "scope": "ALL_FATHER_DEVELOPMENTS",
+  "principle": "Traceability is designed at project start, not reconstructed after implementation.",
+  "required_artifacts": [
+    "TRACEABILITY_PLAN.md",
+    "ROLE_RESPONSIBILITY_MATRIX",
+    "COMMAND_FLOW",
+    "STATE_FLOW",
+    "RUNTIME_TRACE_EVENT_LOG",
+    "EVIDENCE_LINKS"
+  ],
+  "required_design_questions": [
+    "who initiates the action",
+    "who or what executes it",
+    "which command or event is issued",
+    "what inputs are consumed",
+    "what state existed before execution",
+    "what outputs are produced",
+    "what state exists after execution",
+    "where evidence is stored",
+    "which next command or decision is enabled",
+    "how errors retries rework and human approvals are represented"
+  ],
+  "required_runtime_fields": [
+    "trace_id",
+    "correlation_id",
+    "project_id",
+    "task_id",
+    "command_id",
+    "parent_command_id",
+    "actor_role",
+    "initiator",
+    "executor",
+    "trigger",
+    "command_name",
+    "input_refs",
+    "state_before",
+    "started_at",
+    "finished_at",
+    "status",
+    "output_refs",
+    "state_after",
+    "evidence_refs",
+    "error_ref",
+    "retry_of",
+    "rework_reason",
+    "human_approval_ref",
+    "next_command_ids"
+  ],
+  "minimum_statuses": [
+    "PLANNED",
+    "QUEUED",
+    "RUNNING",
+    "WAITING_HUMAN",
+    "PASS",
+    "FAILED",
+    "RETRY",
+    "REWORK",
+    "BLOCKED",
+    "CANCELLED"
+  ],
+  "ui_requirements": {
+    "trace_view_required": true,
+    "show_actor": true,
+    "show_command": true,
+    "show_state_transition": true,
+    "show_inputs_outputs": true,
+    "show_evidence": true,
+    "show_parent_child_commands": true,
+    "show_timestamps": true,
+    "show_errors_retries_rework": true
+  },
+  "acceptance_gate": {
+    "development_may_not_be_showcase_ready_without_traceability_plan": true,
+    "development_may_not_be_marked_operational_without_runtime_trace": true,
+    "unlinked_command_or_output_is_a_traceability_defect": true
+  }
+}

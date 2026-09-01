@@ -1,0 +1,91 @@
+{
+  "schema_version": "1.0",
+  "catalog_id": "ARCHITECT-LIBRARY-RECOMMENDATIONS-001",
+  "purpose": "Broad architect competency catalog used to compare the actual local library and produce gap recommendations. This is not a download list and does not imply rights to obtain any commercial title.",
+  "domains": [
+    "ARCHITECTURE_CORE","DDD","DISTRIBUTED_SYSTEMS","DATA_ARCHITECTURE","MICROSERVICES_EVENT_DRIVEN","RELIABILITY_SRE","SCALABILITY_PERFORMANCE","CLOUD_K8S_IAC","DEVOPS_DELIVERY","SECURITY_ARCHITECTURE","API_INTEGRATION","PRODUCT_REQUIREMENTS","ENTERPRISE_ARCHITECTURE","AI_ML_LLM_ARCHITECTURE","FINOPS"
+  ],
+  "targets": [
+    {"id":"A001","title":"Fundamentals of Software Architecture","author":"Mark Richards; Neal Ford","domain":"ARCHITECTURE_CORE","priority":"P0"},
+    {"id":"A002","title":"Software Architecture: The Hard Parts","author":"Neal Ford; Mark Richards; Pramod Sadalage; Zhamak Dehghani","domain":"ARCHITECTURE_CORE","priority":"P0"},
+    {"id":"A003","title":"Software Architecture in Practice","author":"Len Bass; Paul Clements; Rick Kazman","domain":"ARCHITECTURE_CORE","priority":"P0"},
+    {"id":"A004","title":"Software Systems Architecture","author":"Nick Rozanski; Eoin Woods","domain":"ARCHITECTURE_CORE","priority":"P0"},
+    {"id":"A005","title":"Software Architecture for Developers","author":"Simon Brown","domain":"ARCHITECTURE_CORE","priority":"P0"},
+    {"id":"A006","title":"Just Enough Software Architecture","author":"George Fairbanks","domain":"ARCHITECTURE_CORE","priority":"P1"},
+    {"id":"A007","title":"Building Evolutionary Architectures","author":"Neal Ford; Rebecca Parsons; Patrick Kua; Pramod Sadalage","domain":"ARCHITECTURE_CORE","priority":"P0"},
+    {"id":"A008","title":"The Software Architect Elevator","author":"Gregor Hohpe","domain":"ARCHITECTURE_CORE","priority":"P0"},
+    {"id":"A009","title":"Clean Architecture","author":"Robert C. Martin","domain":"ARCHITECTURE_CORE","priority":"P1"},
+    {"id":"A010","title":"Patterns of Enterprise Application Architecture","author":"Martin Fowler","domain":"ARCHITECTURE_CORE","priority":"P0"},
+    {"id":"A011","title":"Design Patterns: Elements of Reusable Object-Oriented Software","author":"Erich Gamma; Richard Helm; Ralph Johnson; John Vlissides","domain":"ARCHITECTURE_CORE","priority":"P1"},
+    {"id":"A012","title":"Refactoring","author":"Martin Fowler","domain":"ARCHITECTURE_CORE","priority":"P1"},
+    {"id":"A013","title":"Working Effectively with Legacy Code","author":"Michael Feathers","domain":"ARCHITECTURE_CORE","priority":"P1"},
+
+    {"id":"D001","title":"Domain-Driven Design","author":"Eric Evans","domain":"DDD","priority":"P0"},
+    {"id":"D002","title":"Implementing Domain-Driven Design","author":"Vaughn Vernon","domain":"DDD","priority":"P0"},
+    {"id":"D003","title":"Learning Domain-Driven Design","author":"Vlad Khononov","domain":"DDD","priority":"P0"},
+    {"id":"D004","title":"Architecture Patterns with Python","author":"Harry Percival; Bob Gregory","domain":"DDD","priority":"P1"},
+
+    {"id":"DS001","title":"Designing Data-Intensive Applications","author":"Martin Kleppmann","domain":"DISTRIBUTED_SYSTEMS","priority":"P0"},
+    {"id":"DS002","title":"Designing Distributed Systems","author":"Brendan Burns","domain":"DISTRIBUTED_SYSTEMS","priority":"P0"},
+    {"id":"DS003","title":"Distributed Systems","author":"Maarten van Steen; Andrew S. Tanenbaum","domain":"DISTRIBUTED_SYSTEMS","priority":"P1"},
+    {"id":"DS004","title":"Database Internals","author":"Alex Petrov","domain":"DATA_ARCHITECTURE","priority":"P0"},
+    {"id":"DS005","title":"Streaming Systems","author":"Tyler Akidau; Slava Chernyak; Reuven Lax","domain":"DATA_ARCHITECTURE","priority":"P1"},
+    {"id":"DS006","title":"Fundamentals of Data Engineering","author":"Joe Reis; Matt Housley","domain":"DATA_ARCHITECTURE","priority":"P0"},
+    {"id":"DS007","title":"Data Mesh","author":"Zhamak Dehghani","domain":"DATA_ARCHITECTURE","priority":"P1"},
+
+    {"id":"M001","title":"Building Microservices","author":"Sam Newman","domain":"MICROSERVICES_EVENT_DRIVEN","priority":"P0"},
+    {"id":"M002","title":"Microservices Patterns","author":"Chris Richardson","domain":"MICROSERVICES_EVENT_DRIVEN","priority":"P0"},
+    {"id":"M003","title":"Monolith to Microservices","author":"Sam Newman","domain":"MICROSERVICES_EVENT_DRIVEN","priority":"P1"},
+    {"id":"M004","title":"Enterprise Integration Patterns","author":"Gregor Hohpe; Bobby Woolf","domain":"MICROSERVICES_EVENT_DRIVEN","priority":"P0"},
+    {"id":"M005","title":"Building Event-Driven Microservices","author":"Adam Bellemare","domain":"MICROSERVICES_EVENT_DRIVEN","priority":"P1"},
+    {"id":"M006","title":"Designing Event-Driven Systems","author":"Ben Stopford","domain":"MICROSERVICES_EVENT_DRIVEN","priority":"P1"},
+
+    {"id":"R001","title":"Release It!","author":"Michael T. Nygard","domain":"RELIABILITY_SRE","priority":"P0"},
+    {"id":"R002","title":"Site Reliability Engineering","author":"Betsy Beyer; Chris Jones; Jennifer Petoff; Niall Richard Murphy","domain":"RELIABILITY_SRE","priority":"P0"},
+    {"id":"R003","title":"The Site Reliability Workbook","author":"Betsy Beyer; Niall Richard Murphy; David K. Rensin; Kent Kawahara; Stephen Thorne","domain":"RELIABILITY_SRE","priority":"P0"},
+    {"id":"R004","title":"Building Secure and Reliable Systems","author":"Heather Adkins et al.","domain":"RELIABILITY_SRE","priority":"P0"},
+    {"id":"R005","title":"Observability Engineering","author":"Charity Majors; Liz Fong-Jones; George Miranda","domain":"RELIABILITY_SRE","priority":"P1"},
+    {"id":"R006","title":"Distributed Systems Observability","author":"Cindy Sridharan","domain":"RELIABILITY_SRE","priority":"P1"},
+
+    {"id":"S001","title":"The Art of Scalability","author":"Martin Abbott; Michael Fisher","domain":"SCALABILITY_PERFORMANCE","priority":"P0"},
+    {"id":"S002","title":"Scalability Rules","author":"Martin Abbott; Michael Fisher","domain":"SCALABILITY_PERFORMANCE","priority":"P1"},
+    {"id":"S003","title":"Systems Performance","author":"Brendan Gregg","domain":"SCALABILITY_PERFORMANCE","priority":"P0"},
+
+    {"id":"C001","title":"Infrastructure as Code","author":"Kief Morris","domain":"CLOUD_K8S_IAC","priority":"P0"},
+    {"id":"C002","title":"Terraform: Up and Running","author":"Yevgeniy Brikman","domain":"CLOUD_K8S_IAC","priority":"P1"},
+    {"id":"C003","title":"Kubernetes: Up and Running","author":"Brendan Burns; Joe Beda; Kelsey Hightower","domain":"CLOUD_K8S_IAC","priority":"P0"},
+    {"id":"C004","title":"Kubernetes Patterns","author":"Bilgin Ibryam; Roland Huß","domain":"CLOUD_K8S_IAC","priority":"P0"},
+    {"id":"C005","title":"Cloud Native DevOps with Kubernetes","author":"John Arundel; Justin Domingus","domain":"CLOUD_K8S_IAC","priority":"P1"},
+
+    {"id":"DV001","title":"The DevOps Handbook","author":"Gene Kim et al.","domain":"DEVOPS_DELIVERY","priority":"P0"},
+    {"id":"DV002","title":"Accelerate","author":"Nicole Forsgren; Jez Humble; Gene Kim","domain":"DEVOPS_DELIVERY","priority":"P0"},
+    {"id":"DV003","title":"Continuous Delivery","author":"Jez Humble; David Farley","domain":"DEVOPS_DELIVERY","priority":"P0"},
+    {"id":"DV004","title":"Modern Software Engineering","author":"David Farley","domain":"DEVOPS_DELIVERY","priority":"P0"},
+    {"id":"DV005","title":"Team Topologies","author":"Matthew Skelton; Manuel Pais","domain":"DEVOPS_DELIVERY","priority":"P0"},
+
+    {"id":"SEC001","title":"Security Engineering","author":"Ross Anderson","domain":"SECURITY_ARCHITECTURE","priority":"P0"},
+    {"id":"SEC002","title":"Threat Modeling: Designing for Security","author":"Adam Shostack","domain":"SECURITY_ARCHITECTURE","priority":"P0"},
+    {"id":"SEC003","title":"Designing Secure Software","author":"Loren Kohnfelder","domain":"SECURITY_ARCHITECTURE","priority":"P0"},
+    {"id":"SEC004","title":"Zero Trust Networks","author":"Evan Gilman; Doug Barth","domain":"SECURITY_ARCHITECTURE","priority":"P1"},
+
+    {"id":"API001","title":"API Design Patterns","author":"JJ Geewax","domain":"API_INTEGRATION","priority":"P0"},
+    {"id":"API002","title":"Continuous API Management","author":"Mehdi Medjaoui et al.","domain":"API_INTEGRATION","priority":"P1"},
+
+    {"id":"P001","title":"Software Requirements","author":"Karl Wiegers; Joy Beatty","domain":"PRODUCT_REQUIREMENTS","priority":"P0"},
+    {"id":"P002","title":"User Story Mapping","author":"Jeff Patton","domain":"PRODUCT_REQUIREMENTS","priority":"P1"},
+    {"id":"P003","title":"Inspired","author":"Marty Cagan","domain":"PRODUCT_REQUIREMENTS","priority":"P1"},
+    {"id":"P004","title":"Empowered","author":"Marty Cagan; Chris Jones","domain":"PRODUCT_REQUIREMENTS","priority":"P1"},
+    {"id":"P005","title":"Escaping the Build Trap","author":"Melissa Perri","domain":"PRODUCT_REQUIREMENTS","priority":"P1"},
+
+    {"id":"E001","title":"Enterprise Architecture as Strategy","author":"Jeanne Ross; Peter Weill; David Robertson","domain":"ENTERPRISE_ARCHITECTURE","priority":"P1"},
+
+    {"id":"AI001","title":"Designing Machine Learning Systems","author":"Chip Huyen","domain":"AI_ML_LLM_ARCHITECTURE","priority":"P0"},
+    {"id":"AI002","title":"AI Engineering","author":"Chip Huyen","domain":"AI_ML_LLM_ARCHITECTURE","priority":"P0"},
+    {"id":"AI003","title":"Machine Learning Design Patterns","author":"Valliappa Lakshmanan; Sara Robinson; Michael Munn","domain":"AI_ML_LLM_ARCHITECTURE","priority":"P1"},
+    {"id":"AI004","title":"Practical MLOps","author":"Noah Gift; Alfredo Deza","domain":"AI_ML_LLM_ARCHITECTURE","priority":"P1"},
+    {"id":"AI005","title":"Reliable Machine Learning","author":"Cathy Chen et al.","domain":"AI_ML_LLM_ARCHITECTURE","priority":"P1"},
+    {"id":"AI006","title":"Hands-On Large Language Models","author":"Jay Alammar; Maarten Grootendorst","domain":"AI_ML_LLM_ARCHITECTURE","priority":"P1"},
+
+    {"id":"F001","title":"Cloud FinOps","author":"J.R. Storment; Mike Fuller","domain":"FINOPS","priority":"P1"}
+  ]
+}

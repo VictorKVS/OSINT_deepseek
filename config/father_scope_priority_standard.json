@@ -1,0 +1,137 @@
+{
+  "schema_version": "1.0",
+  "standard_id": "FATHER-SCOPE-PRIORITY-001",
+  "status": "MANDATORY",
+  "scope": "ALL_FATHER_AREAS_ROLES_DOCUMENTS_FEATURES_TASKS_AND_KNOWLEDGE",
+  "principle": "Every managed area is classified independently by maturity depth and implementation importance.",
+  "axes": {
+    "maturity": {
+      "field": "maturity_level",
+      "values": {
+        "MIN": {
+          "meaning": "Minimum professionally usable and testable baseline.",
+          "goal": "Close the core path end-to-end without optional depth.",
+          "must_have": [
+            "scope and terminology are defined",
+            "authoritative or primary basis exists, or an explicit GAP is recorded",
+            "basic workflow is executable",
+            "traceability and evidence are present",
+            "critical failure modes are known",
+            "acceptance can be tested"
+          ]
+        },
+        "MEDIUM": {
+          "meaning": "Normal production-grade professional level.",
+          "goal": "Broaden coverage, add independent evidence, examples, controls and operational depth.",
+          "must_have": [
+            "MIN is passed",
+            "important variants and edge cases are covered",
+            "multiple independent source classes support important decisions",
+            "templates, checklists, examples or reference implementations exist where relevant",
+            "conflicts, counter-evidence and applicability boundaries are represented",
+            "quality and regression checks exist"
+          ]
+        },
+        "MAX": {
+          "meaning": "Expert / advanced / research-complete target for the current product horizon.",
+          "goal": "Add deep specialization, monitoring, benchmarks, optimization and challengeable golden decisions.",
+          "must_have": [
+            "MEDIUM is passed",
+            "change monitoring or freshness control exists where relevant",
+            "benchmark or evaluation corpus exists where measurable",
+            "reuse and rework are measured",
+            "advanced failure modes and rare contexts are covered",
+            "golden decisions are versioned and challengeable",
+            "human review remains available for high-impact promotion"
+          ]
+        }
+      }
+    },
+    "importance": {
+      "field": "importance_class",
+      "values": {
+        "NECESSARY": {
+          "meaning": "Required for correctness, legality, safety, core usefulness or acceptance.",
+          "execution_rule": "Must be completed before the containing scope can be declared complete at its target maturity.",
+          "examples": [
+            "applicable law or regulator requirement",
+            "core product path",
+            "security or data-integrity control",
+            "required professional competency",
+            "mandatory source/currentness verification"
+          ]
+        },
+        "DESIRABLE": {
+          "meaning": "Materially improves professional quality, reliability, usability, coverage or economics but is not a hard blocker for the minimum acceptance gate.",
+          "execution_rule": "Do after NECESSARY items for the same maturity level, subject to available capacity.",
+          "examples": [
+            "additional independent source class",
+            "better UX and automation",
+            "extra reference implementation",
+            "deeper observability or performance tuning",
+            "broader sector overlay"
+          ]
+        },
+        "INTERESTING_LATER": {
+          "meaning": "Potentially valuable experiment, advanced specialization or future opportunity; no current completion dependency.",
+          "execution_rule": "Keep in HOLD/backlog until NECESSARY and relevant DESIRABLE work is closed or a concrete trigger raises priority.",
+          "examples": [
+            "rare edge-domain specialization",
+            "experimental algorithm",
+            "novel UI concept",
+            "research-only source expansion",
+            "non-blocking future integration"
+          ]
+        }
+      }
+    }
+  },
+  "required_fields": [
+    "maturity_level",
+    "importance_class"
+  ],
+  "allowed_maturity_values": ["MIN", "MEDIUM", "MAX"],
+  "allowed_importance_values": ["NECESSARY", "DESIRABLE", "INTERESTING_LATER"],
+  "sorting_rule": [
+    "NECESSARY_MIN",
+    "NECESSARY_MEDIUM",
+    "NECESSARY_MAX",
+    "DESIRABLE_MIN",
+    "DESIRABLE_MEDIUM",
+    "DESIRABLE_MAX",
+    "INTERESTING_LATER_MIN",
+    "INTERESTING_LATER_MEDIUM",
+    "INTERESTING_LATER_MAX"
+  ],
+  "planning_rules": {
+    "importance_does_not_imply_maturity": true,
+    "maturity_does_not_imply_importance": true,
+    "necessary_max_may_exist": true,
+    "interesting_later_min_may_exist": true,
+    "no_scope_complete_with_unresolved_necessary_items_at_or_below_target_maturity": true,
+    "gaps_must_preserve_both_axes": true,
+    "deferred_items_must_not_disappear": true,
+    "priority_changes_require_reason_and_trace": true
+  },
+  "default_application": {
+    "REGULATORY_APPLICABILITY_AND_CURRENTNESS": {"maturity_level": "MIN", "importance_class": "NECESSARY"},
+    "CORE_ROLE_COMPETENCY": {"maturity_level": "MIN", "importance_class": "NECESSARY"},
+    "CORE_PRODUCT_PATH": {"maturity_level": "MIN", "importance_class": "NECESSARY"},
+    "ADDITIONAL_PROFESSIONAL_DEPTH": {"maturity_level": "MEDIUM", "importance_class": "DESIRABLE"},
+    "ADVANCED_OPTIMIZATION": {"maturity_level": "MAX", "importance_class": "DESIRABLE"},
+    "EXPERIMENTAL_OR_FUTURE_DIRECTION": {"maturity_level": "MAX", "importance_class": "INTERESTING_LATER"}
+  },
+  "applies_to": [
+    "DOCUMENT_BINDING",
+    "REGULATORY_SECTOR",
+    "ROLE_TOPIC",
+    "ROLE_COMPETENCY",
+    "LIBRARY_ORDER_SCOPE",
+    "PRODUCT_FEATURE",
+    "MODULE",
+    "PROJECT_TASK",
+    "SOURCE_TARGET",
+    "RESEARCH_HYPOTHESIS",
+    "BACKLOG_ITEM"
+  ]
+}

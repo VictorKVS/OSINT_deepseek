@@ -1,0 +1,56 @@
+{
+  "schema_version": "1.0",
+  "policy_id": "FATHER-PROGRAMMER-MIN-DERIVED-REVIEW-001",
+  "status": "ACTIVE_MIN_DERIVED_REVIEW",
+  "role_id": "PROGRAMMER",
+  "maturity_level": "MIN",
+  "importance_class": "NECESSARY",
+  "principle": "Derived tasks must remain hash-bound to reviewed Golden parents and pass structural, source, HOLDOUT-isolation and mutation-quality checks before any response generation or training export.",
+  "expected": {
+    "tasks_total": 40,
+    "parents_total": 8,
+    "tasks_per_parent": 5,
+    "tasks_per_mode": 8,
+    "modes": [
+      "IMPLEMENT_VARIANT",
+      "REPAIR_BUG",
+      "WRITE_TESTS",
+      "CODE_REVIEW",
+      "EDGE_CASE_ANALYSIS"
+    ]
+  },
+  "required_checks": [
+    "derived source artifact summary is PASS",
+    "40 unique TRAIN task ids exist",
+    "exactly 8 tasks exist for each derivation mode",
+    "exactly 5 tasks derive from each of 8 Golden parents",
+    "every parent remains GOLDEN_APPROVED and hash-compatible",
+    "every inherited source ref resolves and matches the parent binding",
+    "no HOLDOUT task id, implementation or function name appears",
+    "repair and review code mutations are syntactically valid",
+    "each registered mutation has a concrete contract defect",
+    "mode-specific prompt contract is preserved",
+    "training_ready remains false until later critic approval"
+  ],
+  "mutation_quality": {
+    "required_parent_functions": [
+      "sum_positive",
+      "stable_unique",
+      "parse_ints",
+      "first_index",
+      "chunked",
+      "safe_ratio",
+      "word_frequency",
+      "merge_sorted"
+    ],
+    "rule": "Each mutation must be demonstrably defective either by a deterministic behavior probe or by a static contract violation when runtime output can coincidentally match."
+  },
+  "promotion_rules": {
+    "automated_review_does_not_make_training_ready": true,
+    "critic_review_required": true,
+    "holdout_never_exported": true,
+    "no_auto_promotion": true
+  },
+  "next_state_on_pass": "DERIVED_AUTOMATED_PASS_CRITIC_PENDING",
+  "telemetry_rule": "Report only measured counts and elapsed time. Do not claim model improvement, speedup or ETA from corpus review alone."
+}

@@ -1,0 +1,491 @@
+{
+  "schema_version": "1.0",
+  "registry_id": "PROGRAMMER-ALGORITHM-BIBLIOGRAPHY-PROBE-001",
+  "role_id": "PROGRAMMER",
+  "purpose": "Telegram search wave for foundational algorithms, data structures, algorithm analysis and language-specific implementation books. Search/probe only; no automatic book download.",
+  "policy": {
+    "probe_only": true,
+    "download": false,
+    "auto_join_channels": false,
+    "access_control_bypass": false,
+    "paywall_bypass": false,
+    "max_parallel_streams": 5,
+    "max_results_per_query": 20,
+    "max_candidates_per_target": 5,
+    "allowed_extensions": [".pdf", ".epub", ".djvu", ".mobi", ".doc", ".docx", ".txt", ".md", ".zip", ".7z", ".rar"]
+  },
+  "targets": [
+    {
+      "id": "ALG-001",
+      "priority": "P0",
+      "kind": "BOOK",
+      "track": "FOUNDATION",
+      "language_focus": ["Python", "language-independent"],
+      "author": "Aditya Y. Bhargava",
+      "title": "Grokking Algorithms, Second Edition: An Illustrated Guide for Programmers and Other Curious People",
+      "year": 2024,
+      "topics": ["search", "sorting", "hash tables", "graphs", "trees", "greedy", "dynamic programming", "k-nearest neighbors"],
+      "query_variants": [
+        "Aditya Bhargava Grokking Algorithms Second Edition",
+        "Grokking Algorithms 2nd Edition Bhargava",
+        "Грокаем алгоритмы Бхаргава 2 издание",
+        "Грокаем алгоритмы иллюстрированное пособие программистов любопытствующих"
+      ]
+    },
+    {
+      "id": "ALG-002",
+      "priority": "P0",
+      "kind": "BOOK",
+      "track": "FOUNDATION",
+      "language_focus": ["pseudocode", "language-independent"],
+      "author": "Thomas H. Cormen; Charles E. Leiserson; Ronald L. Rivest; Clifford Stein",
+      "title": "Introduction to Algorithms, Third Edition",
+      "year": 2009,
+      "topics": ["algorithm analysis", "sorting", "data structures", "graphs", "dynamic programming", "greedy", "NP-completeness"],
+      "query_variants": [
+        "Cormen Leiserson Rivest Stein Introduction to Algorithms Third Edition",
+        "CLRS 3rd edition",
+        "Алгоритмы построение и анализ 3 издание Кормен Лейзерсон Ривест Штайн",
+        "Алгоритмы построение и анализ третье издание"
+      ]
+    },
+    {
+      "id": "ALG-003",
+      "priority": "P1",
+      "kind": "BOOK",
+      "track": "FOUNDATION",
+      "language_focus": ["pseudocode", "language-independent"],
+      "author": "Thomas H. Cormen; Charles E. Leiserson; Ronald L. Rivest; Clifford Stein",
+      "title": "Introduction to Algorithms, Fourth Edition",
+      "year": 2022,
+      "topics": ["algorithm analysis", "sorting", "data structures", "graphs", "dynamic programming", "greedy", "NP-completeness"],
+      "query_variants": [
+        "Cormen Leiserson Rivest Stein Introduction to Algorithms Fourth Edition",
+        "CLRS 4th edition",
+        "Алгоритмы построение и анализ 4 издание"
+      ]
+    },
+    {
+      "id": "ALG-004",
+      "priority": "P0",
+      "kind": "BOOK",
+      "track": "DESIGN",
+      "language_focus": ["language-independent"],
+      "author": "Steven S. Skiena",
+      "title": "The Algorithm Design Manual, Third Edition",
+      "year": 2020,
+      "topics": ["algorithm design", "problem classification", "war stories", "graphs", "combinatorial search", "optimization"],
+      "query_variants": [
+        "Steven Skiena Algorithm Design Manual Third Edition",
+        "The Algorithm Design Manual Skiena 3rd",
+        "Стивен Скьена Алгоритмы руководство по разработке",
+        "Алгоритмы руководство по разработке Скьена"
+      ]
+    },
+    {
+      "id": "ALG-005",
+      "priority": "P0",
+      "kind": "BOOK",
+      "track": "FOUNDATION",
+      "language_focus": ["Pascal", "language-independent"],
+      "author": "Niklaus Wirth",
+      "title": "Algorithms + Data Structures = Programs",
+      "year": 1976,
+      "topics": ["data structures", "sorting", "search", "recursion", "program construction"],
+      "query_variants": [
+        "Niklaus Wirth Algorithms Data Structures Programs",
+        "Algorithms + Data Structures = Programs Wirth",
+        "Никлаус Вирт Алгоритмы и структуры данных",
+        "Алгоритмы структуры данных программы Вирт"
+      ]
+    },
+    {
+      "id": "ALG-006",
+      "priority": "P0",
+      "kind": "BOOK",
+      "track": "ANALYSIS",
+      "language_focus": ["language-independent"],
+      "author": "Jeffrey J. McConnell",
+      "title": "Analysis of Algorithms: An Active Learning Approach",
+      "topics": ["complexity", "asymptotic analysis", "recurrences", "sorting", "searching"],
+      "query_variants": [
+        "Jeffrey McConnell Analysis of Algorithms Active Learning Approach",
+        "Analysis of Algorithms An Active Learning Approach",
+        "Анализ алгоритмов активный обучающий подход Макконнелл",
+        "Анализ алгоритмов Активный обучающий подход"
+      ]
+    },
+    {
+      "id": "ALG-007",
+      "priority": "P0",
+      "kind": "BOOK",
+      "track": "ANALYSIS",
+      "language_focus": ["pseudocode", "language-independent"],
+      "author": "Anany Levitin",
+      "title": "Introduction to the Design and Analysis of Algorithms, Third Edition",
+      "topics": ["algorithm design", "brute force", "divide and conquer", "decrease and conquer", "dynamic programming", "greedy"],
+      "query_variants": [
+        "Anany Levitin Introduction to the Design and Analysis of Algorithms Third Edition",
+        "Levitin Design Analysis Algorithms 3rd",
+        "Левитин алгоритмы введение разработка анализ"
+      ]
+    },
+    {
+      "id": "ALG-008",
+      "priority": "P1",
+      "kind": "BOOK",
+      "track": "PRACTICAL_REFERENCE",
+      "language_focus": ["C", "C++", "Java", "language-independent"],
+      "author": "George T. Heineman; Gary Pollice; Stanley Selkow",
+      "title": "Algorithms in a Nutshell, Second Edition",
+      "topics": ["sorting", "searching", "graphs", "path finding", "computational geometry"],
+      "query_variants": [
+        "Algorithms in a Nutshell Second Edition Heineman Pollice Selkow",
+        "Algorithms in a Nutshell OReilly",
+        "Алгоритмы справочник O'Reilly Heineman"
+      ]
+    },
+    {
+      "id": "ALG-009",
+      "priority": "P0",
+      "kind": "BOOK",
+      "track": "PRACTICE",
+      "language_focus": ["multiple", "pseudocode"],
+      "author": "Stack Overflow; коллектив авторов",
+      "title": "Алгоритмы в задачах и примерах. Самые эффективные способы и решения от сообщества Stack Overflow",
+      "year": 2024,
+      "isbn": "978-5-17-160267-3",
+      "topics": ["graphs", "search", "sorting", "strings", "community recipes"],
+      "query_variants": [
+        "Алгоритмы в задачах и примерах Stack Overflow",
+        "Самые эффективные способы и решения от сообщества Stack Overflow алгоритмы",
+        "978-5-17-160267-3",
+        "Stack Overflow алгоритмы задачи примеры"
+      ]
+    },
+    {
+      "id": "KNUTH-001",
+      "priority": "P0",
+      "kind": "BOOK",
+      "track": "KNUTH",
+      "language_focus": ["MIX", "MMIX", "language-independent"],
+      "author": "Donald E. Knuth",
+      "title": "The Art of Computer Programming, Volume 1: Fundamental Algorithms, Third Edition",
+      "topics": ["fundamental algorithms", "mathematical preliminaries", "information structures"],
+      "query_variants": [
+        "Donald Knuth Art of Computer Programming Volume 1 Fundamental Algorithms 3rd",
+        "TAOCP Volume 1 Fundamental Algorithms",
+        "Кнут Искусство программирования том 1 Основные алгоритмы"
+      ]
+    },
+    {
+      "id": "KNUTH-002",
+      "priority": "P0",
+      "kind": "BOOK",
+      "track": "KNUTH",
+      "language_focus": ["language-independent"],
+      "author": "Donald E. Knuth",
+      "title": "The Art of Computer Programming, Volume 2: Seminumerical Algorithms, Third Edition",
+      "topics": ["random numbers", "arithmetic", "number theory"],
+      "query_variants": [
+        "Donald Knuth Art of Computer Programming Volume 2 Seminumerical Algorithms 3rd",
+        "TAOCP Volume 2 Seminumerical Algorithms",
+        "Кнут Искусство программирования том 2 Получисленные алгоритмы"
+      ]
+    },
+    {
+      "id": "KNUTH-003",
+      "priority": "P0",
+      "kind": "BOOK",
+      "track": "KNUTH",
+      "language_focus": ["language-independent"],
+      "author": "Donald E. Knuth",
+      "title": "The Art of Computer Programming, Volume 3: Sorting and Searching, Second Edition",
+      "topics": ["sorting", "searching", "hashing", "trees"],
+      "query_variants": [
+        "Donald Knuth Art of Computer Programming Volume 3 Sorting Searching 2nd",
+        "TAOCP Volume 3 Sorting and Searching",
+        "Кнут Искусство программирования том 3 Сортировка и поиск"
+      ]
+    },
+    {
+      "id": "KNUTH-004A",
+      "priority": "P0",
+      "kind": "BOOK",
+      "track": "KNUTH",
+      "language_focus": ["language-independent"],
+      "author": "Donald E. Knuth",
+      "title": "The Art of Computer Programming, Volume 4A: Combinatorial Algorithms, Part 1",
+      "year": 2011,
+      "topics": ["combinatorial algorithms", "boolean functions", "generation", "combinatorial search"],
+      "query_variants": [
+        "Donald Knuth Art of Computer Programming Volume 4A Combinatorial Algorithms Part 1",
+        "TAOCP Volume 4A",
+        "Кнут Искусство программирования том 4A Комбинаторные алгоритмы часть 1"
+      ]
+    },
+    {
+      "id": "KNUTH-004B",
+      "priority": "P0",
+      "kind": "BOOK",
+      "track": "KNUTH",
+      "language_focus": ["language-independent"],
+      "author": "Donald E. Knuth",
+      "title": "The Art of Computer Programming, Volume 4B: Combinatorial Algorithms, Part 2",
+      "year": 2022,
+      "topics": ["backtracking", "dancing links", "constraint satisfaction", "combinatorial search"],
+      "query_variants": [
+        "Donald Knuth Art of Computer Programming Volume 4B Combinatorial Algorithms Part 2",
+        "TAOCP Volume 4B",
+        "Кнут Искусство программирования том 4B Комбинаторные алгоритмы часть 2"
+      ]
+    },
+    {
+      "id": "PYALG-001",
+      "priority": "P0",
+      "kind": "BOOK",
+      "track": "PYTHON",
+      "language_focus": ["Python"],
+      "author": "Bradford Tuckfield",
+      "title": "Dive Into Algorithms: A Pythonic Adventure for the Intrepid Beginner",
+      "year": 2021,
+      "topics": ["Python algorithms", "optimization", "search", "machine learning", "performance"],
+      "query_variants": [
+        "Bradford Tuckfield Dive Into Algorithms",
+        "Dive Into Algorithms Pythonic Adventure Tuckfield",
+        "Брэдфорд Такфилд Алгоритмы неформально",
+        "Алгоритмы неформально Инструкция для начинающих питонистов",
+        "978-5-4461-1919-6"
+      ]
+    },
+    {
+      "id": "PYALG-002",
+      "priority": "P0",
+      "kind": "BOOK",
+      "track": "PYTHON",
+      "language_focus": ["Python"],
+      "author": "Michael T. Goodrich; Roberto Tamassia; Michael H. Goldwasser",
+      "title": "Data Structures and Algorithms in Python",
+      "year": 2013,
+      "topics": ["algorithm analysis", "recursion", "sequences", "stacks", "queues", "trees", "hash tables", "graphs"],
+      "query_variants": [
+        "Goodrich Tamassia Goldwasser Data Structures and Algorithms in Python",
+        "Data Structures Algorithms Python Goodrich",
+        "Структуры данных и алгоритмы в Python Гудрич Тамассия"
+      ]
+    },
+    {
+      "id": "PYALG-003",
+      "priority": "P0",
+      "kind": "BOOK",
+      "track": "PYTHON",
+      "language_focus": ["Python"],
+      "author": "Bradley N. Miller; David L. Ranum",
+      "title": "Problem Solving with Algorithms and Data Structures Using Python",
+      "topics": ["problem solving", "algorithm analysis", "lists", "stacks", "queues", "trees", "graphs"],
+      "query_variants": [
+        "Miller Ranum Problem Solving with Algorithms and Data Structures Using Python",
+        "Problem Solving Algorithms Data Structures Python Miller Ranum",
+        "Решение задач алгоритмы структуры данных Python Miller Ranum"
+      ]
+    },
+    {
+      "id": "PYALG-004",
+      "priority": "P1",
+      "kind": "BOOK",
+      "track": "PYTHON",
+      "language_focus": ["Python"],
+      "author": "Magnus Lie Hetland",
+      "title": "Python Algorithms: Mastering Basic Algorithms in the Python Language",
+      "topics": ["Python", "graphs", "trees", "greedy", "dynamic programming", "complexity"],
+      "query_variants": [
+        "Magnus Lie Hetland Python Algorithms",
+        "Python Algorithms Mastering Basic Algorithms Hetland",
+        "Алгоритмы Python Хетланд"
+      ]
+    },
+    {
+      "id": "PYALG-005",
+      "priority": "P1",
+      "kind": "BOOK",
+      "track": "PYTHON",
+      "language_focus": ["Python"],
+      "author": "David Kopec",
+      "title": "Classic Computer Science Problems in Python",
+      "topics": ["search", "constraint satisfaction", "graphs", "machine learning", "genetic algorithms"],
+      "query_variants": [
+        "David Kopec Classic Computer Science Problems in Python",
+        "Classic Computer Science Problems Python Kopec",
+        "Классические задачи Computer Science Python Копек"
+      ]
+    },
+    {
+      "id": "JAVAALG-001",
+      "priority": "P0",
+      "kind": "BOOK",
+      "track": "JAVA",
+      "language_focus": ["Java"],
+      "author": "Michael T. Goodrich; Roberto Tamassia; Michael H. Goldwasser",
+      "title": "Data Structures and Algorithms in Java, Sixth Edition",
+      "topics": ["Java", "data structures", "algorithm analysis", "trees", "hash tables", "sorting", "graphs"],
+      "query_variants": [
+        "Goodrich Tamassia Goldwasser Data Structures and Algorithms in Java 6th Edition",
+        "Data Structures Algorithms Java Sixth Edition Goodrich",
+        "Структуры данных и алгоритмы в Java Гудрич Тамассия Голдвассер"
+      ]
+    },
+    {
+      "id": "JAVAALG-002",
+      "priority": "P0",
+      "kind": "BOOK",
+      "track": "JAVA",
+      "language_focus": ["Java"],
+      "author": "Robert Sedgewick; Kevin Wayne",
+      "title": "Algorithms, Fourth Edition",
+      "year": 2011,
+      "topics": ["Java", "sorting", "searching", "graphs", "strings"],
+      "query_variants": [
+        "Robert Sedgewick Kevin Wayne Algorithms Fourth Edition",
+        "Algorithms 4th Edition Sedgewick Wayne",
+        "Седжвик Уэйн Алгоритмы 4 издание Java"
+      ]
+    },
+    {
+      "id": "CPPALG-001",
+      "priority": "P0",
+      "kind": "BOOK",
+      "track": "CPP",
+      "language_focus": ["C++"],
+      "author": "Robert Sedgewick",
+      "title": "Algorithms in C++, Parts 1-4: Fundamentals, Data Structure, Sorting, Searching, Third Edition",
+      "topics": ["C++", "fundamentals", "data structures", "sorting", "searching"],
+      "query_variants": [
+        "Robert Sedgewick Algorithms in C++ Parts 1-4 Third Edition",
+        "Algorithms in C++ Sedgewick Parts 1 4",
+        "Седжвик Алгоритмы на C++ части 1-4",
+        "Алгоритмы на C++ Седжвик"
+      ]
+    },
+    {
+      "id": "CPPALG-002",
+      "priority": "P0",
+      "kind": "BOOK",
+      "track": "CPP",
+      "language_focus": ["C++"],
+      "author": "Robert Sedgewick",
+      "title": "Algorithms in C++, Part 5: Graph Algorithms, Third Edition",
+      "topics": ["C++", "graphs", "search", "shortest paths", "minimum spanning trees"],
+      "query_variants": [
+        "Robert Sedgewick Algorithms in C++ Part 5 Graph Algorithms Third Edition",
+        "Algorithms in C++ Graph Algorithms Sedgewick",
+        "Седжвик Алгоритмы на C++ часть 5 графы"
+      ]
+    },
+    {
+      "id": "CPPALG-003",
+      "priority": "P1",
+      "kind": "BOOK",
+      "track": "CPP",
+      "language_focus": ["C++"],
+      "author": "Michael T. Goodrich; Roberto Tamassia; David M. Mount",
+      "title": "Data Structures and Algorithms in C++, Second Edition",
+      "topics": ["C++", "data structures", "algorithm analysis", "trees", "graphs", "sorting"],
+      "query_variants": [
+        "Goodrich Tamassia Mount Data Structures and Algorithms in C++ Second Edition",
+        "Data Structures Algorithms C++ Goodrich Tamassia Mount",
+        "Структуры данных и алгоритмы C++ Гудрич Тамассия"
+      ]
+    },
+    {
+      "id": "CPPALG-004",
+      "priority": "P1",
+      "kind": "BOOK",
+      "track": "CPP",
+      "language_focus": ["C++"],
+      "author": "Mark Allen Weiss",
+      "title": "Data Structures and Algorithm Analysis in C++, Fourth Edition",
+      "topics": ["C++", "algorithm analysis", "lists", "trees", "hashing", "graphs", "sorting"],
+      "query_variants": [
+        "Mark Allen Weiss Data Structures and Algorithm Analysis in C++ Fourth Edition",
+        "Weiss Data Structures Algorithm Analysis C++ 4th",
+        "Вайс структуры данных анализ алгоритмов C++"
+      ]
+    },
+    {
+      "id": "GOALG-001",
+      "priority": "P1",
+      "kind": "BOOK",
+      "track": "GO",
+      "language_focus": ["Go"],
+      "author": "Bhagvan Kommadi",
+      "title": "Learn Data Structures and Algorithms with Golang",
+      "year": 2019,
+      "topics": ["Go", "data structures", "graphs", "trees", "sorting", "complexity"],
+      "query_variants": [
+        "Bhagvan Kommadi Learn Data Structures and Algorithms with Golang",
+        "Learn Data Structures Algorithms Golang Kommadi",
+        "структуры данных алгоритмы Go Golang Kommadi"
+      ]
+    },
+    {
+      "id": "RUSTALG-001",
+      "priority": "P1",
+      "kind": "BOOK",
+      "track": "RUST",
+      "language_focus": ["Rust"],
+      "author": "Claus Matzinger",
+      "title": "Hands-On Data Structures and Algorithms with Rust",
+      "year": 2019,
+      "topics": ["Rust", "data structures", "sorting", "search", "graphs", "concurrency"],
+      "query_variants": [
+        "Claus Matzinger Hands-On Data Structures and Algorithms with Rust",
+        "Hands On Data Structures Algorithms Rust Matzinger",
+        "структуры данных алгоритмы Rust Matzinger"
+      ]
+    },
+    {
+      "id": "ILLUM-001",
+      "priority": "P1",
+      "kind": "BOOK",
+      "track": "ALGORITHMS_ILLUMINATED",
+      "language_focus": ["language-independent"],
+      "author": "Tim Roughgarden",
+      "title": "Algorithms Illuminated, Part 1: The Basics",
+      "topics": ["asymptotic analysis", "divide and conquer", "sorting", "randomization"],
+      "query_variants": ["Tim Roughgarden Algorithms Illuminated Part 1 The Basics", "Algorithms Illuminated Part 1 Roughgarden"]
+    },
+    {
+      "id": "ILLUM-002",
+      "priority": "P1",
+      "kind": "BOOK",
+      "track": "ALGORITHMS_ILLUMINATED",
+      "language_focus": ["language-independent"],
+      "author": "Tim Roughgarden",
+      "title": "Algorithms Illuminated, Part 2: Graph Algorithms and Data Structures",
+      "topics": ["graphs", "heaps", "search", "shortest paths", "minimum spanning trees"],
+      "query_variants": ["Tim Roughgarden Algorithms Illuminated Part 2 Graph Algorithms Data Structures", "Algorithms Illuminated Part 2 Roughgarden"]
+    },
+    {
+      "id": "ILLUM-003",
+      "priority": "P1",
+      "kind": "BOOK",
+      "track": "ALGORITHMS_ILLUMINATED",
+      "language_focus": ["language-independent"],
+      "author": "Tim Roughgarden",
+      "title": "Algorithms Illuminated, Part 3: Greedy Algorithms and Dynamic Programming",
+      "topics": ["greedy", "dynamic programming", "scheduling", "knapsack"],
+      "query_variants": ["Tim Roughgarden Algorithms Illuminated Part 3 Greedy Dynamic Programming", "Algorithms Illuminated Part 3 Roughgarden"]
+    },
+    {
+      "id": "ILLUM-004",
+      "priority": "P1",
+      "kind": "BOOK",
+      "track": "ALGORITHMS_ILLUMINATED",
+      "language_focus": ["language-independent"],
+      "author": "Tim Roughgarden",
+      "title": "Algorithms Illuminated, Part 4: Algorithms for NP-Hard Problems",
+      "topics": ["NP-hardness", "approximation", "local search", "branch and bound"],
+      "query_variants": ["Tim Roughgarden Algorithms Illuminated Part 4 NP Hard Problems", "Algorithms Illuminated Part 4 Roughgarden"]
+    }
+  ]
+}

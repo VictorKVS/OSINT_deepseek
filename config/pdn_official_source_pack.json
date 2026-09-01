@@ -1,0 +1,103 @@
+{
+  "schema_version": "1.1",
+  "pack_id": "PDN-OFFICIAL-SOURCE-PACK-001",
+  "policy": "Acquire exact bytes from trusted A0/A1 sources first. GARANT remains A2 navigation only and is HOLD until this pack closes D0-D3.",
+  "documents": [
+    {
+      "document_id": "DOC-RU-FZ-152-2006",
+      "title": "Федеральный закон от 27.07.2006 № 152-ФЗ «О персональных данных»",
+      "preferred_operator_source": {
+        "source_id": "SRC-RU-ROSVOD-001",
+        "trust_tier": "A1_OFFICIAL_ORGAN",
+        "url": "https://voda.gov.ru/otkrytoe-agentstvo/informatsiya-o-prokhozhdenii-gossluzhby/",
+        "locator": "№ 152 | Федеральный закон от 27 июля 2006 г. 152-ФЗ «О персональных данных»"
+      },
+      "publication_anchor": {
+        "source_id": "SRC-RU-RG-001",
+        "trust_tier": "A0_OFFICIAL_PUBLICATION",
+        "url": "https://rg.ru/documents/2006/07/29/personaljnye-dannye-dok.html"
+      },
+      "identity_markers": ["О персональных данных"],
+      "primary_identity_markers": [
+        "Федеральный закон о персональных данных",
+        "Дата подписания: 27.07.2006",
+        "Статья 3. Основные понятия, используемые в настоящем Федеральном законе"
+      ]
+    },
+    {
+      "document_id": "DOC-RU-PP-1119-2012",
+      "title": "Постановление Правительства РФ от 01.11.2012 № 1119",
+      "preferred_operator_source": {
+        "source_id": "SRC-RU-GOV-001",
+        "trust_tier": "A1_OFFICIAL_ORGAN",
+        "url": "https://government.ru/docs/6339/",
+        "locator": "Документ / Постановление от 1 ноября 2012 г. №1119"
+      },
+      "alternate_operator_source": {
+        "source_id": "SRC-RU-ROSVOD-001",
+        "trust_tier": "A1_OFFICIAL_ORGAN",
+        "url": "https://voda.gov.ru/otkrytoe-agentstvo/informatsiya-o-prokhozhdenii-gossluzhby/",
+        "locator": "№ 1119 | Постановление Правительства Российской Федерации от 1 ноября 2012 г. 1119"
+      },
+      "publication_anchor": {
+        "source_id": "SRC-RU-RG-001",
+        "trust_tier": "A0_OFFICIAL_PUBLICATION",
+        "url": "https://rg.ru/documents/2012/11/07/pers-dannye-dok.html"
+      },
+      "identity_markers": ["1119", "требований к защите персональных данных", "1 ноября 2012"],
+      "primary_identity_markers": [
+        "Постановление Правительства Российской Федерации от 1 ноября 2012 г. N 1119",
+        "Дата подписания: 01.11.2012",
+        "Утвердить прилагаемые требования к защите персональных данных"
+      ]
+    },
+    {
+      "document_id": "DOC-RU-FSTEC-21-2013",
+      "title": "Приказ ФСТЭК России от 18.02.2013 № 21",
+      "preferred_operator_source": {
+        "source_id": "SRC-RU-ROSVOD-001",
+        "trust_tier": "A1_OFFICIAL_ORGAN",
+        "url": "https://voda.gov.ru/otkrytoe-agentstvo/normativnye-dokumenty/559246/",
+        "locator": "Скачать"
+      },
+      "alternate_operator_source": {
+        "source_id": "SRC-RU-CBS-MINZDRAV-001",
+        "trust_tier": "A1_OFFICIAL_ORGAN",
+        "url": "https://cbs.minzdrav.gov.ru/public/normative_docs",
+        "locator": "Приказ ФСТЭК России от 18.02.2013 N 21 (ред. от 14.05.2020).docx"
+      },
+      "publication_anchor": {
+        "source_id": "SRC-RU-RG-001",
+        "trust_tier": "A0_OFFICIAL_PUBLICATION",
+        "url": "https://rg.ru/documents/2013/05/22/soderjanie-dok.html"
+      },
+      "identity_markers": ["18 февраля 2013", "21", "персональных данных"],
+      "primary_identity_markers": [
+        "Приказ Федеральной службы по техническому и экспортному контролю (ФСТЭК России) от 18 февраля 2013 г. N 21",
+        "Дата подписания: 18.02.2013",
+        "Регистрационный N 28375"
+      ]
+    },
+    {
+      "document_id": "DOC-RU-FSB-378-2014",
+      "title": "Приказ ФСБ России от 10.07.2014 № 378",
+      "preferred_operator_source": {
+        "source_id": "SRC-RU-ROSVOD-001",
+        "trust_tier": "A1_OFFICIAL_ORGAN",
+        "url": "https://voda.gov.ru/otkrytoe-agentstvo/normativnye-dokumenty/559247/",
+        "locator": "Скачать"
+      },
+      "publication_anchor": {
+        "source_id": "SRC-RU-RG-001",
+        "trust_tier": "A0_OFFICIAL_PUBLICATION",
+        "url": "https://rg.ru/documents/2014/09/17/zashita-dok.html"
+      },
+      "identity_markers": ["10 июля 2014", "378", "криптографической защиты информации"],
+      "primary_identity_markers": [
+        "Приказ Федеральной службы безопасности Российской Федерации от 10 июля 2014 г. N 378",
+        "Дата подписания: 10.07.2014",
+        "Регистрационный N 33620"
+      ]
+    }
+  ]
+}

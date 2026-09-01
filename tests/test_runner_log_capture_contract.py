@@ -1,0 +1,48 @@
+from pathlib import Path
+
+
+def test_active_p0_runners_capture_full_local_transcripts_without_git_tracking():
+    helper = Path("scripts/run_logged_python_sequence.ps1").read_text(encoding="utf-8")
+    gitignore = Path(".gitignore").read_text(encoding="utf-8")
+
+    assert "reports\\pdn_live\\run_logs" in helper
+    assert "LATEST_RUN.txt" in helper
+    assert "LATEST_{0}.txt" in helper
+    assert "STARTED_LOCAL=" in helper
+    assert "GIT_HEAD=" in helper
+    assert "EXIT_CODE=" in helper
+    assert "FULL_LOG=" in helper
+    assert "LATEST_LOG=" in helper
+
+    # Windows PowerShell 5.1 regression contract: do not reopen the transcript
+    # on every native-process output line. Keep one writer open, mirror to the
+    # console, and close before Copy-Item.
+    assert "System.IO.StreamWriter" in helper
+    assert "System.Text.UTF8Encoding" in helper
+    assert "$writer.AutoFlush = $true" in helper
+    assert "$writer.WriteLine($Text)" in helper
+    assert "Write-Host $Text" in helper
+    assert "$writer.Dispose()" in helper
+    assert "Add-Content -LiteralPath" not in helper
+    assert "Copy only after the writer is closed" in helper
+
+    assert "reports/pdn_live/run_logs/" in gitignore
+
+    runners = {
+        "RUN_RESOLVE_PDN_PROOF_SOURCES.cmd": "RESOLVE_PDN_PROOF_SOURCES",
+        "RUN_PDN_CHANGE_MONITOR.cmd": "PDN_CHANGE_MONITOR",
+        "RUN_PDN_OBJECT_DELTA_PLAN.cmd": "PDN_OBJECT_DELTA_PLAN",
+        "RUN_PDN_DELTA_SHADOW_EXECUTION.cmd": "PDN_DELTA_SHADOW_EXECUTION",
+        "RUN_PDN_DIFFERENTIAL_REBUILD.cmd": "PDN_DIFFERENTIAL_REBUILD",
+        "RUN_PDN_DUAL_PATH_REBUILD.cmd": "PDN_DUAL_PATH_REBUILD",
+        "RUN_PDN_DUAL_PATH_D10_REBUILD.cmd": "PDN_DUAL_PATH_D10_REBUILD",
+        "RUN_PDN_DUAL_PATH_D11_REBUILD.cmd": "PDN_DUAL_PATH_D11_REBUILD",
+        "RUN_PDN_DUAL_PATH_D12_REBUILD.cmd": "PDN_DUAL_PATH_D12_REBUILD",
+        "RUN_PDN_DUAL_PATH_D13_REBUILD.cmd": "PDN_DUAL_PATH_D13_REBUILD",
+        "RUN_PDN_FRESHNESS_DISCOVERY.cmd": "PDN_FRESHNESS_DISCOVERY",
+    }
+    for path, run_id in runners.items():
+        text = Path(path).read_text(encoding="utf-8")
+        assert "run_logged_python_sequence.ps1" in text
+        assert run_id in text
+        assert "exit /b %ERRORLEVEL%" in text

@@ -1,0 +1,35 @@
+{
+  "schema_version": "1.0",
+  "registry_id": "PROGRAMMER-BIBLIOGRAPHY-ACQUISITION-001",
+  "role_id": "PROGRAMMER",
+  "policy": {
+    "telegram_candidate_is_not_license_evidence": true,
+    "commercial_fulltext_requires_user_license_or_owned_copy": true,
+    "official_open_sources_preferred_over_telegram": true,
+    "exact_edition_verification_required": true,
+    "sha256_required_after_acquisition": true,
+    "provenance_required": true
+  },
+  "targets": [
+    {"id":"BOOK-001","telegram_status":"FOUND_CANDIDATE","route":"COMMERCIAL_OFFICIAL_OR_USER_OWNED_COPY","official_url":"https://www.oreilly.com/library/view/fluent-python-2nd/9781492056348/","rights_class":"COMMERCIAL_COPYRIGHT"},
+    {"id":"BOOK-002","telegram_status":"FOUND_CANDIDATE","route":"COMMERCIAL_OFFICIAL_OR_USER_OWNED_COPY","official_url":"https://effectivepython.com/","rights_class":"COMMERCIAL_COPYRIGHT"},
+    {"id":"BOOK-003","telegram_status":"NOT_FOUND","route":"COMMERCIAL_OFFICIAL_OR_USER_OWNED_COPY","official_url":"https://www.pearson.com/en-us/subject-catalog/p/python-distilled/P200000007642","rights_class":"COMMERCIAL_COPYRIGHT"},
+    {"id":"BOOK-004","telegram_status":"FOUND_CANDIDATE","route":"OFFICIAL_OPEN_WEB","official_url":"https://www.cosmicpython.com/","rights_class":"CC_BY_NC_ND"},
+    {"id":"BOOK-005","telegram_status":"FOUND_CANDIDATE","route":"COMMERCIAL_OFFICIAL_PLUS_OPEN_COMPANION","official_url":"https://www.martinfowler.com/books/refactoring.html","rights_class":"COMMERCIAL_COPYRIGHT"},
+    {"id":"BOOK-006","telegram_status":"NOT_FOUND","route":"COMMERCIAL_OFFICIAL_OR_USER_OWNED_COPY","official_url":"https://www.pearson.com/en-us/subject-catalog/p/working-effectively-with-legacy-code/P200000008984","rights_class":"COMMERCIAL_COPYRIGHT"},
+    {"id":"BOOK-007","telegram_status":"NOT_FOUND","route":"COMMERCIAL_OFFICIAL_OR_USER_OWNED_COPY","official_url":"https://www.informit.com/store/test-driven-development-by-example-9780321146533","rights_class":"COMMERCIAL_COPYRIGHT"},
+    {"id":"BOOK-008","telegram_status":"FOUND_CANDIDATE","route":"OFFICIAL_OPEN_WEB","official_url":"https://www.obeythetestinggoat.com/pages/book.html","rights_class":"CC_LICENSED_FREE_EDITION"},
+    {"id":"BOOK-009","telegram_status":"NOT_FOUND","route":"COMMERCIAL_OFFICIAL_OR_USER_OWNED_COPY","official_url":"https://www.informit.com/store/growing-object-oriented-software-guided-by-tests-9780321503626","rights_class":"COMMERCIAL_COPYRIGHT"},
+    {"id":"BOOK-010","telegram_status":"NOT_FOUND","route":"COMMERCIAL_OFFICIAL_OR_USER_OWNED_COPY","official_url":"https://www.informit.com/store/domain-driven-design-tackling-complexity-in-the-heart-9780321125217","rights_class":"COMMERCIAL_COPYRIGHT"},
+    {"id":"BOOK-011","telegram_status":"FOUND_CANDIDATE","route":"COMMERCIAL_OFFICIAL_OR_USER_OWNED_COPY","official_url":"https://dataintensive.net/","rights_class":"COMMERCIAL_COPYRIGHT"},
+    {"id":"BOOK-012","telegram_status":"NOT_FOUND","route":"COMMERCIAL_OFFICIAL_OR_USER_OWNED_COPY","official_url":"https://www.pragmatic.org/titles/mnee2/release-it-second-edition/","rights_class":"COMMERCIAL_COPYRIGHT"},
+    {"id":"BOOK-013","telegram_status":"FOUND_CANDIDATE","route":"COMMERCIAL_OFFICIAL_OR_USER_OWNED_COPY","official_url":"https://www.oreilly.com/library/view/robust-python/9781098100650/","rights_class":"COMMERCIAL_COPYRIGHT"},
+    {"id":"BOOK-014","telegram_status":"FOUND_CANDIDATE","route":"COMMERCIAL_OFFICIAL_OR_USER_OWNED_COPY","official_url":"https://www.manning.com/books/python-concurrency-with-asyncio","rights_class":"COMMERCIAL_COPYRIGHT"},
+    {"id":"BOOK-015","telegram_status":"FOUND_CANDIDATE","route":"COMMERCIAL_OFFICIAL_OR_USER_OWNED_COPY","official_url":"https://www.oreilly.com/library/view/high-performance-python/9781492055013/","rights_class":"COMMERCIAL_COPYRIGHT"},
+    {"id":"BOOK-016","telegram_status":"NOT_FOUND","route":"COMMERCIAL_OFFICIAL_OR_USER_OWNED_COPY","official_url":"https://www.oreilly.com/library/view/database-internals/9781492040330/","rights_class":"COMMERCIAL_COPYRIGHT"},
+    {"id":"WORK-001","telegram_status":"NOT_FOUND","route":"OFFICIAL_OPEN_PDF","official_url":"https://ics.uci.edu/~fielding/pubs/dissertation/fielding_dissertation.pdf","rights_class":"INSTITUTIONAL_PUBLICATION"},
+    {"id":"WORK-002","telegram_status":"NOT_FOUND","route":"OFFICIAL_OPEN_PDF","official_url":"https://www.microsoft.com/en-us/research/wp-content/uploads/2016/12/Time-Clocks-and-the-Ordering-of-Events-in-a-Distributed-System.pdf","rights_class":"AUTHOR_INSTITUTIONAL_COPY"},
+    {"id":"WORK-003","telegram_status":"NOT_FOUND","route":"OFFICIAL_REPOSITORY_DOWNLOAD","official_url":"https://kilthub.cmu.edu/articles/journal_contribution/On_the_criteria_to_be_used_in_decomposing_systems_into_modules/6607958","rights_class":"IN_COPYRIGHT_REPOSITORY_ACCESS"},
+    {"id":"WORK-004","telegram_status":"NOT_FOUND","route":"OFFICIAL_OPEN_PDF","official_url":"https://www.cs.unc.edu/techreports/86-020.pdf","rights_class":"UNIVERSITY_TECHNICAL_REPORT"}
+  ]
+}

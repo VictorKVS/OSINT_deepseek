@@ -1,0 +1,37 @@
+from pathlib import Path
+
+
+def test_official_transport_diagnostic_is_read_only_and_uses_official_route_matrix():
+    text = Path("scripts/diagnose_security_official_transport.py").read_text(encoding="utf-8")
+    assert "READ_ONLY_OFFICIAL_ROUTE_MATRIX" in text
+    assert "publication.pravo.gov.ru" in text
+    assert "government.ru" in text
+    assert "protect.gost.ru" in text
+    assert "rg.ru" in text
+    assert "fstec.ru" in text
+    assert "RobustOfficialArtifactFetcher" in text
+    assert "reachable_hosts" in text
+    assert "unreachable_hosts" in text
+    assert "sys.path.insert" in text
+    assert "write_bytes(" not in text
+    assert "raw_path" not in text
+    assert "normalized_path" not in text
+    assert "insecure" not in text.casefold()
+    assert "consultant.ru" not in text.casefold()
+
+
+def test_official_transport_diagnostic_launcher_is_one_click_and_read_only():
+    text = Path("RUN_SECURITY_OFFICIAL_TRANSPORT_DIAGNOSTIC.cmd").read_text(encoding="utf-8")
+    assert "diagnose_security_official_transport.py" in text
+    assert "READ ONLY" in text
+    assert "LATEST_OFFICIAL_TRANSPORT_DIAGNOSTIC.json" in text
+    assert "PYTHONPATH=%CD%" in text
+
+
+def test_master_launcher_uses_advisory_transport_and_multiroute_recovery():
+    text = Path("RUN_SECURITY_OFFICIAL_MASTER_DOWNLOAD.cmd").read_text(encoding="utf-8")
+    assert "run_security_official_master_download_multiroute.py" in text
+    assert "diagnose_security_official_transport.py" not in text
+    assert "Transport health: advisory per-route" in text
+    assert "never a global stop gate" in text
+    assert "PYTHONPATH=%CD%" in text

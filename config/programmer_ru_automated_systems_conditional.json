@@ -1,0 +1,74 @@
+{
+  "schema_version": "1.0",
+  "inventory_id": "FATHER-RU-PROGRAMMER-AS-CONDITIONAL-001",
+  "role_id": "PROGRAMMER",
+  "knowledge_base_id": "PROGRAMMING_KB",
+  "scope": "SOFTWARE_DELIVERED_AS_PART_OF_AUTOMATED_SYSTEMS",
+  "applicability_class": "CONDITIONAL_PROJECT_CONTEXT",
+  "principle": "Do not apply the automated-systems layer to every programmer by default. Activate it when the software is part of an automated system or the project, contract, procurement or regulatory context references these standards.",
+  "current_documents": [
+    {
+      "designation": "ГОСТ Р 59853-2021",
+      "title": "Информационные технологии. Комплекс стандартов на автоматизированные системы. Автоматизированные системы. Термины и определения",
+      "status": "ACTIVE",
+      "effective_from": "2022-01-01",
+      "official_source": "https://protect.gost.ru/gost/details/c297b6ac-7468-4c76-bdb1-21dd1b700873",
+      "replaces_for_rf_use": "ГОСТ 34.003-90",
+      "role_relevance": "terminology and system boundary vocabulary"
+    },
+    {
+      "designation": "ГОСТ 34.201-2020",
+      "title": "Информационные технологии. Комплекс стандартов на автоматизированные системы. Виды, комплектность и обозначение документов при создании автоматизированных систем",
+      "status": "ACTIVE",
+      "effective_from": "2022-01-01",
+      "official_source": "https://protect.gost.ru/gost/details/765f2a29-e368-4e1e-9eed-aeb1dc36a924",
+      "replaces": "ГОСТ 34.201-89",
+      "role_relevance": "documentation set for automated-system creation"
+    },
+    {
+      "designation": "ГОСТ Р 59793-2021",
+      "title": "Информационные технологии. Комплекс стандартов на автоматизированные системы. Автоматизированные системы. Стадии создания",
+      "status": "ACTIVE",
+      "effective_from": "2022-04-30",
+      "official_source": "https://protect.gost.ru/gost/details/2899faee-25e2-4cd1-9f30-e7e01a4b9b8d",
+      "replaces_for_rf_use": "ГОСТ 34.601-90",
+      "role_relevance": "creation stages and engineering work sequence"
+    },
+    {
+      "designation": "ГОСТ 34.602-2020",
+      "title": "Информационные технологии. Комплекс стандартов на автоматизированные системы. Техническое задание на создание автоматизированной системы",
+      "status": "ACTIVE",
+      "effective_from": "2022-01-01",
+      "official_source": "https://protect.gost.ru/gost/details/5876f733-ee91-431a-8cb6-9e02ea2436ac",
+      "replaces": "ГОСТ 34.602-89",
+      "role_relevance": "requirements and technical assignment for automated systems"
+    },
+    {
+      "designation": "ГОСТ Р 59792-2021",
+      "title": "Информационные технологии. Комплекс стандартов на автоматизированные системы. Виды испытаний автоматизированных систем",
+      "status": "ACTIVE",
+      "effective_from": "2022-04-30",
+      "official_source": "https://protect.gost.ru/gost/details/60279c95-21dc-430c-bf2c-f626c588576e",
+      "replaces_for_rf_use": "ГОСТ 34.603-92",
+      "role_relevance": "preliminary, acceptance and other automated-system test types"
+    }
+  ],
+  "historical_do_not_use_as_current": [
+    {"designation":"ГОСТ 34.003-90","status":"NOT_VALID_IN_RF","use_in_rf":"ГОСТ Р 59853-2021"},
+    {"designation":"ГОСТ 34.201-89","status":"SUPERSEDED","superseded_by":"ГОСТ 34.201-2020"},
+    {"designation":"ГОСТ 34.601-90","status":"NOT_VALID_IN_RF","use_in_rf":"ГОСТ Р 59793-2021"},
+    {"designation":"ГОСТ 34.602-89","status":"SUPERSEDED","superseded_by":"ГОСТ 34.602-2020"},
+    {"designation":"ГОСТ 34.603-92","status":"NOT_VALID_IN_RF","use_in_rf":"ГОСТ Р 59792-2021"}
+  ],
+  "activation_questions": [
+    "Is the software part of an automated system?",
+    "Does the technical assignment or contract reference the automated-systems standards?",
+    "Is the customer a state or regulated organization with prescribed documentation lifecycle?",
+    "Do procurement or acceptance terms require this documentation or testing framework?"
+  ],
+  "next_actions": [
+    "enumerate other current automated-system standards relevant to development artifacts",
+    "map this conditional layer to SYSTEM_ANALYST and ARCHITECT role baselines",
+    "link project applicability decisions to contract and regulatory evidence"
+  ]
+}

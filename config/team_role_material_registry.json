@@ -1,0 +1,284 @@
+{
+  "schema_version": "1.0",
+  "registry_id": "FATHER-TEAM-MATERIALS-001",
+  "reference_run": {
+    "role_id": "ARCHITECT",
+    "status": "PROVEN_REFERENCE",
+    "observed_metrics": {
+      "lessons_total": 31,
+      "lessons_with_primary_sources": 7,
+      "lessons_missing_primary_sources": 24,
+      "queries_total": 45,
+      "search_hits_total": 204,
+      "media_candidates_total": 9,
+      "downloaded_total": 7,
+      "payload_reused_total": 2,
+      "skipped_type_total": 195,
+      "skipped_size_total": 0,
+      "errors_total": 0,
+      "bytes_downloaded": 23836395,
+      "elapsed_seconds": 128.42480559999967,
+      "throughput_files_per_second": 0.05450660382389567,
+      "throughput_megabytes_per_second": 0.1770075306013499,
+      "speedup_vs_1_stream_pct": null
+    },
+    "note": "Only raw observed counters from the successful operator run are recorded. No synthetic speedup or ETA is claimed."
+  },
+  "global_policy": {
+    "max_parallel_streams": 5,
+    "telegram_role": "DISCOVERY_AND_ACCESSIBLE_MATERIAL_ACQUISITION_ONLY",
+    "auto_join_channels": false,
+    "access_control_bypass": false,
+    "paywall_bypass": false,
+    "commit_downloaded_payloads_to_git": false,
+    "sha256_required": true,
+    "provenance_required": true,
+    "kb_auto_promotion": false,
+    "source_priority": [
+      "OFFICIAL_OR_STANDARDS_BODY",
+      "PRIMARY_VENDOR_OR_PROJECT_DOCS",
+      "AUTHOR_OR_PUBLISHER_MATERIAL",
+      "REPUTABLE_TECHNICAL_REPOSITORY",
+      "TELEGRAM_OR_COMMUNITY_CANDIDATE"
+    ]
+  },
+  "streams": [
+    {
+      "stream_id": 1,
+      "name": "ENGINEERING_CORE",
+      "roles": ["PROGRAMMER", "QA_TESTER", "DEVOPS_SRE"]
+    },
+    {
+      "stream_id": 2,
+      "name": "ANALYSIS_PRODUCT",
+      "roles": ["SYSTEM_ANALYST", "BUSINESS_ANALYST", "PRODUCT_UX"]
+    },
+    {
+      "stream_id": 3,
+      "name": "SECURITY_LEGAL",
+      "roles": ["SECURITY_ENGINEER", "LEGAL_COMPLIANCE"]
+    },
+    {
+      "stream_id": 4,
+      "name": "DATA_AI",
+      "roles": ["DATA_ENGINEER", "ML_LLM_ENGINEER"]
+    },
+    {
+      "stream_id": 5,
+      "name": "ECONOMICS_RESEARCH",
+      "roles": ["FINOPS_ECONOMIST", "OSINT_RESEARCH_ANALYST"]
+    }
+  ],
+  "roles": [
+    {
+      "role_id": "ARCHITECT",
+      "knowledge_base_id": "ARCHITECTURE_KB",
+      "state": "PROVEN_REFERENCE",
+      "stream_id": 0,
+      "priority": "P0",
+      "topics": [
+        "C4 Model", "ADR and MADR", "system design", "distributed systems", "RAG architecture",
+        "LLM production architecture", "AI system architecture", "LLM evaluation", "OWASP LLM",
+        "VRAM and model sizing", "MLOps and LLMOps", "Terraform and IaC", "ArgoCD and GitOps",
+        "Kubernetes autoscaling", "semantic cache", "FinOps", "multi-cloud", "multi-tenancy",
+        "federated learning and privacy", "AI governance and model cards", "API as product", "technology radar"
+      ]
+    },
+    {
+      "role_id": "PROGRAMMER",
+      "knowledge_base_id": "PROGRAMMING_KB",
+      "state": "READY_FOR_PROFILE_GENERATION",
+      "stream_id": 1,
+      "priority": "P0",
+      "topics": [
+        "Python language and standard library", "software design principles", "clean code and refactoring",
+        "data structures and algorithms", "HTTP and REST semantics", "OpenAPI", "FastAPI and backend design",
+        "PostgreSQL and transaction semantics", "testing with pytest", "concurrency and async Python",
+        "packaging and dependency management", "secure coding", "observability and OpenTelemetry",
+        "performance profiling", "code review", "design patterns and anti-patterns"
+      ],
+      "material_types": ["OFFICIAL_DOC", "SPECIFICATION", "BOOK_OR_AUTHORIZED_EXCERPT", "COURSE_NOTE", "REFERENCE_IMPLEMENTATION", "TEST_FIXTURE"]
+    },
+    {
+      "role_id": "QA_TESTER",
+      "knowledge_base_id": "TESTING_KB",
+      "state": "READY_FOR_PROFILE_GENERATION",
+      "stream_id": 1,
+      "priority": "P0",
+      "topics": [
+        "test strategy", "unit integration system acceptance testing", "risk-based testing", "test design techniques",
+        "property-based testing", "contract testing", "API testing", "UI testing", "performance testing",
+        "security testing", "test data management", "defect taxonomy", "regression strategy", "quality gates",
+        "CI test orchestration", "observability for testing"
+      ],
+      "material_types": ["STANDARD", "OFFICIAL_DOC", "COURSE_NOTE", "TEST_CATALOG", "CHECKLIST", "REFERENCE_TEST_SUITE"]
+    },
+    {
+      "role_id": "DEVOPS_SRE",
+      "knowledge_base_id": "DEVSECOPS_KB",
+      "state": "READY_FOR_PROFILE_GENERATION",
+      "stream_id": 1,
+      "priority": "P0",
+      "topics": [
+        "Linux operations", "containers and Docker", "Kubernetes", "Terraform", "GitOps", "ArgoCD",
+        "CI/CD", "SRE principles", "SLI SLO SLA", "incident response", "observability", "OpenTelemetry",
+        "Prometheus and Grafana", "capacity planning", "autoscaling", "backup and disaster recovery",
+        "secrets management", "supply-chain security"
+      ],
+      "material_types": ["OFFICIAL_DOC", "RUNBOOK", "REFERENCE_ARCHITECTURE", "COURSE_NOTE", "INCIDENT_POSTMORTEM", "CHECKLIST"]
+    },
+    {
+      "role_id": "SYSTEM_ANALYST",
+      "knowledge_base_id": "SYSTEM_ANALYSIS_KB",
+      "state": "READY_FOR_PROFILE_GENERATION",
+      "stream_id": 2,
+      "priority": "P0",
+      "topics": [
+        "requirements engineering", "functional and non-functional requirements", "use cases", "user stories",
+        "BPMN", "UML", "C4 for analysts", "data flow diagrams", "integration analysis", "API contracts",
+        "event-driven systems", "domain modeling", "traceability", "acceptance criteria", "change impact analysis",
+        "quality attributes", "system context and boundaries"
+      ],
+      "material_types": ["STANDARD", "METHOD_GUIDE", "COURSE_NOTE", "TEMPLATE", "CASE_STUDY", "REFERENCE_MODEL"]
+    },
+    {
+      "role_id": "BUSINESS_ANALYST",
+      "knowledge_base_id": "BUSINESS_ANALYSIS_KB",
+      "state": "READY_FOR_PROFILE_GENERATION",
+      "stream_id": 2,
+      "priority": "P1",
+      "topics": [
+        "business needs and goals", "stakeholder analysis", "business process modeling", "BPMN",
+        "value streams", "business rules", "KPI and metrics", "cost-benefit analysis", "risk registers",
+        "requirements prioritization", "workshops and interviews", "process improvement", "operating models",
+        "business cases", "traceability to product outcomes"
+      ],
+      "material_types": ["STANDARD", "METHOD_GUIDE", "CASE_STUDY", "TEMPLATE", "COURSE_NOTE", "CHECKLIST"]
+    },
+    {
+      "role_id": "PRODUCT_UX",
+      "knowledge_base_id": "PRODUCT_KB",
+      "state": "READY_FOR_PROFILE_GENERATION",
+      "stream_id": 2,
+      "priority": "P1",
+      "topics": [
+        "product discovery", "problem framing", "JTBD", "user research", "information architecture",
+        "interaction design", "usability testing", "accessibility", "design systems", "product analytics",
+        "experimentation and A/B testing", "roadmaps", "prioritization", "product-market fit signals",
+        "UX writing", "service design"
+      ],
+      "material_types": ["METHOD_GUIDE", "DESIGN_SYSTEM", "CASE_STUDY", "COURSE_NOTE", "CHECKLIST", "RESEARCH_TEMPLATE"]
+    },
+    {
+      "role_id": "SECURITY_ENGINEER",
+      "knowledge_base_id": "SECURITY_KB",
+      "state": "ACTIVE_SEPARATE_REGULATORY_PIPELINE",
+      "stream_id": 3,
+      "priority": "P0",
+      "topics": [
+        "threat modeling", "secure architecture", "AppSec", "DevSecOps", "OWASP", "cloud security",
+        "identity and access management", "network security", "logging and SIEM", "incident response",
+        "vulnerability management", "cryptography", "KII", "PDN", "GIS security", "LLM security"
+      ],
+      "material_types": ["LAW", "REGULATOR_ORDER", "STANDARD", "OFFICIAL_GUIDE", "THREAT_DATASET", "REFERENCE_ARCHITECTURE", "COURSE_NOTE"]
+    },
+    {
+      "role_id": "LEGAL_COMPLIANCE",
+      "knowledge_base_id": "LEGAL_KB",
+      "state": "READY_FOR_PROFILE_GENERATION",
+      "stream_id": 3,
+      "priority": "P0",
+      "topics": [
+        "legal source hierarchy", "applicability", "effective dates", "amendment chains", "contracts",
+        "data protection and privacy", "information security regulation", "intellectual property",
+        "software licensing", "AI governance", "evidence and auditability", "regulatory change management",
+        "legal risk", "policy drafting", "compliance controls", "legal traceability"
+      ],
+      "material_types": ["LAW", "REGULATION", "COURT_OR_OFFICIAL_INTERPRETATION", "STANDARD", "OFFICIAL_GUIDE", "COMMENTARY_AS_REFERENCE_ONLY", "CHECKLIST"]
+    },
+    {
+      "role_id": "DATA_ENGINEER",
+      "knowledge_base_id": "DATA_KB",
+      "state": "READY_FOR_PROFILE_GENERATION",
+      "stream_id": 4,
+      "priority": "P1",
+      "topics": [
+        "data modeling", "SQL", "PostgreSQL", "ETL and ELT", "data quality", "data lineage",
+        "batch and streaming", "Kafka", "lakehouse", "warehouses", "vector databases", "metadata catalogs",
+        "schema evolution", "data contracts", "orchestration", "privacy engineering", "backup and retention"
+      ],
+      "material_types": ["OFFICIAL_DOC", "SPECIFICATION", "REFERENCE_ARCHITECTURE", "COURSE_NOTE", "DATA_CONTRACT", "CASE_STUDY"]
+    },
+    {
+      "role_id": "ML_LLM_ENGINEER",
+      "knowledge_base_id": "AI_AGENTS_KB",
+      "state": "READY_FOR_PROFILE_GENERATION",
+      "stream_id": 4,
+      "priority": "P0",
+      "topics": [
+        "transformers", "embeddings", "RAG", "retrieval evaluation", "prompt engineering", "tool use",
+        "agent orchestration", "structured outputs", "fine-tuning and adapters", "quantization", "inference serving",
+        "LLM evaluation", "guardrails", "LLM security", "observability", "model routing", "context management",
+        "multimodal models", "MLOps and LLMOps"
+      ],
+      "material_types": ["PAPER", "OFFICIAL_DOC", "MODEL_CARD", "REFERENCE_IMPLEMENTATION", "EVALUATION_DATASET", "COURSE_NOTE", "BENCHMARK"]
+    },
+    {
+      "role_id": "FINOPS_ECONOMIST",
+      "knowledge_base_id": "FINOPS_KB",
+      "state": "READY_FOR_PROFILE_GENERATION",
+      "stream_id": 5,
+      "priority": "P1",
+      "topics": [
+        "unit economics", "TCO", "CAPEX and OPEX", "cloud cost models", "FinOps", "LLM inference cost",
+        "GPU sizing economics", "budgeting", "forecasting", "scenario analysis", "ROI and NPV",
+        "cost allocation", "showback and chargeback", "vendor comparison", "procurement economics",
+        "project business case", "cost risk and sensitivity"
+      ],
+      "material_types": ["STANDARD", "VENDOR_PRICING_GUIDE", "METHOD_GUIDE", "MODEL_TEMPLATE", "CASE_STUDY", "COURSE_NOTE"]
+    },
+    {
+      "role_id": "OSINT_RESEARCH_ANALYST",
+      "knowledge_base_id": "RESEARCH_KB",
+      "state": "ACTIVE_AND_EXPANDING",
+      "stream_id": 5,
+      "priority": "P0",
+      "topics": [
+        "research question formulation", "source discovery", "source reliability", "provenance", "triangulation",
+        "counter-evidence", "bias and uncertainty", "timeline reconstruction", "entity resolution", "graph analysis",
+        "OSINT collection planning", "Telegram research", "web research", "evidence sufficiency", "analytical hypotheses",
+        "structured analytic techniques", "report writing", "red teaming and Socratic critique"
+      ],
+      "material_types": ["METHOD_GUIDE", "STANDARD", "CASE_STUDY", "COURSE_NOTE", "SOURCE_REGISTRY", "ANALYTIC_TEMPLATE", "EVALUATION_FIXTURE"]
+    }
+  ],
+  "maturity_gates": {
+    "MIN": {
+      "requirements": [
+        "topic inventory exists",
+        "authoritative-source seed exists for every P0 topic cluster",
+        "at least one reviewable source artifact or explicit GAP per topic cluster",
+        "provenance and SHA-256 are preserved"
+      ]
+    },
+    "MEDIUM": {
+      "requirements": [
+        "MIN passed",
+        "multiple independent source classes for important decisions",
+        "templates/checklists/examples are linked to concepts",
+        "conflicts and counter-evidence can be represented",
+        "role knowledge can answer competency questions with source lineage"
+      ]
+    },
+    "MAX": {
+      "requirements": [
+        "MEDIUM passed",
+        "change monitoring is active",
+        "benchmark/evaluation corpus exists",
+        "reuse and regression metrics are measured",
+        "golden decisions are versioned and challengeable",
+        "no autonomous promotion without review gate"
+      ]
+    }
+  }
+}

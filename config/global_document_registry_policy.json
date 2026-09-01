@@ -1,0 +1,96 @@
+{
+  "schema_version": "1.1",
+  "registry_id": "FATHER-GLOBAL-DOCUMENT-REGISTRY-001",
+  "status": "MANDATORY",
+  "scope": "ALL_FATHER_KNOWLEDGE_BASES_AND_ROLES",
+  "principle": "A document is registered once globally; roles, domains and projects reference it through applicability bindings.",
+  "classification_standard": "config/father_scope_priority_standard.json",
+  "canonical_layers": [
+    "DOCUMENT",
+    "DOCUMENT_VERSION",
+    "DOCUMENT_RELATION",
+    "APPLICABILITY_BINDING",
+    "SOURCE_OBSERVATION"
+  ],
+  "identity_rules": {
+    "one_document_id_per_legal_or_standard_identity": true,
+    "role_specific_document_copies_forbidden": true,
+    "independent_source_observations_preserved": true,
+    "same_payload_may_reuse_storage_but_not_provenance": true,
+    "designation_aliases_do_not_create_new_document": true,
+    "superseded_and_future_effective_versions_remain_linked_to_the_same_document_family": true
+  },
+  "required_document_fields": [
+    "document_id",
+    "jurisdiction",
+    "document_type",
+    "designation",
+    "title",
+    "issuer",
+    "legal_status",
+    "effective_from",
+    "effective_to",
+    "current_revision_date",
+    "official_source_url",
+    "last_verified_at"
+  ],
+  "required_binding_fields": [
+    "binding_id",
+    "document_id",
+    "subject_type",
+    "subject_id",
+    "applicability",
+    "activation_condition",
+    "legal_force_class",
+    "maturity_level",
+    "importance_class",
+    "review_state"
+  ],
+  "allowed_subject_types": [
+    "ROLE",
+    "KNOWLEDGE_BASE",
+    "DOMAIN",
+    "PROJECT_TYPE",
+    "SYSTEM_CLASS",
+    "SECTOR"
+  ],
+  "allowed_maturity_values": ["MIN", "MEDIUM", "MAX"],
+  "allowed_importance_values": ["NECESSARY", "DESIRABLE", "INTERESTING_LATER"],
+  "legal_status_model": [
+    "CURRENT",
+    "FUTURE_EFFECTIVE",
+    "CONDITIONAL",
+    "SUPERSEDED",
+    "REPEALED",
+    "DRAFT",
+    "VERIFY_CURRENTNESS"
+  ],
+  "relation_types": [
+    "SUPERSEDES",
+    "SUPERSEDED_BY",
+    "AMENDS",
+    "AMENDED_BY",
+    "IMPLEMENTS",
+    "REFERENCES",
+    "DEPENDS_ON",
+    "RELATED_TO"
+  ],
+  "source_priority": [
+    "OFFICIAL_PUBLICATION",
+    "OFFICIAL_REGULATOR",
+    "ROSSTANDART",
+    "PRIMARY_ISSUER",
+    "LEGAL_REFERENCE_NAVIGATION_ONLY",
+    "SECONDARY_REFERENCE"
+  ],
+  "acceptance_gates": {
+    "library_orders_must_resolve_documents_via_global_registry": true,
+    "role_registry_may_store_only_document_ids_and_bindings": true,
+    "duplicate_canonical_document_ids_are_defects": true,
+    "conflicting_current_status_is_a_review_blocker": true,
+    "superseded_document_cannot_close_current_gate": true,
+    "applicability_must_not_be_inferred_from_active_status": true,
+    "every_binding_has_two_axis_classification": true,
+    "unresolved_necessary_binding_at_or_below_target_maturity_blocks_completion": true
+  }
+}

@@ -1,0 +1,217 @@
+{
+  "schema_version": "1.0",
+  "architecture_id": "FATHER-PROGRAMMER-KB-FIRST-001",
+  "status": "ACTIVE_P0",
+  "role_id": "PROGRAMMER",
+  "knowledge_base_id": "PROGRAMMING_KB",
+  "principle": "Professional training starts only after a region-aware knowledge base exists. For the first implementation profile, Russia is authoritative for legal/regulatory applicability; technical choices then proceed from standards to languages to scientifically supported algorithms and engineering decisions.",
+  "region_model": {
+    "first_profile": "RU",
+    "future_profiles": "SEPARATE_OVERLAYS_NOT_MIXED",
+    "rule": "Every professional decision is evaluated under an explicit REGION_PROFILE. Region-specific law, mandatory standards, regulator requirements and sector overlays are resolved before technical preference rules.",
+    "ru_normative_scope_ref": "config/programmer_ru_normative_scope.json"
+  },
+  "mandatory_build_order": [
+    {
+      "stage": 1,
+      "id": "REGION_AND_NORMATIVE_BASE",
+      "title": "Россия: законы, применимость стандартов, ГОСТ и регуляторные overlays",
+      "goal": "Determine what is mandatory, conditional, voluntary, contractual, current, superseded or future-effective before recommending implementation choices.",
+      "required_inputs": [
+        "Global Document Registry",
+        "config/programmer_ru_normative_scope.json",
+        "current official texts and amendment chains"
+      ],
+      "required_outputs": [
+        "REGION_PROFILE:RU",
+        "LEGAL_NORM nodes",
+        "STANDARD nodes",
+        "APPLICABILITY_RULE nodes",
+        "currentness/version relations"
+      ],
+      "gate": "No Russian professional baseline may be declared complete while NECESSARY applicability/currentness gaps remain unresolved."
+    },
+    {
+      "stage": 2,
+      "id": "PROGRAMMING_STANDARDS_LAYER",
+      "title": "ГОСТ/стандарты профессиональной деятельности программиста",
+      "goal": "Map standards to concrete developer work products and actions: requirements, design, code, documentation, testing, maintenance, secure development and evidence.",
+      "required_outputs": [
+        "STANDARD_REQUIREMENT",
+        "WORK_PRODUCT_RULE",
+        "PROCESS_RULE",
+        "SECURE_DEVELOPMENT_RULE",
+        "DOCUMENTATION_RULE"
+      ],
+      "examples_of_existing_ru_clusters": [
+        "ESPD_GOST_19",
+        "SOFTWARE_LIFECYCLE_AND_ENGINEERING",
+        "SECURE_SOFTWARE_DEVELOPMENT",
+        "AUTOMATED_SYSTEMS_GOST_34",
+        "FSTEC_AND_REGULATED_INFORMATION_SYSTEMS"
+      ]
+    },
+    {
+      "stage": 3,
+      "id": "LANGUAGE_KNOWLEDGE_LAYER",
+      "title": "Языки программирования и официальные правила их использования",
+      "goal": "Describe each language through primary specifications/documentation, supported paradigms, type/memory/concurrency model, ecosystem and operational constraints.",
+      "required_outputs": [
+        "LANGUAGE",
+        "LANGUAGE_FEATURE",
+        "LANGUAGE_RUNTIME_PROPERTY",
+        "LANGUAGE_LIMITATION",
+        "PRIMARY_LANGUAGE_SOURCE"
+      ],
+      "min_language_families": [
+        "Python",
+        "Go",
+        "Java",
+        "C#/.NET",
+        "C/C++",
+        "Rust",
+        "JavaScript/TypeScript"
+      ],
+      "rule": "Community opinion cannot override a primary language specification or measured project evidence."
+    },
+    {
+      "stage": 4,
+      "id": "LANGUAGE_SELECTION_RULES",
+      "title": "Правила выбора и применения языка",
+      "goal": "Convert language knowledge into conditional decision rules instead of ranking languages globally.",
+      "required_dimensions": [
+        "regulatory/sector constraints",
+        "safety and memory model",
+        "latency and throughput",
+        "CPU-bound vs IO-bound workload",
+        "concurrency model",
+        "deployment/runtime constraints",
+        "ecosystem/library availability",
+        "maintainability",
+        "team competence",
+        "cost/TCO",
+        "interoperability",
+        "lifecycle/support horizon"
+      ],
+      "required_outputs": [
+        "LANGUAGE_SELECTION_RULE",
+        "PREFERRED_WHEN",
+        "AVOID_WHEN",
+        "TRADEOFF",
+        "DECISION_MATRIX"
+      ]
+    },
+    {
+      "stage": 5,
+      "id": "ALGORITHMS_SCIENTIFIC_LAYER",
+      "title": "Алгоритмы и научно обоснованные критерии выбора",
+      "goal": "Represent algorithms by preconditions, correctness, computational complexity, memory complexity, data properties and empirical behavior.",
+      "required_outputs": [
+        "ALGORITHM",
+        "DATA_STRUCTURE",
+        "PRECONDITION",
+        "INVARIANT",
+        "COMPLEXITY_BOUND",
+        "CORRECTNESS_BASIS",
+        "ALGORITHM_SELECTION_RULE",
+        "COUNTEREXAMPLE",
+        "BENCHMARK_EVIDENCE"
+      ],
+      "evidence_priority": [
+        "peer-reviewed or university-level algorithmic material",
+        "ACM/IEEE professional curriculum/body of knowledge",
+        "primary technical specification",
+        "reproducible benchmark/project evidence"
+      ],
+      "rule": "An algorithm is selected from problem/data constraints; no algorithm is marked globally best."
+    },
+    {
+      "stage": 6,
+      "id": "ENGINEERING_COMPOSITION",
+      "title": "Компоновка решения",
+      "goal": "Compose standards, language choice, algorithm choice, data structures, security and testing into a traceable implementation decision.",
+      "required_outputs": [
+        "DECISION_CARD",
+        "PATTERN",
+        "ANTI_PATTERN",
+        "IMPLEMENTATION_RULE",
+        "TEST_RULE",
+        "SECURITY_CONTROL",
+        "EVIDENCE_REQUIREMENT"
+      ]
+    },
+    {
+      "stage": 7,
+      "id": "TASK_AND_TRAINING_MAPPING",
+      "title": "Только после KB: задачи и обучение",
+      "goal": "Every task must teach or verify explicit knowledge nodes and relations already present in PROGRAMMING_KB.",
+      "required_edges": [
+        "TASK -> TEACHES -> KNOWLEDGE_NODE",
+        "TASK -> REQUIRES -> KNOWLEDGE_NODE",
+        "TASK -> VERIFIED_BY -> TEST",
+        "GOLDEN_CASE -> SUPPORTED_BY -> SOURCE",
+        "GOLDEN_CASE -> DEMONSTRATES -> DECISION_RULE"
+      ],
+      "gate": "No new derived training corpus is promoted while PROGRAMMING_KB MIN gate is incomplete."
+    }
+  ],
+  "knowledge_node_types": [
+    "REGION_PROFILE",
+    "LEGAL_NORM",
+    "STANDARD",
+    "APPLICABILITY_RULE",
+    "STANDARD_REQUIREMENT",
+    "LANGUAGE",
+    "LANGUAGE_FEATURE",
+    "LANGUAGE_SELECTION_RULE",
+    "ALGORITHM",
+    "DATA_STRUCTURE",
+    "PRECONDITION",
+    "INVARIANT",
+    "COMPLEXITY_BOUND",
+    "DECISION_RULE",
+    "DECISION_CARD",
+    "PATTERN",
+    "ANTI_PATTERN",
+    "TEST_RULE",
+    "SECURITY_CONTROL",
+    "SOURCE",
+    "PROJECT_EVIDENCE"
+  ],
+  "relation_types": [
+    "APPLIES_IN_REGION",
+    "MANDATORY_IF",
+    "VOLUNTARY_UNLESS_ACTIVATED",
+    "SUPERSEDES",
+    "AMENDS",
+    "DERIVED_FROM",
+    "SUPPORTED_BY",
+    "CONFLICTS_WITH",
+    "REQUIRES",
+    "IMPLEMENTS",
+    "PREFERRED_WHEN",
+    "AVOID_WHEN",
+    "HAS_PRECONDITION",
+    "HAS_COMPLEXITY",
+    "USES_DATA_STRUCTURE",
+    "VERIFIED_BY",
+    "TEACHES",
+    "DEMONSTRATES"
+  ],
+  "training_state": {
+    "existing_min_golden_cases": "RETAIN_AS_FIXTURES_NOT_MODEL_TRAINING_BASELINE",
+    "existing_40_derived_candidates": "HOLD_UNTIL_PROGRAMMING_KB_MIN_READY",
+    "new_task_expansion": "PAUSED",
+    "model_training": "DISABLED_UNTIL_KB_GATE"
+  },
+  "programming_kb_min_gate": [
+    "RU region profile exists",
+    "RU normative applicability/currentness NECESSARY minimum is resolved or explicit GAPs are recorded",
+    "core programming standards are mapped to developer actions/work products",
+    "minimum language catalog exists with primary sources",
+    "language selection decision rules exist",
+    "core algorithm/data-structure catalog exists with complexity/precondition/scientific evidence",
+    "task-to-knowledge relations are representable and tested",
+    "no training artifact can bypass knowledge/source traceability"
+  ]
+}

@@ -1,0 +1,92 @@
+{
+  "schema_version": "1.0",
+  "policy_id": "FATHER-PROGRAMMING-KB-SOURCE-FACTORY-001",
+  "status": "ACTIVE_MIN_FOUNDATION",
+  "role_id": "PROGRAMMER",
+  "knowledge_base_id": "PROGRAMMING_KB",
+  "region_profile": "RU",
+  "maturity_level": "MIN",
+  "importance_class": "NECESSARY",
+  "principle": "Acquire once, preserve exact bytes and provenance, then decompose into reviewable knowledge candidates and graph edges before any training use.",
+  "source_order": [
+    "RU_OFFICIAL_REGULATORY_AND_GOST",
+    "PRIMARY_LANGUAGE_DOCUMENTATION",
+    "ACADEMIC_AND_PROFESSIONAL_CONSENSUS",
+    "OFFICIAL_OPEN_BOOK_OR_PAPER",
+    "USER_OWNED_OR_AUTHORIZED_BOOK_COPY",
+    "TELEGRAM_DISCOVERY_CANDIDATE"
+  ],
+  "rights_policy": {
+    "telegram_candidate_is_not_license_evidence": true,
+    "commercial_fulltext_auto_download": false,
+    "commercial_fulltext_requires_explicit_user_owned_or_authorized_assertion": true,
+    "explicit_owned_ids_env": "FATHER_OWNED_BOOK_IDS",
+    "official_open_sources_may_be_acquired_automatically": true,
+    "open_license_or_institutional_publication_preferred_over_telegram": true,
+    "no_access_control_bypass": true,
+    "no_paywall_bypass": true
+  },
+  "acquisition": {
+    "max_parallel_streams": 5,
+    "sha256_required": true,
+    "provenance_required": true,
+    "deduplicate_by_sha256": true,
+    "commit_downloaded_payloads_to_git": false,
+    "raw_root": "data/programming_kb_sources",
+    "report_root": "reports/programming_kb_factory"
+  },
+  "processing_pipeline": [
+    "SOURCE_REGISTERED",
+    "EXACT_BYTES_ACQUIRED",
+    "SHA256_COMPUTED",
+    "TEXT_EXTRACTED",
+    "STRUCTURE_BUILT",
+    "CHUNKS_BUILT",
+    "DEFINITION_REQUIREMENT_CLAIM_CANDIDATES",
+    "ENTITY_AND_CONCEPT_CANDIDATES",
+    "RELATION_CANDIDATES",
+    "REVIEW_REQUIRED",
+    "PROGRAMMING_KB_CANDIDATE_GRAPH"
+  ],
+  "supported_extractors": {
+    "txt_md": "STDLIB",
+    "html": "STDLIB_HTML_PARSER",
+    "docx": "STDLIB_ZIP_XML",
+    "epub": "STDLIB_ZIP_HTML",
+    "pdf": ["PYPDF_IF_AVAILABLE", "PYMUPDF_IF_AVAILABLE", "PDFTOTEXT_IF_AVAILABLE"],
+    "djvu_mobi": "PARSER_GAP_UNTIL_ADAPTER_AVAILABLE"
+  },
+  "knowledge_node_types": [
+    "SOURCE_DOCUMENT",
+    "SECTION",
+    "DEFINITION_CANDIDATE",
+    "REQUIREMENT_CANDIDATE",
+    "CLAIM_CANDIDATE",
+    "ENTITY_CANDIDATE",
+    "CONCEPT_CANDIDATE",
+    "LANGUAGE_RULE_CANDIDATE",
+    "ALGORITHM_RULE_CANDIDATE",
+    "PATTERN_CANDIDATE",
+    "ANTI_PATTERN_CANDIDATE",
+    "EXAMPLE_CANDIDATE"
+  ],
+  "relation_types": [
+    "DERIVED_FROM",
+    "SUPPORTED_BY",
+    "DEFINED_IN",
+    "REQUIRES",
+    "APPLIES_WHEN",
+    "CONTRADICTS",
+    "REFINES",
+    "EXAMPLE_OF",
+    "ALTERNATIVE_TO",
+    "RELATED_TO"
+  ],
+  "promotion": {
+    "kb_auto_promotion": false,
+    "training_auto_export": false,
+    "review_required": true,
+    "existing_training_gym_state": "HOLD_UNTIL_PROGRAMMING_KB_MIN_READY"
+  },
+  "telemetry_rule": "Report only measured document counts, bytes, elapsed time, throughput, rework and parser gaps. Never invent speedup or ETA."
+}

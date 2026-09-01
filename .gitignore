@@ -22,12 +22,29 @@ build/
 # Logs
 logs/
 *.log
+# Full local one-click runner transcripts may contain workstation/runtime evidence.
+reports/pdn_live/run_logs/
 
 # Runtime/local data
 data/osint/
 data/osint_dev/
 data/runtime/
 data/m5_live_telegram/
+# Architect Telegram acquisition payloads are local course/source material and never enter public Git.
+data/architect_telegram_downloads/
+# Universal team-role Telegram payloads are local source material and never enter public Git.
+data/team_role_telegram/
+# Knowledge Factory live acquisition: exact originals, extracted text and local registries stay local.
+# Only sanitized review exports under reports/pdn_live/ may be committed for review.
+data/knowledge_factory/
+# Operator-assisted official imports are local exact source bytes and must never enter public Git.
+data/operator_import/
+# Manual official/source intake and sorted copies remain workstation-local.
+_MANUAL_OFFICIAL_INBOX/
+_MANUAL_OFFICIAL_ARCHIVE/
+# Unified Windows Downloads intake contains arbitrary user/source files and model semifabricates.
+# Never publish these payloads from the public repository.
+_LOCAL_DOWNLOADS_KB_INTAKE/
 .runtime/
 *.db
 *.sqlite

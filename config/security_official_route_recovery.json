@@ -1,0 +1,75 @@
+{
+  "schema_version": "1.0",
+  "registry_id": "SECURITY-OFFICIAL-ROUTE-RECOVERY-001",
+  "status": "ACTIVE",
+  "purpose": "Exact direct-artifact recovery routes discovered on official publication pages. Legal authority ranking is unchanged; these are technical fallback routes only.",
+  "routes": {
+    "DOC-RU-FSTEC-235-2017": [
+      {
+        "url": "https://cdnstatic.rg.ru/uploads/attachments/151/31/78/50118.pdf",
+        "source_class": "OFFICIAL_PUBLICATION_ALTERNATIVE",
+        "publisher": "Российская газета",
+        "provenance_page": "https://rg.ru/documents/2018/02/26/fstek-prikaz235-site-dok.html",
+        "expected_registration_number": "50118",
+        "expected_document_number": "235",
+        "expected_document_date": "2017-12-21",
+        "artifact_kind": "PDF"
+      }
+    ],
+    "DOC-RU-FSTEC-239-2017": [
+      {
+        "url": "https://cdnstatic.rg.ru/uploads/attachments/152/52/16/50524.pdf",
+        "source_class": "OFFICIAL_PUBLICATION_ALTERNATIVE",
+        "publisher": "Российская газета",
+        "provenance_page": "https://rg.ru/documents/2018/03/28/fstek-prikaz239-site-dok.html",
+        "expected_registration_number": "50524",
+        "expected_document_number": "239",
+        "expected_document_date": "2017-12-25",
+        "artifact_kind": "PDF"
+      }
+    ],
+    "DOC-RU-FSTEC-240-2023": [
+      {
+        "url": "https://cdnstatic.rg.ru/uploads/attachments/2024/04/18/77896_83e.pdf",
+        "source_class": "OFFICIAL_PUBLICATION_ALTERNATIVE",
+        "publisher": "Российская газета",
+        "provenance_page": "https://rg.ru/documents/2024/04/18/fstek-prikaz240-site-dok.html",
+        "expected_registration_number": "77896",
+        "expected_document_number": "240",
+        "expected_document_date": "2023-12-01",
+        "artifact_kind": "PDF"
+      }
+    ],
+    "DOC-RU-FSTEC-117-2025": [
+      {
+        "url": "https://cdnstatic.rg.ru/uploads/attachments/2025/06/18/82619_8b5.pdf",
+        "source_class": "OFFICIAL_PUBLICATION_ALTERNATIVE",
+        "publisher": "Российская газета",
+        "provenance_page": "https://rg.ru/documents/2025/06/18/fstek-prikaz117-site-dok.html",
+        "expected_registration_number": "82619",
+        "expected_document_number": "117",
+        "expected_document_date": "2025-04-11",
+        "artifact_kind": "PDF"
+      }
+    ],
+    "DOC-RU-FSTEC-230-2025": [
+      {
+        "url": "https://cdnstatic.rg.ru/uploads/attachments/2025/09/22/83573_552.pdf",
+        "source_class": "OFFICIAL_PUBLICATION_ALTERNATIVE",
+        "publisher": "Российская газета",
+        "provenance_page": "https://rg.ru/documents/2025/09/22/fstek-prikaz230-dok.html",
+        "expected_registration_number": "83573",
+        "expected_document_number": "230",
+        "expected_document_date": "2025-06-30",
+        "artifact_kind": "PDF"
+      }
+    ]
+  },
+  "rules": {
+    "technical_fallback_only": true,
+    "does_not_change_legal_priority": true,
+    "strict_tls_required": true,
+    "identity_review_required_before_legal_truth": true,
+    "kb_auto_promotion": false
+  }
+}

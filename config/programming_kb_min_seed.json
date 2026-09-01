@@ -1,0 +1,208 @@
+{
+  "schema_version": "1.0",
+  "knowledge_base_id": "PROGRAMMING_KB",
+  "seed_id": "FATHER-PROGRAMMING-KB-MIN-SEED-001",
+  "status": "BUILDING_MIN",
+  "region_profile": "RU",
+  "maturity_level": "MIN",
+  "importance_class": "NECESSARY",
+  "principle": "Normative applicability first, then language knowledge and language-selection rules, then scientifically supported algorithm selection, then engineering composition and only then task/training mapping.",
+  "nodes": [
+    {
+      "id": "REGION-RU",
+      "type": "REGION_PROFILE",
+      "title": "Российская Федерация",
+      "state": "ACTIVE",
+      "source_refs": ["config/programmer_ru_normative_scope.json"]
+    },
+    {
+      "id": "RU-STANDARDIZATION-APPLICABILITY",
+      "type": "APPLICABILITY_RULE",
+      "title": "Правовая применимость стандартов в РФ",
+      "state": "SEEDED_EXACT_TEXT_REVIEW_REQUIRED",
+      "region": "RU",
+      "source_refs": ["config/programmer_ru_normative_scope.json#LEGAL_FORCE_OF_STANDARDIZATION"],
+      "purpose": "Do not confuse a current standard with a mandatory standard; resolve legal, contractual, regulator and project activation separately."
+    },
+    {
+      "id": "RU-CLUSTER-ESPD-GOST19",
+      "type": "STANDARD",
+      "title": "ЕСПД / ГОСТ 19 — документация программ",
+      "state": "CATALOG_STATUS_AVAILABLE_EXACT_BINDING_PENDING",
+      "region": "RU",
+      "source_refs": ["config/programmer_ru_espd_inventory.json"],
+      "purpose": "Developer documentation and software work-product requirements."
+    },
+    {
+      "id": "RU-CLUSTER-SOFTWARE-LIFECYCLE",
+      "type": "STANDARD",
+      "title": "Жизненный цикл и инженерия программного обеспечения",
+      "state": "SEEDED_EXPANSION_REQUIRED",
+      "region": "RU",
+      "source_refs": ["config/programmer_ru_normative_scope.json#SOFTWARE_LIFECYCLE_AND_ENGINEERING"]
+    },
+    {
+      "id": "RU-CLUSTER-SECURE-DEVELOPMENT",
+      "type": "STANDARD",
+      "title": "Безопасная разработка ПО",
+      "state": "SEEDED_EXPANSION_REQUIRED",
+      "region": "RU",
+      "source_refs": ["config/programmer_ru_normative_scope.json#SECURE_SOFTWARE_DEVELOPMENT"]
+    },
+    {
+      "id": "RU-CLUSTER-GOST34",
+      "type": "STANDARD",
+      "title": "ГОСТ 34 — автоматизированные системы",
+      "state": "CONDITIONAL_CORE_AVAILABLE",
+      "region": "RU",
+      "source_refs": ["config/programmer_ru_automated_systems_conditional.json"]
+    },
+    {
+      "id": "RU-CLUSTER-FSTEC-REGULATED",
+      "type": "STANDARD",
+      "title": "ФСТЭК и регулируемые информационные системы",
+      "state": "CONDITIONAL_PRIMARY_SEEDED_WITH_WATCH",
+      "region": "RU",
+      "source_refs": ["config/programmer_ru_normative_scope.json#FSTEC_AND_REGULATED_INFORMATION_SYSTEMS"]
+    },
+    {
+      "id": "LANG-PYTHON",
+      "type": "LANGUAGE",
+      "title": "Python",
+      "state": "PRIMARY_SOURCE_BOUND",
+      "source_refs": ["PYTHON_LANGUAGE_REFERENCE", "PYTHON_STANDARD_LIBRARY"],
+      "properties_state": "MIN_EXTRACTION_REQUIRED"
+    },
+    {
+      "id": "LANG-GO",
+      "type": "LANGUAGE",
+      "title": "Go",
+      "state": "PRIMARY_SOURCE_GAP",
+      "source_refs": [],
+      "gap": "Bind official language specification/documentation before rules are promoted."
+    },
+    {
+      "id": "LANG-JAVA",
+      "type": "LANGUAGE",
+      "title": "Java",
+      "state": "PRIMARY_SOURCE_GAP",
+      "source_refs": [],
+      "gap": "Bind official language specification/documentation before rules are promoted."
+    },
+    {
+      "id": "LANG-DOTNET",
+      "type": "LANGUAGE",
+      "title": "C# / .NET",
+      "state": "PRIMARY_SOURCE_GAP",
+      "source_refs": [],
+      "gap": "Bind official language/runtime specification before rules are promoted."
+    },
+    {
+      "id": "LANG-CPP",
+      "type": "LANGUAGE",
+      "title": "C / C++",
+      "state": "PRIMARY_SOURCE_GAP",
+      "source_refs": [],
+      "gap": "Bind authoritative language standards/references before rules are promoted."
+    },
+    {
+      "id": "LANG-RUST",
+      "type": "LANGUAGE",
+      "title": "Rust",
+      "state": "PRIMARY_SOURCE_GAP",
+      "source_refs": [],
+      "gap": "Bind official language reference before rules are promoted."
+    },
+    {
+      "id": "LANG-JS-TS",
+      "type": "LANGUAGE",
+      "title": "JavaScript / TypeScript",
+      "state": "PRIMARY_SOURCE_GAP",
+      "source_refs": [],
+      "gap": "Bind ECMAScript and TypeScript primary specifications/documentation before rules are promoted."
+    },
+    {
+      "id": "RULE-LANGUAGE-SELECTION-CONTEXT-FIRST",
+      "type": "LANGUAGE_SELECTION_RULE",
+      "title": "Язык выбирается по ограничениям задачи, а не по глобальному рейтингу",
+      "state": "PROVISIONAL_RULE_SOURCE_EXPANSION_REQUIRED",
+      "conditions": [
+        "region and sector constraints resolved",
+        "safety/memory requirements known",
+        "latency/throughput target known",
+        "CPU-bound vs IO-bound workload known",
+        "deployment/runtime constraints known",
+        "ecosystem and interoperability requirements known",
+        "team competence and lifecycle horizon known"
+      ],
+      "source_refs": ["SWEBOK_V4_SOFTWARE_CONSTRUCTION", "ACM_ALGORITHMICS_BODY_OF_KNOWLEDGE"]
+    },
+    {
+      "id": "ALGO-BINARY-SEARCH",
+      "type": "ALGORITHM",
+      "title": "Binary search / lower-bound family",
+      "state": "MIN_SCIENTIFIC_SOURCE_BOUND",
+      "preconditions": ["search domain is ordered under the comparison used"],
+      "complexity": {"time": "O(log n)", "space": "implementation-dependent; iterative form O(1) auxiliary"},
+      "source_refs": ["UNIVERSITY_ALGORITHMS_REFERENCE", "ACM_ALGORITHMICS_BODY_OF_KNOWLEDGE"]
+    },
+    {
+      "id": "ALGO-LINEAR-MERGE",
+      "type": "ALGORITHM",
+      "title": "Linear merge of two sorted sequences",
+      "state": "MIN_SCIENTIFIC_SOURCE_BOUND",
+      "preconditions": ["both input sequences are sorted under a compatible order"],
+      "complexity": {"time": "O(n+m)", "space": "O(n+m) for a new merged output"},
+      "source_refs": ["UNIVERSITY_ALGORITHMS_REFERENCE", "ACM_ALGORITHMICS_BODY_OF_KNOWLEDGE"]
+    },
+    {
+      "id": "DS-HASH-SET",
+      "type": "DATA_STRUCTURE",
+      "title": "Hash set for membership/deduplication",
+      "state": "MIN_LANGUAGE_SPECIFIC_BINDING_REQUIRED",
+      "source_refs": ["PYTHON_STANDARD_LIBRARY", "SWEBOK_V4_SOFTWARE_CONSTRUCTION"],
+      "note": "Complexity guarantees and collision behavior must be stated per concrete runtime/implementation rather than globally."
+    },
+    {
+      "id": "RULE-ALGORITHM-SELECTION-PROBLEM-FIRST",
+      "type": "DECISION_RULE",
+      "title": "Алгоритм выбирается по свойствам задачи и данных",
+      "state": "MIN_RULE",
+      "requires": [
+        "data size/order/distribution known where relevant",
+        "correctness preconditions known",
+        "time and memory constraints known",
+        "failure/edge cases known"
+      ],
+      "source_refs": ["UNIVERSITY_ALGORITHMS_REFERENCE", "ACM_ALGORITHMICS_BODY_OF_KNOWLEDGE"]
+    }
+  ],
+  "relations": [
+    {"from": "RU-STANDARDIZATION-APPLICABILITY", "type": "APPLIES_IN_REGION", "to": "REGION-RU"},
+    {"from": "RU-CLUSTER-ESPD-GOST19", "type": "APPLIES_IN_REGION", "to": "REGION-RU"},
+    {"from": "RU-CLUSTER-SOFTWARE-LIFECYCLE", "type": "APPLIES_IN_REGION", "to": "REGION-RU"},
+    {"from": "RU-CLUSTER-SECURE-DEVELOPMENT", "type": "APPLIES_IN_REGION", "to": "REGION-RU"},
+    {"from": "RU-CLUSTER-GOST34", "type": "APPLIES_IN_REGION", "to": "REGION-RU"},
+    {"from": "RU-CLUSTER-FSTEC-REGULATED", "type": "APPLIES_IN_REGION", "to": "REGION-RU"},
+    {"from": "RULE-LANGUAGE-SELECTION-CONTEXT-FIRST", "type": "REQUIRES", "to": "RU-STANDARDIZATION-APPLICABILITY"},
+    {"from": "ALGO-BINARY-SEARCH", "type": "HAS_PRECONDITION", "to": "ORDERED-DATA-PRECONDITION"},
+    {"from": "RULE-ALGORITHM-SELECTION-PROBLEM-FIRST", "type": "SUPPORTED_BY", "to": "ALGO-BINARY-SEARCH"},
+    {"from": "RULE-ALGORITHM-SELECTION-PROBLEM-FIRST", "type": "SUPPORTED_BY", "to": "ALGO-LINEAR-MERGE"}
+  ],
+  "explicit_gaps": [
+    "Create exact current RU standard/document bindings through Global Document Registry rather than duplicating legal truth here.",
+    "Bind primary sources for Go, Java, C#/.NET, C/C++, Rust and JavaScript/TypeScript.",
+    "Extract language properties into comparable structured facts.",
+    "Create language-selection matrices with evidence and counterexamples.",
+    "Expand algorithm/data-structure catalog beyond the two seed algorithms.",
+    "Replace placeholder ORDERED-DATA-PRECONDITION target with a normalized PRECONDITION node during graph normalization.",
+    "Map existing Golden/task fixtures to KB nodes only after PROGRAMMING_KB MIN gate passes."
+  ],
+  "training_gate": {
+    "status": "HOLD",
+    "reason": "PROGRAMMING_KB_MIN_NOT_READY",
+    "existing_goldens": "FIXTURES_ONLY",
+    "derived_candidates": "HOLD",
+    "new_training_generation": "PAUSED"
+  }
+}

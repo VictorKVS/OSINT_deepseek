@@ -1,0 +1,24 @@
+{
+  "schema_version": "1.0",
+  "registry_id": "ARCHITECT-PYTHON-ENGINEERING-SUBSET-001",
+  "role_id": "ARCHITECT",
+  "note": "Preserved narrow Python/engineering subset. Not the active Architect library gap registry.",
+  "targets": [
+    {"book_id":"ARCH-BOOK-001","title":"Fluent Python","edition":"2nd Edition","author":"Luciano Ramalho","priority":"P0"},
+    {"book_id":"ARCH-BOOK-002","title":"Effective Python","edition":"3rd Edition","author":"Brett Slatkin","priority":"P0"},
+    {"book_id":"ARCH-BOOK-003","title":"Python Distilled","edition":null,"author":"David Beazley","priority":"P0"},
+    {"book_id":"ARCH-BOOK-004","title":"Architecture Patterns with Python","edition":null,"author":"Harry Percival; Bob Gregory","priority":"P0"},
+    {"book_id":"ARCH-BOOK-005","title":"Refactoring","edition":"2nd Edition","author":"Martin Fowler","priority":"P0"},
+    {"book_id":"ARCH-BOOK-006","title":"Working Effectively with Legacy Code","edition":null,"author":"Michael Feathers","priority":"P0"},
+    {"book_id":"ARCH-BOOK-007","title":"Test Driven Development: By Example","edition":null,"author":"Kent Beck","priority":"P0"},
+    {"book_id":"ARCH-BOOK-008","title":"Test-Driven Development with Python","edition":null,"author":"Harry Percival","priority":"P0"},
+    {"book_id":"ARCH-BOOK-009","title":"Growing Object-Oriented Software, Guided by Tests","edition":null,"author":"Steve Freeman; Nat Pryce","priority":"P0"},
+    {"book_id":"ARCH-BOOK-010","title":"Domain-Driven Design","edition":null,"author":"Eric Evans","priority":"P0"},
+    {"book_id":"ARCH-BOOK-011","title":"Designing Data-Intensive Applications","edition":null,"author":"Martin Kleppmann","priority":"P0"},
+    {"book_id":"ARCH-BOOK-012","title":"Release It!","edition":"2nd Edition","author":"Michael T. Nygard","priority":"P1"},
+    {"book_id":"ARCH-BOOK-013","title":"Robust Python","edition":null,"author":"Patrick Viafore","priority":"P1"},
+    {"book_id":"ARCH-BOOK-014","title":"Python Concurrency with asyncio","edition":null,"author":"Matthew Fowler","priority":"P1"},
+    {"book_id":"ARCH-BOOK-015","title":"High Performance Python","edition":"2nd Edition","author":"Micha Gorelick; Ian Ozsvald","priority":"P1"},
+    {"book_id":"ARCH-BOOK-016","title":"Database Internals","edition":null,"author":"Alex Petrov","priority":"P1"}
+  ]
+}

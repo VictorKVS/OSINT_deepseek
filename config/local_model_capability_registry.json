@@ -1,0 +1,97 @@
+{
+  "schema_version": "father-local-model-capability-registry.v0.1",
+  "mode": "AUTO_DISCOVERY_THEN_ROUTE",
+  "principles": {
+    "use_every_available_model_only_where_capable": true,
+    "do_not_run_every_model_on_every_stage": true,
+    "model_output_is_semifinished_candidate_only": true,
+    "source_evidence_remains_authoritative": true,
+    "main_analyst_review_required": true,
+    "kb_auto_promotion": false
+  },
+  "models": [
+    {
+      "model_id": "GIGACHAT_20B_A3B_INSTRUCT",
+      "aliases": ["gigachat-20b", "gigachat_20b", "a3b", "gigachat3-20b"],
+      "capabilities": ["DOCUMENT_SEMANTIC_STRUCTURE", "TERMINOLOGY_EXTRACTION", "KNOWLEDGE_EXTRACTION", "RELATION_DISCOVERY", "NLI_VERIFICATION", "CROSS_SOURCE_REASONING", "VERIFICATION_JUDGE", "RU_TECHNICAL_SYNTHESIS"],
+      "quality_score": 0.92,
+      "preferred_roles": ["CHAMPION", "PROFESSOR"]
+    },
+    {
+      "model_id": "GIGACHAT3_10B",
+      "aliases": ["gigachat3-10b", "gigachat-10b", "gigachat_10b"],
+      "capabilities": ["DOCUMENT_SEMANTIC_STRUCTURE", "TERMINOLOGY_EXTRACTION", "KNOWLEDGE_EXTRACTION", "RELATION_DISCOVERY", "NLI_VERIFICATION", "VERIFICATION_JUDGE"],
+      "quality_score": 0.80,
+      "preferred_roles": ["CHALLENGER", "JUDGE"]
+    },
+    {
+      "model_id": "QWEN2_5_14B_INSTRUCT_1M",
+      "aliases": ["qwen2.5-14b-instruct-1m", "qwen2.5-14b-instruct", "qwen2_5_14b"],
+      "capabilities": ["DOCUMENT_SEMANTIC_STRUCTURE", "EN_RU_TECHNICAL_TRANSLATION", "TERMINOLOGY_EXTRACTION", "KNOWLEDGE_EXTRACTION", "RELATION_DISCOVERY", "NLI_VERIFICATION", "CROSS_SOURCE_REASONING", "VERIFICATION_JUDGE"],
+      "quality_score": 0.90,
+      "preferred_roles": ["CHAMPION", "CHALLENGER"]
+    },
+    {
+      "model_id": "QWEN2_5_CODER_14B",
+      "aliases": ["qwen2.5-coder-14b", "qwen2_5_coder_14b", "qwen-coder-14b"],
+      "capabilities": ["KNOWLEDGE_EXTRACTION", "RELATION_DISCOVERY", "CROSS_SOURCE_REASONING", "CODE_ARCHITECTURE_ANALYSIS", "SECURE_SDLC_ANALYSIS", "VERIFICATION_JUDGE"],
+      "quality_score": 0.91,
+      "preferred_roles": ["DOMAIN_CHAMPION", "CHALLENGER"]
+    },
+    {
+      "model_id": "DEEPSEEK_CODER_V2_LITE",
+      "aliases": ["deepseek-coder-v2-lite", "deepseek_coder_v2_lite", "deepseek-coder"],
+      "capabilities": ["KNOWLEDGE_EXTRACTION", "RELATION_DISCOVERY", "CODE_ARCHITECTURE_ANALYSIS", "SECURE_SDLC_ANALYSIS", "VERIFICATION_JUDGE"],
+      "quality_score": 0.84,
+      "preferred_roles": ["DOMAIN_CHALLENGER", "JUDGE"]
+    },
+    {
+      "model_id": "LLAVA_1_6_MISTRAL_7B",
+      "aliases": ["llava-1.6-mistral-7b", "llava1.6", "llava"],
+      "capabilities": ["DOCUMENT_LAYOUT_OCR", "STRUCTURED_DOCUMENT_ELEMENTS", "VISION_DOCUMENT_REVIEW"],
+      "quality_score": 0.76,
+      "preferred_roles": ["VISION_CHALLENGER"]
+    },
+    {
+      "model_id": "COGVLM_13B_CHAT",
+      "aliases": ["cogvlm-13b", "cogvlm", "cogvlm-chat"],
+      "capabilities": ["DOCUMENT_LAYOUT_OCR", "STRUCTURED_DOCUMENT_ELEMENTS", "VISION_DOCUMENT_REVIEW"],
+      "quality_score": 0.82,
+      "preferred_roles": ["VISION_CHAMPION"]
+    },
+    {
+      "model_id": "BGE_M3",
+      "aliases": ["bge-m3", "bge_m3"],
+      "capabilities": ["EMBEDDING_RETRIEVAL", "RELATION_RETRIEVAL", "DEDUP_NEIGHBOR_SEARCH"],
+      "quality_score": 0.95,
+      "preferred_roles": ["RETRIEVER"]
+    },
+    {
+      "model_id": "WHISPER_LARGE_V3_TURBO",
+      "aliases": ["whisper-large-v3-turbo", "whisper_large_v3_turbo", "whisper"],
+      "capabilities": ["AUDIO_TRANSCRIPTION"],
+      "quality_score": 0.95,
+      "preferred_roles": ["TRANSCRIBER"]
+    },
+    {
+      "model_id": "MYTHOMAX_L2_13B",
+      "aliases": ["mythomax-l2-13b", "mythomax", "mythomax_l2"],
+      "capabilities": ["ALTERNATIVE_EXPLANATION", "CHALLENGER_SYNTHESIS"],
+      "quality_score": 0.62,
+      "preferred_roles": ["LOW_WEIGHT_CHALLENGER"],
+      "restrictions": ["NEVER_SOLE_LEGAL_OR_SECURITY_AUTHORITY"]
+    }
+  ],
+  "stage_capability_map": {
+    "M1_DOCUMENT_LAYOUT": ["DOCUMENT_LAYOUT_OCR"],
+    "M2_TABLE_FIGURE_FORMULA": ["STRUCTURED_DOCUMENT_ELEMENTS"],
+    "M3_TRANSLATION": ["EN_RU_TECHNICAL_TRANSLATION"],
+    "M4_SEMANTIC_STRUCTURE": ["DOCUMENT_SEMANTIC_STRUCTURE"],
+    "M5_TERMINOLOGY": ["TERMINOLOGY_EXTRACTION"],
+    "M6_KNOWLEDGE_EXTRACTION": ["KNOWLEDGE_EXTRACTION"],
+    "M7_RELATION_DISCOVERY": ["RELATION_DISCOVERY", "RELATION_RETRIEVAL", "EMBEDDING_RETRIEVAL"],
+    "M8_CONTRADICTION_VERIFICATION": ["NLI_VERIFICATION"],
+    "M9_PROFESSOR_SYNTHESIS": ["CROSS_SOURCE_REASONING", "CHALLENGER_SYNTHESIS"],
+    "M10_INDEPENDENT_JUDGE": ["VERIFICATION_JUDGE"]
+  }
+}

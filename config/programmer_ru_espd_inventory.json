@@ -1,0 +1,64 @@
+{
+  "schema_version": "1.0",
+  "inventory_id": "FATHER-RU-PROGRAMMER-ESPD-001",
+  "role_id": "PROGRAMMER",
+  "knowledge_base_id": "PROGRAMMING_KB",
+  "family": "ЕСПД / ГОСТ 19",
+  "scope": "CURRENT_ROSSTANDART_GOST_19_CATALOG_SNAPSHOT",
+  "snapshot_date": "2026-08-24",
+  "official_catalog_sources": [
+    "https://protect.gost.ru/gost?month=0&page=115&search=&year=0",
+    "https://protect.gost.ru/gost?month=0&page=116&search=&year=0"
+  ],
+  "verification_basis": "OFFICIAL_ROSSTANDART_CATALOG",
+  "counts": {
+    "active": 28,
+    "superseded": 1,
+    "catalog_records": 29
+  },
+  "rules": {
+    "active_status_required_for_current_gate": true,
+    "superseded_record_is_history_only": true,
+    "applicability_is_not_inferred_from_active_status": true,
+    "legal_force_requires_separate_review": true,
+    "exact_text_acquisition_is_separate_from_catalog_status_verification": true
+  },
+  "records": [
+    {"designation":"ГОСТ 19.001-77","title":"Единая система программной документации. Общие положения","status":"ACTIVE","catalog_page":115,"detail_url":"https://protect.gost.ru/gost/details/eebbac65-0f64-4be1-8f95-93fc86c62918","detail_metadata_state":"VERIFIED"},
+    {"designation":"ГОСТ 19.005-85","title":"Единая система программной документации. Р-схемы алгоритмов и программ. Обозначения условные графические и правила выполнения","status":"ACTIVE","catalog_page":115,"detail_url":"https://protect.gost.ru/gost/details/7a200848-66be-419b-a6d7-f13f2d26be6c","detail_metadata_state":"VERIFIED"},
+    {"designation":"ГОСТ 19.101-77","title":"Единая система программной документации. Виды программ и программных документов","status":"SUPERSEDED","catalog_page":115,"superseded_by":"ГОСТ 19.101-2024","detail_metadata_state":"VERIFIED"},
+    {"designation":"ГОСТ 19.101-2024","title":"Единая система программной документации. Виды программ и программных документов","status":"ACTIVE","catalog_page":115,"detail_url":"https://protect.gost.ru/gost/details/5cee0533-a1f4-41fe-bcb3-bc79e7e74490","detail_metadata_state":"VERIFIED"},
+    {"designation":"ГОСТ 19.102-77","title":"Единая система программной документации. Стадии разработки","status":"ACTIVE","catalog_page":115,"detail_url":"https://protect.gost.ru/gost/details/a847749a-0f9d-4c69-9a1d-f66de432e251","detail_metadata_state":"VERIFIED"},
+    {"designation":"ГОСТ 19.103-77","title":"Единая система программной документации. Обозначения программ и программных документов","status":"ACTIVE","catalog_page":115,"detail_url":"https://protect.gost.ru/gost/details/14b80a7d-ef71-4ac6-b7b2-7c8ce465cf08","detail_metadata_state":"VERIFIED"},
+    {"designation":"ГОСТ 19.104-78","title":"Единая система программной документации. Основные надписи","status":"ACTIVE","catalog_page":115,"detail_url":"https://protect.gost.ru/gost/details/b54b67fd-f44c-49da-a18a-2bda30cc3674","detail_metadata_state":"VERIFIED"},
+    {"designation":"ГОСТ 19.105-78","title":"Единая система программной документации. Общие требования к программным документам","status":"ACTIVE","catalog_page":115,"detail_url":"https://protect.gost.ru/gost/details/500f8c05-0b04-40fc-a049-4212eae807c3","detail_metadata_state":"VERIFIED"},
+    {"designation":"ГОСТ 19.106-78","title":"Единая система программной документации. Требования к программным документам, выполненным печатным способом","status":"ACTIVE","catalog_page":115,"detail_url":"https://protect.gost.ru/gost/details/237d9e0c-a8a8-40a2-a2f5-f8182da346a8","detail_metadata_state":"VERIFIED"},
+    {"designation":"ГОСТ 19.201-78","title":"Единая система программной документации. Техническое задание. Требования к содержанию и оформлению","status":"ACTIVE","catalog_page":115,"detail_url":"https://protect.gost.ru/gost/details/b64061cf-6bb2-4c75-aee9-18bb5e26e554","detail_metadata_state":"VERIFIED"},
+    {"designation":"ГОСТ 19.202-78","title":"Единая система программной документации. Спецификация. Требования к содержанию и оформлению","status":"ACTIVE","catalog_page":115,"detail_url":"https://protect.gost.ru/gost/details/39373bf1-70a6-45f5-921e-790a58325275","detail_metadata_state":"VERIFIED"},
+    {"designation":"ГОСТ 19.301-79","title":"Единая система программной документации. Программа и методика испытаний. Требования к содержанию и оформлению","status":"ACTIVE","catalog_page":115,"detail_url":"https://protect.gost.ru/gost/details/b25e0645-091a-425b-8558-3e0c3ce37315","detail_metadata_state":"VERIFIED"},
+    {"designation":"ГОСТ 19.401-78","title":"Единая система программной документации. Текст программы. Требования к содержанию и оформлению","status":"ACTIVE","catalog_page":116,"detail_url":"https://protect.gost.ru/gost/details/e71e0951-ee1a-441f-b0c0-be3f3681c2f0","detail_metadata_state":"VERIFIED"},
+    {"designation":"ГОСТ 19.402-78","title":"Единая система программной документации. Описание программы","status":"ACTIVE","catalog_page":116,"detail_url":"https://protect.gost.ru/gost/details/5e9b5f2e-925d-4a92-a100-53f952c8a2a1","detail_metadata_state":"VERIFIED"},
+    {"designation":"ГОСТ 19.403-79","title":"Единая система программной документации. Ведомость держателей подлинников","status":"ACTIVE","catalog_page":116,"detail_url":"https://protect.gost.ru/document.aspx?control=7&id=153593","detail_metadata_state":"VERIFIED_LEGACY_OFFICIAL_PAGE"},
+    {"designation":"ГОСТ 19.404-79","title":"Единая система программной документации. Пояснительная записка. Требования к содержанию и оформлению","status":"ACTIVE","catalog_page":116,"detail_url":"https://protect.gost.ru/gost/details/0db608d7-ffa8-41e4-b58b-e406b308b92a","detail_metadata_state":"VERIFIED"},
+    {"designation":"ГОСТ 19.501-78","title":"Единая система программной документации. Формуляр. Требования к содержанию и оформлению","status":"ACTIVE","catalog_page":116,"detail_url":"https://protect.gost.ru/gost/details/f2d4d86d-a7ff-445c-aec2-d49384a4c75c","detail_metadata_state":"VERIFIED"},
+    {"designation":"ГОСТ 19.502-78","title":"Единая система программной документации. Описание применения. Требования к содержанию и оформлению","status":"ACTIVE","catalog_page":116,"detail_url":"https://protect.gost.ru/gost/details/b60e8bce-06d5-4661-8448-b005f90494d6","detail_metadata_state":"VERIFIED"},
+    {"designation":"ГОСТ 19.503-79","title":"Единая система программной документации. Руководство системного программиста. Требования к содержанию и оформлению","status":"ACTIVE","catalog_page":116,"detail_url":"https://protect.gost.ru/gost/details/b0ff52a4-63aa-4c95-8278-941ab7721188","detail_metadata_state":"VERIFIED"},
+    {"designation":"ГОСТ 19.504-79","title":"Единая система программной документации. Руководство программиста. Требования к содержанию и оформлению","status":"ACTIVE","catalog_page":116,"detail_url":"https://protect.gost.ru/gost/details/2055b69f-9230-4995-b737-c550e84d617b","detail_metadata_state":"VERIFIED"},
+    {"designation":"ГОСТ 19.505-79","title":"Единая система программной документации. Руководство оператора. Требования к содержанию и оформлению","status":"ACTIVE","catalog_page":116,"detail_url":"https://protect.gost.ru/gost/details/07fec7b0-024f-407f-b5a8-7ebfe7cfa0a9","detail_metadata_state":"VERIFIED"},
+    {"designation":"ГОСТ 19.506-79","title":"Единая система программной документации. Описание языка. Требования к содержанию и оформлению","status":"ACTIVE","catalog_page":116,"detail_url":null,"detail_metadata_state":"CATALOG_STATUS_VERIFIED_DETAIL_URL_PENDING"},
+    {"designation":"ГОСТ 19.507-79","title":"Единая система программной документации. Ведомость эксплуатационных документов","status":"ACTIVE","catalog_page":116,"detail_url":"https://protect.gost.ru/gost/details/a77851e7-76c4-4952-960c-beb47ea6e711","detail_metadata_state":"VERIFIED"},
+    {"designation":"ГОСТ 19.508-79","title":"Единая система программной документации. Руководство по техническому обслуживанию. Требования к содержанию и оформлению","status":"ACTIVE","catalog_page":116,"detail_url":"https://protect.gost.ru/gost/details/76244ce7-812e-4557-a7c4-e568308d541a","detail_metadata_state":"VERIFIED"},
+    {"designation":"ГОСТ 19.601-78","title":"Единая система программной документации. Общие правила дублирования, учета и хранения","status":"ACTIVE","catalog_page":116,"detail_url":"https://protect.gost.ru/gost/details/14779eca-b673-4271-9232-e4ca594d4c00","detail_metadata_state":"VERIFIED"},
+    {"designation":"ГОСТ 19.602-78","title":"Единая система программной документации. Правила дублирования, учета и хранения программных документов, выполненных печатным способом","status":"ACTIVE","catalog_page":116,"detail_url":"https://protect.gost.ru/gost/details/fb117db8-1543-4444-ae6e-72c67418979c","detail_metadata_state":"VERIFIED"},
+    {"designation":"ГОСТ 19.603-78","title":"Единая система программной документации. Общие правила внесения изменений","status":"ACTIVE","catalog_page":116,"detail_url":"https://protect.gost.ru/gost/details/28520e77-5886-45f9-b043-b2afbf3c831c","detail_metadata_state":"VERIFIED"},
+    {"designation":"ГОСТ 19.604-78","title":"Единая система программной документации. Правила внесения изменений в программные документы, выполненные печатным способом","status":"ACTIVE","catalog_page":116,"detail_url":"https://protect.gost.ru/gost/details/063a5be7-e2aa-486f-a426-14ad2eebaa3c","detail_metadata_state":"VERIFIED"},
+    {"designation":"ГОСТ 19.701-90","title":"Единая система программной документации. Схемы алгоритмов, программ, данных и систем. Обозначения условные и правила выполнения","status":"ACTIVE","catalog_page":116,"detail_url":"https://protect.gost.ru/gost/details/0c85e066-f89e-433d-a6d3-b7f746bd0c7c","detail_metadata_state":"VERIFIED"}
+  ],
+  "next_actions": [
+    "acquire exact legally available text or operator-authorized copies for each active standard",
+    "extract effective dates and amendments for every active record",
+    "classify applicability to standalone software versus software within automated systems",
+    "link each standard to role tasks, artifacts and competency questions",
+    "monitor Rosstandart catalog for replacements and status changes"
+  ]
+}

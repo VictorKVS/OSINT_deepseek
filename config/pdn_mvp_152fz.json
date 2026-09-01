@@ -1,0 +1,41 @@
+{
+  "schema_version": "1.0",
+  "source": {
+    "source_id": "SRC-RU-PRAVO-001",
+    "name": "Official Internet Portal of Legal Information",
+    "domain": "pravo.gov.ru",
+    "organization": "Official Internet Portal of Legal Information",
+    "source_class": "OFFICIAL",
+    "status": "VERIFIED",
+    "trust_basis": "The official portal states that federal-law texts in the integrated full-text legal-information bank have official status.",
+    "verified_by": "FATHER source-registry review",
+    "verified_at": "2026-08-22T00:00:00+00:00"
+  },
+  "source_policy": {
+    "domains": ["pravo.gov.ru"],
+    "trust_tier": "A0_OFFICIAL_PUBLICATION",
+    "material_profiles": ["LEGAL"],
+    "trust_basis": ["official_state_legal_information_portal"],
+    "authority_scope": ["federal_laws"],
+    "verification_evidence": ["portal_declares_official_status_for_federal_law_texts_in_integrated_bank"]
+  },
+  "document": {
+    "document_id": "DOC-RU-FZ-152-2006",
+    "title": "Федеральный закон от 27.07.2006 № 152-ФЗ О персональных данных",
+    "document_type": "federal_law",
+    "jurisdiction": "RU",
+    "language": "ru",
+    "topic_tags": ["personal_data", "152-fz", "pdn"]
+  },
+  "live_acquisition": {
+    "source_url": "https://ips.pravo.gov.ru/api/ips/legislation/document?baseid=None&hash=98490812b3409e2a8d78a11ca9010f434ea3d9250a11dbbdb78690cd5551bdd6",
+    "file_name": "152-fz-official.bin",
+    "version_date_observed": "2025-09-01",
+    "verified_search_date": "2026-08-22",
+    "limitations": [
+      "The exact artifact hash and MIME are computed only during live acquisition.",
+      "The official consolidated-text locator must be re-resolved when monitoring detects a newer edition or amendment.",
+      "This MVP performs only D0-D5 acquisition/structure/chunking; semantic legal interpretation starts later."
+    ]
+  }
+}

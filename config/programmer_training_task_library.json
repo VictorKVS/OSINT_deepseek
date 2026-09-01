@@ -1,0 +1,159 @@
+{
+  "schema_version": "1.0",
+  "library_id": "FATHER-PROGRAMMER-TASK-LIBRARY-MIN-001",
+  "role_id": "PROGRAMMER",
+  "maturity_level": "MIN",
+  "importance_class": "NECESSARY",
+  "source_resolution_state": "SEED_REFS_REQUIRE_KNOWLEDGE_SOURCE_REGISTRY",
+  "split_policy": {
+    "TRAIN": 8,
+    "HOLDOUT": 4,
+    "no_overlap": true
+  },
+  "tasks": [
+    {
+      "task_id": "PT-MIN-001",
+      "split": "TRAIN",
+      "domain": "PYTHON_FUNDAMENTALS",
+      "title": "Сумма положительных чисел",
+      "prompt": "Реализуй функцию sum_positive(values), возвращающую сумму только положительных чисел. Пустой список должен давать 0.",
+      "interface": "def sum_positive(values: list[int | float]) -> int | float",
+      "constraints": ["one pass preferred", "do not mutate input"],
+      "competencies": ["iteration", "conditions", "edge cases"],
+      "source_refs": ["PYTHON_LANGUAGE_REFERENCE", "SWEBOK_V4_SOFTWARE_CONSTRUCTION"],
+      "evaluation": {"kind": "PURE_FUNCTION", "examples": [[[1,-2,3],4], [[],0], [[-1,-2],0]]}
+    },
+    {
+      "task_id": "PT-MIN-002",
+      "split": "TRAIN",
+      "domain": "DATA_STRUCTURES",
+      "title": "Удаление дублей с сохранением порядка",
+      "prompt": "Реализуй stable_unique(values), удаляющую повторы и сохраняющую порядок первого появления.",
+      "interface": "def stable_unique(values: list[str]) -> list[str]",
+      "constraints": ["preserve first-seen order", "do not mutate input"],
+      "competencies": ["set", "list", "complexity"],
+      "source_refs": ["PYTHON_STANDARD_LIBRARY", "SWEBOK_V4_SOFTWARE_CONSTRUCTION"],
+      "evaluation": {"kind": "PURE_FUNCTION", "examples": [[["a","b","a","c"],["a","b","c"]], [[],[]]]}
+    },
+    {
+      "task_id": "PT-MIN-003",
+      "split": "TRAIN",
+      "domain": "ROBUSTNESS",
+      "title": "Безопасный разбор целых чисел",
+      "prompt": "Реализуй parse_ints(items): корректные целые числа вернуть списком, некорректные элементы пропустить. Принимать строки и int.",
+      "interface": "def parse_ints(items: list[object]) -> list[int]",
+      "constraints": ["no exception escapes for bad items", "booleans are not accepted as integers"],
+      "competencies": ["type handling", "exceptions", "input validation"],
+      "source_refs": ["PYTHON_LANGUAGE_REFERENCE", "NIST_SSDF_INPUT_VALIDATION_GUIDANCE"],
+      "evaluation": {"kind": "PURE_FUNCTION", "examples": [[["1","x",2],[1,2]], [[],[]]]}
+    },
+    {
+      "task_id": "PT-MIN-004",
+      "split": "TRAIN",
+      "domain": "ALGORITHMS",
+      "title": "Первое вхождение в отсортированном массиве",
+      "prompt": "Реализуй first_index(sorted_values, target), возвращающую индекс первого target или -1. Используй двоичный поиск.",
+      "interface": "def first_index(sorted_values: list[int], target: int) -> int",
+      "constraints": ["O(log n)", "input is sorted ascending"],
+      "competencies": ["binary search", "complexity", "boundary conditions"],
+      "source_refs": ["ACM_ALGORITHMICS_BODY_OF_KNOWLEDGE", "UNIVERSITY_ALGORITHMS_REFERENCE"],
+      "evaluation": {"kind": "PURE_FUNCTION", "examples": [[[[1,2,2,2,3],2],1], [[[1,3,5],4],-1], [[[],1],-1]]}
+    },
+    {
+      "task_id": "PT-MIN-005",
+      "split": "TRAIN",
+      "domain": "PYTHON_FUNDAMENTALS",
+      "title": "Разбиение списка на чанки",
+      "prompt": "Реализуй chunked(values, size), возвращающую список чанков. size <= 0 должен приводить к ValueError.",
+      "interface": "def chunked(values: list[object], size: int) -> list[list[object]]",
+      "constraints": ["raise ValueError for size <= 0", "do not mutate input"],
+      "competencies": ["slicing", "validation", "exceptions"],
+      "source_refs": ["PYTHON_LANGUAGE_REFERENCE"],
+      "evaluation": {"kind": "PURE_FUNCTION", "examples": [[[[1,2,3,4,5],2],[[1,2],[3,4],[5]]], [[[],3],[]]]}
+    },
+    {
+      "task_id": "PT-MIN-006",
+      "split": "TRAIN",
+      "domain": "ROBUSTNESS",
+      "title": "Безопасное отношение",
+      "prompt": "Реализуй safe_ratio(numerator, denominator, default=None). При denominator == 0 вернуть default, иначе обычное деление.",
+      "interface": "def safe_ratio(numerator: float, denominator: float, default=None)",
+      "constraints": ["zero denominator is handled explicitly"],
+      "competencies": ["edge cases", "API contract"],
+      "source_refs": ["PYTHON_LANGUAGE_REFERENCE", "SWEBOK_V4_SOFTWARE_CONSTRUCTION"],
+      "evaluation": {"kind": "PURE_FUNCTION", "examples": [[[[10,2]],5.0], [[[1,0]],null]]}
+    },
+    {
+      "task_id": "PT-MIN-007",
+      "split": "TRAIN",
+      "domain": "DATA_STRUCTURES",
+      "title": "Частоты слов",
+      "prompt": "Реализуй word_frequency(words), возвращающую dict слово->частота без изменения регистра.",
+      "interface": "def word_frequency(words: list[str]) -> dict[str, int]",
+      "constraints": ["O(n) expected"],
+      "competencies": ["dict", "counting", "complexity"],
+      "source_refs": ["PYTHON_STANDARD_LIBRARY", "SWEBOK_V4_SOFTWARE_CONSTRUCTION"],
+      "evaluation": {"kind": "PURE_FUNCTION", "examples": [[["a","b","a"],{"a":2,"b":1}], [[],{}]]}
+    },
+    {
+      "task_id": "PT-MIN-008",
+      "split": "TRAIN",
+      "domain": "ALGORITHMS",
+      "title": "Слияние двух отсортированных списков",
+      "prompt": "Реализуй merge_sorted(left, right) без вызова sorted для объединённого списка.",
+      "interface": "def merge_sorted(left: list[int], right: list[int]) -> list[int]",
+      "constraints": ["O(n+m)", "do not mutate inputs"],
+      "competencies": ["two pointers", "complexity", "merge"],
+      "source_refs": ["ACM_ALGORITHMICS_BODY_OF_KNOWLEDGE", "UNIVERSITY_ALGORITHMS_REFERENCE"],
+      "evaluation": {"kind": "PURE_FUNCTION", "examples": [[[[1,3,5],[2,4]], [1,2,3,4,5]], [[[],[1]],[1]] ]}
+    },
+    {
+      "task_id": "PT-MIN-009",
+      "split": "HOLDOUT",
+      "domain": "INPUT_VALIDATION",
+      "title": "Проверка TCP-порта",
+      "prompt": "Реализуй validate_port(value), возвращающую int в диапазоне 1..65535; иначе ValueError. Разрешены int и строка с десятичным числом.",
+      "interface": "def validate_port(value: object) -> int",
+      "constraints": ["reject booleans", "range 1..65535"],
+      "competencies": ["validation", "exceptions", "security basics"],
+      "source_refs": ["PYTHON_LANGUAGE_REFERENCE", "SECURE_INPUT_VALIDATION_CONSENSUS"],
+      "evaluation": {"kind": "PURE_FUNCTION", "examples": [["443",443], [8080,8080]]}
+    },
+    {
+      "task_id": "PT-MIN-010",
+      "split": "HOLDOUT",
+      "domain": "ALGORITHMS",
+      "title": "Top-K частых элементов",
+      "prompt": "Реализуй top_k_frequent(values, k), возвращающую k наиболее частых строк. При равной частоте сортировать лексикографически.",
+      "interface": "def top_k_frequent(values: list[str], k: int) -> list[str]",
+      "constraints": ["deterministic tie break", "k <= 0 returns []"],
+      "competencies": ["counting", "sorting", "determinism"],
+      "source_refs": ["ACM_ALGORITHMICS_BODY_OF_KNOWLEDGE", "PYTHON_STANDARD_LIBRARY"],
+      "evaluation": {"kind": "PURE_FUNCTION", "examples": [[[["b","a","b","c","a","b"],2],["b","a"]]]}
+    },
+    {
+      "task_id": "PT-MIN-011",
+      "split": "HOLDOUT",
+      "domain": "SECURE_CODING",
+      "title": "Маскирование секретов",
+      "prompt": "Реализуй redact_secret(value, keep_last=4): строка короче или равная keep_last полностью заменяется '*'; иначе сохраняются только последние keep_last символов.",
+      "interface": "def redact_secret(value: str, keep_last: int = 4) -> str",
+      "constraints": ["keep_last >= 0 else ValueError", "must not log or expose original value"],
+      "competencies": ["secure handling", "edge cases", "string processing"],
+      "source_refs": ["NIST_SSDF", "OWASP_SECURE_CODING_GUIDANCE"],
+      "evaluation": {"kind": "PURE_FUNCTION", "examples": [[["abcdef",2],"****ef"], [["abc",4],"***"]]}
+    },
+    {
+      "task_id": "PT-MIN-012",
+      "split": "HOLDOUT",
+      "domain": "RELIABILITY",
+      "title": "Расписание exponential backoff",
+      "prompt": "Реализуй backoff_schedule(base, attempts, cap), возвращающую задержки base*2^n, ограниченные cap, для attempts попыток.",
+      "interface": "def backoff_schedule(base: float, attempts: int, cap: float) -> list[float]",
+      "constraints": ["attempts <= 0 returns []", "base and cap must be non-negative"],
+      "competencies": ["reliability", "boundary conditions", "deterministic algorithms"],
+      "source_refs": ["SRE_RELIABILITY_CONSENSUS", "SWEBOK_V4_SOFTWARE_ENGINEERING_OPERATIONS"],
+      "evaluation": {"kind": "PURE_FUNCTION", "examples": [[[[1,5,8]],[1,2,4,8,8]], [[[2,0,10]],[]]]}
+    }
+  ]
+}

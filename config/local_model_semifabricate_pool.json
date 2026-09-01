@@ -1,0 +1,91 @@
+{
+  "schema_version": "1.0",
+  "pool_id": "FATHER-LOCAL-MODEL-SEMIFABRICATE-001",
+  "policy": {
+    "all_applicable_models_participate": true,
+    "no_model_can_promote_legal_truth": true,
+    "raw_source_is_read_once_then_semifabricates_are_reused": true,
+    "disagreement_goes_to_main_analyst": true,
+    "runtime_endpoints_are_local_configuration_not_committed": true
+  },
+  "models": [
+    {
+      "model_id": "GIGACHAT-20B-A3B-INSTRUCT",
+      "kind": "TEXT_REASONING",
+      "roles": ["LEGAL_STRUCTURE", "DOMAIN_SYNTHESIS", "APPLICABILITY", "MAIN_ANALYST_CHALLENGER"],
+      "runtime_env": "FATHER_MODEL_GIGACHAT20_ENDPOINT"
+    },
+    {
+      "model_id": "GIGACHAT3-10B",
+      "kind": "TEXT_REASONING",
+      "roles": ["SUMMARY", "DEFINITION_NORMALIZATION", "REQUIREMENT_REWRITE", "CLAIM_REVIEW"],
+      "runtime_env": "FATHER_MODEL_GIGACHAT10_ENDPOINT"
+    },
+    {
+      "model_id": "QWEN2.5-14B-INSTRUCT-1M",
+      "kind": "LONG_CONTEXT_REASONING",
+      "roles": ["LONG_DOCUMENT", "CROSS_SOURCE_COMPARE", "CONTRADICTION_SCOUT", "APPLICABILITY"],
+      "runtime_env": "FATHER_MODEL_QWEN14_ENDPOINT"
+    },
+    {
+      "model_id": "QWEN2.5-CODER-14B",
+      "kind": "CODE_REASONING",
+      "roles": ["SECURE_SDLC", "ARCHITECTURE", "IMPLEMENTATION_MAPPING", "TEST_DESIGN"],
+      "runtime_env": "FATHER_MODEL_QWEN_CODER_ENDPOINT"
+    },
+    {
+      "model_id": "DEEPSEEK-CODER-V2-LITE",
+      "kind": "CODE_REASONING",
+      "roles": ["SECURE_SDLC", "IMPLEMENTATION_MAPPING", "ANTI_PATTERN", "TEST_DESIGN"],
+      "runtime_env": "FATHER_MODEL_DEEPSEEK_CODER_ENDPOINT"
+    },
+    {
+      "model_id": "MYTHOMAX-L2-13B",
+      "kind": "TEXT_CHALLENGER",
+      "roles": ["ALTERNATIVE_INTERPRETATION", "EDGE_CASE_BRAINSTORM"],
+      "trust_restriction": "CHALLENGER_ONLY_NEVER_LEGAL_TRUTH",
+      "runtime_env": "FATHER_MODEL_MYTHOMAX_ENDPOINT"
+    },
+    {
+      "model_id": "LLAVA-1.6-MISTRAL-7B",
+      "kind": "VISION_LANGUAGE",
+      "roles": ["SCAN_VISUAL_REVIEW", "DIAGRAM_REVIEW", "TABLE_REVIEW"],
+      "runtime_env": "FATHER_MODEL_LLAVA_ENDPOINT"
+    },
+    {
+      "model_id": "COGVLM-13B",
+      "kind": "VISION_LANGUAGE",
+      "roles": ["SCAN_VISUAL_REVIEW", "DIAGRAM_REVIEW", "TABLE_REVIEW"],
+      "runtime_env": "FATHER_MODEL_COGVLM_ENDPOINT"
+    },
+    {
+      "model_id": "BGE-M3",
+      "kind": "EMBEDDING",
+      "roles": ["SEMANTIC_INDEX", "SIMILAR_REQUIREMENT_SEARCH", "CROSS_SOURCE_CLUSTERING"],
+      "runtime_env": "FATHER_MODEL_BGE_M3_ENDPOINT"
+    },
+    {
+      "model_id": "WHISPER-LARGE-V3-TURBO",
+      "kind": "AUDIO_TRANSCRIPTION",
+      "roles": ["AUDIO_TRANSCRIPTION", "VIDEO_AUDIO_TRANSCRIPTION"],
+      "runtime_env": "FATHER_MODEL_WHISPER_ENDPOINT"
+    }
+  ],
+  "semifabricate_contract": {
+    "required_fields": [
+      "source_sha256",
+      "source_locator",
+      "model_id",
+      "task_role",
+      "facts",
+      "definitions",
+      "requirements",
+      "references",
+      "applicability",
+      "contradictions_or_questions",
+      "confidence",
+      "review_status"
+    ],
+    "review_status": "MAIN_ANALYST_REVIEW_REQUIRED"
+  }
+}

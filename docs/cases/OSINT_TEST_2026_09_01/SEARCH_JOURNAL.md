@@ -35,6 +35,106 @@
 - Kept KAS statements attributable to KAS.
 - Status: `FOUND-A` for corrections to methodology.
 
+### J-004 — Ownership/control clarified by official Polish decision
+- Primary source: Polish KAS/MSWiA decision materials.
+- Result:
+  - Armen S. Harutyunyan identified as controlling TECHNOSPETSTRADING LLC;
+  - Ruzanna Khachatryan identified as formal owner of 24% of TECHNOSPETSTRADING LLC and as granting Armen representation authority on 2024-06-06;
+  - TECHNOSPETSTRADINGEXPORT LLC identified as a wholly owned subsidiary of TECHNOSPETSTRADING LLC;
+  - Armen identified as indirect owner of TECHNOSPETSTRADINGEXPORT LLC;
+  - BELTECHNIKA.LT UAB identified as 90% owner of TST PL; Armen is sole owner/director of BELTECHNIKA.LT UAB;
+  - Uluana Atrashkevich owns 10% of TST PL and is president of its management board.
+- Status: `FOUND-A`.
+- Correction: earlier wording that Export ownership was not established is superseded.
+- Family note: no reliable public source found in this pass proving that Ruzanna Khachatryan is a spouse/relative of Armen Harutyunyan. Do not infer kinship from Armenian nationality or community membership.
+
+### J-005 — Quantified TST PL import dependence
+- Primary source: official Polish decision.
+- Result: TST PL imported `3,360,078 kg` of urea in 2023–2025; until the end of 2024 TECHNOSPETSTRADING LLC was the exclusive supplier according to the decision.
+- Status: `FOUND-A`.
+- Analytical value: establishes a measurable, concentrated supplier relationship rather than a generic corporate association.
+
+### J-006 — 2025 route change: Belarus → Latvia → Hungary / Poland
+- Primary source: Polish KAS/MSWiA decision.
+- Result:
+  - after December 2024 sanctions, TECHNOSPETSTRADING LLC continued exports from Belarus;
+  - exports were no longer sent directly to Polish counterparties, but via companies from other EU states or to companies in other EU states;
+  - from February 2025 TST PL's main supplier became a Hungarian entity;
+  - Belarus-origin fertilizer was customs-cleared in Latvia, with Hungary declared as destination/movement country;
+  - the Hungarian company had a urea supply contract with TECHNOSPETSTRADING LLC;
+  - contract contained a clause allowing an external payer.
+- Status: `FOUND-A` for the official position.
+- Key pivot: identify Hungarian entity, Latvian importer/customs declarant, external payer, and final Polish/EU buyer.
+
+### J-007 — Dubai route and named buyer
+- Sources: BIC/LRT/OCCRP investigative materials.
+- Result:
+  - Technospetstrading planned supply of `30,000 tonnes` of carbamide to UAE worth about `EUR 15m`;
+  - named buyer: `DP World Commodities and Logistics FZE`;
+  - route involved Lithuanian logistics/terminal infrastructure; BKT/Klaipėda appears in the shipment chain;
+  - earlier documents traced loading at Auls station next to Grodno Azot.
+- Status: `FOUND-B` (document-based investigative source; primary cargo docs not yet archived in case store).
+- Pitfall: UAE destination can be commercial/re-export; it must not be treated as evidence of concealment by itself.
+
+### J-008 — Trade route after Poland tightened control: Latvia becomes key corridor
+- Sources: OCCRP/BIC + official Polish decision.
+- Result:
+  - investigative materials describe renewed Belarus fertilizer flows into Latvia in 2025;
+  - one Technospetstrading invoice showed shipment to Hungary via Latvia;
+  - OCCRP/BIC report at least 278 railcars crossing to Latvia in the cited period across broader fertilizer flows;
+  - route structure overlaps with official KAS finding about Latvia customs clearance and Hungarian supplier role.
+- Status: `FOUND-A/B` depending on sub-fact.
+- Analytical value: independent source families converge on Latvia as a post-sanctions transit pivot.
+
+### J-009 — Business economics / internal margin claim
+- Source: BIC investigation based on documents/accounts supplied by sources.
+- Result claimed by BIC:
+  - Technospetstrading intermediary share: about 19–31% of Grodno Azot selling price;
+  - related foreign companies reselling to EU buyers allegedly added another 17–30%;
+  - estimated private intermediary benefit around USD 140/ton in cited examples;
+  - BIC estimated private intermediary services could have cost Grodno Azot more than USD 35m in 2024, while Grodno Azot received USD 59m from EU exports.
+- Status: `FOUND-B/C` — strong investigative claim, requires underlying invoices/accounts for A-grade use.
+- Important: do not present these figures as audited financial statements.
+
+### J-010 — Armen Harutyunyan ↔ Sergei Teterin political-business bridge
+- Sources:
+  - BIC: Armen described as former business partner of Sergei Teterin;
+  - EUR-Lex: Sergei Teterin is an EU-listed Belarusian businessman in Lukashenka's inner circle.
+- Result: a non-ethnic, business-based bridge from Armen into a politically exposed Belarusian network.
+- Status: `FOUND-A/B` — Teterin status A from EU source; prior partnership B from BIC pending primary corporate record.
+- Next: identify exact joint company/project and dates of partnership.
+
+### J-011 — GrandGranit / Fert-Corporation continuation network
+- Source: BIC and Polish KAS.
+- Result:
+  - GrandGranit owner Nikita Ter-Minasov is described as former head/acting director of TECHNOSPETSTRADINGEXPORT LLC in 2023–2024;
+  - Fert-Corporation owner/manager Yuri Minich is described as a Technospetstrading driver and 2023 TECHNOSPETSTRADINGEXPORT payroll recipient;
+  - on 2025-05-12 Ter-Minasov granted Minich power of attorney to represent GrandGranit;
+  - KAS independently states GrandGranit owner was a person linked to TECHNOSPETSTRADING LLC / EXPORT and sanctioned GrandGranit in August 2025.
+- Status: `FOUND-A/B`.
+- Key graph implication: replacement exporters are not random market entrants; they are linked by prior management/employment/representation edges.
+
+### J-012 — Shared travel pattern
+- Source: BIC investigative materials.
+- Result: Nikita Ter-Minasov, Yuri Minich, Dmitriy Goshko and Uluana Atrashkevich reportedly bought tickets for the same Belavia Minsk→Dubai flight on 2024-01-05.
+- Status: `FOUND-B/C` until underlying booking records are independently archived/verified.
+- Interpretation: potentially coordinated business travel; not proof of unlawful activity.
+
+### J-013 — Global Fertilizer / logistics personnel bridge
+- Sources: BIC/LRT.
+- Result:
+  - Global Fertilizer Company owned railcars used in the carbamide route;
+  - founder/owner identified by investigators as Diana Ibragimova;
+  - investigators said operational contact was Iryna Fadzeyava, formerly of Belneftekhim.
+- Status: `FOUND-B`.
+- Next: resolve corporate registry, railcar ownership dates, contracts, and Fadzeyava's exact role.
+
+### J-014 — Key methodological rule for family/ethnic links
+- Rule: ethnicity, nationality, diaspora membership, shared surname, or cultural community are not evidence of criminality, control, trust relationship, or kinship.
+- Family/relative links may be recorded only when supported by public records, direct statements, public corporate documents, sanctions/PEP records, or other reliable evidence.
+- Private relatives who have no material public/corporate role are excluded from the report.
+- Status: `FOUND-A` methodological control.
+
 ## Task 2 — Bitcoin address
 
 ### Object
@@ -163,4 +263,6 @@
 3. Find txid for the 600,000 USDT transfer and confirm on TRONSCAN.
 4. Trace first-hop and second-hop counterparties for TRON, prioritizing recurring/sweeping addresses.
 5. Search any recovered counterparties for public service tags, sanctions, scams, court/police notices, exchange references, merchant/OTC traces, and unusual cross-chain links.
-6. Record every hit/no-hit/conflict in this journal before drafting final attribution probabilities.
+6. For Task 1, identify the Hungarian 2025 supplier, Latvian customs/importer node, external payer, downstream EU buyers, and exact prior joint business linking Armen Harutyunyan to Sergei Teterin.
+7. For Task 1, resolve GrandGranit/Fert-Corporation people and document the management/employment/travel edges with source grades.
+8. Record every hit/no-hit/conflict in this journal before drafting final attribution probabilities or final Task-1 network conclusions.

@@ -2,122 +2,144 @@
 
 **Subject:** TRON address `TVpkbcdFitcVMGX9Ty9g33FNSwTzq49fkF`  
 **Task:** collect and structure public data/statistics; isolate attribution-relevant facts; estimate whether the controller is more likely an organization/platform or an individual.  
-**Current disposition:** `IN_PROGRESS`  
+**Current disposition:** `CLOSED_AT_OPEN_SOURCE_ATTRIBUTION_LEVEL / BRAND_IDENTITY_UNRESOLVED`  
 **Public journal:** redacted public-source record.
 
-## Five-stream status
+## Closure status
 
-| Stream | Scope | Status | Current result |
+| Stream | Scope | Status | Final result |
 |---|---|---:|---|
-| 1 | Primary on-chain statistics and chronology | `PARTIAL` | Address validated; one incoming USDT transaction confirmed in TRONSCAN; complete account history remains pending. |
-| 2 | Counterparties, clustering and graph | `PARTIAL` | Two incoming counterparties are leads; only one transfer is primary-source confirmed. |
-| 3 | Off-chain attribution | `NO_HIT/PARTIAL` | No reliable owner/platform label found in completed exact-string searches. |
-| 4 | Abuse, sanctions and risk | `PARTIAL` | No exact-address official sanctions/abuse label established; counterparty exposure cannot be completed without full graph. |
-| 5 | Red Team and source control | `REVIEW/PASS` | A prior decoding error was detected and corrected; service-vs-person attribution remains unscored. |
+| 1 | Primary on-chain statistics and chronology | `PASS` | Complete official-USDT TRONGrid pagination captured: 48 pages, 9,474 events; 9,473 Transfer + 1 Approval. |
+| 2 | Counterparties, clustering and graph | `PASS` | 9,033 incoming transfers from 8,863 senders; 440 outgoing to 4 recipients; main sweep endpoint receives 99.7868% of outgoing value. |
+| 3 | Off-chain attribution | `PASS FOR INFRASTRUCTURE TYPE / NO_HIT FOR BRAND` | Strong collection/sweep service pattern; no reliable public brand/legal-entity label found for target or main sweep address. |
+| 4 | Abuse, sanctions and risk | `PUBLIC OPEN-SOURCE REVIEW COMPLETE` | No final public adverse brand/identity attribution established; identity/KYC remains outside open-source scope. |
+| 5 | Red Team and source control | `PASS` | Incorrect address decode corrected; spam/fake-token risk isolated; Approval max-uint256 excluded from money-flow accounting. |
 
-## Validated technical facts
+## Deterministic address validation
 
 | Fact | Result | Grade |
 |---|---:|---:|
-| Base58Check checksum | `PASS` | A (deterministic validation) |
+| Base58Check checksum | `PASS` | A |
 | TRON mainnet prefix | `0x41` | A |
 | Decoded payload | `41d9c925989c89b8ddcb6f68e2f76c3534c0439a4a` | A |
 | Checksum | `c76d5cd4` | A |
 
-### Red Team correction
+A prior working payload was incorrect and is superseded.
 
-A prior working note used the incorrect payload `41da383c182b70b7d6c91487a4e5fb44d415fbec56`. That value does not decode from the supplied Base58Check address and must not appear in the final report. The corrected payload is recorded above.
+## Official USDT evidence set
 
-## Primary confirmed transaction
+Official Tether TRC-20 contract: `TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t`.
 
-| Field | Value |
-|---|---|
-| Result | `PASS` |
-| Asset | USDT TRC-20 |
-| Amount | `820 USDT` |
-| From | `TJDnKdo9kaM6yVPEwb93Y2ER6gZLR37MFb` |
-| To | `TVpkbcdFitcVMGX9Ty9g33FNSwTzq49fkF` |
-| Txid | `36c2996f0e40b9531b687eb818885f6d612d3fbc4f50e12aa94f374028160131` |
-| Block | `83609827` |
-| Time | `2026-06-15 04:46:51 UTC` |
-| Contract | `TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t` (USDT) |
-| Source | `https://tronscan.org/transaction/36c2996f0e40b9531b687eb818885f6d612d3fbc4f50e12aa94f374028160131/overview` |
-| Evidence grade | A for the explorer-displayed transaction record |
+Complete pagination was captured in GitHub Actions run `33643733770`:
 
-The transaction proves only that the address received this token transfer. It does not identify the beneficial owner, purpose, underlying contract or off-chain payer/payee.
+- artifact `9851943581`;
+- artifact SHA-256 `30de03059123cd5a7ed023cc84932395804aefa7f3011f78412c8153d0e38d4e`;
+- 48 raw response pages + manifest + normalized analysis.
 
-## Secondary large-transfer lead
+### P0 normalization correction
 
-| Field | Value |
-|---|---|
-| Result | `PARTIAL/REVIEW` |
-| Reported asset | USDT |
-| Reported amount | `600,000 USDT` |
-| Reported from | `TBBc6QRDkyP4wYmWjBcoGYrGra2jRY9c14` |
-| Reported to | `TVpkbcdFitcVMGX9Ty9g33FNSwTzq49fkF` |
-| Reported time | `2026-06-14 00:23:57` in the source display |
-| Source | `https://www.coingrab.net/tx2/?cur=&pp=89&ww=2022-02-07` |
-| Evidence grade | C/B discovery lead |
+The endpoint returned `9,474` events for the official USDT contract:
 
-This item must not be promoted to a confirmed fact until its txid is resolved and checked in TRONSCAN/TronGrid or another primary node-backed source. The page is a broad transaction monitor, not an authoritative account dossier.
+- `9,473` with `type=Transfer`;
+- `1` with `type=Approval`.
 
-## Search log
+Approval tx `90fe0a0d487b61f87ec791ef99004a27a677723c8fae55300abb91f70c1073ee` carries maximum `uint256` allowance and is **not** a money transfer. It must be excluded from USDT volume. This closes the earlier false-zero/false-huge-volume normalization risk.
 
-| Entry | Result | Query / action | Source or tool | Result summary | Next pivot |
-|---|---:|---|---|---|---|
-| TRON-0001 | `PASS` | Decode and validate Base58Check | deterministic local validation | Valid TRON mainnet address; corrected payload recorded. | Add validation fixture and regression test. |
-| TRON-0002 | `PASS` | Verify txid `36c299...0131` | TRONSCAN | Successful 820 USDT incoming transfer confirmed. | Expand sender history and destination subsequent movement. |
-| TRON-0003 | `PARTIAL` | Exact-address public web search | public search | One confirmed transaction page and one secondary large-transfer mention found; no owner label. | Obtain account overview and full history. |
-| TRON-0004 | `PARTIAL/REVIEW` | Review reported 600,000 USDT transfer | Coingrab monitoring page | Source reports transfer to target address, but txid absent from current evidence package. | Resolve txid by time/from/to/amount. |
-| TRON-0005 | `NO_HIT` | Search exact address for named owner, exchange, merchant or platform | public web/GitHub | No reliable attribution hit found in completed searches. | Search deposit pages, forums, Telegram, court documents, scam reports and archived sites. |
-| TRON-0006 | `REJECTED` | Hypothesis: one 600,000 USDT receipt proves institutional ownership | Red Team | A high-value transaction may involve an individual, OTC settlement, exchange deposit, escrow, pass-through address or internal transfer. | Require recurring operational pattern and labels. |
-| TRON-0007 | `REJECTED` | Hypothesis: an address receiving USDT controls the private key beneficially | Red Team | A platform-generated deposit address may be technically controlled by a custodian but economically associated with a customer. | Separate key controller, account holder and beneficial recipient. |
-| TRON-0008 | `REVIEW` | Compare previously recorded hex payload with deterministic decode | Red Team | Prior payload was wrong and has been superseded. | Correct all Google Docs and future exports. |
+## Verified official-USDT Transfer statistics
 
-## Mandatory next collection
+Observation window: `2026-06-11 10:44:45 UTC` through `2026-06-21 22:18:33 UTC` (~10.48 days).
 
-The next accepted on-chain export must include:
+- Transfer events: `9,473`;
+- incoming: `9,033`;
+- outgoing: `440`;
+- unique incoming senders: `8,863`;
+- unique outgoing recipients: `4`;
+- incoming volume: `77,702,995.808781 USDT`;
+- outgoing volume: `77,702,995.000000 USDT`;
+- flow difference: `+0.808781 USDT`;
+- largest incoming: `754,980 USDT`;
+- largest outgoing: `940,000 USDT`;
+- median incoming: `1,386 USDT`;
+- mean incoming: ~`8,602 USDT`;
+- one-time incoming senders: `8,735 / 8,863` (~`98.56%`).
 
-```text
-account creation/activation time
-TRX balance and resource state
-all TRC-20 holdings
-complete TRX transaction history
-complete TRC-20 transfer history
-contract calls and approvals
-incoming/outgoing totals by token
-first and last activity
-unique counterparties
-recurring counterparties
-sweep/consolidation events
-transaction fees/resources
-public labels/tags
-collection timestamp UTC
-API/explorer version
-raw capture hash and restricted storage location
-```
+## Reference transfers promoted to FACT
 
-## Attribution-relevant analysis plan
+### 600,000 USDT
 
-- Determine whether incoming funds are rapidly swept to a recurring destination.
-- Test whether deposit sizes are heterogeneous customer-like payments or bilateral settlements.
-- Identify whether the address interacts with known exchange hot wallets, payment processors, OTC desks, gambling services, mixers, sanctions-listed entities or scam clusters.
-- Search all exact counterparties, txids and time/amount pairs off-chain.
-- Check whether the address is published on a website, invoice, Telegram channel, forum, donation page, bot, merchant page, court filing or law-enforcement notice.
-- Separate technical key custody from economic/beneficial control.
+- txid `7092e095be109ec6de8cdb856d0a030b1b87cfe2cbfa8917a5da2c62e81c58a4`;
+- from `TBBc6QRDkyP4wYmWjBcoGYrGra2jRY9c14`;
+- to target;
+- amount `600,000 USDT`;
+- time `2026-06-13 15:23:57 UTC`.
 
-## Current entity-type assessment
+The earlier CoinGrab lead is now independently confirmed by primary TRONGrid data.
 
-`NOT SCORED` for final reporting.
+### 820 USDT
 
-A provisional percentage would be premature because only one transaction is primary-source confirmed and the complete outgoing pattern is unknown. The final assessment should separately score:
+- txid `36c2996f0e40b9531b687eb818885f6d612d3fbc4f50e12aa94f374028160131`;
+- from `TJDnKdo9kaM6yVPEwb93Y2ER6gZLR37MFb`;
+- to target;
+- amount `820 USDT`;
+- time `2026-06-15 04:46:51 UTC`.
 
-1. custodial platform/deposit address;
-2. business/merchant/OTC settlement address;
-3. organization treasury;
-4. individual self-custody;
-5. automated collection or pass-through address.
+Four additional incoming transfers of exactly `820 USDT` from different senders exist, so the amount `820` is not a unique attribution key.
 
-## Current conclusion
+## Main sweep behavior
 
-The address is valid and has at least one confirmed incoming USDT transfer. A second, much larger incoming transfer is a material but unverified lead. No reliable public owner label is established. Full transaction history, outgoing behavior, counterparties and service labels are required before any defensible controller probability can be assigned.
+Main outgoing recipient: `TXjjw736ii8mkei7ubXSRjfyyc2hxibXSA`.
+
+- transfers to it: `433 / 440` outgoing transfers;
+- amount: `77,537,340 USDT`;
+- share of outgoing volume: `99.7868%`;
+- median sweep amount: `145,000 USDT`;
+- mean sweep amount: ~`179,070 USDT`;
+- median interval: ~`17.7 minutes`;
+- mean interval: ~`34.9 minutes`.
+
+Other outgoing recipients:
+
+- `TSgV3q2EzdWTcTQ8SgScTwQJVeSbHoceXK`: `165,000 USDT`;
+- `TKgFnt86i9uMHFP9bRY4371LdDU5n2kWwt`: `500 USDT`;
+- `TPwezUWpEGmFBENNWJHwXHRG1D2NCEEt5s`: `155 USDT` across 4 transfers; TRONSCAN publicly labels this contract `Bridgers: Cross-chain Bridge`.
+
+## Final attribution logic
+
+1. Nearly nine thousand unique incoming senders in 10.48 days are inconsistent with an ordinary personal self-custody profile.
+2. Incoming and outgoing USDT volumes nearly match; the address is a pass-through/collection node rather than an accumulator.
+3. `99.7868%` of outgoing value is regularly swept to one next-hop address.
+4. Graph compression is extreme: `8,863` incoming senders to `4` outgoing recipients.
+5. The short, intense lifecycle is consistent with operational wallet rotation.
+6. No reliable public brand label was found for target or main sweep recipient, so no specific company/platform is asserted.
+
+Assignment-category estimate:
+
+- web platform/payment/crypto service operating a collection/sweep wallet: **60%**;
+- organization/merchant/OTC/settlement operator with automated infrastructure: **38%**;
+- ordinary individual self-custody wallet: **2%**.
+
+Combined institutional/service probability: ~**98%**.
+
+Confidence: `HIGH` for institutional/service vs ordinary personal wallet; `MEDIUM` for platform vs other organization.
+
+## Not confirmed / requires non-open-source authority
+
+`NOT_CONFIRMED`:
+
+- specific company/brand;
+- legal entity;
+- individual beneficiary;
+- KYC identity;
+- purpose of every incoming payment;
+- customer economic ownership;
+- final fiat endpoint.
+
+## Closure artifacts
+
+- `FINAL_FINDINGS_2026-09-02.md`
+- Google Docs main analytical report and investigation journal
+- GitHub Actions run `33643733770`, artifact `9851943581`
+
+## Closure decision
+
+The requested open-source task is complete. The target is assessed with high confidence as an automated centralized collection/sweep address. Specific brand/legal identity remains unresolved and is not guessed.

@@ -14,7 +14,7 @@ Status: ACTIVE
 Grades: `A` primary/official; `B` strong document-based secondary/registry mirror; `C` analytical lead; `D` weak/unverified.
 
 ## J1-A012-01 — Fert-Corporation: stable identifiers and registration timeline
-Type: FACT / registry-derived
+Type: FACT / registry-derived + CACHE-VERSION CONFLICT
 Grade: B+
 
 Registry mirror Sheets.by, reproducing Belarus EGR/MNS data, identifies:
@@ -22,17 +22,20 @@ Registry mirror Sheets.by, reproducing Belarus EGR/MNS data, identifies:
 - UNP: `193846088`;
 - EGR registration: `26.02.2025`;
 - MNS registration: `27.02.2025`;
-- status shown as of `26.12.2025`: Active;
 - legal address: `Minsk, ul. Annaeva 69, isolated premises 17`;
 - main activity: wholesale of other chemical products, OKED `46750`;
 - public phone: `+375296687700`.
 
 Source: https://sheets.by/unp/193846088
 
+### Cache-version conflict / freshness handling
+Two indexed snapshots of the same Sheets.by URL differ only in freshness: an older cached page states `status as of 26.12.2025: Active`, while a newer search snapshot states `status as of 26.04.2026: Active` and `updated 26.04.2026`. The newer snapshot is used as the best available status point, but it is still a secondary mirror and is not a current September-2026 official EGR extract. Direct access to the Belarus EGR page failed in this pass. Therefore the safe wording is: `Fert-Corporation was shown as Active as of 26.04.2026 in the newer registry-mirror snapshot`.
+
 ### Analytical value
-This converts Fert-Corporation from a name-only investigative lead into a target with stable UNP, exact formation date, address, activity code and phone. The company was incorporated only weeks before the spring/summer-2025 restructuring of the fertilizer-export chain described by BIC/KAS.
+This converts Fert-Corporation from a name-only investigative lead into a target with stable UNP, exact formation date, address, activity code and phone. The company was incorporated shortly after the December-2024 Polish sanctions against the earlier TST entities and before the spring/summer-2025 restructuring of the fertilizer-export chain described by BIC/KAS. Timing alone does not prove purpose or control.
 
 ### What this does NOT prove
+- that Fert-Corporation remains active as of 02.09.2026;
 - that Fert-Corporation exported any specific shipment;
 - that it purchased from Grodno Azot;
 - that Yuri Minich is currently the registered owner/director (the registry mirror page exposed in this pass does not display officers/participants);

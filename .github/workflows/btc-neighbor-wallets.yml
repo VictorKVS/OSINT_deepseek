@@ -1,0 +1,57 @@
+name: BTC Neighbor Wallet Profiles
+
+on:
+  push:
+    branches:
+      - agent/btc-onchain-probe-20260902
+    paths:
+      - '.github/workflows/btc-neighbor-wallets.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  neighbors:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Profile WalletExplorer neighbors
+        shell: bash
+        run: |
+          python - <<'PY'
+          import urllib.request,re,json,time
+          from html import unescape
+          from pathlib import Path
+          ids=['f915b4559c4a8118','09c407c4ad1d62ac','3169931e38151e71','a431e12a066db578','586bf68ada3616e9','5b251d80777cd7ff','bfeb6e4da3169f61','7aea34423e670755']
+          out=Path('btc_neighbor_wallets');out.mkdir(exist_ok=True)
+          def get(u):
+              req=urllib.request.Request(u,headers={'User-Agent':'Mozilla/5.0 OSINT-deepseek/1.0'})
+              with urllib.request.urlopen(req,timeout=30) as r:return r.read().decode('utf-8','replace')
+          result=[]
+          for wid in ids:
+              rec={'wallet_id':wid}
+              for kind,path in [('tx',''),('addr','/addresses')]:
+                  try:
+                      t=get(f'https://www.walletexplorer.com/wallet/{wid}{path}')
+                      (out/f'{wid}_{kind}.html').write_text(t,encoding='utf-8')
+                      if kind=='tx':
+                          m=re.search(r'<h2>Wallet\s+(.*?)\s*<span class="showother">',t,re.I|re.S)
+                          txt=re.sub('<[^>]+>',' ',m.group(1)) if m else ''
+                          rec['name']=unescape(re.sub(r'\s+',' ',txt)).strip()
+                          mt=re.search(r'total transactions:\s*([0-9,]+)',t,re.I); rec['transactions']=mt.group(1) if mt else None
+                          # date range from tx table
+                          dates=re.findall(r'<td class="date">([^<]+)</td>',t,re.I)
+                          rec['newest_date']=dates[0].strip() if dates else None; rec['oldest_date_page']=dates[-1].strip() if dates else None
+                      else:
+                          ma=re.search(r'total addresses:\s*([0-9,]+)',t,re.I); rec['addresses']=ma.group(1) if ma else None
+                  except Exception as e: rec[kind+'_error']=repr(e)
+              result.append(rec);time.sleep(.2)
+          (out/'neighbors.json').write_text(json.dumps(result,ensure_ascii=False,indent=2),encoding='utf-8')
+          print(json.dumps(result,ensure_ascii=False,indent=2))
+          PY
+      - name: Upload neighbor evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: btc-neighbor-wallets
+          path: btc_neighbor_wallets/
+          retention-days: 7

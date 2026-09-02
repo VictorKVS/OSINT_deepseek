@@ -39,19 +39,27 @@ jobs:
 
           wallet_html=get(f'https://www.walletexplorer.com/wallet/{WALLET}')
           (out/'wallet.html').write_text(wallet_html,encoding='utf-8')
+          source_mentions='SatoshiDice.com-original' in wallet_html
 
-          rows=re.findall(r'<tr class="(sent|received)">(.*?)</tr>',wallet_html,re.I|re.S)
+          parts=re.split(r'<tr class="(sent|received)">',wallet_html,flags=re.I)
+          rows=[]
+          for i in range(1,len(parts),2):
+              rows.append((parts[i].lower(),parts[i+1]))
+
           sent=[]; received=[]
           for cls,body in rows:
               if 'SatoshiDice.com-original' not in body:
                   continue
               dm=re.search(r'<td class="date">([^<]+)</td>',body,re.I)
               tm=re.search(r'/txid/([0-9a-f]{64})',body,re.I)
-              am=re.search(r'<td class="amount diff">(?:<em>)?([+-]?[0-9.]+)',body,re.I)
+              am=re.search(r'<td class="amount diff">\s*(?:<em>)?\s*([+-]?[0-9.]+)',body,re.I)
               if not (dm and tm and am):
                   continue
-              rec={'class':cls.lower(),'date':dm.group(1).strip(),'txid':tm.group(1),'wallet_net_btc':float(am.group(1))}
-              (sent if cls.lower()=='sent' else received).append(rec)
+              rec={'class':cls,'date':dm.group(1).strip(),'txid':tm.group(1),'wallet_net_btc':float(am.group(1))}
+              (sent if cls=='sent' else received).append(rec)
+
+          if source_mentions and not (sent or received):
+              raise RuntimeError('P0_PARSE_GATE: WalletExplorer contains SatoshiDice label but parser extracted zero rows')
 
           tx_records=[]
           unique_dice={}
@@ -59,11 +67,9 @@ jobs:
               txt=get(f'https://blockstream.info/api/tx/{rec["txid"]}')
               tx=json.loads(txt)
               (out/f'tx_{idx:02d}_{rec["txid"]}.json').write_text(txt,encoding='utf-8')
-              dice_outputs=[]
-              other_outputs=[]
+              dice_outputs=[]; other_outputs=[]
               for o in tx.get('vout',[]):
-                  a=o.get('scriptpubkey_address')
-                  v=o.get('value') or 0
+                  a=o.get('scriptpubkey_address'); v=o.get('value') or 0
                   row={'address':a,'sat':v,'btc':round(v/1e8,8)}
                   if a and a.startswith('1dice'):
                       dice_outputs.append(row); unique_dice[a]=unique_dice.get(a,0)+v
@@ -80,6 +86,9 @@ jobs:
               })
               time.sleep(.15)
 
+          if sent and not any(r['dice_output_count'] for r in tx_records):
+              raise RuntimeError('P0_RAW_TX_GATE: sent rows exist but no 1dice outputs found in raw transactions')
+
           total_dice_sat=sum(r['dice_total_sat'] for r in tx_records)
           multi=[r for r in tx_records if r['dice_output_count']>1]
           zero=[r for r in tx_records if r['dice_output_count']==0]
@@ -92,6 +101,7 @@ jobs:
               'wallet_rows_received_from_satoshidice':len(received),
               'wallet_net_sent_rows_sum_btc':round(sum(-r['wallet_net_btc'] for r in sent),8),
               'wallet_received_rows_sum_btc':round(sum(r['wallet_net_btc'] for r in received),8),
+              'wallet_net_gambling_result_btc':round(sum(r['wallet_net_btc'] for r in received)+sum(r['wallet_net_btc'] for r in sent),8),
               'raw_onchain_dice_outputs_count':sum(r['dice_output_count'] for r in tx_records),
               'raw_onchain_dice_outputs_sum_btc':round(total_dice_sat/1e8,8),
               'transactions_with_multiple_dice_outputs':len(multi),
@@ -105,8 +115,7 @@ jobs:
           }
           evidence={'summary':summary,'sent_transactions':tx_records,'wallet_received_rows':received}
           (out/'bet_structure.json').write_text(json.dumps(evidence,ensure_ascii=False,indent=2),encoding='utf-8')
-          print('=== SUMMARY ===')
-          print(json.dumps(summary,ensure_ascii=False,indent=2))
+          print('=== SUMMARY ==='); print(json.dumps(summary,ensure_ascii=False,indent=2))
           print('=== SENT TX DETAIL ===')
           for r in tx_records:
               print(json.dumps({k:r[k] for k in ['date','txid','wallet_net_btc','dice_output_count','dice_total_btc','dice_outputs']},ensure_ascii=False))

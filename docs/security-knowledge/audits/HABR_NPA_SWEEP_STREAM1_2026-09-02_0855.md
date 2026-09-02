@@ -109,10 +109,10 @@ GitHub hit:
 - GitHub full text: `BLOCKER`
 
 Fresh legal-status layer:
-- 283-FZ of 2026-08-04 also changes 127-FZ; relevant layer effective `2026-09-01`.
-- classification: `POST_HABR_CURRENT_EDITION_ADVANCE / CURRENT_EDITION_ADVANCED_127FZ_2026-08-04 / CURRENT_EFFECTIVE_LAYER_283FZ_2026-09-01`.
-- future signed layer: 317-FZ of 2026-08-04, official pointer `0001202608040042`, effective `2027-02-01`.
-- classification: `SIGNED_FUTURE_LAYER_127FZ_317FZ_EFFECTIVE_2027-02-01`.
+- consolidated systems label the document `ред. от 04.08.2026`, but the verified 2026-08-04 amendment identified in this pass is 317-FZ and it has not yet entered into force.
+- 317-FZ of 2026-08-04 expressly amends 127-FZ; official publication pointer identified: `0001202608040042`; effective `2027-02-01`.
+- classification: `POST_HABR_SIGNED_FUTURE_EDITION_LAYER / SIGNED_FUTURE_LAYER_127FZ_317FZ_EFFECTIVE_2027-02-01`.
+- correction gate: do **not** attribute the 127-FZ 2026-08-04 layer to 283-FZ; 283-FZ was verified here as amending 115-FZ, while 317-FZ is the verified 2026-08-04 amendment to 127-FZ.
 
 ## Cross-target / duplicate findings
 
@@ -129,7 +129,8 @@ Fresh legal-status layer:
 - `STRUCTURAL_INDEX_REJECTED +3`
 - `DERIVED_OR_MENTION_REJECTED +4 target-hits / 3 distinct files`
 - `DERIVED_MULTI_TARGET_FILE +1`
-- `POST_HABR_CURRENT_EDITION_ADVANCE +5`
+- `POST_HABR_CURRENT_EDITION_ADVANCE +4`
+- `POST_HABR_SIGNED_FUTURE_EDITION_LAYER +1`
 - `SIGNED_FUTURE_LAYER +3`
 - `SECONDARY_CONSOLIDATION_LAG +1`
 - `NEW_GITHUB_FULL_BODY_DUPLICATE +0`

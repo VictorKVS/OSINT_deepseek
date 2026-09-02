@@ -1,0 +1,101 @@
+name: BTC Upstream Distributor Chain
+
+on:
+  push:
+    branches:
+      - agent/btc-onchain-probe-20260902
+    paths:
+      - '.github/workflows/btc-upstream-distributor.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Resolve upstream distributor wallets and exact transactions
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json,re,time,urllib.request
+          from pathlib import Path
+          from html import unescape
+
+          SEEDS=['3aa95dcf70eede85','346a258fe5e120a0','1cb62fb9f4a1cf9c']
+          TXIDS=['92101a57482122f3eaf278fb35f2bf0d699c43398798d5c954da0913c5077f65','3d3f3beb0d21562717a2844aaf5c22e757d73ddb79460adcb2d15a7ee42e2e39']
+          out=Path('btc_upstream_distributor'); out.mkdir(exist_ok=True)
+
+          def get(url,retries=5):
+              last=None
+              for attempt in range(retries):
+                  try:
+                      req=urllib.request.Request(url,headers={'User-Agent':'Mozilla/5.0 OSINT-deepseek/1.0'})
+                      with urllib.request.urlopen(req,timeout=30) as r:return r.read().decode('utf-8','replace')
+                  except Exception as e:
+                      last=e; time.sleep(min(8,2**attempt))
+              raise last
+
+          def parse_wallet(wid):
+              html=get(f'https://www.walletexplorer.com/wallet/{wid}')
+              (out/f'wallet_{wid}.html').write_text(html,encoding='utf-8')
+              total=re.search(r'total transactions:\s*([0-9,]+)',html,re.I)
+              parts=re.split(r'<tr class="(sent|received)">',html,flags=re.I)
+              rows=[]
+              for i in range(1,len(parts),2):
+                  direction=parts[i].lower(); body=parts[i+1]
+                  dm=re.search(r'<td class="date">([^<]+)</td>',body,re.I)
+                  tm=re.search(r'/txid/([0-9a-f]{64})',body,re.I)
+                  refs=[]
+                  for wm in re.finditer(r'data-wallet-id="([0-9a-f]+)".*?<span class="wallet_name">([^<]+)</span>',body,re.I|re.S):
+                      refs.append({'wallet_id':wm.group(1),'wallet_name':unescape(wm.group(2)).strip()})
+                  amounts=[float(x) for x in re.findall(r'<td class="amount diff">\s*(?:<em>)?\s*([+-]?[0-9.]+)',body,re.I)]
+                  if dm and tm:
+                      rows.append({'direction':direction,'date':dm.group(1).strip(),'txid':tm.group(1),'amounts_btc':amounts,'counterparty_wallets':refs})
+              return {'wallet_id':wid,'total_transactions':total.group(1) if total else None,'rows':rows}
+
+          wallets=[]
+          next_ids={}
+          for wid in SEEDS:
+              w=parse_wallet(wid); wallets.append(w)
+              for r in w['rows']:
+                  for cp in r['counterparty_wallets']:
+                      if cp['wallet_id'] not in SEEDS and cp['wallet_name'].startswith('['):
+                          next_ids[cp['wallet_id']]=cp['wallet_name']
+
+          # profile only upstream counterparties of 3aa95 recent/oldest rows, bounded to avoid huge fanout
+          upstream_profiles=[]
+          seed3=wallets[0]
+          for r in seed3['rows']:
+              if r['direction']!='received': continue
+              for cp in r['counterparty_wallets']:
+                  wid=cp['wallet_id']
+                  if wid in SEEDS: continue
+                  try:
+                      w=parse_wallet(wid)
+                      names=sorted({c['wallet_name'] for rr in w['rows'] for c in rr['counterparty_wallets'] if not c['wallet_name'].startswith('[')})
+                      upstream_profiles.append({'wallet_id':wid,'name':cp['wallet_name'],'named_services':names,'history':w})
+                  except Exception as e:
+                      upstream_profiles.append({'wallet_id':wid,'name':cp['wallet_name'],'error':repr(e)})
+                  time.sleep(.12)
+
+          rawtx=[]
+          for txid in TXIDS:
+              txt=get(f'https://blockstream.info/api/tx/{txid}')
+              (out/f'tx_{txid}.json').write_text(txt,encoding='utf-8')
+              rawtx.append(json.loads(txt))
+
+          result={'wallets':wallets,'upstream_profiles':upstream_profiles,'raw_transactions':rawtx}
+          (out/'distributor.json').write_text(json.dumps(result,ensure_ascii=False,indent=2),encoding='utf-8')
+          print('=== WALLETS ==='); print(json.dumps(wallets,ensure_ascii=False,indent=2))
+          print('=== UPSTREAM PROFILES ==='); print(json.dumps(upstream_profiles,ensure_ascii=False,indent=2))
+          print('=== RAW TX ==='); print(json.dumps(rawtx,ensure_ascii=False,indent=2))
+          PY
+      - name: Upload evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: btc-upstream-distributor
+          path: btc_upstream_distributor/
+          if-no-files-found: error
+          retention-days: 7

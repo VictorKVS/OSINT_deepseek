@@ -2,90 +2,85 @@
 
 **Subject:** Bitcoin address `1CfXQEZFcfje4bPqNbu9dtj2FXufUpqD75`  
 **Task:** collect and structure public data/statistics; isolate attribution-relevant facts; estimate whether the controller is more likely an organization/platform or an individual.  
-**Current disposition:** `IN_PROGRESS`  
+**Current disposition:** `CLOSED_AT_OPEN_SOURCE_ACTIVITY_ATTRIBUTION_LEVEL / IDENTITY_UNRESOLVED`  
 **Public journal:** redacted public-source record; no private keys, seed material or restricted data.
 
-## Five-stream status
+## Closure status
 
-| Stream | Scope | Status | Current result |
+| Stream | Scope | Status | Final result |
 |---|---|---:|---|
-| 1 | Primary on-chain statistics and chronology | `BLOCKED/PENDING` | Address syntax is validated; complete node-backed address summary and transaction inventory have not yet been archived. |
-| 2 | Counterparties, clustering and graph | `PENDING` | Cannot be completed reliably before primary transaction inventory. |
-| 3 | Off-chain attribution | `NO_HIT/PARTIAL` | Exact-string public web and GitHub searches returned no reliable identity or service label. |
-| 4 | Abuse, sanctions and risk | `PARTIAL` | No reliable exact-address abuse/sanctions attribution found in completed searches; broader counterparty screening awaits graph extraction. |
-| 5 | Red Team and source control | `PASS` for current scope | Invalid inference from address format/volume alone is expressly rejected. |
+| 1 | Primary on-chain statistics and chronology | `PASS` | 27 confirmed tx; 0.09119321 BTC received and spent; zero final balance; activity 2016-03-30 to 2016-05-17. |
+| 2 | Counterparties, clustering and graph | `PASS WITH HEURISTIC CAVEAT` | WalletExplorer cluster `[00421c7e25]`: 29 addresses / 65 tx; downstream split/reconvergence traced; SatoshiDice service path verified. |
+| 3 | Off-chain attribution | `PASS FOR ACTIVITY TYPE / NO_HIT FOR IDENTITY` | Repeated user-side SatoshiDice activity is high-confidence; no reliable real-world identity found. |
+| 4 | Abuse, sanctions and risk | `PUBLIC_INDEXED_CHECK COMPLETE` | Exact target returned `NO_INDEXED_MATCH_FOUND` in scoped OFAC/BitcoinAbuse/Chainabuse/BitcoinWhosWho searches; not a clean certification. |
+| 5 | Red Team and source control | `PASS` | Wallet-delta vs direct-service-flow accounting corrected; bot use and identity not overstated. |
 
 ## Validated technical facts
 
 | Fact | Result | Grade |
 |---|---:|---:|
-| Base58Check checksum | `PASS` | A (deterministic validation) |
+| Base58Check checksum | `PASS` | A |
 | Network/version byte | `0x00` | A |
 | Address family | Bitcoin mainnet legacy `P2PKH` | A |
 | Payload hash160 | `7ff2913a5fe25f64330b2080b7501ecc44a0c3e1` | A |
-| Checksum | `9b4ab1e0` | A |
+| Confirmed transactions | `27` | A/B independently cross-checked |
+| Lifetime received | `0.09119321 BTC` | A/B |
+| Lifetime sent | `0.09119321 BTC` | A/B |
+| Final balance | `0 BTC` | A/B |
 
-The address format does **not** identify a wallet application, exchange, person, country, device, ownership model or lawful/unlawful purpose.
+## Wallet-cluster findings
 
-## Search log
+WalletExplorer places the address in unlabeled wallet cluster `00421c7e25459ed4` / `[00421c7e25]`:
 
-| Entry | Result | Query / action | Source or tool | Result summary | Next pivot |
-|---|---:|---|---|---|---|
-| BTC-0001 | `PASS` | Decode and validate Base58Check | deterministic local validation | Valid Bitcoin mainnet P2PKH address; technical fields recorded above. | Preserve validation fixture. |
-| BTC-0002 | `NO_HIT` | Exact query: `"1CfXQEZFcfje4bPqNbu9dtj2FXufUpqD75"` | public web search | No indexed result linking the address to a named person, company, service or event. | Repeat across archives, forums, code, paste-like and legal sources. |
-| BTC-0003 | `NO_HIT` | Exact query with terms `Bitcoin`, `balance`, `transaction`, `wallet` | public web search | No reliable indexed address-specific page or attribution hit returned. | Obtain explorer data directly. |
-| BTC-0004 | `NO_HIT` | Exact address search in GitHub code | GitHub search | No relevant public code/document match. | Re-run after searching hashes/txids discovered on-chain. |
-| BTC-0005 | `BLOCKED` | `IMPORTDATA` from Blockchain.info address endpoints | Google Sheets working file | External data fetch requires manual user authorization; `#REF!` is not evidence. | Do not cite sheet; collect through an approved API/worker or browser export. |
-| BTC-0006 | `BLOCKED` | Direct API collection from Blockstream/Mempool/Blockchain.info in current runtime | current web/runtime boundary | Exact endpoint output was not acquired as a preservable primary capture. | Use local worker, authenticated connector, browser export or node-backed API. |
-| BTC-0007 | `REJECTED` | Hypothesis: legacy `1...` address implies an old private user | Red Team | Address type only reflects script/address encoding; services may also use P2PKH. | Do not score entity type from prefix alone. |
-| BTC-0008 | `REJECTED` | Hypothesis: no search hit means unused or anonymous owner | Red Team | Search-index absence does not establish transaction inactivity or deliberate concealment. | Resolve on-chain history first. |
+- 29 addresses;
+- 65 transactions;
+- activity `2016-03-30` through `2016-05-18`;
+- received externally `0.90805818 BTC`;
+- sent externally `0.90507183 BTC`;
+- fees `0.00298635 BTC`;
+- final balance `0 BTC`.
 
-## Required primary collection fields
+The cluster is an analytical heuristic and is not legal proof of one owner.
 
-The next accepted collection must record, from at least two independent node-backed sources:
+## SatoshiDice evidence and Red Team correction
 
-```text
-confirmed balance
-mempool delta
-confirmed transaction count
-mempool transaction count
-total funded outputs
-total spent outputs
-lifetime received and sent
-current UTXO set
-first activity block/time
-last activity block/time
-all txids or reproducible pagination cursor
-collection timestamp UTC
-source URL/API version
-raw capture hash and restricted storage location
-```
+Verified direct service flow:
 
-## Attribution-relevant features to calculate after collection
+- 21 direct betting outputs to independently labeled `SatoshiDice.com-original` addresses: `0.506111 BTC`;
+- 21 service-only incoming transactions from SatoshiDice: `0.37109417 BTC`;
+- direct service-flow difference: `-0.13501683 BTC` before network fees.
 
-- one-time receipt/spend versus repeated use;
-- fan-in and fan-out;
-- regularity and time-of-day pattern;
-- amount quantization/round-number behavior;
-- consolidation and sweeping behavior;
-- change-address structure;
-- recurring counterparties;
-- common-input ownership candidates, with CoinJoin/payjoin false-positive controls;
-- exposure to publicly labeled exchanges, payment processors, mining pools, gambling services, mixers, ransomware/extortion or donation pages;
-- exact address reuse in invoices, websites, forums, source code, court records, leak reports and archived pages.
+**Rejected metric:** `0.69013308 BTC` wallet-level outflow across SatoshiDice-labeled rows is not the total bet amount. One mixed-destination transaction sent only `0.02000000 BTC` to SatoshiDice and `0.20402208 BTC` elsewhere; most of the latter later returned to the investigated cluster. Therefore the earlier derived `-0.31903891 BTC` gambling P&L is invalid and superseded.
 
-## Current entity-type assessment
+Canonical correction: `EVIDENCE_009_SATOSHIDICE_FLOW_ACCOUNTING_2026-09-02.md`.
 
-`NOT SCORED`.
+## Downstream graph
 
-Any numerical probability would presently be presentation without evidence because transaction history and counterparties have not been collected. The final score must cite the features that move probability toward:
+After the original cluster closed, the final balance moved to `[f915b4559c]`, split into `[b57bb19d60]` and `[0e5cad0da4]`, then reconverged into `[130e06a98b]`. A later branch `[0be397ba68]` again sent funds to SatoshiDice. `[0e5cad0da4]` has earlier history involving PrimeDice, SatoshiDice and ChangeTip.
 
-- custodial platform/deposit address;
-- merchant/payment address;
-- organization treasury;
-- individual self-custody;
-- automated service or collection address.
+This supports a continuing related gambling-network motif but does not establish one legal owner or a fiat cash-out endpoint.
 
-## Current conclusion
+## Final activity-type assessment
 
-The only defensible findings are that the address is technically valid and presently lacks a reliable indexed public attribution in the searches completed. On-chain statistics, behavioral classification and controller probability remain open tasks.
+**FACT:** the address belongs to a small unlabeled wallet cluster with repeated, quantified, bidirectional SatoshiDice interactions.
+
+**HYPOTHESIS — HIGH CONFIDENCE:** the target is on the **user/client side of a Bitcoin gambling wallet/network**, potentially manual or automated.
+
+Assignment-category estimate:
+
+- individual/user self-custody or automated wallet acting for one user: 85%;
+- small organization/operator with own automation or linked wallets: 10%;
+- web platform/exchange/custodial service as direct controller: 5%.
+
+`NOT_CONFIRMED`: real-world controller, legal entity, bot use, IP/geography/device, KYC identity, final fiat cash-out, legal common ownership of all connected unlabeled clusters.
+
+## Closure artifacts
+
+- `FINAL_FINDINGS_2026-09-02.md`
+- `WORKLOG_2026-09-02.md`
+- `EVIDENCE_008_PEEL_ROUTING_2026-09-02.md`
+- `EVIDENCE_009_SATOSHIDICE_FLOW_ACCOUNTING_2026-09-02.md`
+
+## Closure decision
+
+The requested open-source task is complete. No owner identity is asserted without a new independent off-chain identity edge.

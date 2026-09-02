@@ -22,7 +22,7 @@ jobs:
           import urllib.request,re,json,time
           from html import unescape
           from pathlib import Path
-          ids=['f915b4559c4a8118','09c407c4ad1d62ac','3169931e38151e71','a431e12a066db578','586bf68ada3616e9','5b251d80777cd7ff','bfeb6e4da3169f61','7aea34423e670755']
+          ids=['f915b4559c4a8118','b57bb19d6022ad8f','0e5cad0da4e5d631','09c407c4ad1d62ac','3169931e38151e71','a431e12a066db578','586bf68ada3616e9','5b251d80777cd7ff','bfeb6e4da3169f61','7aea34423e670755']
           out=Path('btc_neighbor_wallets');out.mkdir(exist_ok=True)
           def get(u):
               req=urllib.request.Request(u,headers={'User-Agent':'Mozilla/5.0 OSINT-deepseek/1.0'})
@@ -39,7 +39,6 @@ jobs:
                           txt=re.sub('<[^>]+>',' ',m.group(1)) if m else ''
                           rec['name']=unescape(re.sub(r'\s+',' ',txt)).strip()
                           mt=re.search(r'total transactions:\s*([0-9,]+)',t,re.I); rec['transactions']=mt.group(1) if mt else None
-                          # date range from tx table
                           dates=re.findall(r'<td class="date">([^<]+)</td>',t,re.I)
                           rec['newest_date']=dates[0].strip() if dates else None; rec['oldest_date_page']=dates[-1].strip() if dates else None
                       else:

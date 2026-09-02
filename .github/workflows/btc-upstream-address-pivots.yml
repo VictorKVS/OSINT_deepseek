@@ -1,0 +1,56 @@
+name: BTC Upstream Address Pivots
+
+on:
+  push:
+    branches:
+      - agent/btc-onchain-probe-20260902
+    paths:
+      - '.github/workflows/btc-upstream-address-pivots.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  pivots:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Extract concrete addresses from high-value upstream clusters
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json,re,time,urllib.request
+          from pathlib import Path
+
+          WALLETS=['dac5482b1978a484','17501b5a1c1c594e','09c407c4ad1d62ac','586bf68ada3616e9','1cb62fb9f4a1cf9c','346a258fe5e120a0','3aa95dcf70eede85']
+          out=Path('btc_upstream_address_pivots'); out.mkdir(exist_ok=True)
+          def get(url,retries=5):
+              last=None
+              for attempt in range(retries):
+                  try:
+                      req=urllib.request.Request(url,headers={'User-Agent':'Mozilla/5.0 OSINT-deepseek/1.0'})
+                      with urllib.request.urlopen(req,timeout=30) as r:return r.read().decode('utf-8','replace')
+                  except Exception as e:
+                      last=e; time.sleep(min(8,2**attempt))
+              raise last
+          result=[]
+          for wid in WALLETS:
+              try:
+                  html=get(f'https://www.walletexplorer.com/wallet/{wid}/addresses')
+                  (out/f'{wid}_addresses.html').write_text(html,encoding='utf-8')
+                  addresses=sorted(set(re.findall(r'(?<![A-Za-z0-9])[13][a-km-zA-HJ-NP-Z1-9]{25,34}(?![A-Za-z0-9])',html)))
+                  total=re.search(r'total addresses:\s*([0-9,]+)',html,re.I)
+                  result.append({'wallet_id':wid,'reported_total_addresses':total.group(1) if total else None,'parsed_addresses':addresses})
+              except Exception as e:
+                  result.append({'wallet_id':wid,'error':repr(e)})
+              time.sleep(.12)
+          (out/'address_pivots.json').write_text(json.dumps(result,ensure_ascii=False,indent=2),encoding='utf-8')
+          print(json.dumps(result,ensure_ascii=False,indent=2))
+          PY
+      - name: Upload evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: btc-upstream-address-pivots
+          path: btc_upstream_address_pivots/
+          if-no-files-found: error
+          retention-days: 7

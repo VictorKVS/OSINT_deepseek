@@ -103,7 +103,7 @@ The primary original is therefore confirmed. This pass did not resolve a later p
 
 Classification:
 
-- `PRIMARY_ORIGINAL_CONFIRMED`
+- `PRIMARY_ORIGINAL_BODY_CONFIRMED`
 - `PRIMARY_CURRENT_STATUS_BLOCKER`
 
 Primary source: https://www.cbr.ru/queries/unidbquery/file/48362/58
@@ -118,6 +118,7 @@ Therefore Habr 432466 (version 28.05.2026) still listing 2831-U in the NPS secti
 
 Classification:
 
+- `PRIMARY_TARGET_IDENTITY_CONFIRMED_VIA_REPEALING_ACT`
 - `HABR_STALE_REPEALED_BANK_ACT`
 - `REPEALED_BY_6060-U`
 - `REPEAL_EFFECTIVE_2023-03-01`
@@ -133,6 +134,7 @@ The primary Bank of Russia page remains available, but a dedicated formal `curre
 
 Classification:
 
+- `PRIMARY_TARGET_IDENTITY_CONFIRMED`
 - `PRIMARY_CBR_APPLICATION_PAGE_CONFIRMED`
 - `PRIMARY_AMENDMENT_4436-U_CONFIRMED`
 - `FORMAL_CURRENT_STATUS_FLAG_BLOCKER`
@@ -150,7 +152,7 @@ A Bank of Russia document published in 2026 still expressly cites 3342-U with th
 
 Classification:
 
-- `PRIMARY_ORIGINAL_CONFIRMED`
+- `PRIMARY_ORIGINAL_BODY_CONFIRMED`
 - `PRIMARY_CURRENT_REFERENCE_CONFIRMED_2026`
 - `FORMAL_CURRENT_STATUS_FLAG_BLOCKER`
 
@@ -171,6 +173,7 @@ Current consolidated secondary legal systems identify the edition as `09.01.2023
 
 Classification:
 
+- `PRIMARY_TARGET_IDENTITY_CONFIRMED`
 - `CURRENT_EDITION_ADVANCED_607P_2023-01-09`
 - `PRIMARY_AMENDMENT_6352-U_CONFIRMED`
 - `AMENDMENT_EFFECTIVE_2023-10-01`
@@ -192,7 +195,9 @@ Primary sources:
 - `DERIVED_MULTI_TARGET_FILE_TARGET_EXPANSION +1`
 - `NUMBER_COLLISION_TARGET_IDENTITY_MISMATCH +1`
 - `HABR_STALE_REPEALED_BANK_ACT +1`
-- `PRIMARY_ORIGINAL_CONFIRMED +4` (2695-U, 2831-U via repealing primary context/original references, 3342-U, 607-P; 422-P separately has a dedicated CBR application page)
+- `PRIMARY_ORIGINAL_BODY_CONFIRMED +2` (2695-U, 3342-U)
+- `PRIMARY_TARGET_IDENTITY_CONFIRMED +5`
+- `PRIMARY_REPEAL_CONFIRMED +1` (6060-U -> 2831-U)
 - `PRIMARY_CURRENT_REFERENCE_CONFIRMED +2` (3342-U, 607-P)
 - `PRIMARY_AMENDMENT_CONFIRMED +2` (4436-U -> 422-P; 6352-U -> 607-P)
 - `NEW_GITHUB_FULL_BODY_DUPLICATE +0`

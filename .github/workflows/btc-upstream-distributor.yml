@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - name: Resolve upstream distributor wallets and exact transactions
+      - name: Verify exact upstream fan-out geometry
         shell: bash
         run: |
           python - <<'PY'
@@ -23,8 +23,13 @@ jobs:
           from pathlib import Path
           from html import unescape
 
-          SEEDS=['3aa95dcf70eede85','346a258fe5e120a0','1cb62fb9f4a1cf9c']
-          TXIDS=['92101a57482122f3eaf278fb35f2bf0d699c43398798d5c954da0913c5077f65','3d3f3beb0d21562717a2844aaf5c22e757d73ddb79460adcb2d15a7ee42e2e39']
+          WALLETS=['d32c53c4e37a5939','3aa95dcf70eede85','346a258fe5e120a0','1cb62fb9f4a1cf9c']
+          TXIDS=[
+            '009cd5be97ec0b50aecb4ece63b4ea24a89a149944bcba68534e052d7ced440e',
+            'ea4b8dd153de26cb1b7e5b55869db7c41f6f82f043fc75486d22390eaab9cf08',
+            '92101a57482122f3eaf278fb35f2bf0d699c43398798d5c954da0913c5077f65',
+            '3d3f3beb0d21562717a2844aaf5c22e757d73ddb79460adcb2d15a7ee42e2e39',
+          ]
           out=Path('btc_upstream_distributor'); out.mkdir(exist_ok=True)
 
           def get(url,retries=5):
@@ -37,60 +42,49 @@ jobs:
                       last=e; time.sleep(min(8,2**attempt))
               raise last
 
-          def parse_wallet(wid):
+          def label(address):
+              try:
+                  html=get(f'https://www.walletexplorer.com/address/{address}')
+                  m=re.search(r'data-wallet-id="([0-9a-f]+)".*?<span class="wallet_name">([^<]+)</span>',html,re.I|re.S)
+                  if m:return {'wallet_id':m.group(1),'wallet_name':unescape(m.group(2)).strip()}
+              except Exception as e:return {'error':repr(e)}
+              return None
+
+          wallet_pages={}
+          for wid in WALLETS:
               html=get(f'https://www.walletexplorer.com/wallet/{wid}')
               (out/f'wallet_{wid}.html').write_text(html,encoding='utf-8')
-              total=re.search(r'total transactions:\s*([0-9,]+)',html,re.I)
-              parts=re.split(r'<tr class="(sent|received)">',html,flags=re.I)
-              rows=[]
-              for i in range(1,len(parts),2):
-                  direction=parts[i].lower(); body=parts[i+1]
-                  dm=re.search(r'<td class="date">([^<]+)</td>',body,re.I)
-                  tm=re.search(r'/txid/([0-9a-f]{64})',body,re.I)
-                  refs=[]
-                  for wm in re.finditer(r'data-wallet-id="([0-9a-f]+)".*?<span class="wallet_name">([^<]+)</span>',body,re.I|re.S):
-                      refs.append({'wallet_id':wm.group(1),'wallet_name':unescape(wm.group(2)).strip()})
-                  amounts=[float(x) for x in re.findall(r'<td class="amount diff">\s*(?:<em>)?\s*([+-]?[0-9.]+)',body,re.I)]
-                  if dm and tm:
-                      rows.append({'direction':direction,'date':dm.group(1).strip(),'txid':tm.group(1),'amounts_btc':amounts,'counterparty_wallets':refs})
-              return {'wallet_id':wid,'total_transactions':total.group(1) if total else None,'rows':rows}
+              wallet_pages[wid]=html
 
-          wallets=[]
-          next_ids={}
-          for wid in SEEDS:
-              w=parse_wallet(wid); wallets.append(w)
-              for r in w['rows']:
-                  for cp in r['counterparty_wallets']:
-                      if cp['wallet_id'] not in SEEDS and cp['wallet_name'].startswith('['):
-                          next_ids[cp['wallet_id']]=cp['wallet_name']
-
-          # profile only upstream counterparties of 3aa95 recent/oldest rows, bounded to avoid huge fanout
-          upstream_profiles=[]
-          seed3=wallets[0]
-          for r in seed3['rows']:
-              if r['direction']!='received': continue
-              for cp in r['counterparty_wallets']:
-                  wid=cp['wallet_id']
-                  if wid in SEEDS: continue
-                  try:
-                      w=parse_wallet(wid)
-                      names=sorted({c['wallet_name'] for rr in w['rows'] for c in rr['counterparty_wallets'] if not c['wallet_name'].startswith('[')})
-                      upstream_profiles.append({'wallet_id':wid,'name':cp['wallet_name'],'named_services':names,'history':w})
-                  except Exception as e:
-                      upstream_profiles.append({'wallet_id':wid,'name':cp['wallet_name'],'error':repr(e)})
-                  time.sleep(.12)
-
-          rawtx=[]
+          txs=[]
           for txid in TXIDS:
               txt=get(f'https://blockstream.info/api/tx/{txid}')
-              (out/f'tx_{txid}.json').write_text(txt,encoding='utf-8')
-              rawtx.append(json.loads(txt))
+              tx=json.loads(txt); (out/f'tx_{txid}.json').write_text(txt,encoding='utf-8')
+              ins=[]; outs=[]
+              for vin in tx.get('vin',[]):
+                  p=vin.get('prevout') or {}; a=p.get('scriptpubkey_address'); v=p.get('value') or 0
+                  ins.append({'address':a,'sat':v,'btc':round(v/1e8,8),'wallet':label(a) if a else None})
+              for vout in tx.get('vout',[]):
+                  a=vout.get('scriptpubkey_address'); v=vout.get('value') or 0
+                  outs.append({'address':a,'sat':v,'btc':round(v/1e8,8),'wallet':label(a) if a else None})
+              txs.append({'txid':txid,'block_time':(tx.get('status') or {}).get('block_time'),'inputs':ins,'outputs':outs,'fee_sat':tx.get('fee')})
+              time.sleep(.15)
 
-          result={'wallets':wallets,'upstream_profiles':upstream_profiles,'raw_transactions':rawtx}
-          (out/'distributor.json').write_text(json.dumps(result,ensure_ascii=False,indent=2),encoding='utf-8')
-          print('=== WALLETS ==='); print(json.dumps(wallets,ensure_ascii=False,indent=2))
-          print('=== UPSTREAM PROFILES ==='); print(json.dumps(upstream_profiles,ensure_ascii=False,indent=2))
-          print('=== RAW TX ==='); print(json.dumps(rawtx,ensure_ascii=False,indent=2))
+          # quantify repeated output values and sibling named services
+          geometry=[]
+          for tx in txs:
+              counts={}
+              named=[]
+              for o in tx['outputs']:
+                  counts[str(o['sat'])]=counts.get(str(o['sat']),0)+1
+                  w=o.get('wallet') or {}
+                  name=w.get('wallet_name') if isinstance(w,dict) else None
+                  if name and not name.startswith('['): named.append({'name':name,'btc':o['btc'],'address':o['address']})
+              geometry.append({'txid':tx['txid'],'output_value_counts':counts,'named_service_outputs':named})
+
+          result={'transactions':txs,'geometry':geometry}
+          (out/'distributor_exact.json').write_text(json.dumps(result,ensure_ascii=False,indent=2),encoding='utf-8')
+          print(json.dumps(result,ensure_ascii=False,indent=2))
           PY
       - name: Upload evidence
         uses: actions/upload-artifact@v4

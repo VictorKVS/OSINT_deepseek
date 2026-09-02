@@ -1,0 +1,120 @@
+name: BTC SatoshiDice Bet Structure
+
+on:
+  push:
+    branches:
+      - agent/btc-onchain-probe-20260902
+    paths:
+      - '.github/workflows/btc-bet-structure.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Analyze SatoshiDice betting transactions
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json,re,time,urllib.request
+          from pathlib import Path
+          from datetime import datetime
+
+          WALLET='00421c7e25459ed4'
+          out=Path('btc_bet_structure'); out.mkdir(exist_ok=True)
+
+          def get(url, retries=5):
+              last=None
+              for attempt in range(retries):
+                  try:
+                      req=urllib.request.Request(url,headers={'User-Agent':'Mozilla/5.0 OSINT-deepseek/1.0'})
+                      with urllib.request.urlopen(req,timeout=30) as r:
+                          return r.read().decode('utf-8','replace')
+                  except Exception as e:
+                      last=e; time.sleep(min(8,2**attempt))
+              raise last
+
+          wallet_html=get(f'https://www.walletexplorer.com/wallet/{WALLET}')
+          (out/'wallet.html').write_text(wallet_html,encoding='utf-8')
+
+          rows=re.findall(r'<tr class="(sent|received)">(.*?)</tr>',wallet_html,re.I|re.S)
+          sent=[]; received=[]
+          for cls,body in rows:
+              if 'SatoshiDice.com-original' not in body:
+                  continue
+              dm=re.search(r'<td class="date">([^<]+)</td>',body,re.I)
+              tm=re.search(r'/txid/([0-9a-f]{64})',body,re.I)
+              am=re.search(r'<td class="amount diff">(?:<em>)?([+-]?[0-9.]+)',body,re.I)
+              if not (dm and tm and am):
+                  continue
+              rec={'class':cls.lower(),'date':dm.group(1).strip(),'txid':tm.group(1),'wallet_net_btc':float(am.group(1))}
+              (sent if cls.lower()=='sent' else received).append(rec)
+
+          tx_records=[]
+          unique_dice={}
+          for idx,rec in enumerate(sent,1):
+              txt=get(f'https://blockstream.info/api/tx/{rec["txid"]}')
+              tx=json.loads(txt)
+              (out/f'tx_{idx:02d}_{rec["txid"]}.json').write_text(txt,encoding='utf-8')
+              dice_outputs=[]
+              other_outputs=[]
+              for o in tx.get('vout',[]):
+                  a=o.get('scriptpubkey_address')
+                  v=o.get('value') or 0
+                  row={'address':a,'sat':v,'btc':round(v/1e8,8)}
+                  if a and a.startswith('1dice'):
+                      dice_outputs.append(row); unique_dice[a]=unique_dice.get(a,0)+v
+                  else:
+                      other_outputs.append(row)
+              tx_records.append({**rec,
+                  'dice_output_count':len(dice_outputs),
+                  'dice_outputs':dice_outputs,
+                  'dice_total_sat':sum(x['sat'] for x in dice_outputs),
+                  'dice_total_btc':round(sum(x['sat'] for x in dice_outputs)/1e8,8),
+                  'other_outputs':other_outputs,
+                  'fee_sat':tx.get('fee'),
+                  'block_time':(tx.get('status') or {}).get('block_time'),
+              })
+              time.sleep(.15)
+
+          total_dice_sat=sum(r['dice_total_sat'] for r in tx_records)
+          multi=[r for r in tx_records if r['dice_output_count']>1]
+          zero=[r for r in tx_records if r['dice_output_count']==0]
+          exact_match=[r for r in tx_records if abs(abs(r['wallet_net_btc'])-r['dice_total_btc']) < 1e-8]
+          bet_times=sorted(datetime.strptime(r['date'],'%Y-%m-%d %H:%M:%S') for r in sent)
+          gaps=[(bet_times[i]-bet_times[i-1]).total_seconds() for i in range(1,len(bet_times))]
+          summary={
+              'wallet_id':WALLET,
+              'wallet_rows_sent_to_satoshidice':len(sent),
+              'wallet_rows_received_from_satoshidice':len(received),
+              'wallet_net_sent_rows_sum_btc':round(sum(-r['wallet_net_btc'] for r in sent),8),
+              'wallet_received_rows_sum_btc':round(sum(r['wallet_net_btc'] for r in received),8),
+              'raw_onchain_dice_outputs_count':sum(r['dice_output_count'] for r in tx_records),
+              'raw_onchain_dice_outputs_sum_btc':round(total_dice_sat/1e8,8),
+              'transactions_with_multiple_dice_outputs':len(multi),
+              'transactions_with_zero_dice_outputs_despite_wallet_label':len(zero),
+              'wallet_net_equals_raw_dice_total_count':len(exact_match),
+              'unique_dice_addresses':[{ 'address':a,'btc':round(v/1e8,8)} for a,v in sorted(unique_dice.items())],
+              'bet_gap_seconds_min':min(gaps) if gaps else None,
+              'bet_gap_seconds_median':sorted(gaps)[len(gaps)//2] if gaps else None,
+              'bet_gap_seconds_max':max(gaps) if gaps else None,
+              'same_blocktime_bet_pairs':sum(1 for g in gaps if g==0),
+          }
+          evidence={'summary':summary,'sent_transactions':tx_records,'wallet_received_rows':received}
+          (out/'bet_structure.json').write_text(json.dumps(evidence,ensure_ascii=False,indent=2),encoding='utf-8')
+          print('=== SUMMARY ===')
+          print(json.dumps(summary,ensure_ascii=False,indent=2))
+          print('=== SENT TX DETAIL ===')
+          for r in tx_records:
+              print(json.dumps({k:r[k] for k in ['date','txid','wallet_net_btc','dice_output_count','dice_total_btc','dice_outputs']},ensure_ascii=False))
+          PY
+      - name: Upload evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: btc-bet-structure
+          path: btc_bet_structure/
+          if-no-files-found: error
+          retention-days: 7

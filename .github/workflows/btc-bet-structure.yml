@@ -13,7 +13,7 @@ permissions:
 jobs:
   analyze:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - name: Analyze SatoshiDice betting transactions
         shell: bash
@@ -22,8 +22,10 @@ jobs:
           import json,re,time,urllib.request
           from pathlib import Path
           from datetime import datetime
+          from html import unescape
 
           WALLET='00421c7e25459ed4'
+          SERVICE='SatoshiDice.com-original'
           out=Path('btc_bet_structure'); out.mkdir(exist_ok=True)
 
           def get(url, retries=5):
@@ -38,17 +40,18 @@ jobs:
               raise last
 
           wallet_html=get(f'https://www.walletexplorer.com/wallet/{WALLET}')
+          addr_html=get(f'https://www.walletexplorer.com/wallet/{WALLET}/addresses')
           (out/'wallet.html').write_text(wallet_html,encoding='utf-8')
-          source_mentions='SatoshiDice.com-original' in wallet_html
+          (out/'wallet_addresses.html').write_text(addr_html,encoding='utf-8')
+          wallet_addrs=set(re.findall(r'(?<![A-Za-z0-9])[13][a-km-zA-HJ-NP-Z1-9]{25,34}(?![A-Za-z0-9])',addr_html))
+          if len(wallet_addrs) < 20:
+              raise RuntimeError(f'P0_CLUSTER_GATE: expected >=20 wallet addresses, got {len(wallet_addrs)}')
 
           parts=re.split(r'<tr class="(sent|received)">',wallet_html,flags=re.I)
-          rows=[]
-          for i in range(1,len(parts),2):
-              rows.append((parts[i].lower(),parts[i+1]))
-
+          rows=[(parts[i].lower(),parts[i+1]) for i in range(1,len(parts),2)]
           sent=[]; received=[]
           for cls,body in rows:
-              if 'SatoshiDice.com-original' not in body:
+              if SERVICE not in body:
                   continue
               dm=re.search(r'<td class="date">([^<]+)</td>',body,re.I)
               tm=re.search(r'/txid/([0-9a-f]{64})',body,re.I)
@@ -57,68 +60,89 @@ jobs:
                   continue
               rec={'class':cls,'date':dm.group(1).strip(),'txid':tm.group(1),'wallet_net_btc':float(am.group(1))}
               (sent if cls=='sent' else received).append(rec)
+          if SERVICE in wallet_html and not (sent or received):
+              raise RuntimeError('P0_PARSE_GATE: source contains SatoshiDice label but parser extracted zero rows')
 
-          if source_mentions and not (sent or received):
-              raise RuntimeError('P0_PARSE_GATE: WalletExplorer contains SatoshiDice label but parser extracted zero rows')
+          label_cache={}
+          def resolve_wallet_label(address):
+              if not address: return None
+              if address in label_cache: return label_cache[address]
+              try:
+                  h=get(f'https://www.walletexplorer.com/address/{address}')
+                  m=re.search(r'<span class="wallet_name">([^<]+)</span>',h,re.I)
+                  label=unescape(m.group(1)).strip() if m else None
+              except Exception as e:
+                  label=f'ERROR:{type(e).__name__}'
+              label_cache[address]=label
+              time.sleep(.08)
+              return label
 
-          tx_records=[]
-          unique_dice={}
+          sent_records=[]; received_records=[]; unique_dice={}
           for idx,rec in enumerate(sent,1):
               txt=get(f'https://blockstream.info/api/tx/{rec["txid"]}')
-              tx=json.loads(txt)
-              (out/f'tx_{idx:02d}_{rec["txid"]}.json').write_text(txt,encoding='utf-8')
-              dice_outputs=[]; other_outputs=[]
+              tx=json.loads(txt); (out/f'sent_{idx:02d}_{rec["txid"]}.json').write_text(txt,encoding='utf-8')
+              dice=[]; other=[]
               for o in tx.get('vout',[]):
                   a=o.get('scriptpubkey_address'); v=o.get('value') or 0
                   row={'address':a,'sat':v,'btc':round(v/1e8,8)}
                   if a and a.startswith('1dice'):
-                      dice_outputs.append(row); unique_dice[a]=unique_dice.get(a,0)+v
-                  else:
-                      other_outputs.append(row)
-              tx_records.append({**rec,
-                  'dice_output_count':len(dice_outputs),
-                  'dice_outputs':dice_outputs,
-                  'dice_total_sat':sum(x['sat'] for x in dice_outputs),
-                  'dice_total_btc':round(sum(x['sat'] for x in dice_outputs)/1e8,8),
-                  'other_outputs':other_outputs,
-                  'fee_sat':tx.get('fee'),
-                  'block_time':(tx.get('status') or {}).get('block_time'),
-              })
-              time.sleep(.15)
+                      dice.append(row); unique_dice[a]=unique_dice.get(a,0)+v
+                  else: other.append(row)
+              sent_records.append({**rec,'dice_outputs':dice,'dice_total_sat':sum(x['sat'] for x in dice),'dice_total_btc':round(sum(x['sat'] for x in dice)/1e8,8),'other_outputs':other,'fee_sat':tx.get('fee')})
+              time.sleep(.08)
 
-          if sent and not any(r['dice_output_count'] for r in tx_records):
-              raise RuntimeError('P0_RAW_TX_GATE: sent rows exist but no 1dice outputs found in raw transactions')
+          for idx,rec in enumerate(received,1):
+              txt=get(f'https://blockstream.info/api/tx/{rec["txid"]}')
+              tx=json.loads(txt); (out/f'received_{idx:02d}_{rec["txid"]}.json').write_text(txt,encoding='utf-8')
+              wi=wo=0; external_inputs=[]
+              for i in tx.get('vin',[]):
+                  p=i.get('prevout') or {}; a=p.get('scriptpubkey_address'); v=p.get('value') or 0
+                  if a in wallet_addrs: wi += v
+                  elif a: external_inputs.append({'address':a,'sat':v,'btc':round(v/1e8,8)})
+              for o in tx.get('vout',[]):
+                  a=o.get('scriptpubkey_address'); v=o.get('value') or 0
+                  if a in wallet_addrs: wo += v
+              labels=[]
+              for x in external_inputs:
+                  label=resolve_wallet_label(x['address']); x['wallet_label']=label
+                  if label: labels.append(label)
+              net=wo-wi
+              unique_labels=sorted(set(labels))
+              service_only=bool(external_inputs) and all(x.get('wallet_label')==SERVICE for x in external_inputs)
+              received_records.append({**rec,'wallet_inputs_sat':wi,'wallet_outputs_sat':wo,'raw_wallet_net_sat':net,'raw_wallet_net_btc':round(net/1e8,8),'external_inputs':external_inputs,'external_input_labels':unique_labels,'service_only_external_inputs':service_only,'fee_sat':tx.get('fee')})
+              time.sleep(.08)
 
-          total_dice_sat=sum(r['dice_total_sat'] for r in tx_records)
-          multi=[r for r in tx_records if r['dice_output_count']>1]
-          zero=[r for r in tx_records if r['dice_output_count']==0]
-          exact_match=[r for r in tx_records if abs(abs(r['wallet_net_btc'])-r['dice_total_btc']) < 1e-8]
+          if sent and not any(r['dice_total_sat'] for r in sent_records):
+              raise RuntimeError('P0_RAW_TX_GATE: sent rows exist but no 1dice outputs found')
+          raw_bets=sum(r['dice_total_sat'] for r in sent_records)
+          clean_received=[r for r in received_records if r['service_only_external_inputs']]
+          mixed_received=[r for r in received_records if not r['service_only_external_inputs']]
+          clean_inflow=sum(r['raw_wallet_net_sat'] for r in clean_received)
+          labeled_net_inflow=sum(round(r['wallet_net_btc']*1e8) for r in received)
+          exceptional_sent=[r for r in sent_records if abs(round(abs(r['wallet_net_btc'])*1e8)-r['dice_total_sat']) > 1]
           bet_times=sorted(datetime.strptime(r['date'],'%Y-%m-%d %H:%M:%S') for r in sent)
           gaps=[(bet_times[i]-bet_times[i-1]).total_seconds() for i in range(1,len(bet_times))]
           summary={
-              'wallet_id':WALLET,
-              'wallet_rows_sent_to_satoshidice':len(sent),
-              'wallet_rows_received_from_satoshidice':len(received),
-              'wallet_net_sent_rows_sum_btc':round(sum(-r['wallet_net_btc'] for r in sent),8),
-              'wallet_received_rows_sum_btc':round(sum(r['wallet_net_btc'] for r in received),8),
-              'wallet_net_gambling_result_btc':round(sum(r['wallet_net_btc'] for r in received)+sum(r['wallet_net_btc'] for r in sent),8),
-              'raw_onchain_dice_outputs_count':sum(r['dice_output_count'] for r in tx_records),
-              'raw_onchain_dice_outputs_sum_btc':round(total_dice_sat/1e8,8),
-              'transactions_with_multiple_dice_outputs':len(multi),
-              'transactions_with_zero_dice_outputs_despite_wallet_label':len(zero),
-              'wallet_net_equals_raw_dice_total_count':len(exact_match),
-              'unique_dice_addresses':[{ 'address':a,'btc':round(v/1e8,8)} for a,v in sorted(unique_dice.items())],
-              'bet_gap_seconds_min':min(gaps) if gaps else None,
-              'bet_gap_seconds_median':sorted(gaps)[len(gaps)//2] if gaps else None,
-              'bet_gap_seconds_max':max(gaps) if gaps else None,
-              'same_blocktime_bet_pairs':sum(1 for g in gaps if g==0),
+              'wallet_id':WALLET,'wallet_address_count':len(wallet_addrs),
+              'sent_rows':len(sent),'received_rows':len(received),
+              'direct_dice_bet_outputs_count':sum(len(r['dice_outputs']) for r in sent_records),
+              'direct_dice_bet_outputs_btc':round(raw_bets/1e8,8),
+              'wallet_net_outflow_in_sent_labeled_txs_btc':round(sum(-r['wallet_net_btc'] for r in sent),8),
+              'sent_labeled_txs_with_nonservice_outflow':len(exceptional_sent),
+              'wallet_net_inflow_in_received_labeled_txs_btc':round(labeled_net_inflow/1e8,8),
+              'received_txs_with_service_only_external_inputs':len(clean_received),
+              'received_txs_with_mixed_or_unresolved_external_inputs':len(mixed_received),
+              'verified_service_only_wallet_net_inflow_btc':round(clean_inflow/1e8,8),
+              'direct_service_flow_difference_btc_if_all_received_rows_clean':round((labeled_net_inflow-raw_bets)/1e8,8) if not mixed_received else None,
+              'unique_dice_addresses':[{'address':a,'btc':round(v/1e8,8)} for a,v in sorted(unique_dice.items())],
+              'bet_gap_seconds_min':min(gaps) if gaps else None,'bet_gap_seconds_median':sorted(gaps)[len(gaps)//2] if gaps else None,'bet_gap_seconds_max':max(gaps) if gaps else None,'same_blocktime_bet_pairs':sum(1 for g in gaps if g==0),
+              'caveat':'WalletExplorer timestamps are block times; timing alone does not prove automation.'
           }
-          evidence={'summary':summary,'sent_transactions':tx_records,'wallet_received_rows':received}
+          evidence={'summary':summary,'sent_transactions':sent_records,'received_transactions':received_records,'label_cache':label_cache}
           (out/'bet_structure.json').write_text(json.dumps(evidence,ensure_ascii=False,indent=2),encoding='utf-8')
           print('=== SUMMARY ==='); print(json.dumps(summary,ensure_ascii=False,indent=2))
-          print('=== SENT TX DETAIL ===')
-          for r in tx_records:
-              print(json.dumps({k:r[k] for k in ['date','txid','wallet_net_btc','dice_output_count','dice_total_btc','dice_outputs']},ensure_ascii=False))
+          print('=== EXCEPTIONAL SENT ==='); print(json.dumps(exceptional_sent,ensure_ascii=False,indent=2))
+          print('=== MIXED RECEIVED ==='); print(json.dumps(mixed_received,ensure_ascii=False,indent=2))
           PY
       - name: Upload evidence
         uses: actions/upload-artifact@v4

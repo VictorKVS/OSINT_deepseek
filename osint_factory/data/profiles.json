@@ -1,0 +1,86 @@
+{
+  "schema_version": "father-osint.factory-profiles.v1",
+  "profiles": {
+    "RU_ORG": {
+      "subject_type": "ORGANIZATION",
+      "jurisdiction_group": "RU",
+      "country_pack_required": false,
+      "minimum_identity": {
+        "required": ["official_name", "jurisdiction", "registration_or_tax_id"],
+        "secondary": ["incorporation_date", "registered_address", "official_domain"]
+      },
+      "streams": {
+        "ENTITY_REGISTRY": ["RU_FNS_EGRUL_EGRIP", "RU_FNS_TRANSPARENT_BUSINESS"],
+        "BUSINESS_FINANCIAL_OPERATIONS": ["RU_GIR_BO", "RU_PROCUREMENT_EIS"],
+        "DIGITAL_FOOTPRINT": ["DOMAIN_RDAP_DNS_TLS", "WEB_ARCHIVE"],
+        "LEGAL_SANCTIONS_ADVERSE": ["RU_ARBITRATION_KAD", "RU_FEDRESURS_BANKRUPTCY", "RU_FSSP_PUBLIC_ENFORCEMENT", "APPLICABLE_SANCTIONS"],
+        "RED_TEAM_SOURCE_QUALITY": ["RED_TEAM_IDENTITY", "RED_TEAM_SOURCE_INDEPENDENCE"]
+      },
+      "enhanced_source_families": ["RU_SECTOR_REGULATOR", "RU_IP_TRADEMARKS", "CROSS_CASE_LINKS"]
+    },
+    "RU_PERSON": {
+      "subject_type": "PERSON",
+      "jurisdiction_group": "RU",
+      "country_pack_required": false,
+      "minimum_identity": {
+        "required": ["full_name_original", "jurisdiction", "distinguishing_context"],
+        "desired": ["birth_date_or_year", "role_or_employer", "city_or_region"]
+      },
+      "hard_rules": [
+        "one_name_is_not_identity",
+        "automatic_merge_for_persons_forbidden",
+        "family_links_only_when_material_and_documented",
+        "public_data_does_not_remove_purpose_and_minimization_requirements"
+      ],
+      "streams": {
+        "ENTITY_REGISTRY": ["RU_FNS_PERSON_COMPANY_PARTICIPATION", "RU_PUBLIC_OFFICIAL_OR_PROFESSIONAL_REGISTERS"],
+        "BUSINESS_FINANCIAL_OPERATIONS": ["RU_PUBLIC_BUSINESS_ROLES"],
+        "DIGITAL_FOOTPRINT": ["PUBLIC_OFFICIAL_ACCOUNTS", "PUBLIC_ACCOUNT_CANDIDATES"],
+        "LEGAL_SANCTIONS_ADVERSE": ["RU_PUBLIC_COURT_SOURCES", "RU_FEDRESURS_PERSON_BANKRUPTCY", "RU_FSSP_PUBLIC_ENFORCEMENT", "APPLICABLE_SANCTIONS"],
+        "RED_TEAM_SOURCE_QUALITY": ["RED_TEAM_NAMESAKE_PERSON", "RED_TEAM_ACCOUNT_ATTRIBUTION", "RED_TEAM_PROCEDURAL_STATUS"]
+      },
+      "enhanced_source_families": ["RU_PROFESSIONAL_DISCIPLINARY_SOURCES", "MULTILINGUAL_ADVERSE_MEDIA", "CROSS_CASE_LINKS"]
+    },
+    "INTL_ORG": {
+      "subject_type": "ORGANIZATION",
+      "jurisdiction_group": "INTERNATIONAL",
+      "country_pack_required": true,
+      "minimum_identity": {
+        "required": ["official_name", "jurisdiction", "registration_or_tax_id"],
+        "secondary": ["incorporation_date", "registered_address", "official_domain"]
+      },
+      "streams": {
+        "ENTITY_REGISTRY": ["HOME_COUNTRY_COMPANY_REGISTRY", "CROSS_BORDER_BRANCH_REGISTRIES", "BENEFICIAL_OWNERSHIP_WHERE_LAWFUL"],
+        "BUSINESS_FINANCIAL_OPERATIONS": ["FINANCIAL_FILINGS", "PROCUREMENT_AND_DEBARMENT", "PUBLIC_OPERATIONS_AND_LOGISTICS"],
+        "DIGITAL_FOOTPRINT": ["DOMAIN_RDAP_DNS_TLS", "WEB_ARCHIVE", "PUBLIC_OFFICIAL_ACCOUNTS"],
+        "LEGAL_SANCTIONS_ADVERSE": ["HOME_COUNTRY_COURTS", "HOME_COUNTRY_INSOLVENCY", "REGULATOR_ENFORCEMENT", "UN_SANCTIONS", "APPLICABLE_SANCTIONS"],
+        "RED_TEAM_SOURCE_QUALITY": ["RED_TEAM_TRANSLITERATION", "RED_TEAM_CORPORATE_GROUP_VS_LEGAL_ENTITY", "RED_TEAM_SOURCE_FRESHNESS"]
+      },
+      "enhanced_source_families": ["CROSS_BORDER_LITIGATION", "TRADEMARKS_PATENTS", "MULTILINGUAL_ADVERSE_MEDIA", "CROSS_CASE_LINKS"]
+    },
+    "INTL_PERSON": {
+      "subject_type": "PERSON",
+      "jurisdiction_group": "INTERNATIONAL",
+      "country_pack_required": true,
+      "minimum_identity": {
+        "required": ["full_name_original", "jurisdiction", "distinguishing_context"],
+        "desired": ["birth_date_or_year", "role_or_employer", "city_or_region"]
+      },
+      "hard_rules": [
+        "automatic_merge_for_persons_forbidden",
+        "sanctions_name_match_is_not_identity",
+        "public_account_is_not_owner_attribution",
+        "sensitive_traits_are_not_risk_evidence",
+        "family_links_only_when_material_and_documented"
+      ],
+      "streams": {
+        "ENTITY_REGISTRY": ["COMPANY_DIRECTORSHIP_OWNERSHIP", "PUBLIC_OFFICIAL_OR_PROFESSIONAL_REGISTERS"],
+        "BUSINESS_FINANCIAL_OPERATIONS": ["PUBLIC_BUSINESS_INTERESTS"],
+        "DIGITAL_FOOTPRINT": ["PUBLIC_OFFICIAL_ACCOUNTS", "PUBLIC_ACCOUNT_CANDIDATES"],
+        "LEGAL_SANCTIONS_ADVERSE": ["HOME_COUNTRY_COURTS_WHERE_PUBLIC", "HOME_COUNTRY_INSOLVENCY_WHERE_PUBLIC", "REGULATOR_ENFORCEMENT", "UN_SANCTIONS", "APPLICABLE_SANCTIONS"],
+        "RED_TEAM_SOURCE_QUALITY": ["RED_TEAM_NAMESAKE_PERSON", "RED_TEAM_TRANSLITERATION", "RED_TEAM_ACCOUNT_ATTRIBUTION", "RED_TEAM_PROCEDURAL_STATUS"]
+      },
+      "enhanced_source_families": ["PROFESSIONAL_DISCIPLINARY_SOURCES", "MULTILINGUAL_ADVERSE_MEDIA", "CROSS_CASE_LINKS"]
+    }
+  }
+}

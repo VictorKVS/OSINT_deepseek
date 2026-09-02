@@ -1,0 +1,55 @@
+{
+  "schema_version": "father-osint.country-packs.v1",
+  "country_packs": {
+    "RU": {
+      "jurisdictions": ["RU"],
+      "languages": ["ru"],
+      "source_overrides": {},
+      "mandatory_sanctions_packs": ["UN"],
+      "conditional_sanctions_packs": ["EU", "UK", "US_OFAC"],
+      "requires_source_health_review": true
+    },
+    "GENERIC_INTL": {
+      "jurisdictions": ["*"],
+      "languages": [],
+      "source_overrides": {},
+      "mandatory_sanctions_packs": ["UN"],
+      "conditional_sanctions_packs": ["EU", "UK", "US_OFAC", "HOME_JURISDICTION"],
+      "requires_source_health_review": true
+    },
+    "EU": {
+      "jurisdictions": ["EU", "EEA"],
+      "languages": [],
+      "source_overrides": {
+        "HOME_COUNTRY_COMPANY_REGISTRY": ["HOME_NATIONAL_REGISTER", "EU_BRIS_NAVIGATION"],
+        "APPLICABLE_SANCTIONS": ["EU_SANCTIONS", "UN_SANCTIONS"]
+      },
+      "mandatory_sanctions_packs": ["UN", "EU"],
+      "conditional_sanctions_packs": ["UK", "US_OFAC", "HOME_JURISDICTION"],
+      "requires_source_health_review": true
+    },
+    "UK": {
+      "jurisdictions": ["GB", "UK"],
+      "languages": ["en"],
+      "source_overrides": {
+        "HOME_COUNTRY_COMPANY_REGISTRY": ["UK_COMPANIES_HOUSE"],
+        "APPLICABLE_SANCTIONS": ["UK_SANCTIONS_LIST", "UN_SANCTIONS"]
+      },
+      "mandatory_sanctions_packs": ["UN", "UK"],
+      "conditional_sanctions_packs": ["EU", "US_OFAC"],
+      "requires_source_health_review": true
+    },
+    "US": {
+      "jurisdictions": ["US"],
+      "languages": ["en"],
+      "source_overrides": {
+        "FINANCIAL_FILINGS": ["US_SEC_EDGAR_WHERE_APPLICABLE"],
+        "PROCUREMENT_AND_DEBARMENT": ["US_SAM_EXCLUSIONS_AND_PROCUREMENT"],
+        "APPLICABLE_SANCTIONS": ["US_OFAC", "UN_SANCTIONS"]
+      },
+      "mandatory_sanctions_packs": ["UN", "US_OFAC"],
+      "conditional_sanctions_packs": ["EU", "UK", "HOME_STATE"],
+      "requires_source_health_review": true
+    }
+  }
+}

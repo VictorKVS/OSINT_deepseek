@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://father.example/schemas/screening-plan.schema.json",
+  "title": "FATHER OSINT Screening Plan",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["request_id", "case_id", "subject_id", "profile_id", "depth", "risk_tier", "source_pack_ids", "work_items", "missing_identity_anchors", "stop_conditions", "human_review_gates", "coverage_domains", "plan_id", "generated_at_utc"],
+  "properties": {
+    "request_id": {"type": "string"},
+    "case_id": {"type": "string"},
+    "subject_id": {"type": "string"},
+    "profile_id": {"enum": ["RU_LEGAL_ENTITY", "FOREIGN_LEGAL_ENTITY", "RU_PERSON", "FOREIGN_PERSON"]},
+    "depth": {"enum": ["BASIC", "STANDARD", "ENHANCED", "DEEP"]},
+    "risk_tier": {"enum": ["LOW", "MEDIUM", "HIGH", "CRITICAL"]},
+    "source_pack_ids": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+    "work_items": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["request_id", "check_code", "title_ru", "stream", "stage", "wave", "dependencies", "source_families", "capabilities", "state", "blocked_reason", "work_item_id"],
+        "properties": {
+          "request_id": {"type": "string"},
+          "check_code": {"type": "string", "pattern": "^[A-Z0-9-]+$"},
+          "title_ru": {"type": "string", "minLength": 3},
+          "stream": {"enum": ["IDENTITY_REGISTRY", "BUSINESS_FINANCIAL", "DIGITAL_FOOTPRINT", "LEGAL_SANCTIONS_ADVERSE", "RED_TEAM_SOURCE_QUALITY"]},
+          "stage": {"enum": ["ADMISSION", "IDENTIFY", "EXPAND", "ASSESS", "REVIEW"]},
+          "wave": {"type": "integer", "minimum": 0},
+          "dependencies": {"type": "array", "items": {"type": "string"}},
+          "source_families": {"type": "array", "items": {"type": "string"}},
+          "capabilities": {"type": "array", "items": {"type": "string"}},
+          "state": {"enum": ["PLANNED", "READY", "RUNNING", "COMPLETED", "BLOCKED", "FAILED", "CANCELLED"]},
+          "blocked_reason": {"type": ["string", "null"]},
+          "work_item_id": {"type": "string"}
+        }
+      }
+    },
+    "missing_identity_anchors": {"type": "array", "items": {"type": "string"}},
+    "stop_conditions": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+    "human_review_gates": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+    "coverage_domains": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+    "plan_id": {"type": "string"},
+    "generated_at_utc": {"type": "string", "format": "date-time"}
+  }
+}

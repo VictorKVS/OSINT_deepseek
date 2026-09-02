@@ -161,7 +161,16 @@ class ArchitectureBookAnalyst:
                     ),
                 )
 
-            normalized = " " + " ".join(sentence.casefold().split()) + " "
+            # Signal dictionaries use explicit word boundaries represented by
+            # surrounding spaces. Convert punctuation to spaces first so
+            # markers match tokens such as "компромисс:" and "Например,"
+            # without falling back to unsafe substring matching inside words.
+            normalized = " " + re.sub(
+                r"[^\w-]+",
+                " ",
+                sentence.casefold(),
+                flags=re.UNICODE,
+            ).strip() + " "
             matched_any = False
             for candidate_type, markers in self._signals.items():
                 if any(marker.casefold() in normalized for marker in markers):

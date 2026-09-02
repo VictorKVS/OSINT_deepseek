@@ -1,0 +1,32 @@
+{
+  "schema_version": "father-osint.query-plan.v0.1",
+  "query_plan_id": "QPLAN-SYNTH-0001",
+  "case_id": "CASE-SYNTH-0001",
+  "objective": "Проверить идентичность синтетической организации, регистрационную связь и границы допустимого вывода.",
+  "mode": "IDENTIFY",
+  "status": "APPROVED",
+  "created_at_utc": "2026-09-01T15:01:00Z",
+  "created_by": {"actor_id":"research-planner-synthetic","actor_type":"AGENT","version":"0.1"},
+  "seed_entity_ids": ["ENT-0001"],
+  "known_fact_ids": [],
+  "unknowns": [
+    {"question_id":"Q-IDENTITY-001","question":"Однозначно ли регистрационная запись относится к ENT-0001?","why_matters":"Ошибка разрешения объекта сделает недостоверными все последующие связи.","priority":"P0","stream":"ENTITY_REGISTRY","status":"ANSWERED"},
+    {"question_id":"Q-PRESENCE-001","question":"Подтверждено ли фактическое присутствие организации по учебному адресу?","why_matters":"Регистрационная связь сама по себе не подтверждает фактическую деятельность.","priority":"P1","stream":"BUSINESS_TRANSACTIONS_LOGISTICS","status":"NO_HIT"},
+    {"question_id":"Q-DIGITAL-001","question":"Есть ли подтвержденный цифровой след синтетической организации?","why_matters":"Цифровой след может подтвердить или опровергнуть самостоятельную деятельность.","priority":"P2","stream":"DIGITAL_FOOTPRINT","status":"NO_HIT"},
+    {"question_id":"Q-LEGAL-001","question":"Есть ли допустимые негативные или правовые сведения?","why_matters":"Нельзя переносить негативный статус из отсутствующих источников.","priority":"P1","stream":"LEGAL_SANCTIONS_ADVERSE","status":"NO_HIT"},
+    {"question_id":"Q-REDTEAM-001","question":"Какие альтернативные объяснения ограничивают регистрационный вывод?","why_matters":"Red Team должен исключить превращение регистрационного claim в вывод о деятельности.","priority":"P0","stream":"RED_TEAM_SOURCE_QUALITY","status":"ANSWERED"}
+  ],
+  "pivots": [
+    {"pivot_id":"PVT-REG-001","stream":"ENTITY_REGISTRY","query_or_action":"Resolve synthetic registry identity and registration address","input_entity_ids":["ENT-0001"],"source_family":"synthetic_registry","execution_mode":"FIXTURE_ONLY","expected_output_types":["ORGANIZATION","ADDRESS","SOURCE_CAPTURE","CLAIM","RELATION"],"priority":"P0","status":"COMPLETED","access_class":"PUBLIC","dependencies":[],"timeout_seconds":30,"max_requests":0,"notes":"Deterministic local fixture."},
+    {"pivot_id":"PVT-BIZ-001","stream":"BUSINESS_TRANSACTIONS_LOGISTICS","query_or_action":"Check synthetic evidence for operational presence at the registered address","input_entity_ids":["ENT-0001"],"source_family":"synthetic_business_records","execution_mode":"FIXTURE_ONLY","expected_output_types":["FINDING","RESEARCH_GAP"],"priority":"P1","status":"COMPLETED","access_class":"PUBLIC","dependencies":["PVT-REG-001"],"timeout_seconds":30,"max_requests":0,"notes":"Expected NO_HIT and explicit research gap."},
+    {"pivot_id":"PVT-DIG-001","stream":"DIGITAL_FOOTPRINT","query_or_action":"Check fixture corpus for domains, email and public accounts","input_entity_ids":["ENT-0001"],"source_family":"synthetic_digital_footprint","execution_mode":"FIXTURE_ONLY","expected_output_types":["DOMAIN","EMAIL","FINDING","RESEARCH_GAP"],"priority":"P2","status":"COMPLETED","access_class":"PUBLIC","dependencies":["PVT-REG-001"],"timeout_seconds":30,"max_requests":0,"notes":"No external search."},
+    {"pivot_id":"PVT-LEGAL-001","stream":"LEGAL_SANCTIONS_ADVERSE","query_or_action":"Check fixture corpus for legal, sanctions and adverse records","input_entity_ids":["ENT-0001"],"source_family":"synthetic_legal_records","execution_mode":"FIXTURE_ONLY","expected_output_types":["FINDING","RESEARCH_GAP"],"priority":"P1","status":"COMPLETED","access_class":"PUBLIC","dependencies":["PVT-REG-001"],"timeout_seconds":30,"max_requests":0,"notes":"NO_HIT is not proof of absence outside fixture scope."},
+    {"pivot_id":"PVT-RED-001","stream":"RED_TEAM_SOURCE_QUALITY","query_or_action":"Challenge identity, address meaning and unsupported business inferences","input_entity_ids":["ENT-0001"],"source_family":"internal_red_team","execution_mode":"FIXTURE_ONLY","expected_output_types":["FINDING","RESEARCH_GAP"],"priority":"P0","status":"COMPLETED","access_class":"PUBLIC","dependencies":["PVT-REG-001","PVT-BIZ-001","PVT-DIG-001","PVT-LEGAL-001"],"timeout_seconds":60,"max_requests":0,"notes":"Blind challenge over preserved fixture evidence."}
+  ],
+  "legal_constraints": ["Use synthetic evidence only.","Do not infer real persons, companies, wrongdoing or operational presence.","No network acquisition or active actions."],
+  "stop_conditions": ["Stop when all five streams have a terminal result.","Stop and escalate if any non-synthetic or restricted datum appears.","Do not promote a model opinion directly to FACT."],
+  "expected_cost_time": {"estimated_jobs":5,"estimated_minutes":1.5,"max_network_requests":0,"estimate_basis":"Design estimate for deterministic fixture execution; not production telemetry."},
+  "human_approval": {"required":true,"status":"APPROVED","reviewer_id":"ROLE-CHIEF-ANALYST","reviewed_at_utc":"2026-09-01T15:02:00Z","note":"Approved for synthetic contract validation only."},
+  "plan_hash": "e74c0b37d86970a32479a46eec92e3439df30e8362dcf47723e66fab20c90401",
+  "synthetic": true
+}

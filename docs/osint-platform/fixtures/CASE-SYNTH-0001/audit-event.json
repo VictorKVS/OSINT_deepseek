@@ -1,0 +1,16 @@
+{
+  "schema_version": "father-osint.audit-event.v0.1",
+  "event_id": "AUD-0001",
+  "case_id": "CASE-SYNTH-0001",
+  "actor_type": "HUMAN",
+  "actor_id": "role:chief-analyst",
+  "action": "APPROVE_FINDING",
+  "object_type": "FINDING",
+  "object_id": "FND-0001",
+  "timestamp_utc": "2026-09-01T15:20:00Z",
+  "justification": "Synthetic evidence chain is complete and limitations are explicit.",
+  "policy_decision": "ALLOW_WITH_CONDITIONS",
+  "previous_hash": null,
+  "new_hash": "e9af3702a96195ff848a4c869a0c2cb2c74abad3e800d2278a308216cf4d21d1",
+  "conditions": ["Finding remains explicitly synthetic.", "No inference of physical presence."]
+}

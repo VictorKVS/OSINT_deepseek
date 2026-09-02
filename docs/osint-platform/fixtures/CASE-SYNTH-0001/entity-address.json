@@ -1,0 +1,14 @@
+{
+  "schema_version": "father-osint.entity.v0.1",
+  "entity_id": "ENT-0002",
+  "case_id": "CASE-SYNTH-0001",
+  "entity_type": "ADDRESS",
+  "display_name": "Учебный проспект, дом 1, город Пример",
+  "aliases": [],
+  "identifiers": [{"type": "SYNTHETIC_ADDRESS_ID", "value": "SYN-ADDR-0001", "masked": false, "source_ids": ["SRC-0001"]}],
+  "attributes": {"is_fictional": true},
+  "access_class": "PUBLIC",
+  "source_ids": ["SRC-0001"],
+  "status": "CONFIRMED",
+  "synthetic": true
+}

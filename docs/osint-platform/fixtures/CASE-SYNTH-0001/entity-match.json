@@ -1,0 +1,21 @@
+{
+  "schema_version": "father-osint.entity-match.v0.1",
+  "entity_match_id": "EMATCH-SYNTH-0001",
+  "case_id": "CASE-SYNTH-0001",
+  "entity_a_id": "ENT-0001",
+  "entity_b_id": "ENT-0003",
+  "status": "CONFIRMED_DISTINCT",
+  "same_entity_probability": 0.18,
+  "features": {"exact_identifier":0.0,"name_similarity":0.92,"address_overlap":0.0,"temporal_consistency":0.5,"source_quality":1.0},
+  "supporting_features": [{"feature":"NAME_SIMILARITY","description":"Названия и англоязычные алиасы похожи.","source_ids":["SRC-0001"]}],
+  "contradicting_features": [
+    {"feature":"REGISTRY_IDENTIFIER","description":"Синтетические регистрационные идентификаторы различаются.","source_ids":["SRC-0001"]},
+    {"feature":"ADDRESS","description":"Кандидат не связан с ENT-0002 в учебной записи.","source_ids":["SRC-0001"]}
+  ],
+  "missing_decisive_evidence": [],
+  "method": {"engine":"deterministic-entity-resolution","version":"0.1","ruleset_or_model_hash":"955a9da7888ba8ccfccb438d60d1cec073a66a2edec8f5e960ffc2a9c14e5892"},
+  "human_review": {"required":true,"status":"APPROVED","reviewer_role":"Главный аналитик","reviewed_at_utc":"2026-09-01T15:12:00Z","decision_note":"Одноимённая запись не объединяется: точный идентификатор и адресная связь различаются."},
+  "automatic_merge_performed": false,
+  "created_at_utc": "2026-09-01T15:10:00Z",
+  "synthetic": true
+}

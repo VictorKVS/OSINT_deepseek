@@ -1,0 +1,15 @@
+{
+  "schema_version": "father-osint.export-manifest.v0.1",
+  "export_id": "EXP-0001",
+  "case_id": "CASE-SYNTH-0001",
+  "export_profile": "PUBLIC_REDACTED",
+  "generated_at_utc": "2026-09-01T15:30:00Z",
+  "case_revision": "baseline-v0.1",
+  "git_commit": null,
+  "drive_revision": null,
+  "included_files": [{"path": "report-redacted.md", "sha256": "4eb7109d877e0d52da4916b25571f8d658c8ea712e829412bdfde48d6bc5583e", "access_class": "PUBLIC"}],
+  "excluded_items": [{"object_id": "CAP-0001", "reason": "Raw capture remains outside the public report even when synthetic."}],
+  "gates": {"no_restricted_data": true, "pii_minimized": true, "claims_not_promoted": true, "capture_hashes_present": true, "red_team_complete": true, "metadata_sanitized": true, "hashes_verified": true},
+  "reviewer_role": "Data and export reviewer",
+  "review_status": "APPROVED"
+}

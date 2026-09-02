@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://father.example/schemas/osint-platform/analysis-opinion.schema.json",
+  "title": "Independent Analysis Opinion",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "opinion_id", "run_id", "case_id", "task_id", "analyzer_id", "analyzer_family", "analyzer_version", "modality", "output_class", "answer", "supporting_refs", "contradicting_refs", "assumptions", "limitations", "confidence_decomposition", "data_boundary", "access_class", "generated_at_utc", "output_sha256", "can_create_fact"],
+  "properties": {
+    "schema_version": {"const": "father-osint.analysis-opinion.v0.1"},
+    "opinion_id": {"type": "string", "pattern": "^OPN-[0-9]{4,}$"},
+    "run_id": {"type": "string", "pattern": "^ARUN-[0-9]{4,}$"},
+    "case_id": {"type": "string", "pattern": "^CASE-[A-Z0-9][A-Z0-9-]{2,63}$"},
+    "task_id": {"type": "string", "pattern": "^TASK-[0-9]{4,}$"},
+    "analyzer_id": {"type": "string", "minLength": 3},
+    "analyzer_family": {"enum": ["DETERMINISTIC_RULE", "LLM_LOCAL", "LLM_REMOTE", "GRAPH_ALGORITHM", "MEDIA_PIPELINE", "LEGAL_RULESET", "HUMAN_REVIEW"]},
+    "analyzer_version": {"type": "string", "minLength": 1},
+    "modality": {"type": "array", "items": {"enum": ["TEXT", "GRAPH", "IMAGE", "AUDIO", "VIDEO", "METADATA", "LEGAL"]}, "minItems": 1, "uniqueItems": true},
+    "output_class": {"enum": ["CLAIM_CANDIDATE", "ENTITY_CANDIDATE", "RELATION_CANDIDATE", "CONTRADICTION_CANDIDATE", "RISK_SIGNAL", "HYPOTHESIS_CANDIDATE", "REPORT_DRAFT", "NO_CONCLUSION"]},
+    "answer": {"type": "string", "minLength": 1},
+    "supporting_refs": {"type": "array", "items": {"type": "string"}},
+    "contradicting_refs": {"type": "array", "items": {"type": "string"}},
+    "assumptions": {"type": "array", "items": {"type": "string"}},
+    "limitations": {"type": "array", "items": {"type": "string"}, "minItems": 1},
+    "confidence_decomposition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["authority", "directness", "independence", "corroboration", "recency", "ambiguity", "bias_risk", "contradiction_severity"],
+      "properties": {
+        "authority": {"type": "number", "minimum": 0, "maximum": 1},
+        "directness": {"type": "number", "minimum": 0, "maximum": 1},
+        "independence": {"type": "number", "minimum": 0, "maximum": 1},
+        "corroboration": {"type": "number", "minimum": 0, "maximum": 1},
+        "recency": {"type": "number", "minimum": 0, "maximum": 1},
+        "ambiguity": {"type": "number", "minimum": 0, "maximum": 1},
+        "bias_risk": {"type": "number", "minimum": 0, "maximum": 1},
+        "contradiction_severity": {"type": "number", "minimum": 0, "maximum": 1}
+      }
+    },
+    "data_boundary": {"enum": ["LOCAL_ONLY", "REMOTE_PUBLIC_ONLY", "REMOTE_REDACTED", "HUMAN_ONLY"]},
+    "access_class": {"enum": ["PUBLIC", "PUBLIC_WITH_PERSONAL_DATA", "AUTHORIZED_INTERNAL", "RESTRICTED", "PROHIBITED"]},
+    "generated_at_utc": {"type": "string", "format": "date-time"},
+    "output_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "can_create_fact": {"const": false}
+  }
+}

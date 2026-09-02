@@ -1,0 +1,55 @@
+{
+  "schema_version": "father-osint.acquisition-job.v0.1",
+  "job_id": "JOB-SYNTH-REG-0001",
+  "case_id": "CASE-SYNTH-0001",
+  "query_plan_id": "QPLAN-SYNTH-0001",
+  "pivot_id": "PVT-REG-001",
+  "stream": "ENTITY_REGISTRY",
+  "source_id": "SRC-0001",
+  "transform_id": "TRN-SYNTH-REGISTRY-LOOKUP",
+  "tool_adapter_id": null,
+  "state": "REVIEWED",
+  "execution_profile": "FIXTURE_ONLY",
+  "safety_class": "PASSIVE_PUBLIC",
+  "authorization": {
+    "case_scope_checked": true,
+    "policy_decision": "ALLOW",
+    "human_approval_required": false,
+    "human_approval_obtained": false,
+    "approved_by": null,
+    "allowed_access_classes": ["PUBLIC"]
+  },
+  "inputs": [{
+    "input_type": "ORGANIZATION",
+    "reference": "ENT-0001",
+    "value_hash": "9fb0e7fc0f9f82c47290bdc86023d54f9ff898f3d50285bf5a5a9f47b93ffc0d"
+  }],
+  "schedule": {
+    "queued_at_utc": "2026-09-01T15:03:00Z",
+    "started_at_utc": "2026-09-01T15:03:01Z",
+    "finished_at_utc": "2026-09-01T15:03:02Z",
+    "timeout_seconds": 30,
+    "attempt": 1
+  },
+  "output": {
+    "result_code": "FOUND",
+    "summary": "Synthetic registry entry, address claim and typed relation were normalized.",
+    "source_ids": ["SRC-0001"],
+    "capture_ids": ["CAP-0001"],
+    "entity_ids": ["ENT-0001", "ENT-0002"],
+    "relation_ids": ["REL-0001"],
+    "claim_ids": ["CLM-0001"],
+    "finding_ids": [],
+    "research_gap_ids": [],
+    "error_code": null
+  },
+  "parser": {
+    "name": "synthetic_registry_parser",
+    "version": "0.1",
+    "output_contract": "father-osint.entities-relations-sources.v0.1"
+  },
+  "raw_output_hash": "3111d7e8d8547a5a0fe4a3b9036a11f711a975a6403f3071a908a76fa5e34384",
+  "normalized_output_hash": "b291a8c5ee2c5d46df00e03a4706186f7560a833d621943f4d62ca5d7e3dfacb",
+  "run_manifest_hash": "b34f7a1eb441b9eddb8bbca1131fb5f27b7b69f80ac4fdd1db3790aff149c8f2",
+  "synthetic": true
+}

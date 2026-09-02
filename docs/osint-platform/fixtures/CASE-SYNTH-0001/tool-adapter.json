@@ -1,0 +1,21 @@
+{
+  "schema_version": "father-osint.tool-adapter.v0.1",
+  "tool_id": "SYNTH-DOC-META",
+  "name": "synthetic-document-metadata",
+  "category": "document_metadata",
+  "execution_profile": "CONTAINER_ISOLATED",
+  "input_types": ["DOCUMENT"],
+  "output_contract": "father-osint.entities-relations-sources.v0.1",
+  "legal_mode": "PUBLIC_ONLY",
+  "safety_class": "PASSIVE_PUBLIC",
+  "risk_level": "LOW",
+  "network_policy": "NO_NETWORK",
+  "timeout_seconds": 30,
+  "requires_human_approval": false,
+  "parser": "adapters/synthetic_doc_meta_v0_1.py",
+  "version_probe": "synthetic-document-metadata --version",
+  "upstream_url": "https://example.org/tools/synthetic-document-metadata",
+  "status": "PROPOSED",
+  "known_failure_modes": ["Missing metadata", "Malformed synthetic document"],
+  "resource_limits": {"cpu_seconds": 10, "memory_mb": 256}
+}

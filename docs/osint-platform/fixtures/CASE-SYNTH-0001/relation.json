@@ -1,0 +1,15 @@
+{
+  "schema_version": "father-osint.relation.v0.1",
+  "relation_id": "REL-0001",
+  "case_id": "CASE-SYNTH-0001",
+  "from_entity_id": "ENT-0001",
+  "relation_type": "REGISTERED_AT",
+  "to_entity_id": "ENT-0002",
+  "valid_from": "2026-08-31T12:00:00Z",
+  "valid_to": null,
+  "source_ids": ["SRC-0001"],
+  "claim_ids": ["CLM-0001"],
+  "evidence_grade": "A_CONFIRMED",
+  "status": "CONFIRMED",
+  "not_implying": ["Фактическое присутствие по адресу.", "Реальную хозяйственную деятельность.", "Любой негативный статус."]
+}

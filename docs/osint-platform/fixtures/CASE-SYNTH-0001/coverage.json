@@ -1,0 +1,25 @@
+{
+  "schema_version": "father-osint.coverage.v0.1",
+  "coverage_id": "COV-SYNTH-0001",
+  "case_id": "CASE-SYNTH-0001",
+  "finding_id": "FND-0001",
+  "evaluated_at_utc": "2026-09-01T15:21:00Z",
+  "policy_version": "coverage-policy/0.1",
+  "dimensions": [
+    {"dimension":"IDENTITY_RESOLUTION","status":"COVERED","weight":1.0,"evidence_refs":["EMATCH-SYNTH-0001","ENT-0001"],"research_gap_ids":[],"note":"Exact synthetic registry identifier resolves the primary organization."},
+    {"dimension":"SOURCE_AUTHORITY","status":"COVERED","weight":1.0,"evidence_refs":["SRC-0001"],"research_gap_ids":[],"note":"Authoritative within the synthetic fixture universe only."},
+    {"dimension":"DIRECTNESS","status":"COVERED","weight":1.0,"evidence_refs":["CAP-0001","CLM-0001"],"research_gap_ids":[],"note":"The preserved capture directly states the registration relationship."},
+    {"dimension":"CORROBORATION","status":"PARTIAL","weight":0.5,"evidence_refs":["SRC-0001"],"research_gap_ids":[],"note":"Only one synthetic source is required for this deterministic fixture; no real-world corroboration exists."},
+    {"dimension":"CONTRADICTIONS","status":"COVERED","weight":1.0,"evidence_refs":["CNS-0001"],"research_gap_ids":[],"note":"No contradiction to the narrow registration statement; broader operational inference was rejected."},
+    {"dimension":"CAPTURE_INTEGRITY","status":"COVERED","weight":1.0,"evidence_refs":["CAP-0001"],"research_gap_ids":[],"note":"SHA-256 and immutable flag are present."},
+    {"dimension":"ACCESS_LEGALITY","status":"COVERED","weight":1.0,"evidence_refs":["CASE-SYNTH-0001","SRC-0001"],"research_gap_ids":[],"note":"Synthetic public fixture."},
+    {"dimension":"TEMPORAL_ALIGNMENT","status":"COVERED","weight":1.0,"evidence_refs":["REL-0001"],"research_gap_ids":[],"note":"Validity and collection timestamps are distinguished."},
+    {"dimension":"SOURCE_INDEPENDENCE","status":"NOT_APPLICABLE","weight":0.0,"evidence_refs":[],"research_gap_ids":[],"note":"Not required for the narrow deterministic fixture finding."}
+  ],
+  "overall_grade": "STRONG",
+  "report_readiness": "READY_WITH_LIMITATION",
+  "decisive_gaps": ["GAP-SYNTH-0001"],
+  "explanation": "Регистрационная связь подтверждена в пределах синтетического источника; вывод нельзя расширять до фактического присутствия или деятельности.",
+  "human_review": {"status":"APPROVED","reviewer_role":"Главный аналитик","reviewed_at_utc":"2026-09-01T15:22:00Z"},
+  "synthetic": true
+}

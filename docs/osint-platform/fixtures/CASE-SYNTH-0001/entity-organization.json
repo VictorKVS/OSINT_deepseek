@@ -1,0 +1,14 @@
+{
+  "schema_version": "father-osint.entity.v0.1",
+  "entity_id": "ENT-0001",
+  "case_id": "CASE-SYNTH-0001",
+  "entity_type": "ORGANIZATION",
+  "display_name": "ООО «Северный Контур»",
+  "aliases": ["Northern Contour Training LLC"],
+  "identifiers": [{"type": "SYNTHETIC_REGISTRY_ID", "value": "SYN-ORG-0001", "masked": false, "source_ids": ["SRC-0001"]}],
+  "attributes": {"is_fictional": true},
+  "access_class": "PUBLIC",
+  "source_ids": ["SRC-0001"],
+  "status": "CONFIRMED",
+  "synthetic": true
+}

@@ -1,0 +1,23 @@
+{
+  "schema_version": "father-osint.analysis-opinion.v0.1",
+  "opinion_id": "OPN-0001",
+  "run_id": "ARUN-0001",
+  "case_id": "CASE-SYNTH-0001",
+  "task_id": "TASK-0001",
+  "analyzer_id": "RULE-TRACE-001",
+  "analyzer_family": "DETERMINISTIC_RULE",
+  "analyzer_version": "0.1",
+  "modality": ["TEXT"],
+  "output_class": "RELATION_CANDIDATE",
+  "answer": "Claim, entities and source form a resolvable registration-at chain.",
+  "supporting_refs": ["SRC-0001", "CAP-0001", "CLM-0001", "ENT-0001", "ENT-0002"],
+  "contradicting_refs": [],
+  "assumptions": ["Fixture is internally consistent and synthetic."],
+  "limitations": ["Rule verifies traceability, not real-world truth."],
+  "confidence_decomposition": {"authority": 0.9, "directness": 0.95, "independence": 0.7, "corroboration": 0.4, "recency": 1.0, "ambiguity": 0.1, "bias_risk": 0.1, "contradiction_severity": 0.0},
+  "data_boundary": "LOCAL_ONLY",
+  "access_class": "PUBLIC",
+  "generated_at_utc": "2026-09-01T15:10:01Z",
+  "output_sha256": "1094c351431b6aff8481c3fa131bc268bfff02f97ed0055168791b6cf8848dd6",
+  "can_create_fact": false
+}

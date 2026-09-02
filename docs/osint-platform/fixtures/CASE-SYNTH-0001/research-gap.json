@@ -1,0 +1,20 @@
+{
+  "schema_version": "father-osint.research-gap.v0.1",
+  "research_gap_id": "GAP-SYNTH-0001",
+  "case_id": "CASE-SYNTH-0001",
+  "subject_refs": ["ENT-0001","ENT-0002","REL-0001","FND-0001"],
+  "stream": "BUSINESS_TRANSACTIONS_LOGISTICS",
+  "question": "Подтверждено ли фактическое присутствие или деятельность организации по регистрационному адресу?",
+  "why_matters": "Без отдельного доказательства регистрационный адрес нельзя представлять как фактическое местонахождение или производственную площадку.",
+  "priority": "P1",
+  "state": "NO_HIT",
+  "evidence_needed": ["Независимый источник фактического присутствия.","Документ о помещении, персонале, оборудовании или хозяйственной операции."],
+  "planned_pivot_ids": ["PVT-BIZ-001"],
+  "blocking_reasons": ["В синтетическом корпусе таких доказательств нет."],
+  "owner_role": "Составной аналитик",
+  "opened_at_utc": "2026-09-01T15:05:00Z",
+  "resolved_at_utc": null,
+  "resolved_by_finding_ids": [],
+  "report_effect": "LIMITS_REPORT",
+  "synthetic": true
+}

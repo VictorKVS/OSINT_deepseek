@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://father.example/schemas/osint-platform/consensus.schema.json",
+  "title": "Analysis Consensus and Dissent",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "consensus_id", "case_id", "task_id", "opinion_ids", "method", "independent_family_count", "common_ground", "disagreements", "minority_views", "unresolved_questions", "recommended_status", "human_review_required", "human_decision"],
+  "properties": {
+    "schema_version": {"const": "father-osint.consensus.v0.1"},
+    "consensus_id": {"type": "string", "pattern": "^CNS-[0-9]{4,}$"},
+    "case_id": {"type": "string", "pattern": "^CASE-[A-Z0-9][A-Z0-9-]{2,63}$"},
+    "task_id": {"type": "string", "pattern": "^TASK-[0-9]{4,}$"},
+    "opinion_ids": {"type": "array", "items": {"type": "string", "pattern": "^OPN-[0-9]{4,}$"}, "minItems": 2, "uniqueItems": true},
+    "method": {"enum": ["EVIDENCE_WEIGHTED", "RULED_ARBITRATION", "HUMAN_SYNTHESIS"]},
+    "independent_family_count": {"type": "integer", "minimum": 2},
+    "common_ground": {"type": "array", "items": {"type": "string"}},
+    "disagreements": {"type": "array", "items": {"type": "object", "additionalProperties": false, "required": ["question", "positions", "likely_cause", "required_next_action"], "properties": {"question": {"type": "string"}, "positions": {"type": "array", "items": {"type": "string"}, "minItems": 2}, "likely_cause": {"type": "string"}, "required_next_action": {"type": "string"}}}},
+    "minority_views": {"type": "array", "items": {"type": "string"}},
+    "unresolved_questions": {"type": "array", "items": {"type": "string"}},
+    "recommended_status": {"enum": ["NO_CONCLUSION", "RESEARCH_MORE", "HYPOTHESIS_CANDIDATE", "INFERENCE_CANDIDATE", "FACT_CANDIDATE"]},
+    "human_review_required": {"const": true},
+    "human_decision": {"enum": ["PENDING", "RESEARCH_MORE", "REJECT", "ACCEPT_AS_HYPOTHESIS", "ACCEPT_AS_INFERENCE", "ACCEPT_AS_FACT_CANDIDATE"]}
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://father.example/schemas/osint-platform/tool-adapter.schema.json",
+  "title": "Governed Tool Adapter",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "tool_id", "name", "category", "execution_profile", "input_types", "output_contract", "legal_mode", "safety_class", "risk_level", "network_policy", "timeout_seconds", "requires_human_approval", "parser", "version_probe", "upstream_url", "status"],
+  "properties": {
+    "schema_version": {"const": "father-osint.tool-adapter.v0.1"},
+    "tool_id": {"type": "string", "pattern": "^[A-Z0-9-]{4,64}$"},
+    "name": {"type": "string", "minLength": 1},
+    "category": {"type": "string", "minLength": 3},
+    "execution_profile": {"enum": ["WINDOWS_NATIVE", "WSL2_KALI", "CONTAINER_ISOLATED", "REMOTE_SANDBOX", "MANUAL_EXTERNAL"]},
+    "input_types": {"type": "array", "items": {"enum": ["DOMAIN", "URL", "IP", "USERNAME", "DOCUMENT", "IMAGE", "AUDIO", "VIDEO", "ENTITY", "CASE"]}, "minItems": 1, "uniqueItems": true},
+    "output_contract": {"type": "string", "minLength": 3},
+    "legal_mode": {"enum": ["PUBLIC_ONLY", "OWNED_OR_AUTHORIZED", "RESTRICTED_EVIDENCE_ONLY", "NEVER"]},
+    "safety_class": {"enum": ["PASSIVE_PUBLIC", "ACTIVE_AUTHORIZED", "RESTRICTED_FORENSIC", "PROHIBITED"]},
+    "risk_level": {"enum": ["LOW", "MEDIUM", "HIGH", "CRITICAL"]},
+    "network_policy": {"enum": ["NO_NETWORK", "INTERNET_READ_ONLY", "SCOPED_TARGETS_ONLY", "RESTRICTED_NETWORK"]},
+    "timeout_seconds": {"type": "integer", "minimum": 1, "maximum": 86400},
+    "requires_human_approval": {"type": "boolean"},
+    "parser": {"type": "string", "minLength": 3},
+    "version_probe": {"type": "string", "minLength": 1},
+    "upstream_url": {"type": "string", "format": "uri"},
+    "status": {"enum": ["PROPOSED", "APPROVED", "DISABLED", "RETIRED", "PROHIBITED"]},
+    "known_failure_modes": {"type": "array", "items": {"type": "string"}},
+    "resource_limits": {"type": "object"}
+  }
+}

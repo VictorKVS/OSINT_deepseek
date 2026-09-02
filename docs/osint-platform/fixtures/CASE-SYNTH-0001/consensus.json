@@ -1,0 +1,21 @@
+{
+  "schema_version": "father-osint.consensus.v0.1",
+  "consensus_id": "CNS-0001",
+  "case_id": "CASE-SYNTH-0001",
+  "task_id": "TASK-0001",
+  "opinion_ids": ["OPN-0001", "OPN-0002", "OPN-0003"],
+  "method": "EVIDENCE_WEIGHTED",
+  "independent_family_count": 2,
+  "common_ground": ["Источник поддерживает только синтетическую регистрационную связь."],
+  "disagreements": [{
+    "question": "Следует ли считать адрес фактическим местом деятельности?",
+    "positions": ["Нет: подтверждена только регистрационная запись.", "Не установлено: нужны дополнительные материалы."],
+    "likely_cause": "Различие между юридической регистрацией и фактическим присутствием.",
+    "required_next_action": "Не делать вывод о фактическом присутствии; в реальном кейсе собрать независимые подтверждения."
+  }],
+  "minority_views": ["OPN-0003 подчёркивает риск семантического расширения отношения."],
+  "unresolved_questions": ["Фактическое присутствие не исследовалось и не входит в synthetic scope."],
+  "recommended_status": "FACT_CANDIDATE",
+  "human_review_required": true,
+  "human_decision": "ACCEPT_AS_FACT_CANDIDATE"
+}

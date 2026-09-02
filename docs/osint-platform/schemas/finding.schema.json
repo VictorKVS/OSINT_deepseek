@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://father.example/schemas/osint-platform/finding.schema.json",
+  "title": "Reviewed Finding",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "finding_id", "case_id", "classification", "statement", "evidence_grade", "source_ids", "claim_ids", "entity_ids", "reasoning_summary", "alternative_explanations", "limitations", "red_team_status", "human_approved", "approved_by_role", "approved_at_utc", "access_class"],
+  "properties": {
+    "schema_version": {"const": "father-osint.finding.v0.1"},
+    "finding_id": {"type": "string", "pattern": "^FND-[0-9]{4,}$"},
+    "case_id": {"type": "string", "pattern": "^CASE-[A-Z0-9][A-Z0-9-]{2,63}$"},
+    "classification": {"enum": ["FACT", "INFERENCE", "HYPOTHESIS", "RISK", "DECISION"]},
+    "statement": {"type": "string", "minLength": 5},
+    "evidence_grade": {"enum": ["A_CONFIRMED", "B_HIGHLY_PROBABLE", "C_ANALYTICAL_HYPOTHESIS", "D_LEAD"]},
+    "source_ids": {"type": "array", "items": {"type": "string", "pattern": "^SRC-[0-9]{4,}$"}, "minItems": 1, "uniqueItems": true},
+    "claim_ids": {"type": "array", "items": {"type": "string", "pattern": "^CLM-[0-9]{4,}$"}, "minItems": 1, "uniqueItems": true},
+    "entity_ids": {"type": "array", "items": {"type": "string", "pattern": "^ENT-[0-9]{4,}$"}, "minItems": 1, "uniqueItems": true},
+    "consensus_id": {"type": ["string", "null"], "pattern": "^CNS-[0-9]{4,}$"},
+    "reasoning_summary": {"type": "string", "minLength": 5},
+    "alternative_explanations": {"type": "array", "items": {"type": "string"}},
+    "limitations": {"type": "array", "items": {"type": "string"}, "minItems": 1},
+    "red_team_status": {"enum": ["NOT_REQUIRED", "PENDING", "CHALLENGED", "PASSED", "REJECTED"]},
+    "human_approved": {"const": true},
+    "approved_by_role": {"type": "string", "minLength": 3},
+    "approved_at_utc": {"type": "string", "format": "date-time"},
+    "access_class": {"enum": ["PUBLIC", "PUBLIC_WITH_PERSONAL_DATA", "AUTHORIZED_INTERNAL", "RESTRICTED", "PROHIBITED"]}
+  }
+}

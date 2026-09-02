@@ -22,7 +22,7 @@ Registry mirror Sheets.by, reproducing Belarus EGR/MNS data, identifies:
 - UNP: `193846088`;
 - EGR registration: `26.02.2025`;
 - MNS registration: `27.02.2025`;
-- status shown as of `26.04.2026`: Active;
+- status shown as of `26.12.2025`: Active;
 - legal address: `Minsk, ul. Annaeva 69, isolated premises 17`;
 - main activity: wholesale of other chemical products, OKED `46750`;
 - public phone: `+375296687700`.

@@ -1,0 +1,74 @@
+name: BTC Exceptional Output Resolution
+
+on:
+  push:
+    branches:
+      - agent/btc-onchain-probe-20260902
+    paths:
+      - '.github/workflows/btc-exceptional-output.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  resolve:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Resolve exceptional output and next-hop context
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json,re,time,urllib.request
+          from pathlib import Path
+          from html import unescape
+
+          ADDR='1A1GUw9yWbBBVSCcAEux7vV4Ft3KxN7NzL'
+          out=Path('btc_exceptional_output'); out.mkdir(exist_ok=True)
+
+          def get(url,retries=5):
+              last=None
+              for attempt in range(retries):
+                  try:
+                      req=urllib.request.Request(url,headers={'User-Agent':'Mozilla/5.0 OSINT-deepseek/1.0'})
+                      with urllib.request.urlopen(req,timeout=30) as r:return r.read().decode('utf-8','replace')
+                  except Exception as e:
+                      last=e; time.sleep(min(8,2**attempt))
+              raise last
+
+          summary={'address':ADDR}
+          we=get(f'https://www.walletexplorer.com/address/{ADDR}')
+          (out/'walletexplorer_address.html').write_text(we,encoding='utf-8')
+          m=re.search(r'data-wallet-id="([0-9a-f]+)"',we,re.I)
+          if m:
+              summary['wallet_id']=m.group(1)
+              wm=get(f'https://www.walletexplorer.com/wallet/{m.group(1)}')
+              (out/'walletexplorer_wallet.html').write_text(wm,encoding='utf-8')
+              n=re.search(r'<h2>Wallet\s+(.*?)\s*<span class="showother">',wm,re.I|re.S)
+              if n:
+                  summary['wallet_name']=unescape(re.sub(r'\s+',' ',re.sub('<[^>]+>',' ',n.group(1)))).strip()
+              txc=re.search(r'total transactions:\s*([0-9,]+)',wm,re.I)
+              summary['wallet_transactions']=txc.group(1) if txc else None
+          raw=get(f'https://blockchain.info/rawaddr/{ADDR}?limit=50')
+          (out/'rawaddr.json').write_text(raw,encoding='utf-8')
+          d=json.loads(raw)
+          summary.update({'n_tx':d.get('n_tx'),'total_received_sat':d.get('total_received'),'total_sent_sat':d.get('total_sent'),'final_balance_sat':d.get('final_balance')})
+          txs=[]
+          for tx in d.get('txs',[]):
+              ins=[]; outs=[]
+              for i in tx.get('inputs',[]):
+                  p=i.get('prev_out') or {}
+                  if p.get('addr'): ins.append([p.get('addr'),p.get('value')])
+              for o in tx.get('out',[]):
+                  if o.get('addr'): outs.append([o.get('addr'),o.get('value')])
+              txs.append({'txid':tx.get('hash'),'time':tx.get('time'),'inputs':ins,'outputs':outs,'fee':tx.get('fee')})
+          summary['transactions']=txs
+          (out/'summary.json').write_text(json.dumps(summary,ensure_ascii=False,indent=2),encoding='utf-8')
+          print(json.dumps(summary,ensure_ascii=False,indent=2))
+          PY
+      - name: Upload evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: btc-exceptional-output
+          path: btc_exceptional_output/
+          retention-days: 7

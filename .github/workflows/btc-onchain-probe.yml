@@ -1,0 +1,75 @@
+name: BTC On-chain Evidence Probe
+
+on:
+  push:
+    branches:
+      - agent/btc-onchain-probe-20260902
+    paths:
+      - '.github/workflows/btc-onchain-probe.yml'
+      - 'docs/investigations/CASE-BTC-0001/**'
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Fetch Bitcoin address evidence
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json, os, hashlib, time, urllib.request, urllib.error
+          from pathlib import Path
+
+          addr = '1CfXQEZFcfje4bPqNbu9dtj2FXufUpqD75'
+          out = Path('btc_probe_evidence')
+          out.mkdir(exist_ok=True)
+          endpoints = {
+              'blockstream_address': f'https://blockstream.info/api/address/{addr}',
+              'mempool_address': f'https://mempool.space/api/address/{addr}',
+              'blockchain_rawaddr': f'https://blockchain.info/rawaddr/{addr}?limit=0',
+              'blockchair_address': f'https://api.blockchair.com/bitcoin/dashboards/address/{addr}?transaction_details=false',
+              'blockstream_txs_first': f'https://blockstream.info/api/address/{addr}/txs',
+              'mempool_txs_first': f'https://mempool.space/api/address/{addr}/txs',
+          }
+          manifest = {'address': addr, 'fetched_at_utc': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()), 'items': {}}
+          for name, url in endpoints.items():
+              req = urllib.request.Request(url, headers={'User-Agent':'OSINT-deepseek-evidence-probe/1.0'})
+              item = {'url': url}
+              try:
+                  with urllib.request.urlopen(req, timeout=30) as r:
+                      body = r.read()
+                      item['status'] = r.status
+                      item['content_type'] = r.headers.get('content-type')
+                      item['bytes'] = len(body)
+                      item['sha256'] = hashlib.sha256(body).hexdigest()
+                      suffix = '.json' if b'json' in (r.headers.get('content-type') or '').encode() or body[:1] in (b'{', b'[') else '.txt'
+                      (out / f'{name}{suffix}').write_bytes(body)
+                      try:
+                          parsed = json.loads(body)
+                          item['json_type'] = type(parsed).__name__
+                      except Exception:
+                          pass
+              except Exception as e:
+                  item['error'] = repr(e)
+              manifest['items'][name] = item
+          (out / 'manifest.json').write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding='utf-8')
+          print(json.dumps(manifest, ensure_ascii=False, indent=2))
+          PY
+      - name: Show compact evidence payloads
+        shell: bash
+        run: |
+          for f in btc_probe_evidence/*; do
+            echo "===== $f ====="
+            head -c 12000 "$f" || true
+            echo
+          done
+      - name: Upload evidence artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: btc-onchain-evidence
+          path: btc_probe_evidence/
+          if-no-files-found: error
+          retention-days: 7

@@ -1,0 +1,105 @@
+name: BTC Wallet Behavior Reconstruction
+
+on:
+  push:
+    branches:
+      - agent/btc-onchain-probe-20260902
+    paths:
+      - '.github/workflows/btc-wallet-behavior.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  behavior:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Reconstruct wallet-level history
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json,re,urllib.request,time
+          from pathlib import Path
+          from datetime import datetime,timezone
+          from collections import Counter
+
+          WALLET_ID='00421c7e25459ed4'
+          out=Path('btc_wallet_behavior'); out.mkdir(exist_ok=True)
+          def get(url):
+              req=urllib.request.Request(url,headers={'User-Agent':'Mozilla/5.0 OSINT-deepseek/1.0'})
+              with urllib.request.urlopen(req,timeout=30) as r: return r.read().decode('utf-8','replace')
+
+          html=get(f'https://www.walletexplorer.com/wallet/{WALLET_ID}/addresses')
+          wallet=set(re.findall(r'(?<![A-Za-z0-9])[13][a-km-zA-HJ-NP-Z1-9]{25,34}(?![A-Za-z0-9])',html))
+          assert len(wallet)>=20, len(wallet)
+          alltx={}; raw_manifest=[]
+          for n,a in enumerate(sorted(wallet),1):
+              txt=get(f'https://blockchain.info/rawaddr/{a}?limit=100')
+              d=json.loads(txt)
+              raw_manifest.append({'address':a,'n_tx':d.get('n_tx'),'balance':d.get('final_balance')})
+              for tx in d.get('txs',[]): alltx[tx['hash']]=tx
+              time.sleep(0.05)
+          (out/'address_manifest.json').write_text(json.dumps(raw_manifest,indent=2),encoding='utf-8')
+
+          rows=[]; ext_in=Counter(); ext_out=Counter(); dice_bets=[]; dice_returns=[]
+          for tx in alltx.values():
+              wi=0; wo=0; other_inputs=[]; other_outputs=[]
+              for i in tx.get('inputs',[]):
+                  p=i.get('prev_out') or {}; a=p.get('addr'); v=p.get('value') or 0
+                  if a in wallet: wi+=v
+                  elif a: other_inputs.append((a,v)); ext_in[a]+=v
+              for o in tx.get('out',[]):
+                  a=o.get('addr'); v=o.get('value') or 0
+                  if a in wallet: wo+=v
+                  elif a: other_outputs.append((a,v)); ext_out[a]+=v
+              fee=tx.get('fee') or 0
+              ts=tx.get('time') or 0
+              net=wo-wi
+              # wallet-relative classification; co-input transactions stay MIXED
+              if wi==0 and wo>0: cls='INCOMING'
+              elif wi>0 and not other_inputs: cls='OUTGOING'
+              elif wi>0 and other_inputs: cls='MIXED_COINPUT'
+              else: cls='OTHER'
+              row={'txid':tx['hash'],'utc':datetime.fromtimestamp(ts,tz=timezone.utc).isoformat() if ts else None,
+                   'time':ts,'class':cls,'wallet_inputs_sat':wi,'wallet_outputs_sat':wo,'wallet_net_sat':net,
+                   'fee_sat':fee,'other_inputs':other_inputs,'other_outputs':other_outputs}
+              rows.append(row)
+              for a,v in other_outputs:
+                  if a.startswith('1dice'): dice_bets.append({'utc':row['utc'],'txid':tx['hash'],'address':a,'value_sat':v,'class':cls})
+              for a,v in other_inputs:
+                  if a.startswith('1dice') or a.startswith('1bank'): dice_returns.append({'utc':row['utc'],'txid':tx['hash'],'address':a,'value_sat':v,'class':cls})
+          rows.sort(key=lambda r:(r['time'],r['txid']))
+
+          # Balance from all addresses, and wallet net flow. Positive/negative net is safe at wallet level.
+          pos=sum(max(0,r['wallet_net_sat']) for r in rows)
+          neg=sum(max(0,-r['wallet_net_sat']) for r in rows)
+          final=sum(x.get('balance') or 0 for x in raw_manifest)
+          by_class=Counter(r['class'] for r in rows)
+          summary={
+              'wallet_id':WALLET_ID,'address_count':len(wallet),'dedup_tx_count':len(rows),
+              'first_activity_utc':rows[0]['utc'] if rows else None,'last_activity_utc':rows[-1]['utc'] if rows else None,
+              'current_balance_sat':final,'current_balance_btc':round(final/1e8,8),
+              'sum_positive_wallet_net_sat':pos,'sum_positive_wallet_net_btc':round(pos/1e8,8),
+              'sum_negative_wallet_net_sat':neg,'sum_negative_wallet_net_btc':round(neg/1e8,8),
+              'classes':dict(by_class),'direct_dice_outputs_count':len(dice_bets),
+              'direct_dice_outputs_btc':round(sum(x['value_sat'] for x in dice_bets)/1e8,8),
+              'dice_or_bank_input_events_count':len(dice_returns),
+              'top_external_output_by_value':[(a,round(v/1e8,8)) for a,v in ext_out.most_common(20)],
+              'top_external_input_by_value':[(a,round(v/1e8,8)) for a,v in ext_in.most_common(20)],
+          }
+          evidence={'summary':summary,'wallet_addresses':sorted(wallet),'transactions':rows,'dice_bets':dice_bets,'dice_returns':dice_returns}
+          (out/'wallet_behavior.json').write_text(json.dumps(evidence,ensure_ascii=False,indent=2),encoding='utf-8')
+          print('=== SUMMARY ==='); print(json.dumps(summary,ensure_ascii=False,indent=2))
+          print('=== DICE BET OUTPUTS ===')
+          for x in dice_bets: print(json.dumps({**x,'value_btc':round(x['value_sat']/1e8,8)},ensure_ascii=False))
+          print('=== DICE/BANK INPUT EVENTS ===')
+          for x in dice_returns: print(json.dumps({**x,'value_btc':round(x['value_sat']/1e8,8)},ensure_ascii=False))
+          PY
+      - name: Upload behavior evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: btc-wallet-behavior
+          path: btc_wallet_behavior/
+          if-no-files-found: error
+          retention-days: 7

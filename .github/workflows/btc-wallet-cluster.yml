@@ -1,0 +1,72 @@
+name: BTC Wallet Cluster Expansion
+
+on:
+  push:
+    branches:
+      - agent/btc-onchain-probe-20260902
+    paths:
+      - '.github/workflows/btc-wallet-cluster.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  cluster:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Expand WalletExplorer cluster
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json,re,urllib.request,time,hashlib
+          from pathlib import Path
+          from html import unescape
+
+          WALLET='00421c7e25459ed4'
+          TARGET='1CfXQEZFcfje4bPqNbu9dtj2FXufUpqD75'
+          out=Path('btc_wallet_cluster'); out.mkdir(exist_ok=True)
+          def get(url):
+              req=urllib.request.Request(url,headers={'User-Agent':'Mozilla/5.0 OSINT-deepseek/1.0'})
+              with urllib.request.urlopen(req,timeout=30) as r:
+                  return r.read().decode('utf-8','replace')
+
+          urls=[
+              f'https://www.walletexplorer.com/wallet/{WALLET}',
+              f'https://www.walletexplorer.com/wallet/{WALLET}/addresses',
+          ]
+          pages={}
+          for i,u in enumerate(urls):
+              try:
+                  t=get(u); pages[u]=t
+                  (out/f'walletexplorer_{i}.html').write_text(t,encoding='utf-8')
+              except Exception as e: pages[u]=f'ERROR {e!r}'
+
+          html='\n'.join(v for v in pages.values() if not v.startswith('ERROR'))
+          addresses=sorted(set(re.findall(r'(?<![A-Za-z0-9])[13][a-km-zA-HJ-NP-Z1-9]{25,34}(?![A-Za-z0-9])',html)))
+          bech=sorted(set(re.findall(r'(?<![A-Za-z0-9])bc1[ac-hj-np-z02-9]{11,71}(?![A-Za-z0-9])',html,re.I)))
+          addresses+=bech
+          wallet_name=None
+          m=re.search(r'<h2>Wallet\s+([^<]+)',html,re.I)
+          if m: wallet_name=unescape(re.sub(r'\s+',' ',m.group(1))).strip()
+          mtx=re.search(r'total transactions:\s*([0-9,]+)',html,re.I)
+          ma=re.search(r'total addresses:\s*([0-9,]+)',html,re.I)
+          summary={
+              'wallet_id':WALLET,'target':TARGET,'wallet_name':wallet_name,
+              'parsed_unique_addresses':len(addresses),'target_in_parsed_addresses':TARGET in addresses,
+              'reported_total_transactions':mtx.group(1) if mtx else None,
+              'reported_total_addresses':ma.group(1) if ma else None,
+              'addresses':addresses,
+              'source_urls':urls,
+              'fetched_at_utc':time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime())
+          }
+          (out/'cluster_summary.json').write_text(json.dumps(summary,ensure_ascii=False,indent=2),encoding='utf-8')
+          print(json.dumps(summary,ensure_ascii=False,indent=2))
+          PY
+      - name: Upload cluster evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: btc-wallet-cluster
+          path: btc_wallet_cluster/
+          if-no-files-found: error
+          retention-days: 7

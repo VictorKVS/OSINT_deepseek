@@ -1,0 +1,163 @@
+name: BTC On-chain Analysis
+
+on:
+  push:
+    branches:
+      - agent/btc-onchain-probe-20260902
+    paths:
+      - '.github/workflows/btc-onchain-analysis.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Fetch and analyze complete address history
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json, re, time, urllib.request, urllib.error, hashlib, statistics
+          from pathlib import Path
+          from datetime import datetime, timezone
+          from collections import Counter
+
+          ADDR='1CfXQEZFcfje4bPqNbu9dtj2FXufUpqD75'
+          out=Path('btc_analysis_evidence'); out.mkdir(exist_ok=True)
+
+          def get(url, binary=False):
+              req=urllib.request.Request(url,headers={'User-Agent':'Mozilla/5.0 OSINT-deepseek/1.0'})
+              with urllib.request.urlopen(req,timeout=30) as r:
+                  b=r.read()
+                  return b if binary else b.decode('utf-8','replace')
+
+          raw_text=get(f'https://blockchain.info/rawaddr/{ADDR}?limit=50')
+          raw=json.loads(raw_text)
+          (out/'blockchain_rawaddr_50.json').write_text(raw_text,encoding='utf-8')
+
+          # independent stats
+          stats={}
+          for name,url in {
+              'blockstream':f'https://blockstream.info/api/address/{ADDR}',
+              'mempool':f'https://mempool.space/api/address/{ADDR}',
+          }.items():
+              txt=get(url); stats[name]=json.loads(txt); (out/f'{name}_address.json').write_text(txt,encoding='utf-8')
+
+          # target pages from heuristic/OSINT explorers
+          pages={}
+          for name,url in {
+              'walletexplorer':f'https://www.walletexplorer.com/address/{ADDR}',
+              'bitinfocharts':f'https://bitinfocharts.com/bitcoin/address/{ADDR}',
+              'bitcoinwhoswho':f'https://www.bitcoinwhoswho.com/address/{ADDR}',
+          }.items():
+              try:
+                  txt=get(url); pages[name]=txt; (out/f'{name}_target.html').write_text(txt,encoding='utf-8')
+              except Exception as e:
+                  pages[name]=f'ERROR {e!r}'
+
+          rows=[]; cp_in=Counter(); cp_out=Counter(); dice_hits=Counter(); bank_hits=Counter()
+          for tx in raw.get('txs',[]):
+              ins=[]; outs=[]
+              spent=0; received=0
+              for i in tx.get('inputs',[]):
+                  po=i.get('prev_out') or {}; a=po.get('addr'); v=po.get('value') or 0
+                  if a==ADDR: spent+=v
+                  elif a: ins.append((a,v)); cp_in[a]+=1
+                  if a and a.startswith('1dice'): dice_hits[a]+=1
+                  if a and a.startswith('1bank'): bank_hits[a]+=1
+              for o in tx.get('out',[]):
+                  a=o.get('addr'); v=o.get('value') or 0
+                  if a==ADDR: received+=v
+                  elif a: outs.append((a,v)); cp_out[a]+=1
+                  if a and a.startswith('1dice'): dice_hits[a]+=1
+                  if a and a.startswith('1bank'): bank_hits[a]+=1
+              ts=tx.get('time') or 0
+              rows.append({
+                  'time':ts,
+                  'utc':datetime.fromtimestamp(ts,tz=timezone.utc).isoformat() if ts else None,
+                  'block_height':tx.get('block_height'),
+                  'txid':tx.get('hash'),
+                  'received_sat':received,
+                  'spent_sat':spent,
+                  'net_sat':received-spent,
+                  'inputs_other':ins,
+                  'outputs_other':outs,
+                  'fee_sat':tx.get('fee'),
+                  'result_field':tx.get('result'),
+                  'balance_field':tx.get('balance'),
+              })
+          rows.sort(key=lambda x:(x['time'],x['txid'] or ''))
+
+          # exact address-output lifecycle using blockchain transaction indexes is not reliable enough here;
+          # derive temporal holding intervals between address funding and next address spend as descriptive only.
+          funding=[r for r in rows if r['received_sat']>0]
+          spends=[r for r in rows if r['spent_sat']>0]
+
+          def btc(s): return round(s/1e8,8)
+          summary={
+              'address':ADDR,
+              'n_tx':raw.get('n_tx'),
+              'total_received_sat':raw.get('total_received'),
+              'total_received_btc':btc(raw.get('total_received',0)),
+              'total_sent_sat':raw.get('total_sent'),
+              'total_sent_btc':btc(raw.get('total_sent',0)),
+              'final_balance_sat':raw.get('final_balance'),
+              'final_balance_btc':btc(raw.get('final_balance',0)),
+              'first_activity_utc':rows[0]['utc'] if rows else None,
+              'first_txid':rows[0]['txid'] if rows else None,
+              'last_activity_utc':rows[-1]['utc'] if rows else None,
+              'last_txid':rows[-1]['txid'] if rows else None,
+              'funding_events':len(funding),
+              'spend_events':len(spends),
+              'unique_other_input_addresses':len(cp_in),
+              'unique_other_output_addresses':len(cp_out),
+              'dice_addresses':dict(dice_hits),
+              'bank_addresses':dict(bank_hits),
+              'largest_receive_btc':btc(max((r['received_sat'] for r in rows),default=0)),
+              'largest_spend_btc':btc(max((r['spent_sat'] for r in rows),default=0)),
+              'blockstream_chain_stats':stats['blockstream'].get('chain_stats'),
+              'mempool_chain_stats':stats['mempool'].get('chain_stats'),
+              'mempool_stats':stats['mempool'].get('mempool_stats'),
+          }
+
+          # Extract WalletExplorer wallet label/id and BitInfoCharts wallet label if present.
+          we=pages.get('walletexplorer','')
+          m=re.search(r'part of wallet\s*<a[^>]*>([^<]+)</a>',we,re.I)
+          if not m: m=re.search(r'part of wallet\s*([^<\r\n]+)',we,re.I)
+          summary['walletexplorer_wallet_text']=m.group(1).strip() if m else None
+          # Preserve first short snippets around notable phrases as evidence aids.
+          for key,txt in pages.items():
+              low=txt.lower(); snippets=[]
+              for needle in ['part of wallet','satoshidice','wallet:','tags','gambling']:
+                  p=low.find(needle)
+                  if p>=0: snippets.append(re.sub(r'\s+',' ',txt[max(0,p-180):p+420]))
+              summary[f'{key}_snippets']=snippets[:5]
+
+          analysis={'summary':summary,'transactions':rows,
+                    'top_other_inputs':cp_in.most_common(25),'top_other_outputs':cp_out.most_common(25)}
+          (out/'analysis.json').write_text(json.dumps(analysis,ensure_ascii=False,indent=2),encoding='utf-8')
+
+          print('=== SUMMARY ===')
+          print(json.dumps(summary,ensure_ascii=False,indent=2))
+          print('=== TRANSACTIONS OLDEST->NEWEST ===')
+          for r in rows:
+              print(json.dumps({
+                  'utc':r['utc'],'txid':r['txid'],'received_btc':btc(r['received_sat']),
+                  'spent_btc':btc(r['spent_sat']),'net_btc':btc(r['net_sat']),
+                  'inputs_other':[(a,btc(v)) for a,v in r['inputs_other']],
+                  'outputs_other':[(a,btc(v)) for a,v in r['outputs_other']],
+                  'fee_btc':btc(r['fee_sat'] or 0)
+              },ensure_ascii=False))
+          print('=== TOP COUNTERPARTIES ===')
+          print('inputs',json.dumps(cp_in.most_common(25),ensure_ascii=False))
+          print('outputs',json.dumps(cp_out.most_common(25),ensure_ascii=False))
+          PY
+      - name: Upload analysis evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: btc-onchain-analysis
+          path: btc_analysis_evidence/
+          if-no-files-found: error
+          retention-days: 7

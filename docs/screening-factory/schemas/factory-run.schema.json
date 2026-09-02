@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://father.example/schemas/factory-run.schema.json",
+  "title": "FATHER OSINT Factory Run",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["request", "plan", "results", "summary", "run_id"],
+  "properties": {
+    "request": {"type": "object"},
+    "plan": {"type": "object"},
+    "results": {"type": "array", "items": {"type": "object"}},
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["total", "counts_by_outcome", "counts_by_stream", "started_at_utc", "finished_at_utc", "duration_ms", "peak_parallelism", "report_ready", "blocking_gaps"],
+      "properties": {
+        "total": {"type": "integer", "minimum": 0},
+        "counts_by_outcome": {"type": "object", "additionalProperties": {"type": "integer", "minimum": 0}},
+        "counts_by_stream": {"type": "object", "additionalProperties": {"type": "integer", "minimum": 0}},
+        "started_at_utc": {"type": "string"},
+        "finished_at_utc": {"type": "string"},
+        "duration_ms": {"type": "integer", "minimum": 0},
+        "peak_parallelism": {"type": "integer", "minimum": 0},
+        "report_ready": {"type": "boolean"},
+        "blocking_gaps": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "run_id": {"type": "string"}
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://father.example/schemas/source-registry.schema.json",
+  "title": "FATHER OSINT Source Registry",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "generated_for", "sources"],
+  "properties": {
+    "schema_version": {"const": "father-osint.source-registry.v1"},
+    "generated_for": {"type": "string"},
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["source_id", "title", "jurisdiction", "source_family", "authority_tier", "canonical_url", "subject_kinds", "access_mode", "freshness_policy", "usage_note", "discovery_only"],
+        "properties": {
+          "source_id": {"type": "string"},
+          "title": {"type": "string"},
+          "jurisdiction": {"type": "string"},
+          "source_family": {"type": "string"},
+          "authority_tier": {"type": "string"},
+          "canonical_url": {"type": "string", "format": "uri"},
+          "subject_kinds": {"type": "array", "items": {"enum": ["PERSON", "LEGAL_ENTITY"]}},
+          "access_mode": {"type": "string"},
+          "freshness_policy": {"type": "string"},
+          "usage_note": {"type": "string"},
+          "discovery_only": {"type": "boolean"}
+        }
+      }
+    }
+  }
+}

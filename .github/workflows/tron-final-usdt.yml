@@ -1,0 +1,139 @@
+name: TRON Final Official USDT Reconciliation
+
+on:
+  push:
+    branches:
+      - agent/tron-final-20260902
+    paths:
+      - '.github/workflows/tron-final-usdt.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  reconcile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Fetch complete official USDT transfer history
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json, time, urllib.parse, urllib.request, hashlib
+          from pathlib import Path
+          from collections import Counter, defaultdict
+          from datetime import datetime, timezone
+
+          ADDR='TVpkbcdFitcVMGX9Ty9g33FNSwTzq49fkF'
+          USDT='TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t'
+          EXPECT_SENDER='TBBc6QRDkyP4wYmWjBcoGYrGra2jRY9c14'
+          out=Path('tron_final_usdt'); out.mkdir(exist_ok=True)
+
+          def get(url,retries=6):
+              last=None
+              for attempt in range(retries):
+                  try:
+                      req=urllib.request.Request(url,headers={'User-Agent':'OSINT-deepseek-evidence/1.0'})
+                      with urllib.request.urlopen(req,timeout=40) as r:
+                          body=r.read(); return body, dict(r.headers), r.status
+                  except Exception as e:
+                      last=e; time.sleep(min(16,2**attempt))
+              raise last
+
+          rows=[]; pages=[]; fingerprint=None; page=0
+          while True:
+              params={
+                  'limit':'200',
+                  'only_confirmed':'true',
+                  'contract_address':USDT,
+                  'order_by':'block_timestamp,asc',
+              }
+              if fingerprint: params['fingerprint']=fingerprint
+              url='https://api.trongrid.io/v1/accounts/'+ADDR+'/transactions/trc20?'+urllib.parse.urlencode(params)
+              body,headers,status=get(url); page+=1
+              sha=hashlib.sha256(body).hexdigest()
+              (out/f'page_{page:03d}.json').write_bytes(body)
+              obj=json.loads(body)
+              data=obj.get('data') or []
+              pages.append({'page':page,'url':url,'status':status,'count':len(data),'sha256':sha})
+              for x in data:
+                  ti=x.get('token_info') or {}
+                  token_addr=ti.get('address') or x.get('contract_address')
+                  if token_addr and token_addr != USDT:
+                      continue
+                  dec=int(ti.get('decimals',6) or 6)
+                  raw=int(x.get('value') or 0)
+                  rows.append({
+                      'txid':x.get('transaction_id'),
+                      'timestamp_ms':int(x.get('block_timestamp') or 0),
+                      'from':x.get('from'),
+                      'to':x.get('to'),
+                      'raw_value':raw,
+                      'decimals':dec,
+                      'amount':raw/(10**dec),
+                      'token_symbol':ti.get('symbol'),
+                      'token_name':ti.get('name'),
+                      'token_address':token_addr,
+                  })
+              meta=obj.get('meta') or {}
+              links=meta.get('links') or {}
+              nxt=links.get('next')
+              new_fp=meta.get('fingerprint')
+              if nxt and len(data):
+                  # Use provider's exact next URL when available.
+                  url_next=nxt
+                  try:
+                      qs=urllib.parse.parse_qs(urllib.parse.urlparse(url_next).query)
+                      new_fp=(qs.get('fingerprint') or [new_fp])[0]
+                  except Exception:
+                      pass
+              if not data or not new_fp or new_fp==fingerprint:
+                  break
+              fingerprint=new_fp
+              if page>=200:
+                  raise RuntimeError('pagination safety limit reached')
+              time.sleep(.08)
+
+          rows.sort(key=lambda r:(r['timestamp_ms'],r['txid'] or ''))
+          incoming=[r for r in rows if r['to']==ADDR]
+          outgoing=[r for r in rows if r['from']==ADDR]
+          other=[r for r in rows if r['to']!=ADDR and r['from']!=ADDR]
+          top_in=Counter(); top_out=Counter()
+          for r in incoming: top_in[r['from']]+=r['amount']
+          for r in outgoing: top_out[r['to']]+=r['amount']
+          exact_600=[r for r in incoming if r['from']==EXPECT_SENDER and abs(r['amount']-600000.0)<1e-9]
+          exact_820=[r for r in incoming if abs(r['amount']-820.0)<1e-9]
+
+          def iso(ms):
+              return datetime.fromtimestamp(ms/1000,tz=timezone.utc).isoformat() if ms else None
+          summary={
+              'address':ADDR,'official_usdt_contract':USDT,'page_count':page,
+              'official_usdt_event_count':len(rows),'incoming_count':len(incoming),'outgoing_count':len(outgoing),'other_count':len(other),
+              'incoming_total_usdt':round(sum(r['amount'] for r in incoming),6),
+              'outgoing_total_usdt':round(sum(r['amount'] for r in outgoing),6),
+              'net_usdt':round(sum(r['amount'] for r in incoming)-sum(r['amount'] for r in outgoing),6),
+              'first_event_utc':iso(rows[0]['timestamp_ms']) if rows else None,
+              'last_event_utc':iso(rows[-1]['timestamp_ms']) if rows else None,
+              'unique_in_senders':len({r['from'] for r in incoming if r['from']}),
+              'unique_out_recipients':len({r['to'] for r in outgoing if r['to']}),
+              'largest_incoming_usdt':max([r['amount'] for r in incoming],default=0),
+              'largest_outgoing_usdt':max([r['amount'] for r in outgoing],default=0),
+              'exact_600k_matches':exact_600,
+              'exact_820_matches':exact_820,
+              'top_incoming_counterparties_by_usdt':top_in.most_common(20),
+              'top_outgoing_counterparties_by_usdt':top_out.most_common(20),
+          }
+          evidence={'summary':summary,'transfers':rows,'pages':pages}
+          (out/'final_usdt_analysis.json').write_text(json.dumps(evidence,ensure_ascii=False,indent=2),encoding='utf-8')
+          (out/'manifest.json').write_text(json.dumps({'pages':pages},ensure_ascii=False,indent=2),encoding='utf-8')
+          print('=== SUMMARY ==='); print(json.dumps(summary,ensure_ascii=False,indent=2))
+          print('=== 600K ==='); print(json.dumps(exact_600,ensure_ascii=False,indent=2))
+          print('=== 820 ==='); print(json.dumps(exact_820,ensure_ascii=False,indent=2))
+          PY
+      - name: Upload evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: tron-final-usdt-evidence
+          path: tron_final_usdt/
+          if-no-files-found: error
+          retention-days: 14

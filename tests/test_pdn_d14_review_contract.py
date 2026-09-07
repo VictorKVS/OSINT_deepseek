@@ -21,6 +21,9 @@ def test_d14_apply_requires_complete_human_decisions_and_keeps_d15_unpromoted():
     assert "D14_DECISION_SET_MISMATCH" in script
     assert "REVIEWER_OR_REASON_MISSING" in script
     assert "ESCALATE" in script
+    assert "D14_DOCUMENT_PREFLIGHT_FAILED" in script
+    assert "store.save_documents(registry_documents)" in script
+    assert "D14_DOCUMENT_BATCH_WRITE_FAILED" in script
     assert "PipelineStage.D14_EXPERT_REVIEWED" in script
     assert "StageState.VERIFIED" in script
     assert "D15_PROMOTION_REQUEST" in script
@@ -37,6 +40,13 @@ def test_d15_requires_explicit_operator_approval_and_all_rule_classes_accepted()
     assert 'parser.add_argument("--approve", action="store_true"' in script
     assert "D15_EXPLICIT_APPROVAL_REQUIRED" in script
     assert "D15_BLOCKED_REJECTED_OR_UNACCEPTED_RULES" in script
+    assert "D15_CORPUS_ID_MISMATCH" in script
+    assert "D15_PACKET_HASH_BINDING_MISMATCH" in script
+    assert "D15_DECISIONS_HASH_BINDING_MISMATCH" in script
+    assert "D15_ACCEPTED_RULE_BINDING_MISMATCH" in script
+    assert "D15_CONFLICT_DECISION_BINDING_MISMATCH" in script
+    assert "D15_DOCUMENT_PREFLIGHT_FAILED" in script
+    assert "store.save_documents(registry_documents)" in script
     assert "PipelineStage.D15_KB_READY" in script
     assert "StageState.VERIFIED" in script
     assert "EXPLICIT_OPERATOR_COMMAND" in script

@@ -84,5 +84,6 @@ jobs:
         with:
           name: test-evidence-osint-deepseek-${{ github.run_id }}-${{ github.run_attempt }}-${{ github.sha }}
           path: .test-results
-          if-no-files-found: warn
+          if-no-files-found: error
+          include-hidden-files: true
           retention-days: 90

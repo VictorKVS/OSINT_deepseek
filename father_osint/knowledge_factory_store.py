@@ -65,16 +65,39 @@ class KnowledgeFactoryStore:
         self._write_jsonl(self.sources_file, rows)
 
     def save_document(self, document: DocumentRecord) -> None:
+        self.save_documents((document,))
+
+    def save_documents(self, documents: Iterable[DocumentRecord]) -> None:
+        """Atomically upsert a validated batch of document registry records.
+
+        All payloads are materialized before the registry is touched and the
+        JSONL registry is replaced exactly once. Duplicate IDs in the incoming
+        batch are rejected so a caller cannot accidentally create order-based
+        partial semantics inside one logical pipeline transition.
+        """
+        batch = list(documents)
+        if not batch:
+            return
+
+        payloads = [document.to_dict() for document in batch]
+        document_ids = [document.document_id for document in batch]
+        if len(document_ids) != len(set(document_ids)):
+            raise ValueError("duplicate document_id in batch")
+
         rows = self._read_jsonl(self.documents_file)
-        payload = document.to_dict()
-        replaced = False
-        for index, row in enumerate(rows):
-            if row.get("document_id") == document.document_id:
+        row_index = {
+            str(row.get("document_id")): index
+            for index, row in enumerate(rows)
+            if row.get("document_id") is not None
+        }
+        for document, payload in zip(batch, payloads, strict=True):
+            index = row_index.get(document.document_id)
+            if index is None:
+                row_index[document.document_id] = len(rows)
+                rows.append(payload)
+            else:
                 rows[index] = payload
-                replaced = True
-                break
-        if not replaced:
-            rows.append(payload)
+
         self._write_jsonl(self.documents_file, rows)
 
     def append_acquisition(self, event: Mapping[str, object]) -> None:

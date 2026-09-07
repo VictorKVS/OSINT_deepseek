@@ -146,6 +146,23 @@ def main() -> int:
     rejected_rules = [row for row in applied if row["scope_type"] == "RULE_CLASS" and row["decision"] == "REJECT"]
     conflict_decisions = [row for row in applied if row["scope_type"] != "RULE_CLASS"]
 
+    # Fail closed before writing result artifacts: every target must exist and
+    # must be able to advance to D14. The actual registry write happens once.
+    store = KnowledgeFactoryStore(STORE_ROOT)
+    registry_documents: list[DocumentRecord] = []
+    for document_id in TARGETS:
+        payload = store.get_document(document_id)
+        if not payload:
+            print(f"D14_DOCUMENT_REGISTRY_MISSING:{document_id}")
+            return 2
+        try:
+            document = _document(payload)
+            document.set_stage_state(PipelineStage.D14_EXPERT_REVIEWED, StageState.VERIFIED)
+        except (KeyError, TypeError, ValueError) as exc:
+            print(f"D14_DOCUMENT_PREFLIGHT_FAILED:{document_id}:{exc}")
+            return 2
+        registry_documents.append(document)
+
     decision_material = json.dumps(applied, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")
     decisions_sha256 = _sha256_bytes(decision_material)
     result = {
@@ -186,15 +203,12 @@ def main() -> int:
         encoding="utf-8",
     )
 
-    store = KnowledgeFactoryStore(STORE_ROOT)
-    for document_id in TARGETS:
-        payload = store.get_document(document_id)
-        if not payload:
-            print(f"D14_DOCUMENT_REGISTRY_MISSING:{document_id}")
-            return 2
-        document = _document(payload)
-        document.set_stage_state(PipelineStage.D14_EXPERT_REVIEWED, StageState.VERIFIED)
-        store.save_document(document)
+    try:
+        store.save_documents(registry_documents)
+    except (OSError, ValueError) as exc:
+        print(f"D14_DOCUMENT_BATCH_WRITE_FAILED:{exc}")
+        return 2
+
     store.append_audit(AuditEvent(
         actor_id=",".join(sorted(reviewers)),
         actor_role=Role.REVIEWER.value,

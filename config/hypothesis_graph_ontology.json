@@ -1,0 +1,76 @@
+{
+  "schema_version": "0.1",
+  "record_type": "HYPOTHESIS_GRAPH_ONTOLOGY",
+  "active_product_contour": "REASONING_GRAPH",
+  "tool_router_unlocked": false,
+  "node_types": [
+    "RQ",
+    "HYP",
+    "ALT_HYP",
+    "FACT",
+    "CLAIM",
+    "EVIDENCE",
+    "SRC",
+    "TEST",
+    "RESULT",
+    "GAP",
+    "CONFLICT",
+    "DECISION"
+  ],
+  "edge_types": [
+    "ADDRESSES",
+    "SUPPORTS",
+    "CONTRADICTS",
+    "COMPETES_WITH",
+    "DEPENDS_ON",
+    "DERIVED_FROM",
+    "OBSERVED_IN",
+    "TESTED_BY",
+    "PRODUCES",
+    "REQUIRES",
+    "RESOLVES",
+    "WEAKENS",
+    "REJECTS",
+    "SUPERSEDES"
+  ],
+  "hypothesis_states": [
+    "DRAFT",
+    "OPEN",
+    "SUPPORTED",
+    "WEAKENED",
+    "CONFLICTED",
+    "REJECTED",
+    "CLOSED"
+  ],
+  "confidence_policy": {
+    "default_mode": "ORDINAL_WITH_REASONS",
+    "numeric_confidence_allowed": false,
+    "numeric_unlock_requires": [
+      "confidence_model_id",
+      "confidence_model_version",
+      "calibration_evidence",
+      "validation_status"
+    ]
+  },
+  "semantic_invariants": [
+    "FACT != CLAIM != INFERENCE != HYPOTHESIS != OPINION != RECOMMENDATION",
+    "ABSENCE_OF_EVIDENCE_IS_GAP_NOT_NEGATIVE_FACT",
+    "SOURCE_FAILURE_DOES_NOT_REJECT_HYPOTHESIS",
+    "MIRRORS_DO_NOT_CREATE_INDEPENDENT_SUPPORT",
+    "HYPOTHESIS_CANNOT_SILENTLY_PROMOTE_TO_FACT",
+    "REJECTED_HYPOTHESES_REMAIN_IN_HISTORY",
+    "ANALYTICALLY_MEANINGFUL_EDGES_ARE_AUDITABLE"
+  ],
+  "first_acceptance_fixture": {
+    "case_id": "CASE-SYNTH-HG-001",
+    "minimum_primary_hypotheses": 1,
+    "minimum_alternative_hypotheses": 1,
+    "minimum_support_edges": 1,
+    "minimum_counter_edges": 1,
+    "minimum_gap_nodes": 1,
+    "minimum_test_nodes": 1,
+    "must_preserve_rejected_hypothesis": true,
+    "external_tools_required": false
+  },
+  "unlock_condition": "GRAPH_CORE_G0_G5_PASS"
+}

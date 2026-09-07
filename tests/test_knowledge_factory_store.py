@@ -1,3 +1,5 @@
+import pytest
+
 from father_osint.knowledge_factory import (
     AuditEvent,
     DocumentRecord,
@@ -61,3 +63,41 @@ def test_store_creates_originals_boundary(tmp_path):
     store = KnowledgeFactoryStore(tmp_path)
     assert store.originals_dir.exists()
     assert store.originals_dir.parent == tmp_path
+
+
+def test_store_batch_rejects_duplicate_ids_without_mutating_registry(tmp_path):
+    store = KnowledgeFactoryStore(tmp_path)
+    original = DocumentRecord(title="Original", document_type="federal_law")
+    store.save_document(original)
+
+    changed = DocumentRecord(
+        title="Changed",
+        document_type="federal_law",
+        document_id=original.document_id,
+    )
+    conflicting = DocumentRecord(
+        title="Conflicting",
+        document_type="federal_law",
+        document_id=original.document_id,
+    )
+
+    with pytest.raises(ValueError, match="duplicate document_id in batch"):
+        store.save_documents((changed, conflicting))
+
+    stored = store.get_document(original.document_id)
+    assert stored is not None
+    assert stored["title"] == "Original"
+
+
+def test_store_batch_upserts_multiple_documents_in_one_transition(tmp_path):
+    store = KnowledgeFactoryStore(tmp_path)
+    first = DocumentRecord(title="First", document_type="federal_law")
+    second = DocumentRecord(title="Second", document_type="regulation")
+
+    store.save_documents((first, second))
+    first.topic_tags.append("updated")
+    second.topic_tags.append("updated")
+    store.save_documents((first, second))
+
+    assert store.get_document(first.document_id)["topic_tags"] == ["updated"]
+    assert store.get_document(second.document_id)["topic_tags"] == ["updated"]

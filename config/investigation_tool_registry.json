@@ -1,0 +1,138 @@
+{
+  "schema_version": "1.0",
+  "record_type": "INVESTIGATION_TOOL_REGISTRY",
+  "tools": [
+    {
+      "tool_id": "TELEGRAM_SEARCH",
+      "family": "SOCIAL_TELEGRAM",
+      "label": "Telegram Search",
+      "status": "READY",
+      "execution": "LOCAL_ADAPTER",
+      "capabilities": ["SEARCH", "PIVOT", "MESSAGE_DISCOVERY"],
+      "outputs": ["FINDING", "SOURCE_LOCATOR"],
+      "requires_case": true,
+      "policy": "PUBLIC_OR_AUTHORIZED_ONLY"
+    },
+    {
+      "tool_id": "TELEGRAM_DOWNLOAD",
+      "family": "SOCIAL_TELEGRAM",
+      "label": "Telegram Acquisition",
+      "status": "READY",
+      "execution": "LOCAL_ADAPTER",
+      "capabilities": ["ACQUIRE", "HASH", "PROVENANCE"],
+      "outputs": ["RAW_ARTIFACT", "FINDING", "ACQUISITION_RECEIPT"],
+      "requires_case": true,
+      "policy": "PUBLIC_OR_AUTHORIZED_ONLY"
+    },
+    {
+      "tool_id": "LOCAL_KB",
+      "family": "LOCAL_KNOWLEDGE",
+      "label": "Local Knowledge Base",
+      "status": "READY",
+      "execution": "LOCAL_ADAPTER",
+      "capabilities": ["SEARCH", "CROSS_REFERENCE", "REUSE_EVIDENCE"],
+      "outputs": ["FINDING", "EVIDENCE_REFERENCE"],
+      "requires_case": true,
+      "policy": "LOCAL_DATA_ONLY"
+    },
+    {
+      "tool_id": "GITHUB_CODE",
+      "family": "CODE_REPOSITORIES",
+      "label": "GitHub / Code Investigation",
+      "status": "EXPERIMENTAL",
+      "execution": "CONNECTOR_OR_LOCAL_ADAPTER",
+      "capabilities": ["REPOSITORY_SEARCH", "CODE_SEARCH", "COMMIT_TRACE"],
+      "outputs": ["FINDING", "SOURCE_LOCATOR"],
+      "requires_case": true,
+      "policy": "PUBLIC_OR_AUTHORIZED_ONLY"
+    },
+    {
+      "tool_id": "WEB_SEARCH",
+      "family": "WEB",
+      "label": "Web Search",
+      "status": "NEEDS_CONFIG",
+      "execution": "ADAPTER",
+      "capabilities": ["SEARCH", "OFFICIAL_SOURCE_DISCOVERY", "NEWS_DISCOVERY"],
+      "outputs": ["FINDING", "SOURCE_LOCATOR"],
+      "requires_case": true,
+      "policy": "PUBLIC_WEB_ONLY"
+    },
+    {
+      "tool_id": "DOMAIN_DNS_RDAP",
+      "family": "INFRASTRUCTURE",
+      "label": "Domain / DNS / RDAP",
+      "status": "PLANNED",
+      "execution": "ADAPTER",
+      "capabilities": ["DNS", "RDAP", "WHOIS_STYLE_METADATA", "PIVOT"],
+      "outputs": ["ENTITY", "RELATION", "FINDING"],
+      "requires_case": true,
+      "policy": "PASSIVE_ONLY"
+    },
+    {
+      "tool_id": "TLS_CT",
+      "family": "INFRASTRUCTURE",
+      "label": "TLS / Certificate Transparency",
+      "status": "PLANNED",
+      "execution": "ADAPTER",
+      "capabilities": ["CERTIFICATE_DISCOVERY", "DOMAIN_PIVOT"],
+      "outputs": ["ENTITY", "RELATION", "FINDING"],
+      "requires_case": true,
+      "policy": "PASSIVE_ONLY"
+    },
+    {
+      "tool_id": "BITCOIN_TRACE",
+      "family": "CRYPTO",
+      "label": "Bitcoin Investigation",
+      "status": "EXPERIMENTAL",
+      "execution": "LOCAL_ADAPTER",
+      "capabilities": ["ADDRESS", "TRANSACTION", "FLOW", "CLUSTER_HINT"],
+      "outputs": ["ENTITY", "RELATION", "FINDING", "TIMELINE_EVENT"],
+      "requires_case": true,
+      "policy": "PUBLIC_LEDGER_ONLY"
+    },
+    {
+      "tool_id": "TRON_TRACE",
+      "family": "CRYPTO",
+      "label": "TRON Investigation",
+      "status": "EXPERIMENTAL",
+      "execution": "LOCAL_ADAPTER",
+      "capabilities": ["ADDRESS", "TRANSACTION", "TOKEN_FLOW"],
+      "outputs": ["ENTITY", "RELATION", "FINDING", "TIMELINE_EVENT"],
+      "requires_case": true,
+      "policy": "PUBLIC_LEDGER_ONLY"
+    },
+    {
+      "tool_id": "MEDIA_METADATA",
+      "family": "MEDIA",
+      "label": "Media Metadata",
+      "status": "PLANNED",
+      "execution": "LOCAL_ADAPTER",
+      "capabilities": ["METADATA", "HASH", "FRAME_REFERENCE"],
+      "outputs": ["FINDING", "RAW_ARTIFACT"],
+      "requires_case": true,
+      "policy": "LOCAL_OR_PUBLIC_ARTIFACT"
+    },
+    {
+      "tool_id": "NARRATIVE_DRIFT",
+      "family": "MEDIA",
+      "label": "Narrative Drift Analyzer",
+      "status": "PLANNED",
+      "execution": "ANALYST_PIPELINE",
+      "capabilities": ["SOURCE_CHAIN", "FRAMING", "OMISSION", "EDIT_ANALYSIS", "COUNTER_NARRATIVE"],
+      "outputs": ["CLAIM", "RELATION", "ANALYST_NOTE"],
+      "requires_case": true,
+      "policy": "EVIDENCE_BOUND_ANALYSIS"
+    },
+    {
+      "tool_id": "GEO_MAP",
+      "family": "GEO",
+      "label": "Geo / Map Workspace",
+      "status": "PLANNED",
+      "execution": "ADAPTER",
+      "capabilities": ["LOCATION", "ROUTE", "SPATIAL_CLUSTER", "GEO_PIVOT"],
+      "outputs": ["ENTITY", "RELATION", "TIMELINE_EVENT"],
+      "requires_case": true,
+      "policy": "PUBLIC_OR_CASE_AUTHORIZED"
+    }
+  ]
+}

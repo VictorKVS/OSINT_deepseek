@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>FATHER OSINT — Investigation Workspace</title>
+  <link rel="icon" type="image/svg+xml" href="/brand-mark.svg" />
+  <link rel="stylesheet" href="/styles.css" />
+  <style>
+    :root{--iw-bg:#071018;--iw-panel:#0b1721;--iw-panel2:#0e1d29;--iw-line:#20384b;--iw-text:#dce9f2;--iw-muted:#7892a6;--iw-cyan:#49d8ff;--iw-green:#65e6a6;--iw-amber:#f6c867;--iw-red:#ff7b7b;--iw-violet:#b9a0ff}
+    body{background:radial-gradient(circle at 48% 0,#0c2231 0,#071018 36%,#050b10 100%);color:var(--iw-text);min-height:100vh;margin:0;font-family:Inter,Segoe UI,Arial,sans-serif}
+    *{box-sizing:border-box}.iw-shell{display:grid;grid-template-columns:230px minmax(0,1fr) 310px;grid-template-rows:72px minmax(650px,calc(100vh - 164px)) 92px;min-height:100vh}
+    .iw-top{grid-column:1/4;display:flex;align-items:center;gap:18px;padding:0 20px;border-bottom:1px solid var(--iw-line);background:#07121bdd;backdrop-filter:blur(16px);position:sticky;top:0;z-index:5}.iw-brand{display:flex;align-items:center;gap:10px;width:210px}.iw-brand img{width:40px;height:40px}.iw-brand b{letter-spacing:.18em;font-size:13px}.iw-brand small{display:block;color:var(--iw-muted);font-size:9px;letter-spacing:.13em}.iw-case-head{min-width:0;flex:1}.iw-case-head small{color:var(--iw-cyan);letter-spacing:.12em}.iw-case-head h1{font-size:20px;margin:3px 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.iw-status{display:flex;gap:8px;align-items:center}.iw-pill{border:1px solid var(--iw-line);background:#0d1a25;border-radius:999px;padding:7px 10px;font-size:10px;letter-spacing:.06em}.iw-pill.active{border-color:#65e6a655;color:var(--iw-green);background:#65e6a611}.iw-btn{border:1px solid var(--iw-line);background:#0c1a25;color:var(--iw-text);border-radius:9px;padding:9px 12px;cursor:pointer}.iw-btn.primary{background:#0f3342;border-color:#2b7187;color:#dff8ff}
+    .iw-left{grid-row:2;grid-column:1;border-right:1px solid var(--iw-line);background:#07121be8;padding:16px 12px;overflow:auto}.iw-section-title{font-size:9px;color:var(--iw-muted);letter-spacing:.15em;margin:10px 8px 8px}.iw-nav{display:grid;gap:4px}.iw-nav button{width:100%;text-align:left;border:0;background:transparent;color:#a9becd;padding:10px 10px;border-radius:8px;cursor:pointer}.iw-nav button.active,.iw-nav button:hover{background:#102330;color:#e9f5fb}.iw-nav button.active{box-shadow:inset 3px 0 0 var(--iw-cyan)}.iw-case-mini{border:1px solid var(--iw-line);background:#0a1822;border-radius:10px;padding:10px;margin-top:14px}.iw-case-mini b{display:block;font-size:11px}.iw-case-mini small{color:var(--iw-muted)}.iw-tool-list{display:grid;gap:6px}.iw-tool{border:1px solid #1c3344;background:#091722;border-radius:8px;padding:8px}.iw-tool b{display:block;font-size:10px}.iw-tool small{color:var(--iw-muted)}.iw-tool i{float:right;width:7px;height:7px;border-radius:50%;background:var(--iw-muted);margin-top:3px}.iw-tool.ready i{background:var(--iw-green)}.iw-tool.exp i{background:var(--iw-amber)}
+    .iw-main{grid-row:2;grid-column:2;padding:14px;overflow:auto;min-width:0}.iw-toolbar{display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap}.iw-toolbar .spacer{flex:1}.iw-view-tabs{display:flex;border:1px solid var(--iw-line);border-radius:9px;overflow:hidden}.iw-view-tabs button{border:0;border-right:1px solid var(--iw-line);background:#091721;color:var(--iw-muted);padding:8px 12px;cursor:pointer}.iw-view-tabs button:last-child{border-right:0}.iw-view-tabs button.active{background:#123041;color:var(--iw-cyan)}
+    .iw-grid{display:grid;grid-template-columns:minmax(360px,1.45fr) minmax(300px,.85fr);gap:12px}.iw-panel{border:1px solid var(--iw-line);background:linear-gradient(180deg,#0c1a25,#09141d);border-radius:12px;overflow:hidden;min-width:0}.iw-panel-head{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:12px 14px;border-bottom:1px solid #1a3040}.iw-panel-head small{color:var(--iw-muted)}.iw-panel-head h2{font-size:13px;margin:0}.iw-panel-body{padding:13px}.iw-canvas{height:470px;position:relative;background-image:linear-gradient(#14304133 1px,transparent 1px),linear-gradient(90deg,#14304133 1px,transparent 1px);background-size:32px 32px;overflow:hidden}.iw-edge{position:absolute;height:1px;background:#4d7084;transform-origin:left center}.iw-edge.e1{width:190px;left:150px;top:126px;transform:rotate(7deg)}.iw-edge.e2{width:170px;left:323px;top:150px;transform:rotate(34deg)}.iw-edge.e3{width:170px;left:198px;top:291px;transform:rotate(-28deg)}.iw-edge.e4{width:185px;left:348px;top:288px;transform:rotate(-54deg)}.iw-node{position:absolute;min-width:120px;max-width:170px;border:1px solid var(--iw-line);background:#0e2130;border-radius:10px;padding:10px;box-shadow:0 10px 30px #0006;cursor:pointer}.iw-node b{display:block;font-size:11px}.iw-node small{display:block;color:var(--iw-muted);font-size:9px;margin-top:4px}.iw-node.entity{border-color:#49d8ff77}.iw-node.evidence{border-color:#65e6a677}.iw-node.hypothesis{border-color:#b9a0ff77}.iw-node.alert{border-color:#ff7b7b77}.n1{left:42px;top:72px}.n2{left:296px;top:95px}.n3{left:482px;top:255px}.n4{left:156px;top:306px}.n5{left:322px;top:205px}.iw-node.selected{box-shadow:0 0 0 2px #49d8ff33,0 10px 30px #0008}
+    .iw-question{border:1px solid #1d3446;border-radius:9px;padding:10px;margin-bottom:8px;background:#0a1822}.iw-question b{font-size:10px}.iw-question small{display:block;color:var(--iw-muted);margin-top:5px}.iw-hyp{border-left:3px solid var(--iw-violet);padding:9px 10px;background:#0b1822;border-radius:7px;margin-bottom:8px}.iw-hyp .counts{display:flex;gap:8px;font-size:9px;color:var(--iw-muted);margin-top:6px}.iw-count.support{color:var(--iw-green)}.iw-count.counter{color:var(--iw-red)}
+    .iw-right{grid-row:2;grid-column:3;border-left:1px solid var(--iw-line);background:#08131ce8;padding:14px;overflow:auto}.iw-inspector-title{display:flex;justify-content:space-between;align-items:start;gap:10px}.iw-inspector-title h2{font-size:15px;margin:4px 0}.iw-kv{display:grid;grid-template-columns:92px 1fr;gap:6px 10px;font-size:10px;padding:10px 0;border-bottom:1px solid #182d3c}.iw-kv span{color:var(--iw-muted)}.iw-evidence-link{border:1px solid #214051;background:#0b1b27;border-radius:8px;padding:9px;margin-top:7px}.iw-evidence-link b{font-size:10px}.iw-evidence-link small{display:block;color:var(--iw-muted);margin-top:4px}.iw-quality{display:grid;grid-template-columns:1fr auto;gap:5px;margin-top:10px;font-size:10px}.iw-quality span:nth-child(odd){color:var(--iw-muted)}
+    .iw-trace{grid-column:1/4;grid-row:3;border-top:1px solid var(--iw-line);background:#061018;padding:10px 18px;display:grid;grid-template-columns:150px 1fr;gap:14px;align-items:start;overflow:hidden}.iw-trace h3{font-size:10px;letter-spacing:.12em;margin:4px 0;color:var(--iw-muted)}.iw-trace-row{display:flex;gap:7px;align-items:center;font:10px Consolas,monospace;color:#9fb4c3;white-space:nowrap;overflow:auto}.iw-trace-row span{padding:5px 7px;border:1px solid #1d3445;border-radius:6px;background:#091721}.iw-trace-row i{font-style:normal;color:var(--iw-cyan)}
+    .iw-hidden{display:none!important}.iw-table{width:100%;border-collapse:collapse;font-size:10px}.iw-table th,.iw-table td{text-align:left;border-bottom:1px solid #1b3141;padding:8px}.iw-table th{color:var(--iw-muted);font-weight:500}.iw-timeline{display:grid;gap:10px}.iw-time-row{display:grid;grid-template-columns:120px 18px 1fr;gap:8px}.iw-time-dot{width:9px;height:9px;border-radius:50%;background:var(--iw-cyan);margin-top:4px}.iw-time-row small{color:var(--iw-muted)}
+    @media(max-width:1200px){.iw-shell{grid-template-columns:210px minmax(0,1fr);grid-template-rows:72px auto 92px}.iw-right{display:none}.iw-top{grid-column:1/3}.iw-trace{grid-column:1/3}.iw-grid{grid-template-columns:1fr}.iw-main{grid-column:2}}
+    @media(max-width:760px){.iw-shell{display:block}.iw-left{display:none}.iw-top{position:static}.iw-brand{width:auto}.iw-case-head h1{font-size:15px}.iw-status .iw-pill{display:none}.iw-main{padding:8px}.iw-canvas{height:430px}.iw-trace{display:none}}
+  </style>
+</head>
+<body>
+  <div class="iw-shell">
+    <header class="iw-top">
+      <div class="iw-brand"><img src="/brand-mark.svg" alt="" /><div><b>FATHER</b><small>INVESTIGATION WORKSPACE</small></div></div>
+      <div class="iw-case-head"><small>CASE-2026-0001 · ACTIVE INVESTIGATION</small><h1>Новое расследование — рабочий пример интерфейса</h1></div>
+      <div class="iw-status"><span class="iw-pill active">ACTIVE</span><span class="iw-pill">3 questions</span><span class="iw-pill">2 hypotheses</span><button class="iw-btn">Export</button><button class="iw-btn primary">Run tool</button></div>
+    </header>
+
+    <aside class="iw-left">
+      <div class="iw-section-title">CASE</div>
+      <nav class="iw-nav" id="caseNav">
+        <button class="active" data-section="overview">◈ Overview</button>
+        <button data-section="questions">? Questions</button>
+        <button data-section="hypotheses">◇ Hypotheses</button>
+        <button data-section="entities">◎ Entities</button>
+        <button data-section="evidence">▦ Evidence</button>
+        <button data-section="timeline">↦ Timeline</button>
+        <button data-section="sources">◉ Sources</button>
+        <button data-section="tools">⌘ Tools</button>
+        <button data-section="tasks">▤ Tasks</button>
+        <button data-section="report">▣ Report</button>
+      </nav>
+      <div class="iw-case-mini"><b>Scope gate</b><small>Public / authorized sources only. Raw findings are not facts.</small></div>
+      <div class="iw-section-title">TOOLS</div>
+      <div class="iw-tool-list">
+        <div class="iw-tool ready"><i></i><b>Telegram</b><small>search + acquire</small></div>
+        <div class="iw-tool ready"><i></i><b>Local KB</b><small>search + reuse</small></div>
+        <div class="iw-tool exp"><i></i><b>GitHub / Code</b><small>experimental</small></div>
+        <div class="iw-tool exp"><i></i><b>Bitcoin / TRON</b><small>experimental</small></div>
+        <div class="iw-tool"><i></i><b>Web / Infra / Geo</b><small>next adapters</small></div>
+      </div>
+    </aside>
+
+    <main class="iw-main">
+      <div class="iw-toolbar"><div class="iw-view-tabs"><button class="active" data-view="graph">Graph</button><button data-view="table">Table</button><button data-view="timeline">Timeline</button></div><button class="iw-btn">Filter</button><button class="iw-btn">Pin path</button><div class="spacer"></div><span class="iw-pill">Evidence-backed edges only</span></div>
+      <div class="iw-grid">
+        <section class="iw-panel">
+          <div class="iw-panel-head"><div><h2>Investigation Canvas</h2><small>entities · evidence · relations · hypotheses</small></div><small id="canvasMode">GRAPH VIEW</small></div>
+          <div class="iw-panel-body iw-canvas" id="graphView">
+            <div class="iw-edge e1"></div><div class="iw-edge e2"></div><div class="iw-edge e3"></div><div class="iw-edge e4"></div>
+            <div class="iw-node entity n1 selected" data-node="org"><b>Entity · Organization</b><small>target organization</small></div>
+            <div class="iw-node entity n2" data-node="domain"><b>Entity · Domain</b><small>example.org</small></div>
+            <div class="iw-node evidence n3" data-node="evidence"><b>Evidence · EV-014</b><small>source + SHA + review</small></div>
+            <div class="iw-node hypothesis n4" data-node="hyp"><b>Hypothesis · H-02</b><small>open · 2 support / 1 counter</small></div>
+            <div class="iw-node alert n5" data-node="conflict"><b>Counter-evidence</b><small>independent source conflicts</small></div>
+          </div>
+          <div class="iw-panel-body iw-hidden" id="tableView">
+            <table class="iw-table"><thead><tr><th>ID</th><th>Type</th><th>Label</th><th>Status</th><th>Evidence</th></tr></thead><tbody><tr><td>ENT-001</td><td>ORGANIZATION</td><td>Target organization</td><td>VERIFIED</td><td>EV-002, EV-014</td></tr><tr><td>ENT-004</td><td>DOMAIN</td><td>example.org</td><td>CANDIDATE</td><td>EV-014</td></tr><tr><td>REL-007</td><td>USES_DOMAIN</td><td>ENT-001 → ENT-004</td><td>SUPPORTED</td><td>EV-014</td></tr></tbody></table>
+          </div>
+          <div class="iw-panel-body iw-hidden" id="timelineView">
+            <div class="iw-timeline"><div class="iw-time-row"><small>2026-09-07 08:12</small><div class="iw-time-dot"></div><div><b>Source acquired</b><small>EV-014 · exact acquisition time; event time unknown</small></div></div><div class="iw-time-row"><small>unknown</small><div class="iw-time-dot"></div><div><b>Observed relationship</b><small>Do not invent chronology when source event time is absent.</small></div></div></div>
+          </div>
+        </section>
+
+        <section class="iw-panel">
+          <div class="iw-panel-head"><div><h2>Questions & Hypotheses</h2><small>what are we trying to prove or disprove?</small></div><button class="iw-btn">+</button></div>
+          <div class="iw-panel-body">
+            <div class="iw-question"><b>Q-01 · What infrastructure belongs to the target?</b><small>OPEN · P0 · 4 findings require review</small></div>
+            <div class="iw-question"><b>Q-02 · Are two observed identities connected?</b><small>PARTIAL · P1 · counter-evidence exists</small></div>
+            <div class="iw-hyp"><b>H-01 · Shared infrastructure indicates control</b><div class="counts"><span class="iw-count support">support 3</span><span class="iw-count counter">counter 1</span><span>gaps 2</span></div></div>
+            <div class="iw-hyp"><b>H-02 · Similarity is incidental</b><div class="counts"><span class="iw-count support">support 1</span><span class="iw-count counter">counter 2</span><span>gaps 1</span></div></div>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <aside class="iw-right">
+      <div class="iw-inspector-title"><div><small style="color:var(--iw-cyan)">SELECTED OBJECT</small><h2 id="inspectorLabel">Target organization</h2></div><span class="iw-pill active">VERIFIED</span></div>
+      <div class="iw-kv"><span>ID</span><b id="inspectorId">ENT-001</b><span>TYPE</span><b>ORGANIZATION</b><span>CASE</span><b>CASE-2026-0001</b><span>EVIDENCE</span><b>2 linked</b></div>
+      <div class="iw-section-title">EVIDENCE LINKS</div>
+      <div class="iw-evidence-link"><b>EV-014 · primary page capture</b><small>HASHED · provenance COMPLETE · analyst REVIEWED</small></div>
+      <div class="iw-evidence-link"><b>EV-002 · official registry</b><small>PRIMARY · source identity STRONG</small></div>
+      <div class="iw-section-title">QUALITY</div>
+      <div class="iw-quality"><span>Source identity</span><b>STRONG</b><span>Directness</span><b>PRIMARY</b><span>Provenance</span><b>COMPLETE</b><span>Integrity</span><b>HASHED</b><span>Independence</span><b>MIXED</b><span>Consistency</span><b>MIXED</b></div>
+      <div class="iw-section-title">ACTIONS</div>
+      <button class="iw-btn" style="width:100%;margin-bottom:7px">Run pivot from entity</button><button class="iw-btn" style="width:100%;margin-bottom:7px">Attach evidence</button><button class="iw-btn" style="width:100%">Add analyst note</button>
+    </aside>
+
+    <footer class="iw-trace"><h3>CHAIN OF CUSTODY</h3><div class="iw-trace-row"><span>CASE-2026-0001</span><i>→</i><span>Q-01</span><i>→</i><span>TELEGRAM_SEARCH</span><i>→</i><span>FIND-038</span><i>→</i><span>EV-014</span><i>→</i><span>REL-007</span><i>→</i><span>H-01</span><i>→</i><span>analyst review</span></div></footer>
+  </div>
+  <script>
+    const views={graph:document.querySelector('#graphView'),table:document.querySelector('#tableView'),timeline:document.querySelector('#timelineView')};
+    document.querySelectorAll('[data-view]').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('[data-view]').forEach(x=>x.classList.remove('active'));btn.classList.add('active');Object.entries(views).forEach(([k,v])=>v.classList.toggle('iw-hidden',k!==btn.dataset.view));document.querySelector('#canvasMode').textContent=btn.dataset.view.toUpperCase()+' VIEW'}));
+    document.querySelectorAll('.iw-node').forEach(node=>node.addEventListener('click',()=>{document.querySelectorAll('.iw-node').forEach(x=>x.classList.remove('selected'));node.classList.add('selected');document.querySelector('#inspectorLabel').textContent=node.querySelector('b').textContent;document.querySelector('#inspectorId').textContent=node.dataset.node.toUpperCase()}));
+    document.querySelectorAll('#caseNav button').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('#caseNav button').forEach(x=>x.classList.remove('active'));btn.classList.add('active')}));
+  </script>
+</body>
+</html>

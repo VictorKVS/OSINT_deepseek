@@ -23,6 +23,8 @@ RESULT_JSON = REPORT_ROOT / "D14_REVIEW_RESULT.json"
 RESULT_MD = REPORT_ROOT / "D14_REVIEW_RESULT.md"
 PROMOTION_REQUEST = REPORT_ROOT / "D15_PROMOTION_REQUEST.json"
 APPLY_RECEIPT = REPORT_ROOT / "D14_APPLY_RECEIPT.json"
+KB_READY_ROOT = STORE_ROOT / "kb_ready"
+KB_READY_MANIFEST = KB_READY_ROOT / "manifest.json"
 TARGETS = (
     "DOC-RU-FZ-152-2006",
     "DOC-RU-PP-1119-2012",
@@ -159,7 +161,8 @@ def main() -> int:
     conflict_decisions = [row for row in applied if row["scope_type"] != "RULE_CLASS"]
 
     # Fail closed before any canonical D14 evidence is replaced: every target
-    # must exist, have a current version, and be able to advance to D14.
+    # must exist, have a current version, and be able to advance to D14. A new
+    # D14 application also explicitly invalidates any prior D15 state.
     store = KnowledgeFactoryStore(STORE_ROOT)
     registry_documents: list[DocumentRecord] = []
     for document_id in TARGETS:
@@ -174,6 +177,7 @@ def main() -> int:
         try:
             document = _document(payload)
             document.set_stage_state(PipelineStage.D14_EXPERT_REVIEWED, StageState.VERIFIED)
+            document.set_stage_state(PipelineStage.D15_KB_READY, StageState.NOT_DONE)
             registry_documents.append(document)
         except (KeyError, TypeError, ValueError) as exc:
             print(f"D14_DOCUMENT_PREFLIGHT_FAILED:{document_id}:{exc}")
@@ -208,6 +212,29 @@ def main() -> int:
         "autonomous_kb_promotion": False,
     }
 
+    # Invalidate the canonical readiness manifest before changing the registry.
+    # If the later batch transition fails, the system is unavailable for D15
+    # rather than incorrectly serving a stale kb_ready=true claim.
+    try:
+        KB_READY_ROOT.mkdir(parents=True, exist_ok=True)
+        superseded_manifest_sha256 = _sha256_file(KB_READY_MANIFEST) if KB_READY_MANIFEST.is_file() else None
+        invalidation_manifest = {
+            "schema_version": "1.0",
+            "record_type": "D15_KB_INVALIDATED",
+            "corpus_id": packet.get("corpus_id"),
+            "packet_sha256": packet_sha256,
+            "decisions_sha256": decisions_sha256,
+            "reason": "D14_REVIEW_APPLIED_OR_REAPPLIED",
+            "superseded_manifest_sha256": superseded_manifest_sha256,
+            "kb_ready": False,
+            "autonomous_kb_promotion": False,
+        }
+        _write_json_atomic(KB_READY_MANIFEST, invalidation_manifest)
+        invalidation_manifest_sha256 = _sha256_file(KB_READY_MANIFEST)
+    except OSError as exc:
+        print(f"D14_D15_INVALIDATION_FAILED:{exc}")
+        return 2
+
     # The registry transition happens before publishing new canonical D14
     # evidence. D15 requires the receipt written last, so any later failure is
     # observable and cannot authorize a new promotion.
@@ -223,7 +250,10 @@ def main() -> int:
             payload = store.get_document(document_id)
             if not payload:
                 raise ValueError(f"persisted document missing: {document_id}")
-            persisted_documents.append(_document(payload))
+            persisted_document = _document(payload)
+            if persisted_document.stage_states.get(PipelineStage.D15_KB_READY.value) != StageState.NOT_DONE.value:
+                raise ValueError(f"D15 was not invalidated: {document_id}")
+            persisted_documents.append(persisted_document)
         persisted_snapshot_sha256 = document_stage_snapshot_sha256(
             persisted_documents,
             PipelineStage.D14_EXPERT_REVIEWED,
@@ -267,6 +297,8 @@ def main() -> int:
                 "decisions_sha256": decisions_sha256,
                 "result_sha256": result_sha256,
                 "document_snapshot_sha256": persisted_snapshot_sha256,
+                "d15_invalidation_manifest_sha256": invalidation_manifest_sha256,
+                "superseded_d15_manifest_sha256": superseded_manifest_sha256,
                 "accepted_rule_classes": len(accepted_rules),
                 "rejected_rule_classes": len(rejected_rules),
                 "conflict_overlap_decisions": len(conflict_decisions),
@@ -285,6 +317,7 @@ def main() -> int:
             f"- rejected rule classes: {len(rejected_rules)}",
             f"- D12 decisions: {len(conflict_decisions)}",
             f"- D14 document snapshot: `{persisted_snapshot_sha256}`",
+            f"- D15 invalidation manifest: `{invalidation_manifest_sha256}`",
             "- D14: **VERIFIED**",
             "- D15: **NOT_DONE — explicit approval required**",
             "",
@@ -305,8 +338,10 @@ def main() -> int:
             "d14_result_sha256": result_sha256,
             "promotion_request_sha256": promotion_request_sha256,
             "document_snapshot_sha256": persisted_snapshot_sha256,
+            "d15_invalidation_manifest_sha256": invalidation_manifest_sha256,
             "target_document_ids": sorted(TARGETS),
             "receipt_state": "APPLIED",
+            "d15_invalidated": True,
             "autonomous_kb_promotion": False,
         }
         _write_json_atomic(APPLY_RECEIPT, receipt)
@@ -326,6 +361,7 @@ def main() -> int:
         "promotion_request": PROMOTION_REQUEST.relative_to(REPO_ROOT).as_posix(),
         "apply_receipt": APPLY_RECEIPT.relative_to(REPO_ROOT).as_posix(),
         "document_snapshot_sha256": persisted_snapshot_sha256,
+        "d15_invalidation_manifest_sha256": invalidation_manifest_sha256,
         "autonomous_kb_promotion": False,
     }, ensure_ascii=False, indent=2))
     return 0

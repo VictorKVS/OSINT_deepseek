@@ -13,6 +13,7 @@ if str(REPO_ROOT) not in sys.path:
 
 from father_osint.knowledge_factory import AuditEvent, DocumentRecord, DocumentVersion, PipelineStage, Role, StageState
 from father_osint.knowledge_factory_store import KnowledgeFactoryStore
+from father_osint.knowledge_factory_transition import document_stage_snapshot_sha256
 
 STORE_ROOT = REPO_ROOT / "data" / "knowledge_factory" / "pdn_official_batch"
 REPORT_ROOT = REPO_ROOT / "reports" / "pdn_live"
@@ -21,6 +22,7 @@ DECISIONS = REPORT_ROOT / "D14_DECISIONS.jsonl"
 RESULT_JSON = REPORT_ROOT / "D14_REVIEW_RESULT.json"
 RESULT_MD = REPORT_ROOT / "D14_REVIEW_RESULT.md"
 PROMOTION_REQUEST = REPORT_ROOT / "D15_PROMOTION_REQUEST.json"
+APPLY_RECEIPT = REPORT_ROOT / "D14_APPLY_RECEIPT.json"
 TARGETS = (
     "DOC-RU-FZ-152-2006",
     "DOC-RU-PP-1119-2012",
@@ -40,6 +42,16 @@ def _read_jsonl(path: Path) -> list[dict[str, Any]]:
 
 def _sha256_bytes(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
+
+
+def _sha256_file(path: Path) -> str:
+    return _sha256_bytes(path.read_bytes())
+
+
+def _write_json_atomic(path: Path, payload: dict[str, Any]) -> None:
+    tmp = path.with_suffix(path.suffix + ".tmp")
+    tmp.write_text(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    tmp.replace(path)
 
 
 def _packet_hash(packet: dict[str, Any]) -> str:
@@ -146,22 +158,35 @@ def main() -> int:
     rejected_rules = [row for row in applied if row["scope_type"] == "RULE_CLASS" and row["decision"] == "REJECT"]
     conflict_decisions = [row for row in applied if row["scope_type"] != "RULE_CLASS"]
 
-    # Fail closed before writing result artifacts: every target must exist and
-    # must be able to advance to D14. The actual registry write happens once.
+    # Fail closed before any canonical D14 evidence is replaced: every target
+    # must exist, have a current version, and be able to advance to D14.
     store = KnowledgeFactoryStore(STORE_ROOT)
     registry_documents: list[DocumentRecord] = []
     for document_id in TARGETS:
-        payload = store.get_document(document_id)
+        try:
+            payload = store.get_document(document_id)
+        except (OSError, ValueError, json.JSONDecodeError) as exc:
+            print(f"D14_DOCUMENT_REGISTRY_INVALID:{document_id}:{exc}")
+            return 2
         if not payload:
             print(f"D14_DOCUMENT_REGISTRY_MISSING:{document_id}")
             return 2
         try:
             document = _document(payload)
             document.set_stage_state(PipelineStage.D14_EXPERT_REVIEWED, StageState.VERIFIED)
+            registry_documents.append(document)
         except (KeyError, TypeError, ValueError) as exc:
             print(f"D14_DOCUMENT_PREFLIGHT_FAILED:{document_id}:{exc}")
             return 2
-        registry_documents.append(document)
+
+    try:
+        expected_snapshot_sha256 = document_stage_snapshot_sha256(
+            registry_documents,
+            PipelineStage.D14_EXPERT_REVIEWED,
+        )
+    except ValueError as exc:
+        print(f"D14_DOCUMENT_SNAPSHOT_INVALID:{exc}")
+        return 2
 
     decision_material = json.dumps(applied, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")
     decisions_sha256 = _sha256_bytes(decision_material)
@@ -182,71 +207,112 @@ def main() -> int:
         "d15_state": "NOT_DONE",
         "autonomous_kb_promotion": False,
     }
-    RESULT_JSON.write_text(json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-    result_sha256 = _sha256_bytes(RESULT_JSON.read_bytes())
 
-    promotion_request = {
-        "schema_version": "1.0",
-        "record_type": "D15_PROMOTION_REQUEST",
-        "corpus_id": packet.get("corpus_id"),
-        "d14_result_sha256": result_sha256,
-        "packet_sha256": packet_sha256,
-        "decisions_sha256": decisions_sha256,
-        "accepted_rule_decision_ids": [row["decision_id"] for row in accepted_rules],
-        "rejected_rule_decision_ids": [row["decision_id"] for row in rejected_rules],
-        "conflict_overlap_decisions": conflict_decisions,
-        "request_state": "AWAITING_EXPLICIT_D15_APPROVAL",
-        "autonomous_kb_promotion": False,
-    }
-    PROMOTION_REQUEST.write_text(
-        json.dumps(promotion_request, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
-        encoding="utf-8",
-    )
-
+    # The registry transition happens before publishing new canonical D14
+    # evidence. D15 requires the receipt written last, so any later failure is
+    # observable and cannot authorize a new promotion.
     try:
         store.save_documents(registry_documents)
     except (OSError, ValueError) as exc:
         print(f"D14_DOCUMENT_BATCH_WRITE_FAILED:{exc}")
         return 2
 
-    store.append_audit(AuditEvent(
-        actor_id=",".join(sorted(reviewers)),
-        actor_role=Role.REVIEWER.value,
-        action="APPLY_D14_EXPERT_REVIEW_DECISIONS",
-        object_type="CORPUS",
-        object_id=str(packet.get("corpus_id")),
-        result="SUCCESS",
-        metadata={
+    persisted_documents: list[DocumentRecord] = []
+    try:
+        for document_id in TARGETS:
+            payload = store.get_document(document_id)
+            if not payload:
+                raise ValueError(f"persisted document missing: {document_id}")
+            persisted_documents.append(_document(payload))
+        persisted_snapshot_sha256 = document_stage_snapshot_sha256(
+            persisted_documents,
+            PipelineStage.D14_EXPERT_REVIEWED,
+        )
+    except (OSError, KeyError, TypeError, ValueError, json.JSONDecodeError) as exc:
+        print(f"D14_DOCUMENT_BATCH_VERIFY_FAILED:{exc}")
+        return 2
+    if persisted_snapshot_sha256 != expected_snapshot_sha256:
+        print("D14_DOCUMENT_BATCH_VERIFY_FAILED: snapshot mismatch")
+        return 2
+
+    try:
+        _write_json_atomic(RESULT_JSON, result)
+        result_sha256 = _sha256_file(RESULT_JSON)
+
+        promotion_request = {
+            "schema_version": "1.0",
+            "record_type": "D15_PROMOTION_REQUEST",
+            "corpus_id": packet.get("corpus_id"),
+            "d14_result_sha256": result_sha256,
             "packet_sha256": packet_sha256,
             "decisions_sha256": decisions_sha256,
-            "result_sha256": result_sha256,
-            "accepted_rule_classes": len(accepted_rules),
-            "rejected_rule_classes": len(rejected_rules),
-            "conflict_overlap_decisions": len(conflict_decisions),
+            "accepted_rule_decision_ids": [row["decision_id"] for row in accepted_rules],
+            "rejected_rule_decision_ids": [row["decision_id"] for row in rejected_rules],
+            "conflict_overlap_decisions": conflict_decisions,
+            "request_state": "AWAITING_EXPLICIT_D15_APPROVAL",
             "autonomous_kb_promotion": False,
-        },
-    ))
+        }
+        _write_json_atomic(PROMOTION_REQUEST, promotion_request)
+        promotion_request_sha256 = _sha256_file(PROMOTION_REQUEST)
 
-    lines = [
-        "# PDn D14 expert review result",
-        "",
-        f"- packet: `{packet_sha256}`",
-        f"- decisions: `{decisions_sha256}`",
-        f"- reviewers: {', '.join(sorted(reviewers))}",
-        f"- resolved decisions: {len(applied)}/{len(items)}",
-        f"- accepted rule classes: {len(accepted_rules)}",
-        f"- rejected rule classes: {len(rejected_rules)}",
-        f"- D12 decisions: {len(conflict_decisions)}",
-        "- D14: **VERIFIED**",
-        "- D15: **NOT_DONE — explicit approval required**",
-        "",
-        "| Decision | Scope | Result | Reviewer | Reason |",
-        "|---|---|---|---|---|",
-    ]
-    for row in applied:
-        reason = str(row["reason"]).replace("|", "\\|")
-        lines.append(f"| `{row['decision_id']}` | {row['scope_type']} | **{row['decision']}** | {row['reviewer']} | {reason} |")
-    RESULT_MD.write_text("\n".join(lines) + "\n", encoding="utf-8", newline="\n")
+        store.append_audit(AuditEvent(
+            actor_id=",".join(sorted(reviewers)),
+            actor_role=Role.REVIEWER.value,
+            action="APPLY_D14_EXPERT_REVIEW_DECISIONS",
+            object_type="CORPUS",
+            object_id=str(packet.get("corpus_id")),
+            result="SUCCESS",
+            metadata={
+                "packet_sha256": packet_sha256,
+                "decisions_sha256": decisions_sha256,
+                "result_sha256": result_sha256,
+                "document_snapshot_sha256": persisted_snapshot_sha256,
+                "accepted_rule_classes": len(accepted_rules),
+                "rejected_rule_classes": len(rejected_rules),
+                "conflict_overlap_decisions": len(conflict_decisions),
+                "autonomous_kb_promotion": False,
+            },
+        ))
+
+        lines = [
+            "# PDn D14 expert review result",
+            "",
+            f"- packet: `{packet_sha256}`",
+            f"- decisions: `{decisions_sha256}`",
+            f"- reviewers: {', '.join(sorted(reviewers))}",
+            f"- resolved decisions: {len(applied)}/{len(items)}",
+            f"- accepted rule classes: {len(accepted_rules)}",
+            f"- rejected rule classes: {len(rejected_rules)}",
+            f"- D12 decisions: {len(conflict_decisions)}",
+            f"- D14 document snapshot: `{persisted_snapshot_sha256}`",
+            "- D14: **VERIFIED**",
+            "- D15: **NOT_DONE — explicit approval required**",
+            "",
+            "| Decision | Scope | Result | Reviewer | Reason |",
+            "|---|---|---|---|---|",
+        ]
+        for row in applied:
+            reason = str(row["reason"]).replace("|", "\\|")
+            lines.append(f"| `{row['decision_id']}` | {row['scope_type']} | **{row['decision']}** | {row['reviewer']} | {reason} |")
+        RESULT_MD.write_text("\n".join(lines) + "\n", encoding="utf-8", newline="\n")
+
+        receipt = {
+            "schema_version": "1.0",
+            "record_type": "D14_APPLY_RECEIPT",
+            "corpus_id": packet.get("corpus_id"),
+            "packet_sha256": packet_sha256,
+            "decisions_sha256": decisions_sha256,
+            "d14_result_sha256": result_sha256,
+            "promotion_request_sha256": promotion_request_sha256,
+            "document_snapshot_sha256": persisted_snapshot_sha256,
+            "target_document_ids": sorted(TARGETS),
+            "receipt_state": "APPLIED",
+            "autonomous_kb_promotion": False,
+        }
+        _write_json_atomic(APPLY_RECEIPT, receipt)
+    except (OSError, ValueError) as exc:
+        print(f"D14_EVIDENCE_WRITE_FAILED:{exc}")
+        return 2
 
     print(json.dumps({
         "record_type": "D14_REVIEW_APPLY_SUMMARY",
@@ -258,6 +324,8 @@ def main() -> int:
         "d14_state": "VERIFIED",
         "d15_state": "NOT_DONE",
         "promotion_request": PROMOTION_REQUEST.relative_to(REPO_ROOT).as_posix(),
+        "apply_receipt": APPLY_RECEIPT.relative_to(REPO_ROOT).as_posix(),
+        "document_snapshot_sha256": persisted_snapshot_sha256,
         "autonomous_kb_promotion": False,
     }, ensure_ascii=False, indent=2))
     return 0

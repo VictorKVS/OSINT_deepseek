@@ -52,7 +52,7 @@ def _valid_request(result):
         "decisions_sha256": result["decisions_sha256"],
         "accepted_rule_decision_ids": ["RULE-D6"],
         "rejected_rule_decision_ids": [],
-        "conflict_overlap_decisions": [result["decisions"][1]],
+        "conflict_overlap_decisions": [deepcopy(result["decisions"][1])],
         "request_state": "AWAITING_EXPLICIT_D15_APPROVAL",
         "autonomous_kb_promotion": False,
     }

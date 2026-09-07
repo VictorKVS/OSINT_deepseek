@@ -54,6 +54,46 @@ def _document(payload: dict[str, Any]) -> DocumentRecord:
     )
 
 
+def _request_matches_result(request: dict[str, Any], result: dict[str, Any]) -> tuple[bool, str]:
+    if request.get("record_type") != "D15_PROMOTION_REQUEST":
+        return False, "D15_PROMOTION_REQUEST_TYPE_INVALID"
+    if result.get("record_type") != "D14_EXPERT_REVIEW_RESULT":
+        return False, "D15_D14_RESULT_TYPE_INVALID"
+
+    scalar_bindings = (
+        ("corpus_id", "D15_CORPUS_ID_MISMATCH"),
+        ("packet_sha256", "D15_PACKET_HASH_BINDING_MISMATCH"),
+        ("decisions_sha256", "D15_DECISIONS_HASH_BINDING_MISMATCH"),
+    )
+    for field, error in scalar_bindings:
+        if request.get(field) != result.get(field):
+            return False, error
+
+    decisions = list(result.get("decisions", []))
+    rule_decisions = [row for row in decisions if row.get("scope_type") == "RULE_CLASS"]
+    expected_accepted = sorted(
+        str(row.get("decision_id"))
+        for row in rule_decisions
+        if row.get("decision") == "ACCEPT"
+    )
+    expected_rejected = sorted(
+        str(row.get("decision_id"))
+        for row in rule_decisions
+        if row.get("decision") != "ACCEPT"
+    )
+    actual_accepted = sorted(str(value) for value in request.get("accepted_rule_decision_ids", []))
+    actual_rejected = sorted(str(value) for value in request.get("rejected_rule_decision_ids", []))
+    if actual_accepted != expected_accepted:
+        return False, "D15_ACCEPTED_RULE_BINDING_MISMATCH"
+    if actual_rejected != expected_rejected:
+        return False, "D15_REJECTED_RULE_BINDING_MISMATCH"
+
+    expected_conflicts = [row for row in decisions if row.get("scope_type") != "RULE_CLASS"]
+    if request.get("conflict_overlap_decisions", []) != expected_conflicts:
+        return False, "D15_CONFLICT_DECISION_BINDING_MISMATCH"
+    return True, ""
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Explicit human-gated D15 KB-ready promotion")
     parser.add_argument("--approve", action="store_true", help="Explicitly authorize D15 promotion")
@@ -71,11 +111,20 @@ def main() -> int:
         print("D15_INPUT_MISSING: complete D14 first")
         return 2
 
-    result = _read_json(D14_RESULT)
-    request = _read_json(PROMOTION_REQUEST)
-    result_sha256 = _sha256_file(D14_RESULT)
+    try:
+        result = _read_json(D14_RESULT)
+        request = _read_json(PROMOTION_REQUEST)
+        result_sha256 = _sha256_file(D14_RESULT)
+    except (OSError, json.JSONDecodeError) as exc:
+        print(f"D15_INPUT_INVALID:{exc}")
+        return 2
+
     if request.get("d14_result_sha256") != result_sha256:
         print("D15_D14_RESULT_HASH_MISMATCH")
+        return 2
+    bindings_valid, binding_error = _request_matches_result(request, result)
+    if not bindings_valid:
+        print(binding_error)
         return 2
     if result.get("d14_state") != "VERIFIED":
         print("D15_BLOCKED_D14_NOT_VERIFIED")
@@ -99,19 +148,26 @@ def main() -> int:
         print("D15_BLOCKED_UNRESOLVED_D12_DECISIONS")
         return 2
 
+    # Preflight the complete target corpus before touching the registry. Once all
+    # four records are valid, save_documents replaces the JSONL registry once.
     store = KnowledgeFactoryStore(STORE_ROOT)
+    registry_documents: list[DocumentRecord] = []
     documents: list[dict[str, Any]] = []
     for document_id in TARGETS:
         payload = store.get_document(document_id)
         if not payload:
             print(f"D15_DOCUMENT_REGISTRY_MISSING:{document_id}")
             return 2
-        document = _document(payload)
-        if document.stage_states.get(PipelineStage.D14_EXPERT_REVIEWED.value) != StageState.VERIFIED.value:
-            print(f"D15_DOCUMENT_D14_NOT_VERIFIED:{document_id}")
+        try:
+            document = _document(payload)
+            if document.stage_states.get(PipelineStage.D14_EXPERT_REVIEWED.value) != StageState.VERIFIED.value:
+                print(f"D15_DOCUMENT_D14_NOT_VERIFIED:{document_id}")
+                return 2
+            document.set_stage_state(PipelineStage.D15_KB_READY, StageState.VERIFIED)
+        except (KeyError, TypeError, ValueError) as exc:
+            print(f"D15_DOCUMENT_PREFLIGHT_FAILED:{document_id}:{exc}")
             return 2
-        document.set_stage_state(PipelineStage.D15_KB_READY, StageState.VERIFIED)
-        store.save_document(document)
+        registry_documents.append(document)
         documents.append({
             "document_id": document_id,
             "version_id": document.current_version_id,
@@ -135,8 +191,13 @@ def main() -> int:
         "autonomous_kb_promotion": False,
     }
     manifest_path = KB_READY_ROOT / "manifest.json"
-    manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-    manifest_sha256 = _sha256_file(manifest_path)
+    try:
+        manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        manifest_sha256 = _sha256_file(manifest_path)
+        store.save_documents(registry_documents)
+    except (OSError, ValueError) as exc:
+        print(f"D15_PROMOTION_WRITE_FAILED:{exc}")
+        return 2
 
     store.append_audit(AuditEvent(
         actor_id=reviewer,

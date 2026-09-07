@@ -36,6 +36,17 @@ def _sha256_file(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def _sha256_json(value: Any) -> str:
+    raw = json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    return hashlib.sha256(raw).hexdigest()
+
+
+def _write_json_atomic(path: Path, payload: dict[str, Any]) -> None:
+    tmp = path.with_suffix(path.suffix + ".tmp")
+    tmp.write_text(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    tmp.replace(path)
+
+
 def _document(payload: dict[str, Any]) -> DocumentRecord:
     return DocumentRecord(
         title=str(payload["title"]),
@@ -54,11 +65,46 @@ def _document(payload: dict[str, Any]) -> DocumentRecord:
     )
 
 
+def _validate_result_integrity(result: dict[str, Any]) -> tuple[bool, str]:
+    if result.get("record_type") != "D14_EXPERT_REVIEW_RESULT":
+        return False, "D15_D14_RESULT_TYPE_INVALID"
+    if result.get("autonomous_kb_promotion") is not False:
+        return False, "D15_D14_AUTONOMOUS_PROMOTION_FLAG_INVALID"
+
+    raw_decisions = result.get("decisions")
+    if not isinstance(raw_decisions, list) or any(not isinstance(row, dict) for row in raw_decisions):
+        return False, "D15_D14_DECISIONS_INVALID"
+    decisions = list(raw_decisions)
+    decision_ids = [str(row.get("decision_id", "")) for row in decisions]
+    if any(not decision_id for decision_id in decision_ids) or len(decision_ids) != len(set(decision_ids)):
+        return False, "D15_D14_DECISION_IDS_INVALID"
+
+    required = result.get("required_decisions")
+    resolved = result.get("resolved_decisions")
+    if required != resolved or resolved != len(decisions):
+        return False, "D15_D14_DECISION_COUNT_MISMATCH"
+
+    if result.get("decisions_sha256") != _sha256_json(decisions):
+        return False, "D15_D14_DECISIONS_CONTENT_HASH_MISMATCH"
+
+    rule_decisions = [row for row in decisions if row.get("scope_type") == "RULE_CLASS"]
+    accepted = sum(1 for row in rule_decisions if row.get("decision") == "ACCEPT")
+    rejected = sum(1 for row in rule_decisions if row.get("decision") != "ACCEPT")
+    conflicts = sum(1 for row in decisions if row.get("scope_type") != "RULE_CLASS")
+    if result.get("accepted_rule_classes") != accepted:
+        return False, "D15_D14_ACCEPTED_RULE_COUNT_MISMATCH"
+    if result.get("rejected_rule_classes") != rejected:
+        return False, "D15_D14_REJECTED_RULE_COUNT_MISMATCH"
+    if result.get("conflict_overlap_decisions") != conflicts:
+        return False, "D15_D14_CONFLICT_COUNT_MISMATCH"
+    return True, ""
+
+
 def _request_matches_result(request: dict[str, Any], result: dict[str, Any]) -> tuple[bool, str]:
     if request.get("record_type") != "D15_PROMOTION_REQUEST":
         return False, "D15_PROMOTION_REQUEST_TYPE_INVALID"
-    if result.get("record_type") != "D14_EXPERT_REVIEW_RESULT":
-        return False, "D15_D14_RESULT_TYPE_INVALID"
+    if request.get("autonomous_kb_promotion") is not False:
+        return False, "D15_PROMOTION_REQUEST_AUTONOMOUS_FLAG_INVALID"
 
     scalar_bindings = (
         ("corpus_id", "D15_CORPUS_ID_MISMATCH"),
@@ -121,6 +167,10 @@ def main() -> int:
 
     if request.get("d14_result_sha256") != result_sha256:
         print("D15_D14_RESULT_HASH_MISMATCH")
+        return 2
+    result_valid, result_error = _validate_result_integrity(result)
+    if not result_valid:
+        print(result_error)
         return 2
     bindings_valid, binding_error = _request_matches_result(request, result)
     if not bindings_valid:
@@ -192,7 +242,7 @@ def main() -> int:
     }
     manifest_path = KB_READY_ROOT / "manifest.json"
     try:
-        manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        _write_json_atomic(manifest_path, manifest)
         manifest_sha256 = _sha256_file(manifest_path)
         store.save_documents(registry_documents)
     except (OSError, ValueError) as exc:

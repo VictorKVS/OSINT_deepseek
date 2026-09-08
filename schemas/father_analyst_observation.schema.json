@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://father.local/schemas/father_analyst_observation.schema.json",
+  "title": "FATHER Analyst M4 Observation",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "observation_id",
+    "case_id",
+    "tool_run_id",
+    "tool_id",
+    "output_type",
+    "source_locator",
+    "acquired_at",
+    "raw_artifact_ref",
+    "state",
+    "independence_group"
+  ],
+  "properties": {
+    "schema_version": {"const": "m4.0"},
+    "observation_id": {"type": "string", "pattern": "^OBS-[A-Z0-9][A-Z0-9_-]{1,95}$"},
+    "case_id": {"type": "string", "pattern": "^CASE-[A-Z0-9][A-Z0-9_-]{1,95}$"},
+    "question_ids": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "hypothesis_ids": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "tool_run_id": {"type": "string", "pattern": "^RUN-[A-Z0-9][A-Z0-9_-]{1,95}$"},
+    "tool_id": {"type": "string", "pattern": "^TOOL-[A-Z0-9][A-Z0-9_-]{1,79}$"},
+    "output_type": {"type": "string", "minLength": 1, "maxLength": 80},
+    "source_locator": {"type": "string", "minLength": 1, "maxLength": 2048},
+    "acquired_at": {"type": "string", "format": "date-time"},
+    "raw_artifact_ref": {"type": "string", "minLength": 1, "maxLength": 512},
+    "raw_artifact_sha256": {"type": ["string", "null"], "pattern": "^[0-9a-f]{64}$"},
+    "normalizer_version": {"type": ["string", "null"], "maxLength": 120},
+    "independence_group": {"type": "string", "minLength": 1, "maxLength": 160},
+    "state": {"enum": ["RAW", "NORMALIZED", "TRIAGED", "REJECTED", "DUPLICATE", "OUT_OF_SCOPE", "BLOCKED"]},
+    "attributes": {"type": "object"},
+    "possible_edges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["edge_id", "relation_type", "from_ref", "to_ref", "state", "basis_observation_ids"],
+        "properties": {
+          "edge_id": {"type": "string", "pattern": "^EDGE-[A-Z0-9][A-Z0-9_-]{1,95}$"},
+          "relation_type": {"type": "string", "pattern": "^[A-Z][A-Z0-9_]{1,79}$"},
+          "from_ref": {"type": "string", "minLength": 1},
+          "to_ref": {"type": "string", "minLength": 1},
+          "state": {"const": "CANDIDATE"},
+          "basis_observation_ids": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {"type": "string", "pattern": "^OBS-"}
+          },
+          "alternative_explanation": {"type": ["string", "null"], "maxLength": 1000}
+        }
+      }
+    }
+  }
+}

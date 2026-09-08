@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://father.local/schemas/father_analyst_analysis_packet.schema.json",
+  "title": "FATHER Analyst M4 Analysis Packet",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "packet_id",
+    "case_id",
+    "role",
+    "task",
+    "evidence_refs",
+    "excerpts",
+    "conflict_refs",
+    "gap_refs",
+    "max_chars",
+    "actual_chars",
+    "source_versions"
+  ],
+  "properties": {
+    "schema_version": {"const": "m4.0"},
+    "packet_id": {"type": "string", "pattern": "^PKT-[A-Z0-9][A-Z0-9_-]{1,95}$"},
+    "case_id": {"type": "string", "pattern": "^CASE-[A-Z0-9][A-Z0-9_-]{1,95}$"},
+    "role": {
+      "enum": ["COLLECTOR", "SOURCE_ANALYST", "ENTITY_ANALYST", "MAIN_ANALYST", "SOCRATES", "KNOWLEDGE_ENGINEER", "SECURITY_LEGAL_REVIEWER"]
+    },
+    "task": {"type": "string", "minLength": 1, "maxLength": 2000},
+    "question_ids": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "hypothesis_ids": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "evidence_refs": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "excerpts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["source_ref", "locator", "text"],
+        "properties": {
+          "source_ref": {"type": "string", "minLength": 1},
+          "locator": {"type": "string", "minLength": 1, "maxLength": 512},
+          "text": {"type": "string", "maxLength": 12000}
+        }
+      }
+    },
+    "conflict_refs": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "gap_refs": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "max_chars": {"type": "integer", "minimum": 1, "maximum": 200000},
+    "actual_chars": {"type": "integer", "minimum": 0, "maximum": 200000},
+    "source_versions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["source_ref", "version_ref"],
+        "properties": {
+          "source_ref": {"type": "string", "minLength": 1},
+          "version_ref": {"type": "string", "minLength": 1},
+          "sha256": {"type": ["string", "null"], "pattern": "^[0-9a-f]{64}$"}
+        }
+      }
+    }
+  }
+}

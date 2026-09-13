@@ -78,6 +78,32 @@ OPERATIONS / FEEDBACK / EVOLUTION
 - `docs/OPERATIONS_GOVERNANCE_MODEL.md` — production operations roles and controls.
 - `docs/PROJECT_ROADMAP_AND_CONTROL.md` — capability roadmap / risks / gates.
 
+## Separate improvement control
+
+Recommendations are deliberately kept outside the AS-IS project description.
+
+Canonical improvement document:
+
+- [`IMPROVEMENT_BACKLOG.md`](IMPROVEMENT_BACKLOG.md) — what should be changed or strengthened, why, evidence/source, priority, accountable owner, affected artifacts, target lesson and status.
+
+Rule:
+
+```text
+AS-IS / EVIDENCE
+      ≠
+RECOMMENDATION / TO-BE
+```
+
+A recommendation does not silently become a requirement or implementation task. It must be accepted by the accountable owner and pass the relevant change/architecture gate.
+
+At the end of every lesson we update this backlog with three mandatory fields:
+
+- `что стоит улучшить`;
+- `как улучшить / что именно поменять`;
+- `приоритет`;
+
+plus owner, evidence, affected artifacts, target lesson and status.
+
 ## Status vocabulary
 
 `EXISTING_VERIFIED` — already supported by current repository evidence.

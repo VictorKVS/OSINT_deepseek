@@ -37,7 +37,7 @@ TO-BE / RECOMMENDATION
 | IMP-008 | P1 | Cross-link project/security/delivery risks without collapsing meanings | several risk registers must not diverge | PM + Security + KGA | 2–10 | IN_PROGRESS |
 | IMP-009 | P1 | Instantiate formal Change Request on next material baseline change | change model exists but is not yet exercised in course package | PM / Change Manager | next material change | ACCEPTED |
 | IMP-010 | P1 | Maintain TCO scenarios for API/cloud-GPU/on-prem/hybrid | Lesson 9 model exists; measured workload/current quotes still missing | Finance + Architect + Ops | Production ADR | IN_PROGRESS |
-| IMP-011 | P1 | Establish versioned Golden/Evaluation set ownership | RAG/LLM choices need common quality evidence | QA + Product + SME | 6–13 | PROPOSED |
+| IMP-011 | P1 | Establish versioned Golden/Evaluation set ownership | Lesson 13 contract exists; actual v1 dataset still missing | QA + Product + SME | 13 | IN_PROGRESS |
 | IMP-012 | P2 | Convert only material historic decisions into immutable ADR timeline | ADR-0001..0003 created; migration should remain selective | Architect + Reviewer | 8–10 | IN_PROGRESS |
 | IMP-013 | P1 | Add independent challenge/sign-off for major ADRs | Lesson 9 challenge pack exists; human independent approval remains | Skeptical Reviewer / CTO | 9–10+ | OWNER_REVIEW |
 | IMP-014 | P2 | Map every course document to canonical evidence | prevents course mirror becoming second truth source | KGA / Maintainer | 1–20 | IN_PROGRESS |
@@ -50,11 +50,11 @@ TO-BE / RECOMMENDATION
 | IMP-021 | P1 | Create one canonical C4/architecture-as-code source and render C1/C2/C3 from it | current diagrams are consistent but maintained in several documents | Architect | 10–18 | PROPOSED |
 | IMP-022 | P1 | Version domain schemas independently of Python classes | future API/services/RAG/agents need stable contracts | System/Integration Engineer | 5/11/12 | PROPOSED |
 | IMP-023 | P0 | Replace local filesystem paths with safe artifact references in any future remote API | prevents path disclosure/arbitrary-file risks | Security + API owner | before API implementation | ACCEPTED |
-| IMP-024 | P1 | Create versioned retrieval/eval query set with expected evidence refs | RAG currently has design, not measured quality | QA + Product + SME | 6/13 | PROPOSED |
+| IMP-024 | P1 | Populate a versioned retrieval/eval set with expected evidence refs | Lesson 13 defines contract but has no executed dataset baseline yet | QA + Product + SME | 13 | IN_PROGRESS |
 | IMP-025 | P0 | Enforce retrieved/source content as untrusted data, never policy/tool instruction | retrieval/prompt poisoning is Critical/High risk | Security + Agent/RAG owners | before agentic RAG | ACCEPTED |
 | IMP-026 | P0 | Define formal tool permission/delegation policy before executable agents | prevents excessive agency/confused deputy/privilege escalation | Security + System Owner | before agent tools | PROPOSED |
 | IMP-027 | P1 | Define provider-neutral Model Gateway contract + policy/compliance tests | ADR-0004 depends on replaceability and data gating | Architect + Security + Integration | before external LLM runtime dependency | PROPOSED |
-| IMP-028 | P1 | Benchmark hosted and local model candidates on one eval set and collect workload/TCO telemetry | Lesson 9 cannot name Production cost/quality winner yet | QA + Ops + Finance + AI Lead | 9/13/17 | PROPOSED |
+| IMP-028 | P1 | Benchmark hosted and local model candidates on one eval set and collect workload/TCO telemetry | Lesson 9 cannot name Production cost/quality winner yet | QA + Ops + Finance + AI Lead | 13/17 | PROPOSED |
 | IMP-029 | P1 | Require independent reviewer record for material accepted ADRs | producer must not self-certify architecture | Skeptical Reviewer / CTO | 9/10 | PROPOSED |
 | IMP-030 | P2 | Visualize driver → requirement → option → trade-off → ADR → test → operation trace | makes evidence-backed architecture inspectable | FATHER site / KGA | site | PROPOSED |
 | IMP-031 | P1 | Automate architecture-conformance checks for stable invariants | Lesson 10 defines review model; manual checks can drift | Architect + DevSecOps | 10–18 | PROPOSED |
@@ -65,6 +65,13 @@ TO-BE / RECOMMENDATION
 | IMP-036 | P1 | Add stage-level data-quality telemetry | freshness/parse/chunk/index/evidence quality need separate metrics | Data + QA + Ops | 12–15 | PROPOSED |
 | IMP-037 | P1 | Benchmark lexical/vector/graph retrieval/storage layers before Production selection | avoids buying an AI stack before measured value | Architect + Data + QA | 12–17 | PROPOSED |
 | IMP-038 | P2 | Add versioned dataset manifests for eval/training corpora | reproducibility and later MLOps require exact dataset identity | Data + QA / ML | 12–19 | PROPOSED |
+| IMP-039 | P1 | Build Golden/Eval Dataset v1 with calibration/regression/holdout/security partitions | Lesson 13 quality architecture is not executable without reviewed cases | QA + Domain SME | 13 | PROPOSED |
+| IMP-040 | P1 | Calibrate automated judge/rubrics against human labels | LLM-as-judge must not become unverified authority | QA + Independent Reviewer | 13 | PROPOSED |
+| IMP-041 | P1 | Select Model A / Model B and execute same-context RAG comparison | quality/hosting decisions need measured evidence | QA + AI Lead + Architect | 13 | PROPOSED |
+| IMP-042 | P1 | Establish semantic regression thresholds from measured baseline | avoid arbitrary pass percentages | QA + Product + Ops | 13–15 | PROPOSED |
+| IMP-043 | P0 | Add prompt-injection/retrieval-poisoning cases to mandatory security eval | agentic RAG cannot ship without adversarial evidence | Security + QA | 13–14 | PROPOSED |
+| IMP-044 | P1 | Integrate compact semantic regression into CI after dataset/tool approval | make quality gate executable and repeatable | QA + DevSecOps | 13–18 | PROPOSED |
+| IMP-045 | P2 | Feed human acceptance/rework/judge telemetry into Model Zoo routing | model portfolio should improve by capability evidence | FATHER Model Zoo + QA | 13+ | PROPOSED |
 
 ## Mandatory per-lesson review template
 

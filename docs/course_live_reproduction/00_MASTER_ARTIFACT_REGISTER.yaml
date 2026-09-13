@@ -1,0 +1,166 @@
+schemaVersion: 1
+projectId: FATHER-OSINT-AGENT-LIVE-REPRODUCTION-0001
+status: ACTIVE_CUMULATIVE
+sourceOfTruthRule: existing canonical repository artifacts are reused by reference; course artifacts add traceability and missing lifecycle evidence
+
+artifactFamilies:
+  product:
+    status: DRAFT_FROM_CURRENT_EVIDENCE
+    artifacts:
+      - BUSINESS_NEED
+      - PRODUCT_VISION
+      - TARGET_USERS
+      - VALUE_PROPOSITION
+      - PRODUCT_SCOPE
+      - SUCCESS_METRICS
+      - STAKEHOLDER_AUTHORITY
+      - ASSUMPTION_UNKNOWN_LOG
+      - PRODUCT_READY_DECISION
+
+  business_analysis:
+    status: DRAFT_FROM_CURRENT_EVIDENCE
+    artifacts:
+      - BUSINESS_PROCESS_MODEL
+      - USER_OPERATOR_JOURNEYS
+      - BUSINESS_RULE_CATALOGUE
+      - DOMAIN_GLOSSARY
+      - BUSINESS_REQUIREMENTS
+      - RFP_ANALYSIS
+      - CLARIFYING_QUESTIONS
+
+  security_legal_data:
+    status: PARTLY_EXISTING
+    canonicalRefs:
+      - docs/SECURITY_THREAT_REGISTER.md
+      - docs/SECURITY_SUPPLY_CHAIN_CONTROL.md
+    artifacts:
+      - SECURITY_INTAKE
+      - REGULATORY_APPLICABILITY
+      - DATA_INVENTORY
+      - DATA_CLASSIFICATION
+      - THREAT_MODEL_V0
+      - SECURITY_CONSTRAINTS
+
+  system_engineering:
+    status: PARTLY_EXISTING
+    canonicalRefs:
+      - docs/OSINT_AGENT_TZ_V1.md
+      - docs/03_architecture/02_ARCHITECTURE_VIEWS.md
+    artifacts:
+      - SYSTEM_CONTEXT
+      - SYSTEM_BOUNDARY
+      - FUNCTION_MODEL
+      - DATA_FLOW_MODEL
+      - INTERFACE_INVENTORY
+      - EXTERNAL_DEPENDENCY_REGISTER
+      - OPERATIONAL_MODES
+
+  requirements:
+    status: EXISTING_NEEDS_NORMALIZATION
+    canonicalRefs:
+      - docs/OSINT_AGENT_TZ_V1.md
+      - docs/TRACEABILITY_MATRIX.md
+    artifacts:
+      - BUSINESS_REQUIREMENTS
+      - SYSTEM_REQUIREMENTS
+      - SOFTWARE_REQUIREMENTS
+      - NFR_CATALOGUE
+      - SECURITY_REQUIREMENTS
+      - ACCEPTANCE_CRITERIA
+      - REQUIREMENTS_TRACEABILITY_MATRIX
+
+  delivery_feasibility:
+    status: DRAFT_FROM_CURRENT_EVIDENCE
+    artifacts:
+      - NFR_SPECIFICATION
+      - NFR_VERIFICATION_MATRIX
+      - DELIVERY_WBS_V0
+      - ESTIMATION_REGISTER_V0
+      - PROJECT_RISK_REGISTER
+      - TCO_MODEL_V0
+      - CHANGE_MANAGEMENT_MODEL
+      - DELIVERY_FEASIBILITY_DECISION
+
+  architecture:
+    status: PARTLY_EXISTING
+    canonicalRefs:
+      - docs/03_architecture/README.md
+      - docs/03_architecture/02_ARCHITECTURE_VIEWS.md
+      - docs/03_architecture/03_ARCHITECTURE_REVIEW.md
+      - docs/03_architecture/04_DECISION_REGISTER.md
+    artifacts:
+      - ARCHITECTURE_DRIVER_SET
+      - ARCHITECTURE_OPTIONS
+      - TRADEOFF_MATRIX
+      - C4_CONTEXT
+      - C4_CONTAINERS
+      - DEPLOYMENT_VIEW
+      - ADR_REGISTER
+      - ARCHITECTURE_REVIEW
+
+  verification:
+    status: PARTLY_EXISTING
+    canonicalRefs:
+      - docs/04_testing/
+      - docs/06_verification/
+    artifacts:
+      - TEST_STRATEGY
+      - ACCEPTANCE_TESTS
+      - SECURITY_TESTS
+      - PERFORMANCE_TESTS
+      - VERIFICATION_REPORT
+      - CTO_CHALLENGE_REVIEW
+
+  implementation_devsecops:
+    status: PARTLY_EXISTING
+    canonicalRefs:
+      - father_osint/
+      - scripts/
+      - tests/
+      - .github/
+    artifacts:
+      - IMPLEMENTATION_BASELINE
+      - DEPENDENCY_MANIFEST
+      - CI_PIPELINE
+      - SAST_SCA_SECRET_SCAN_EVIDENCE
+      - SBOM
+      - CONFIGURATION_BASELINE
+
+  production_operations:
+    status: PARTLY_EXISTING
+    canonicalRefs:
+      - docs/OPERATIONS_GOVERNANCE_MODEL.md
+    artifacts:
+      - RELEASE_PLAN
+      - DEPLOYMENT_PLAN
+      - ROLLBACK_PLAN
+      - OBSERVABILITY_MODEL
+      - SLO_SLA
+      - CAPACITY_SIZING
+      - INCIDENT_RESPONSE
+      - BACKUP_RESTORE
+      - OPERATIONS_HANDOFF
+
+lessonTargets:
+  '01': [product, business_analysis]
+  '02': [requirements, delivery_feasibility]
+  '03': [delivery_feasibility, production_operations]
+  '04': [architecture]
+  '05': [architecture]
+  '06': [architecture, requirements]
+  '07': [architecture, system_engineering]
+  '08': [architecture]
+  '09': [architecture, verification]
+  '10': [architecture, production_operations]
+  '11': [system_engineering, architecture]
+  '12': [security_legal_data, system_engineering]
+  '13': [verification]
+  '14': [security_legal_data, architecture]
+  '15': [production_operations]
+  '16': [delivery_feasibility, production_operations]
+  '17': [delivery_feasibility, architecture]
+  '18': [implementation_devsecops]
+  '19': [implementation_devsecops, production_operations]
+  '20': [production_operations, verification]
+
+completionRule: artifact presence alone does not imply readiness; status, evidence, owner and review state are required

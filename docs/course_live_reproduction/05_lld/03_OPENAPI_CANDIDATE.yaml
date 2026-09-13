@@ -1,0 +1,143 @@
+openapi: 3.1.0
+info:
+  title: FATHER OSINT Research Adapter API
+  version: 0.1.0-candidate
+  description: >-
+    CANDIDATE / NOT IMPLEMENTED. External HTTP adapter around existing ResearchTask -> MaterialPackage semantics.
+    This file is documentation for Lesson 05 and does not claim that the current DEV baseline exposes an HTTP service.
+servers: []
+tags:
+  - name: Research
+paths:
+  /research-tasks:
+    post:
+      tags: [Research]
+      summary: Submit a bounded research task
+      operationId: submitResearchTask
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResearchTaskInput'
+      responses:
+        '202':
+          description: Candidate async acceptance contract; implementation semantics not approved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResearchTaskAccepted'
+        '400':
+          description: Invalid task contract
+        '401':
+          description: Authentication required in any future network deployment
+        '403':
+          description: Caller not authorized for requested source/scope
+  /research-tasks/{taskId}:
+    get:
+      tags: [Research]
+      summary: Read candidate task state
+      operationId: getResearchTask
+      parameters:
+        - in: path
+          name: taskId
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Task state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResearchTaskState'
+        '404': { description: Task not found }
+  /research-tasks/{taskId}/material-package:
+    get:
+      tags: [Research]
+      summary: Retrieve the evidence package for a task
+      operationId: getMaterialPackage
+      parameters:
+        - in: path
+          name: taskId
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: MaterialPackage preserving observations, collection errors and stop reason
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MaterialPackage'
+        '404': { description: Package not found or not yet produced }
+components:
+  schemas:
+    ResearchTaskInput:
+      type: object
+      required: [question, source_types, max_items]
+      properties:
+        question: { type: string, minLength: 1 }
+        topics:
+          type: array
+          items: { type: string }
+        source_types:
+          type: array
+          minItems: 1
+          items: { type: string }
+        date_from: { type: [string, 'null'] }
+        date_to: { type: [string, 'null'] }
+        max_items: { type: integer, minimum: 1 }
+        depth:
+          type: string
+          enum: [FAST, NORMAL, DEEP, CRITICAL]
+        stop_when_enough: { type: [string, 'null'] }
+        requested_by: { type: string }
+    ResearchTaskAccepted:
+      type: object
+      required: [task_id, status]
+      properties:
+        task_id: { type: string }
+        status:
+          type: string
+          enum: [ACCEPTED]
+    ResearchTaskState:
+      type: object
+      required: [task_id, status]
+      properties:
+        task_id: { type: string }
+        status:
+          type: string
+          enum: [ACCEPTED, RUNNING, COMPLETED, PARTIAL, FAILED]
+        stop_reason: { type: [string, 'null'] }
+    Material:
+      type: object
+      required: [material_id, source_type, source_locator, title, collected_at]
+      properties:
+        material_id: { type: string }
+        source_type: { type: string }
+        source_locator: { type: string }
+        title: { type: string }
+        raw_text: { type: [string, 'null'] }
+        local_path:
+          type: [string, 'null']
+          description: Must not expose an unsafe server filesystem path in a real remote API; candidate needs redesign for artifact download/reference.
+        published_at: { type: [string, 'null'] }
+        author: { type: [string, 'null'] }
+        collected_at: { type: string }
+        content_hash: { type: [string, 'null'] }
+        metadata: { type: object, additionalProperties: true }
+    MaterialPackage:
+      type: object
+      required: [package_id, task_id, materials, payloads_reused, collection_errors, stop_reason, created_at]
+      properties:
+        package_id: { type: string }
+        task_id: { type: string }
+        materials:
+          type: array
+          items: { $ref: '#/components/schemas/Material' }
+        payloads_reused: { type: integer, minimum: 0 }
+        collection_errors:
+          type: array
+          items: { type: string }
+        notes: { type: string }
+        stop_reason: { type: string }
+        created_at: { type: string }

@@ -80,6 +80,33 @@ artifactFamilies:
       - TCO_MODEL_V0
       - CHANGE_MANAGEMENT_MODEL
       - DELIVERY_FEASIBILITY_DECISION
+      - DISCOVERY_QUESTION_REGISTER
+      - CONTRACT_MODEL_DECISION
+
+  value_delivery:
+    status: DOCUMENTATION_COMPLETE_CONDITIONAL
+    courseRefs:
+      - docs/course_live_reproduction/03_poc_to_production/01_DISCOVERY_QUESTIONS.md
+      - docs/course_live_reproduction/03_poc_to_production/02_DELIVERY_STRATEGY_AND_CONTRACT.md
+      - docs/course_live_reproduction/03_poc_to_production/03_POC_MVP_PROD_ROADMAP.md
+      - docs/course_live_reproduction/03_poc_to_production/04_RISK_MATRIX.md
+      - docs/course_live_reproduction/03_poc_to_production/05_STAGE_GATE_CRITERIA.md
+      - docs/course_live_reproduction/03_poc_to_production/06_LESSON_03_REVIEW.md
+    artifacts:
+      - DEMO_READY_GATE
+      - POC_READY_GATE
+      - POC_EXIT_DECISION
+      - MVP_READY_GATE
+      - MVP_EXIT_DECISION
+      - PRODUCTION_READY_GATE
+      - POC_MVP_PRODUCTION_ROADMAP
+      - STAGED_DELIVERY_RISK_MATRIX
+      - CONTRACT_STRATEGY
+    currentProjectClassification:
+      DEV_BASELINE: EXISTING_VERIFIED
+      TECHNICAL_POC: ACTIVE_M5_TDLIB_EVIDENCE_PATH
+      MVP_PRODUCT: UNKNOWN_OWNER_DECISION_REQUIRED
+      PRODUCTION_READY: NOT_CLAIMED
 
   architecture:
     status: PARTLY_EXISTING
@@ -144,7 +171,7 @@ artifactFamilies:
 lessonTargets:
   '01': [product, business_analysis]
   '02': [requirements, delivery_feasibility]
-  '03': [delivery_feasibility, production_operations]
+  '03': [delivery_feasibility, value_delivery, production_operations]
   '04': [architecture]
   '05': [architecture]
   '06': [architecture, requirements]

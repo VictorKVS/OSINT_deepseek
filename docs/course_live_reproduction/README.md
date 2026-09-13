@@ -46,9 +46,9 @@ OPERATIONS / FEEDBACK / EVOLUTION
 
 | Lesson | Layer | Course artifact | Project state |
 |---|---|---|---|
-| 01 | Presale / Requirements foundation | Product + RFP + business requirement intake | ACTIVE DRAFT |
+| 01 | Presale / Requirements foundation | Product + RFP + business requirement intake | ACTIVE DRAFT / PRODUCT CONDITIONAL PASS |
 | 02 | Estimation / Risks / Cost | NFR + WBS + Estimate v0 + Risk + TCO v0 + Change model | ACTIVE DRAFT |
-| 03 | PoC → Production value delivery | PoC gate / MVP / production transition | QUEUED |
+| 03 | PoC → Production value delivery | Discovery + contract strategy + PoC/MVP/Prod roadmap + staged risks + gates | DOCUMENTATION COMPLETE / CONDITIONAL PASS |
 | 04 | HLD / C4 | Context + Container + HLD views | PARTLY EXISTS / TO NORMALIZE |
 | 05 | LLD | Components + interactions + API/data contracts | PARTLY EXISTS / TO NORMALIZE |
 | 06 | RAG patterns | Retrieval architecture decision pack | FUTURE / CONDITIONAL |
@@ -67,6 +67,26 @@ OPERATIONS / FEEDBACK / EVOLUTION
 | 19 | MLOps | model/data/eval/deploy lifecycle | QUEUED |
 | 20 | Production deployment | rollout / rollback / acceptance / operations handoff | QUEUED |
 
+## Lesson 03 package
+
+`03_poc_to_production/` contains the project-specific application of OTUS Lesson 03 without changing implementation:
+
+- `01_DISCOVERY_QUESTIONS.md`;
+- `02_DELIVERY_STRATEGY_AND_CONTRACT.md`;
+- `03_POC_MVP_PROD_ROADMAP.md`;
+- `04_RISK_MATRIX.md`;
+- `05_STAGE_GATE_CRITERIA.md`;
+- `06_LESSON_03_REVIEW.md`.
+
+The current project is explicitly classified as:
+
+```text
+DEV BASELINE      = EXISTING_VERIFIED
+TECHNICAL POC     = ACTIVE / M5 TDLib evidence path
+MVP PRODUCT       = UNKNOWN / OWNER DECISION REQUIRED
+PRODUCTION READY  = NOT CLAIMED
+```
+
 ## Existing canonical project evidence reused
 
 - `docs/OSINT_AGENT_TZ_V1.md` — reviewed requirements and acceptance criteria.
@@ -77,6 +97,7 @@ OPERATIONS / FEEDBACK / EVOLUTION
 - `docs/SECURITY_THREAT_REGISTER.md` — security/supply-chain threats.
 - `docs/OPERATIONS_GOVERNANCE_MODEL.md` — production operations roles and controls.
 - `docs/PROJECT_ROADMAP_AND_CONTROL.md` — capability roadmap / risks / gates.
+- `docs/PROJECT_EXECUTION_CONTROL.md` — DoR/DoD, WIP, PoC/ADR/change rules and execution control.
 
 ## Separate improvement control
 

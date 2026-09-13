@@ -1,106 +1,43 @@
-schemaVersion: 2
+schemaVersion: 3
 projectId: FATHER-OSINT-AGENT-LIVE-REPRODUCTION-0001
-status: LESSONS_01_09_DOCUMENTED
+status: LESSONS_01_12_DOCUMENTED
 sourceOfTruthRule: existing canonical repository artifacts are reused by reference; course artifacts add traceability and missing lifecycle evidence
-masterReview: docs/course_live_reproduction/LESSONS_01_09_MASTER_REVIEW.md
+masterReview: docs/course_live_reproduction/CANONICAL_DZ_REVIEW_01_12.md
 
 artifactFamilies:
   product:
     status: CONDITIONAL_PASS
-    courseRefs:
-      - docs/course_live_reproduction/01_product/
-    artifacts:
-      - BUSINESS_NEED
-      - PRODUCT_VISION
-      - TARGET_USERS
-      - VALUE_PROPOSITION
-      - PRODUCT_SCOPE
-      - SUCCESS_METRICS
-      - STAKEHOLDER_AUTHORITY
-      - ASSUMPTION_UNKNOWN_LOG
-      - PRODUCT_READY_DECISION
+    courseRefs: [docs/course_live_reproduction/01_product/]
+    artifacts: [BUSINESS_NEED, PRODUCT_VISION, TARGET_USERS, VALUE_PROPOSITION, PRODUCT_SCOPE, SUCCESS_METRICS, STAKEHOLDER_AUTHORITY, ASSUMPTION_UNKNOWN_LOG, PRODUCT_READY_DECISION]
 
   business_analysis:
     status: DRAFT_FROM_CURRENT_EVIDENCE
-    canonicalRefs:
-      - docs/03_architecture/01_BUSINESS_ANALYSIS.md
-    artifacts:
-      - BUSINESS_PROCESS_MODEL
-      - USER_OPERATOR_JOURNEYS
-      - BUSINESS_RULE_CATALOGUE
-      - DOMAIN_GLOSSARY
-      - BUSINESS_REQUIREMENTS
-      - RFP_ANALYSIS
-      - CLARIFYING_QUESTIONS
+    canonicalRefs: [docs/03_architecture/01_BUSINESS_ANALYSIS.md]
+    artifacts: [BUSINESS_PROCESS_MODEL, USER_OPERATOR_JOURNEYS, BUSINESS_RULE_CATALOGUE, DOMAIN_GLOSSARY, BUSINESS_REQUIREMENTS, RFP_ANALYSIS, CLARIFYING_QUESTIONS]
 
   security_legal_data:
     status: PARTLY_EXISTING_WITH_P0_GAPS
-    canonicalRefs:
-      - docs/SECURITY_THREAT_REGISTER.md
-      - docs/SECURITY_SUPPLY_CHAIN_CONTROL.md
-    artifacts:
-      - SECURITY_INTAKE
-      - REGULATORY_APPLICABILITY
-      - DATA_INVENTORY
-      - DATA_CLASSIFICATION
-      - THREAT_MODEL_V0
-      - SECURITY_CONSTRAINTS
+    canonicalRefs: [docs/SECURITY_THREAT_REGISTER.md, docs/SECURITY_SUPPLY_CHAIN_CONTROL.md]
+    artifacts: [SECURITY_INTAKE, REGULATORY_APPLICABILITY, DATA_INVENTORY, DATA_CLASSIFICATION, THREAT_MODEL_V0, SECURITY_CONSTRAINTS]
     majorGaps:
       - production_legal_compliance_authority
       - production_data_classification_retention_external_processing_matrix
 
   system_engineering:
     status: PARTLY_EXISTING
-    canonicalRefs:
-      - docs/OSINT_AGENT_TZ_V1.md
-      - docs/03_architecture/02_ARCHITECTURE_VIEWS.md
-      - father_osint/agent.py
-      - father_osint/models.py
-    artifacts:
-      - SYSTEM_CONTEXT
-      - SYSTEM_BOUNDARY
-      - FUNCTION_MODEL
-      - DATA_FLOW_MODEL
-      - INTERFACE_INVENTORY
-      - EXTERNAL_DEPENDENCY_REGISTER
-      - OPERATIONAL_MODES
+    canonicalRefs: [docs/OSINT_AGENT_TZ_V1.md, docs/03_architecture/02_ARCHITECTURE_VIEWS.md, father_osint/agent.py, father_osint/models.py]
+    artifacts: [SYSTEM_CONTEXT, SYSTEM_BOUNDARY, FUNCTION_MODEL, DATA_FLOW_MODEL, INTERFACE_INVENTORY, EXTERNAL_DEPENDENCY_REGISTER, OPERATIONAL_MODES]
 
   requirements:
     status: EXISTING_PLUS_NFR_BASELINE_GAPS
-    canonicalRefs:
-      - docs/OSINT_AGENT_TZ_V1.md
-      - docs/TRACEABILITY_MATRIX.md
-    courseRefs:
-      - docs/course_live_reproduction/02_delivery_feasibility/01_NFR_BASELINE.md
-    artifacts:
-      - BUSINESS_REQUIREMENTS
-      - SYSTEM_REQUIREMENTS
-      - SOFTWARE_REQUIREMENTS
-      - NFR_CATALOGUE
-      - SECURITY_REQUIREMENTS
-      - ACCEPTANCE_CRITERIA
-      - REQUIREMENTS_TRACEABILITY_MATRIX
+    canonicalRefs: [docs/OSINT_AGENT_TZ_V1.md, docs/TRACEABILITY_MATRIX.md]
+    courseRefs: [docs/course_live_reproduction/02_delivery_feasibility/01_NFR_BASELINE.md]
+    artifacts: [BUSINESS_REQUIREMENTS, SYSTEM_REQUIREMENTS, SOFTWARE_REQUIREMENTS, NFR_CATALOGUE, SECURITY_REQUIREMENTS, ACCEPTANCE_CRITERIA, REQUIREMENTS_TRACEABILITY_MATRIX]
 
   delivery_feasibility:
     status: CONDITIONAL_PASS
-    courseRefs:
-      - docs/course_live_reproduction/02_delivery_feasibility/
-      - docs/course_live_reproduction/03_poc_to_production/
-    artifacts:
-      - NFR_SPECIFICATION
-      - NFR_VERIFICATION_MATRIX
-      - DELIVERY_WBS_V0
-      - ESTIMATION_REGISTER_V0
-      - PROJECT_RISK_REGISTER
-      - TCO_MODEL_V0
-      - CHANGE_MANAGEMENT_MODEL
-      - DISCOVERY_QUESTION_REGISTER
-      - CONTRACT_MODEL_DECISION
-      - DELIVERY_FEASIBILITY_DECISION
-      - POC_MVP_PRODUCTION_ROADMAP
-      - POC_READY_GATE
-      - MVP_READY_GATE
-      - PRODUCTION_READY_GATE
+    courseRefs: [docs/course_live_reproduction/02_delivery_feasibility/, docs/course_live_reproduction/03_poc_to_production/]
+    artifacts: [NFR_SPECIFICATION, NFR_VERIFICATION_MATRIX, DELIVERY_WBS_V0, ESTIMATION_REGISTER_V0, PROJECT_RISK_REGISTER, TCO_MODEL_V0, CHANGE_MANAGEMENT_MODEL, DISCOVERY_QUESTION_REGISTER, CONTRACT_MODEL_DECISION, DELIVERY_FEASIBILITY_DECISION, POC_MVP_PRODUCTION_ROADMAP, POC_READY_GATE, MVP_READY_GATE, PRODUCTION_READY_GATE]
     currentProjectClassification:
       DEV_BASELINE: EXISTING_VERIFIED
       TECHNICAL_POC: ACTIVE_EVIDENCE_PATH
@@ -109,37 +46,9 @@ artifactFamilies:
 
   architecture:
     status: DOCUMENTED_THROUGH_CTO_CHALLENGE
-    canonicalRefs:
-      - docs/03_architecture/README.md
-      - docs/03_architecture/02_ARCHITECTURE_VIEWS.md
-      - docs/03_architecture/03_ARCHITECTURE_REVIEW.md
-      - docs/03_architecture/04_DECISION_REGISTER.md
-      - config/model_stage_registry.yaml
-    courseRefs:
-      - docs/course_live_reproduction/04_hld_c4/
-      - docs/course_live_reproduction/05_lld/
-      - docs/course_live_reproduction/06_rag/
-      - docs/course_live_reproduction/07_agents/
-      - docs/course_live_reproduction/08_adr/
-      - docs/course_live_reproduction/09_cto_challenge/
-    artifacts:
-      - ARCHITECTURE_DRIVER_SET
-      - C4_CONTEXT
-      - C4_CONTAINERS
-      - C3_COMPONENTS
-      - SEQUENCE_VIEWS
-      - OPENAPI_CANDIDATE
-      - RAG_OPTION_SET
-      - HYBRID_RAG_CANDIDATE
-      - AGENT_ROLE_MODEL
-      - AGENT_HANDOFF_CONTRACT
-      - ADR_REGISTER
-      - ADR_0001_OSINT_BOUNDARY
-      - ADR_0002_PROVENANCE_PAYLOAD
-      - ADR_0003_BOUNDED_RESEARCH
-      - ADR_0004_LLM_HOSTING_POLICY
-      - TRADEOFF_MATRIX
-      - CTO_CHALLENGE_REVIEW
+    canonicalRefs: [docs/03_architecture/README.md, docs/03_architecture/02_ARCHITECTURE_VIEWS.md, docs/03_architecture/03_ARCHITECTURE_REVIEW.md, docs/03_architecture/04_DECISION_REGISTER.md, config/model_stage_registry.yaml]
+    courseRefs: [docs/course_live_reproduction/04_hld_c4/, docs/course_live_reproduction/05_lld/, docs/course_live_reproduction/06_rag/, docs/course_live_reproduction/07_agents/, docs/course_live_reproduction/08_adr/, docs/course_live_reproduction/09_cto_challenge/]
+    artifacts: [ARCHITECTURE_DRIVER_SET, C4_CONTEXT, C4_CONTAINERS, C3_COMPONENTS, SEQUENCE_VIEWS, OPENAPI_CANDIDATE, RAG_OPTION_SET, HYBRID_RAG_CANDIDATE, AGENT_ROLE_MODEL, AGENT_HANDOFF_CONTRACT, ADR_REGISTER, ADR_0001_OSINT_BOUNDARY, ADR_0002_PROVENANCE_PAYLOAD, ADR_0003_BOUNDED_RESEARCH, ADR_0004_LLM_HOSTING_POLICY, TRADEOFF_MATRIX, CTO_CHALLENGE_REVIEW]
     states:
       HLD: CONDITIONAL_PASS
       LLD: CONDITIONAL_PASS
@@ -148,51 +57,59 @@ artifactFamilies:
       ADR_DISCIPLINE: READY
       LLM_HOSTING_CURRENT_STAGE_POLICY: ACCEPTED_WITH_CONDITIONS
 
+  architecture_governance:
+    status: CONDITIONAL_PASS
+    canonicalRefs: [docs/PROJECT_EXECUTION_CONTROL.md, docs/03_architecture/03_ARCHITECTURE_REVIEW.md]
+    courseRefs: [docs/course_live_reproduction/10_architecture_governance/]
+    artifacts: [ARCHITECTURAL_CONFORMANCE_MODEL, PR_ARCHITECTURE_REVIEW_CHECKLIST, TECH_DEBT_REGISTER, LESSON_10_REVIEW]
+    invariants:
+      - debt_is_not_defect_or_risk_or_feature
+      - governance_depth_is_materiality_based
+      - material_change_requires_change_impact_and_evidence
+      - material_architecture_decision_may_require_ADR
+
+  integrations:
+    status: CONDITIONAL_PASS
+    canonicalRefs: [father_osint/models.py, father_osint/agent.py, father_osint/collectors/telegram.py]
+    courseRefs: [docs/course_live_reproduction/11_integrations/]
+    artifacts: [INTEGRATION_LANDSCAPE, RELIABLE_ASYNC_INTEGRATION_CANDIDATE, AI_INTEGRATION_STANDARDS_APPLICABILITY, LESSON_11_REVIEW]
+    states:
+      DEV_DIRECT_CONTRACTS: EXISTING
+      TELEGRAM_TRANSPORT_ABSTRACTION: EXISTING
+      MESSAGE_BROKER_PATH: CANDIDATE_REQUIREMENT_TRIGGERED
+      PUBLIC_HTTP_GRPC_API: CANDIDATE
+      MCP_A2A: FUTURE_SECURITY_GATED
+      ONNX: CONDITIONAL_MODEL_PORTABILITY
+
+  data_architecture:
+    status: CONDITIONAL_PASS
+    canonicalRefs: [father_osint/storage.py, father_osint/knowledge_factory.py, config/model_stage_registry.yaml]
+    courseRefs: [docs/course_live_reproduction/12_data_architecture/]
+    artifacts: [END_TO_END_DATA_PIPELINE, STORAGE_SELECTION_MODEL, DATA_GOVERNANCE_LINEAGE, FEATURE_STORE_APPLICABILITY, LESSON_12_REVIEW]
+    states:
+      CURRENT_DEV_STORE: VERIFIED_SIMPLIFIED
+      RAW_OBJECT_DATA_LAKE_CLASS: PRODUCTION_CANDIDATE
+      METADATA_RELATIONAL_CATALOG_CLASS: PRODUCTION_CANDIDATE
+      VECTOR_INDEX: CONDITIONAL_ON_RAG_EVAL
+      GRAPH_STORE: CONDITIONAL_ON_GRAPH_USE_CASE
+      FEATURE_STORE: NOT_REQUIRED_FOR_CURRENT_CORE_CONDITIONAL
+      DATA_GOVERNANCE_POLICY: PARTIAL_P0_GAPS
+
   verification:
     status: EXISTING_PLUS_LESSON09_REVIEW
-    canonicalRefs:
-      - docs/04_testing/
-      - docs/06_verification/
-    courseRefs:
-      - docs/course_live_reproduction/09_cto_challenge/04_CTO_CHALLENGE.md
-      - docs/course_live_reproduction/09_cto_challenge/05_LESSON_09_REVIEW.md
-    artifacts:
-      - TEST_STRATEGY
-      - ACCEPTANCE_TESTS
-      - SECURITY_TESTS
-      - PERFORMANCE_TESTS
-      - VERIFICATION_REPORT
-      - CTO_CHALLENGE_REVIEW
+    canonicalRefs: [docs/04_testing/, docs/06_verification/]
+    courseRefs: [docs/course_live_reproduction/09_cto_challenge/04_CTO_CHALLENGE.md, docs/course_live_reproduction/09_cto_challenge/05_LESSON_09_REVIEW.md]
+    artifacts: [TEST_STRATEGY, ACCEPTANCE_TESTS, SECURITY_TESTS, PERFORMANCE_TESTS, VERIFICATION_REPORT, CTO_CHALLENGE_REVIEW]
 
   implementation_devsecops:
     status: PARTLY_EXISTING_UNCHANGED_BY_COURSE_PASS
-    canonicalRefs:
-      - father_osint/
-      - scripts/
-      - tests/
-      - .github/
-    artifacts:
-      - IMPLEMENTATION_BASELINE
-      - DEPENDENCY_MANIFEST
-      - CI_PIPELINE
-      - SAST_SCA_SECRET_SCAN_EVIDENCE
-      - SBOM
-      - CONFIGURATION_BASELINE
+    canonicalRefs: [father_osint/, scripts/, tests/, .github/]
+    artifacts: [IMPLEMENTATION_BASELINE, DEPENDENCY_MANIFEST, CI_PIPELINE, SAST_SCA_SECRET_SCAN_EVIDENCE, SBOM, CONFIGURATION_BASELINE]
 
   production_operations:
     status: PARTLY_EXISTING_NOT_PRODUCTION_READY
-    canonicalRefs:
-      - docs/OPERATIONS_GOVERNANCE_MODEL.md
-    artifacts:
-      - RELEASE_PLAN
-      - DEPLOYMENT_PLAN
-      - ROLLBACK_PLAN
-      - OBSERVABILITY_MODEL
-      - SLO_SLA
-      - CAPACITY_SIZING
-      - INCIDENT_RESPONSE
-      - BACKUP_RESTORE
-      - OPERATIONS_HANDOFF
+    canonicalRefs: [docs/OPERATIONS_GOVERNANCE_MODEL.md]
+    artifacts: [RELEASE_PLAN, DEPLOYMENT_PLAN, ROLLBACK_PLAN, OBSERVABILITY_MODEL, SLO_SLA, CAPACITY_SIZING, INCIDENT_RESPONSE, BACKUP_RESTORE, OPERATIONS_HANDOFF]
 
 lessonStatus:
   '01': CONDITIONAL_PASS
@@ -204,6 +121,9 @@ lessonStatus:
   '07': CANDIDATE_SECURITY_VALUE_PROOF_REQUIRED
   '08': PASS_DOCUMENTATION_DISCIPLINE
   '09': READY_FOR_HOMEWORK_REVIEW
+  '10': CONDITIONAL_PASS
+  '11': CONDITIONAL_PASS
+  '12': CONDITIONAL_PASS
 
 lessonTargets:
   '01': [product, business_analysis]
@@ -215,9 +135,9 @@ lessonTargets:
   '07': [architecture, system_engineering]
   '08': [architecture]
   '09': [architecture, verification]
-  '10': [architecture, production_operations]
-  '11': [system_engineering, architecture]
-  '12': [security_legal_data, system_engineering]
+  '10': [architecture_governance, architecture]
+  '11': [integrations, system_engineering, architecture]
+  '12': [data_architecture, security_legal_data, system_engineering]
   '13': [verification]
   '14': [security_legal_data, architecture]
   '15': [production_operations]

@@ -119,4 +119,35 @@ flowchart TB
     META --> GRAPH
 ```
 
-The exact technology stack remains unresolved until requirements and measurements justify it.
+## 10. Homework Target Stack — explicit technology choice
+
+For the OTUS submission we make a **concrete candidate choice**. This is a design decision for the homework/target architecture, not a claim that these products are already deployed.
+
+| Function | Candidate technology | Rationale |
+|---|---|---|
+| durable streaming log | **Apache Kafka** | ordered partitions, replay, consumer groups, backpressure-friendly integration |
+| batch orchestration | **Apache Airflow** | explicit DAGs, retries, scheduling, observable dependency graph |
+| stream/batch transforms | **Apache Spark + Structured Streaming** | shared transformation model for historical and streaming data |
+| raw object storage | **MinIO / S3 API** | immutable originals, low-cost object storage, on-prem/cloud portability |
+| curated/lakehouse tables | **Parquet + Apache Iceberg** | efficient analytics, snapshots, schema evolution, reproducible versions |
+| metadata / lineage | **PostgreSQL** | transactional state, joins, ownership/version/audit references |
+| vector retrieval | **PostgreSQL + pgvector** initially | reduce operational sprawl; metadata and vectors remain close |
+| dedicated vector scale-out | **Qdrant** only after benchmark | introduce only if pgvector fails required latency/scale |
+| feature definitions/offline-online materialization | **Feast** | one feature registry and point-in-time correct offline/online feature flow |
+| online feature serving | **Redis** | low-latency feature lookup for ranking/inference |
+
+### Why Kafka / Kappa ideas are used only on the stream branch
+
+The stream branch benefits from a Kappa-style append-only durable event log and replay. Derived views can be rebuilt from canonical events. But the whole OSINT/Knowledge Factory is **not pure Kappa** because Git/Web/files, historical reprocessing, eval datasets and reproducible corpus rebuilds need a strong batch/history layer as well.
+
+Therefore the target design is hybrid:
+
+```text
+STREAM: Telegram/live → Kafka → Spark Structured Streaming ┐
+                                                           ├→ Raw Lake → Curated → AI layers
+BATCH:  Git/Web/files → Airflow → Spark Batch ─────────────┘
+```
+
+## 11. Decision state
+
+The technology stack above satisfies the homework requirement to make a concrete choice. Before Production adoption each material component still requires workload/security/operations evidence and, where appropriate, PoC/benchmark/ADR.

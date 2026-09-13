@@ -1,6 +1,6 @@
 # OSINT Agent — Live Reproduction / OTUS Lessons 01–20
 
-Status: `ACTIVE / LESSONS 01–12 DOCUMENTED`
+Status: `ACTIVE / LESSONS 01–13 DOCUMENTED`
 
 This directory is the canonical cross-lesson engineering package for one real project: **FATHER OSINT Agent**.
 
@@ -14,13 +14,14 @@ Existing root/project documents remain canonical for implemented behavior. This 
 
 ## Current review point
 
-**[Canonical DZ Review 01–12](CANONICAL_DZ_REVIEW_01_12.md)** — primary human-readable review through architecture governance, integrations and data architecture.
+**[Canonical DZ Review 01–12](CANONICAL_DZ_REVIEW_01_12.md)** — latest consolidated human-readable milestone before the GenAI quality layer.
 
-**[Lessons 01–12 Master Review](LESSONS_01_12_MASTER_REVIEW.md)** — technical inventory/status companion for audit and traceability.
+**Lesson 13 package:** [`13_genai_quality/`](13_genai_quality/) — Golden/Eval Dataset contract, RAG/LLM comparison plan, semantic Quality Gate, CI tiers, load/reliability/security tests.
 
-Earlier milestone:
+Earlier milestones:
 - [Canonical DZ Review 01–09](CANONICAL_DZ_REVIEW_01_09.md)
 - [Lessons 01–09 Master Review](LESSONS_01_09_MASTER_REVIEW.md)
+- [Lessons 01–12 Master Review](LESSONS_01_12_MASTER_REVIEW.md)
 
 ## Core lifecycle
 
@@ -51,7 +52,9 @@ INTEGRATION ARCHITECTURE              11
   ↓
 DATA ARCHITECTURE / GOVERNANCE        12
   ↓
-QUALITY / SECURITY / OBSERVABILITY / SIZING / DEVOPS / MLOPS / PROD   13–20
+GENAI QUALITY / EVAL / CI GATE        13
+  ↓
+SECURITY / OBSERVABILITY / SIZING / DEVOPS / MLOPS / PROD   14–20
 ```
 
 ## Course checkpoints
@@ -69,8 +72,8 @@ QUALITY / SECURITY / OBSERVABILITY / SIZING / DEVOPS / MLOPS / PROD   13–20
 | 09 | Architecture Verification / CTO Challenge | `09_cto_challenge/` | `READY FOR HOMEWORK REVIEW` |
 | 10 | Architecture governance / Tech debt | `10_architecture_governance/` | `CONDITIONAL_PASS` |
 | 11 | Integrations | `11_integrations/` | `CONDITIONAL_PASS` |
-| 12 | Data architecture for AI | `12_data_architecture/` | `CONDITIONAL_PASS` |
-| 13 | GenAI quality | future | QUEUED |
+| 12 | Data architecture for AI | `12_data_architecture/` | `CONDITIONAL_PASS / DZ READY` |
+| 13 | GenAI quality / testing | `13_genai_quality/` | `CONDITIONAL_PASS / EXECUTION EVIDENCE PENDING` |
 | 14 | Security by Design | existing security baseline + future normalization | QUEUED |
 | 15 | Observability | future | QUEUED |
 | 16 | Sizing | future | QUEUED |
@@ -85,11 +88,12 @@ QUALITY / SECURITY / OBSERVABILITY / SIZING / DEVOPS / MLOPS / PROD   13–20
 DEV BASELINE       = EXISTING_VERIFIED
 TECHNICAL POC      = ACTIVE / EVIDENCE-PRODUCING PATH
 MVP PRODUCT        = UNKNOWN / OWNER DECISION REQUIRED
-RAG                = CANDIDATE / NOT CLAIMED IMPLEMENTED
-PRODUCTION AGENTS  = CANDIDATE / NOT CLAIMED IMPLEMENTED
+RAG                = CANDIDATE / QUALITY EVAL NOW DEFINED
+PRODUCTION AGENTS  = CANDIDATE / SECURITY+VALUE PROOF REQUIRED
 ASYNC BROKER PATH  = CANDIDATE / REQUIREMENT-TRIGGERED
-PRODUCTION STORES  = STORAGE CLASSES DEFINED / PRODUCTS NOT SELECTED
-FEATURE STORE      = NOT REQUIRED FOR CURRENT CORE / CONDITIONAL
+PRODUCTION STORES  = STORAGE CLASSES + DZ TARGET STACK DEFINED
+FEATURE STORE      = CONDITIONAL / TRAINED-RANKING USE CASE
+GENAI QUALITY GATE = CONTRACT DEFINED / EXECUTION PENDING
 PRODUCTION READY   = NOT CLAIMED
 ```
 
@@ -97,7 +101,7 @@ PRODUCTION READY   = NOT CLAIMED
 
 - `docs/OSINT_AGENT_TZ_V1.md` — requirements and acceptance criteria;
 - `docs/03_architecture/` — architecture/business-analysis pack;
-- `docs/04_testing/` — acceptance test design;
+- `docs/04_testing/` — deterministic acceptance test design;
 - `docs/06_verification/` — verification/frozen baseline evidence;
 - `docs/TRACEABILITY_MATRIX.md` — requirement → architecture → test → code → evidence;
 - `docs/SECURITY_THREAT_REGISTER.md` — security/agent/supply-chain threats;
@@ -129,8 +133,9 @@ Each lesson records what to improve, how, priority, owner, evidence, affected ar
 - `CONDITIONAL_PASS` — documentation/process is usable but named evidence/owner conditions remain;
 - `GAP` — missing artifact/input;
 - `UNKNOWN` — explicitly unknown fact; never guessed;
+- `TO_BE_BASELINED` — metric/threshold awaits measured baseline;
 - `FUTURE_LESSON` — intentionally deferred.
 
 ## Deliverable strategy
 
-By Lesson 12 the project now tells a coherent story from business need through architecture verification, governance, integration strategy and end-to-end data architecture. Lessons 13–20 continue the **same package** into GenAI quality, Security by Design, observability, sizing, IaC/CI-CD, MLOps and Production deployment.
+By Lesson 13 the project now spans business/product definition, architecture, governance, integrations, data and a reusable GenAI quality/evaluation gate. Lessons 14–20 continue the **same package** into Security by Design, observability, sizing, inference sizing, IaC/CI-CD, MLOps and Production deployment.

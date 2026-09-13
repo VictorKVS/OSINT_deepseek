@@ -1,6 +1,6 @@
-schemaVersion: 3
+schemaVersion: 4
 projectId: FATHER-OSINT-AGENT-LIVE-REPRODUCTION-0001
-status: LESSONS_01_12_DOCUMENTED
+status: LESSONS_01_13_DOCUMENTED
 sourceOfTruthRule: existing canonical repository artifacts are reused by reference; course artifacts add traceability and missing lifecycle evidence
 masterReview: docs/course_live_reproduction/CANONICAL_DZ_REVIEW_01_12.md
 
@@ -82,24 +82,39 @@ artifactFamilies:
       ONNX: CONDITIONAL_MODEL_PORTABILITY
 
   data_architecture:
-    status: CONDITIONAL_PASS
+    status: CONDITIONAL_PASS_DZ_READY
     canonicalRefs: [father_osint/storage.py, father_osint/knowledge_factory.py, config/model_stage_registry.yaml]
     courseRefs: [docs/course_live_reproduction/12_data_architecture/]
-    artifacts: [END_TO_END_DATA_PIPELINE, STORAGE_SELECTION_MODEL, DATA_GOVERNANCE_LINEAGE, FEATURE_STORE_APPLICABILITY, LESSON_12_REVIEW]
+    artifacts: [END_TO_END_DATA_PIPELINE, STORAGE_SELECTION_MODEL, DATA_GOVERNANCE_LINEAGE, FEATURE_STORE_APPLICABILITY, DZ_SUBMISSION, LESSON_12_REVIEW]
     states:
       CURRENT_DEV_STORE: VERIFIED_SIMPLIFIED
+      HOMEWORK_TARGET_STACK: CANDIDATE
       RAW_OBJECT_DATA_LAKE_CLASS: PRODUCTION_CANDIDATE
       METADATA_RELATIONAL_CATALOG_CLASS: PRODUCTION_CANDIDATE
       VECTOR_INDEX: CONDITIONAL_ON_RAG_EVAL
       GRAPH_STORE: CONDITIONAL_ON_GRAPH_USE_CASE
-      FEATURE_STORE: NOT_REQUIRED_FOR_CURRENT_CORE_CONDITIONAL
+      FEATURE_STORE: CONDITIONAL_ON_TRAINED_RANKING_MODEL
       DATA_GOVERNANCE_POLICY: PARTIAL_P0_GAPS
 
+  genai_quality:
+    status: CONDITIONAL_PASS_EXECUTION_EVIDENCE_PENDING
+    canonicalRefs: [docs/04_testing/, docs/06_verification/, config/model_stage_registry.yaml, docs/SECURITY_THREAT_REGISTER.md]
+    courseRefs: [docs/course_live_reproduction/13_genai_quality/]
+    artifacts: [GENAI_TEST_STRATEGY, GOLDEN_EVAL_DATASET_CONTRACT, RAG_LLM_COMPARISON_TEST_PLAN, QUALITY_GATE_AND_CI_CONTRACT, LOAD_RELIABILITY_SECURITY_TESTS, LESSON_13_REVIEW]
+    states:
+      DETERMINISTIC_TESTING: EXISTING
+      GOLDEN_EVAL_DATASET: CONTRACT_DEFINED_NOT_BASELINED
+      MODEL_COMPARISON_PLAN: READY_FOR_EXECUTION
+      SEMANTIC_CI_GATE: CONTRACT_DEFINED_EXECUTION_PENDING
+      SECURITY_ADVERSARIAL_EVAL: DESIGNED
+      LOAD_COST_BENCHMARK: DESIGNED_TO_BE_BASELINED
+      MEASURED_MODEL_WINNER: UNKNOWN
+
   verification:
-    status: EXISTING_PLUS_LESSON09_REVIEW
+    status: EXISTING_PLUS_GENAI_QUALITY_LAYER
     canonicalRefs: [docs/04_testing/, docs/06_verification/]
-    courseRefs: [docs/course_live_reproduction/09_cto_challenge/04_CTO_CHALLENGE.md, docs/course_live_reproduction/09_cto_challenge/05_LESSON_09_REVIEW.md]
-    artifacts: [TEST_STRATEGY, ACCEPTANCE_TESTS, SECURITY_TESTS, PERFORMANCE_TESTS, VERIFICATION_REPORT, CTO_CHALLENGE_REVIEW]
+    courseRefs: [docs/course_live_reproduction/09_cto_challenge/, docs/course_live_reproduction/13_genai_quality/]
+    artifacts: [TEST_STRATEGY, ACCEPTANCE_TESTS, SECURITY_TESTS, PERFORMANCE_TESTS, VERIFICATION_REPORT, CTO_CHALLENGE_REVIEW, GENAI_QUALITY_GATE]
 
   implementation_devsecops:
     status: PARTLY_EXISTING_UNCHANGED_BY_COURSE_PASS
@@ -123,7 +138,8 @@ lessonStatus:
   '09': READY_FOR_HOMEWORK_REVIEW
   '10': CONDITIONAL_PASS
   '11': CONDITIONAL_PASS
-  '12': CONDITIONAL_PASS
+  '12': CONDITIONAL_PASS_DZ_READY
+  '13': CONDITIONAL_PASS_EXECUTION_EVIDENCE_PENDING
 
 lessonTargets:
   '01': [product, business_analysis]
@@ -138,7 +154,7 @@ lessonTargets:
   '10': [architecture_governance, architecture]
   '11': [integrations, system_engineering, architecture]
   '12': [data_architecture, security_legal_data, system_engineering]
-  '13': [verification]
+  '13': [genai_quality, verification]
   '14': [security_legal_data, architecture]
   '15': [production_operations]
   '16': [delivery_feasibility, production_operations]

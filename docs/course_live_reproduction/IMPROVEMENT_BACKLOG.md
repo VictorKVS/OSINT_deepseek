@@ -47,9 +47,13 @@ A recommendation does **not** become project truth, requirement or implementatio
 | IMP-011 | P1 | Establish Golden Dataset / evaluation set ownership and versioning for future RAG/LLM quality decisions | Model/RAG decisions cannot be validated by subjective demos alone | OTUS Lesson 2 and future Lessons 6/13 | QA + Product + Domain SME | Golden set plan, eval policy, acceptance evidence | 2–13 | PROPOSED |
 | IMP-012 | P2 | Convert existing architecture decisions into an immutable ADR timeline with supersession links | Decisions exist in several documents; lesson 8/9 expects a clean decision history | existing decision register + future lesson 8 | Architect + Reviewer | ADR directory, decision register | 8–9 | DEFERRED |
 | IMP-013 | P1 | Add independent architecture challenge pack before accepting major hosting/LLM/integration decisions | Current review is good, but lesson 9 explicitly requires challenge/defense and honest trade-offs | OTUS Lesson 9 | Skeptical Reviewer / CTO Challenge role | review findings, trade-off matrix, risk storm | 9 | DEFERRED |
-| IMP-014 | P2 | Map each course document to existing canonical project evidence to prevent duplicated truth | The repository already contains rich docs; course package should remain an index/projection, not a second source of truth | `docs/course_live_reproduction/README.md` | KGA / Maintainer | artifact registry, traceability | 1–20 | IN_PROGRESS |
-| IMP-015 | P2 | Add lesson-by-lesson “what changed in project understanding” journal | Helps prove evolution and avoids silently rewriting history | course live reproduction model | PM / KGA | course journal / change log | 1–20 | PROPOSED |
+| IMP-014 | P2 | Map each course document to existing canonical project evidence to prevent duplicated truth | The repository already contains rich docs; course package should remain an index/projection, not a second source of truth | `docs/course_live_reproduction/README.md` | KGA / Maintainer | artifact register, traceability | 1–20 | IN_PROGRESS |
+| IMP-015 | P2 | Add lesson-by-lesson “what changed in project understanding” journal | Helps prove evolution and avoids silently rewriting history | course live reproduction model | PM / KGA | course journal / change log | 1–20 | IN_PROGRESS |
 | IMP-016 | P2 | Add explicit `what we still do not know` panel to every major lesson/gate | Prevents reconstructed documentation from looking more certain than the evidence supports | FATHER UNKNOWN/evidence rule | Every accountable owner | gate decisions, lesson summaries | 1–20 | ACCEPTED |
+| IMP-017 | P1 | Select one bounded MVP product outcome before labeling any Telegram capability as MVP | PoC feasibility and product value are different claims; current roadmap contains several opportunities but no single approved MVP | OTUS Lesson 03 + project product opportunity roadmap | Product Owner / Business Owner | MVP scope, success metrics, roadmap | 3–4 | OWNER_REVIEW |
+| IMP-018 | P1 | Standardize every technical PoC report as hypothesis → setup → raw evidence → limitations → decision impact | Current governance correctly requires evidence, but a uniform report will improve comparability and ADR reuse | OTUS Lesson 03 + `PROJECT_EXECUTION_CONTROL.md` | Architect + QA + PoC owner | PoC reports, ADR evidence | 3–9 | PROPOSED |
+| IMP-019 | P1 | Define production workload, freshness and SLO assumptions before sizing/TCO/hosting ADR | Without workload and service targets, architecture/cost comparisons can create false precision | Lesson 03 discovery questions; future Lessons 15–17 | Product + Ops + Requirements | NFR, sizing, TCO, ADR | 3–17 | PROPOSED |
+| IMP-020 | P2 | Add visible lifecycle state for each capability: DEV / POC / MVP / PRODUCTION / RETIRED | Prevents technical prototypes from being mistaken for product or production readiness | OTUS Lesson 03 staged delivery model | PM + KGA | roadmap, course index, future site/dashboard | 3–10 | ACCEPTED |
 
 ## Per-lesson review template
 
@@ -87,7 +91,7 @@ Status:
 
 Recommendations are reviewed together with:
 
-- `MASTER_ARTIFACT_REGISTRY.yaml`;
+- `00_MASTER_ARTIFACT_REGISTER.yaml`;
 - lesson gate decision;
 - requirement/architecture traceability;
 - project risk register;

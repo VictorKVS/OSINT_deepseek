@@ -16,6 +16,8 @@ Existing root/project documents remain canonical for implemented behavior. This 
 
 **[Canonical DZ Review 01–12](CANONICAL_DZ_REVIEW_01_12.md)** — primary human-readable review through architecture governance, integrations and data architecture.
 
+**[Lessons 01–12 Master Review](LESSONS_01_12_MASTER_REVIEW.md)** — technical inventory/status companion for audit and traceability.
+
 Earlier milestone:
 - [Canonical DZ Review 01–09](CANONICAL_DZ_REVIEW_01_09.md)
 - [Lessons 01–09 Master Review](LESSONS_01_09_MASTER_REVIEW.md)

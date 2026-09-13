@@ -14,7 +14,9 @@ Existing root/project documents remain canonical for implemented behavior. This 
 
 ## Current review point
 
-**[Lessons 01–09 Master Review](LESSONS_01_09_MASTER_REVIEW.md)** — one-page view of the entire course/project chain, document tree, gates, UNKNOWNs, Lesson 09 ADR/CTO decision and improvement priorities.
+**[Canonical DZ Review 01–09](CANONICAL_DZ_REVIEW_01_09.md)** — primary human-readable review for lessons 01–09: what OTUS asks, how it was applied to the real OSINT Agent, key diagrams/decisions, what is proven, what remains UNKNOWN and what should be improved.
+
+**[Lessons 01–09 Master Review](LESSONS_01_09_MASTER_REVIEW.md)** — technical inventory of the entire course/project chain, document tree, gates and source-of-truth structure.
 
 ## Core lifecycle
 

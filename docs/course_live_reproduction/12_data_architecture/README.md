@@ -9,10 +9,11 @@ For FATHER OSINT Agent the primary concern is **evidence lineage**: original sou
 ## Artifacts
 
 - `01_END_TO_END_DATA_PIPELINE.md` — source → raw → normalize → enrich → index → review/knowledge flow.
-- `02_STORAGE_SELECTION.md` — role-based storage choices; technology names remain candidates until workload requirements exist.
+- `02_STORAGE_SELECTION.md` — role-based storage choices plus explicit OTUS homework target stack (Kafka/Airflow/Spark/MinIO/PostgreSQL/pgvector/Feast/Redis).
 - `03_DATA_GOVERNANCE_LINEAGE.md` — ownership, lineage, versions, retention, deletion/retraction and quality rules.
 - `04_FEATURE_STORE_APPLICABILITY.md` — when Feature Store is actually required and how training-serving skew is prevented.
 - `05_LESSON_12_REVIEW.md` — result, UNKNOWNs and improvement actions.
+- `06_DZ_SUBMISSION.md` — compact submission-ready answer matching the OTUS wording and acceptance criteria.
 
 ## Core principle
 
@@ -23,4 +24,4 @@ Preserve original evidence first
 → promote knowledge only after review/gates
 ```
 
-The project does not treat a Vector DB, Knowledge Graph, Data Lake or Feature Store as mandatory merely because they appear in an AI reference architecture.
+The project does not treat a Vector DB, Knowledge Graph, Data Lake or Feature Store as mandatory merely because they appear in an AI reference architecture. For the course submission, however, a concrete **target candidate stack** is selected and justified separately from current DEV truth.

@@ -28,6 +28,7 @@ class TelethonTransport:
         max_flood_wait_retries: int = 1,
         max_flood_wait_seconds: int = 30,
         client_factory: Callable[..., Any] | None = None,
+        proxy: tuple[Any, ...] | None = None,
         sleep_func: Callable[[float], Awaitable[Any]] | None = None,
     ) -> None:
         if api_id <= 0:
@@ -53,6 +54,7 @@ class TelethonTransport:
         self.max_flood_wait_retries = max_flood_wait_retries
         self.max_flood_wait_seconds = max_flood_wait_seconds
         self._client_factory = client_factory
+        self.proxy = proxy
         self._sleep_func = sleep_func or asyncio.sleep
         self.last_errors: list[str] = []
 
@@ -155,7 +157,8 @@ class TelethonTransport:
                 ) from exc
             factory = TelegramClient
 
-        return factory(str(self.session_path), self.api_id, self.api_hash)
+        kwargs = {"proxy": self.proxy} if self.proxy is not None else {}
+        return factory(str(self.session_path), self.api_id, self.api_hash, **kwargs)
 
     @staticmethod
     def _map_message(entity: Any, message: Any, text: str) -> TelegramMessage:

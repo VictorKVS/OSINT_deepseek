@@ -55,6 +55,8 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="M5 live Telegram evidence/restart/search-plan proof")
     parser.add_argument("--config", type=Path, default=DEFAULT_CONFIG)
     parser.add_argument("--session", type=Path, default=DEFAULT_SESSION)
+    parser.add_argument("--socks5-host", default=None, help="SOCKS5 server; disabled by default")
+    parser.add_argument("--socks5-port", type=int, default=1080)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--max-items", type=int, default=10)
     parser.add_argument("--expect-reuse-min", type=int, default=0)
@@ -123,12 +125,20 @@ def main() -> int:
         max_items=args.max_items,
         requested_by="OSINT_EXPERT",
     )
+    proxy = None
+    if args.socks5_host:
+        if not 1 <= args.socks5_port <= 65535:
+            raise SystemExit("--socks5-port must be between 1 and 65535")
+        import socks
+        proxy = (socks.SOCKS5, args.socks5_host, args.socks5_port, True)
+
     transport = TelethonTransport(
         api_id=int(telegram["api_id"]),
         api_hash=str(telegram["api_hash"]),
         session_path=args.session,
         channels=channels,
         per_channel_limit=int(per_channel_limit),
+        proxy=proxy,
     )
     collector = TelegramCollector(transport)
     store = MaterialStore(args.output)
